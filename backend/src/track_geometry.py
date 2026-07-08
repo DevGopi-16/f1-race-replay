@@ -1,0 +1,648 @@
+# """Pure-data ports of the track geometry and race-event extraction logic
+# originally in src/ui_components.py — with the `arcade` dependency stripped
+# out, since the web backend has no need to render anything itself.
+
+# Behavior is intentionally kept identical to the desktop app so the web
+# replay matches it (same track boundary math, same DRS zone detection,
+# same flag/DNF event types).
+# """
+
+# import numpy as np
+
+# # Event type constants (mirrors RaceProgressBarComponent.EVENT_* in the
+# # desktop app, duplicated here so this module has no UI dependency)
+# EVENT_DNF = "dnf"
+# EVENT_YELLOW_FLAG = "yellow_flag"
+# EVENT_RED_FLAG = "red_flag"
+# EVENT_SAFETY_CAR = "safety_car"
+# EVENT_VSC = "vsc"
+
+# TRACK_STATUS_TO_EVENT = {
+#     "2": EVENT_YELLOW_FLAG,
+#     "4": EVENT_SAFETY_CAR,
+#     "5": EVENT_RED_FLAG,
+#     "6": EVENT_VSC,
+#     "7": EVENT_VSC,
+# }
+
+
+# def plot_drs_zones(example_lap):
+#     """Detect contiguous DRS-active stretches in a lap's telemetry and
+#     return them as [{start: {x,y}, end: {x,y}}, ...].
+
+#     DRS values 10/12/14 mean "active" in FastF1's encoding (same check
+#     used throughout the desktop app, e.g. DriverInfoComponent).
+#     """
+#     x_val = example_lap["X"]
+#     y_val = example_lap["Y"]
+#     drs_zones = []
+#     drs_start = None
+
+#     for i, val in enumerate(example_lap["DRS"]):
+#         if val in (10, 12, 14):
+#             if drs_start is None:
+#                 drs_start = i
+#         else:
+#             if drs_start is not None:
+#                 drs_end = i - 1
+#                 drs_zones.append({
+#                     "start": {"x": float(x_val.iloc[drs_start]), "y": float(y_val.iloc[drs_start])},
+#                     "end": {"x": float(x_val.iloc[drs_end]), "y": float(y_val.iloc[drs_end])},
+#                 })
+#                 drs_start = None
+
+#     if drs_start is not None:
+#         drs_end = len(example_lap["DRS"]) - 1
+#         drs_zones.append({
+#             "start": {"x": float(x_val.iloc[drs_start]), "y": float(y_val.iloc[drs_start])},
+#             "end": {"x": float(x_val.iloc[drs_end]), "y": float(y_val.iloc[drs_end])},
+#         })
+
+#     return drs_zones
+
+
+# def build_track_geometry(example_lap, track_width: float = 200.0) -> dict:
+#     """Build centerline + inner/outer track boundary + DRS zones from a
+#     single representative lap's telemetry (qualifying fastest lap
+#     preferred, since it has clean DRS data — see main.py's fallback logic).
+
+#     Returns plain lists/dicts, ready to json.dumps directly.
+#     """
+#     drs_zones = plot_drs_zones(example_lap)
+
+#     plot_x_ref = example_lap["X"].to_numpy()
+#     plot_y_ref = example_lap["Y"].to_numpy()
+
+#     dx = np.gradient(plot_x_ref)
+#     dy = np.gradient(plot_y_ref)
+
+#     norm = np.sqrt(dx ** 2 + dy ** 2)
+#     norm[norm == 0] = 1.0
+#     dx /= norm
+#     dy /= norm
+
+#     nx = -dy
+#     ny = dx
+
+#     x_outer = plot_x_ref + nx * (track_width / 2)
+#     y_outer = plot_y_ref + ny * (track_width / 2)
+#     x_inner = plot_x_ref - nx * (track_width / 2)
+#     y_inner = plot_y_ref - ny * (track_width / 2)
+
+#     return {
+#         "centerline": list(zip(plot_x_ref.round(1).tolist(), plot_y_ref.round(1).tolist())),
+#         "inner": list(zip(x_inner.round(1).tolist(), y_inner.round(1).tolist())),
+#         "outer": list(zip(x_outer.round(1).tolist(), y_outer.round(1).tolist())),
+#         "drs_zones": drs_zones,
+#         "bounds": {
+#             "x_min": float(min(plot_x_ref.min(), x_inner.min(), x_outer.min())),
+#             "x_max": float(max(plot_x_ref.max(), x_inner.max(), x_outer.max())),
+#             "y_min": float(min(plot_y_ref.min(), y_inner.min(), y_outer.min())),
+#             "y_max": float(max(plot_y_ref.max(), y_inner.max(), y_outer.max())),
+#         },
+#     }
+
+
+# def extract_race_events(frames: list, track_statuses: list, sample_every: int = 25) -> list:
+#     """Extract DNF and flag/SC/VSC events from telemetry frames, keyed by
+#     TIME (seconds) rather than frame index — this decouples events from
+#     the frame sample rate, so they stay correct even if the web backend
+#     downsamples frames before sending them to the browser (unlike the
+#     desktop version, which indexes events by frame # at a fixed 25fps).
+
+#     sample_every: check every Nth *original* frame for driver dropouts
+#     (DNFs), same performance tradeoff as the desktop version.
+#     """
+#     events = []
+#     if not frames:
+#         return events
+
+#     prev_drivers = set()
+#     for i in range(0, len(frames), sample_every):
+#         frame = frames[i]
+#         current_drivers = set(frame.get("drivers", {}).keys())
+
+#         if prev_drivers:
+#             for driver_code in prev_drivers - current_drivers:
+#                 prev_frame = frames[max(0, i - sample_every)]
+#                 driver_info = prev_frame.get("drivers", {}).get(driver_code, {})
+#                 events.append({
+#                     "type": EVENT_DNF,
+#                     "t": frame["t"],
+#                     "label": driver_code,
+#                     "lap": driver_info.get("lap", "?"),
+#                 })
+
+#         prev_drivers = current_drivers
+
+#     race_end_t = frames[-1]["t"] if frames else 0
+#     for status in track_statuses:
+#         event_type = TRACK_STATUS_TO_EVENT.get(str(status.get("status", "")))
+#         if event_type is None:
+#             continue
+#         start_t = status.get("start_time", 0)
+#         end_t = status.get("end_time")
+#         if end_t is None:
+#             end_t = start_t + 10  # default duration, mirrors desktop fallback
+#         if end_t <= 0:
+#             continue  # entirely before the race started
+#         end_t = min(end_t, race_end_t)
+#         events.append({"type": event_type, "t": start_t, "end_t": end_t, "label": ""})
+
+#     events.sort(key=lambda e: e["t"])
+#     return events
+
+
+
+import numpy as np
+
+# ============================================================
+# Event Constants
+# ============================================================
+
+EVENT_DNF = "dnf"
+EVENT_YELLOW_FLAG = "yellow_flag"
+EVENT_RED_FLAG = "red_flag"
+EVENT_SAFETY_CAR = "safety_car"
+EVENT_VSC = "vsc"
+
+TRACK_STATUS_TO_EVENT = {
+    "2": EVENT_YELLOW_FLAG,
+    "4": EVENT_SAFETY_CAR,
+    "5": EVENT_RED_FLAG,
+    "6": EVENT_VSC,
+    "7": EVENT_VSC,
+}
+
+
+# ============================================================
+# Helper Functions
+# ============================================================
+
+def point_at_distance(example_lap, distance):
+
+    if "Distance" not in example_lap.columns:
+        return {
+            "x": float(example_lap["X"].iloc[0]),
+            "y": float(example_lap["Y"].iloc[0]),
+        }
+
+    distances = example_lap["Distance"].to_numpy()
+
+    idx = np.abs(distances - distance).argmin()
+
+    return {
+        "x": float(example_lap["X"].iloc[idx]),
+        "y": float(example_lap["Y"].iloc[idx]),
+    }
+
+# def build_sector_markers(example_lap):
+#     """
+#     Creates Sector 1 / Sector 2 / Sector 3 markers.
+#     Works even if Distance is missing.
+#     """
+
+#     # If Distance exists, use it
+#     if "Distance" in example_lap.columns:
+
+#         total_distance = float(example_lap["Distance"].max())
+
+#         sector_distances = [
+#             total_distance / 3,
+#             total_distance * 2 / 3,
+#             total_distance,
+#         ]
+
+#         sectors = []
+
+#         for i, d in enumerate(sector_distances, start=1):
+
+#             sectors.append({
+#                 "id": i,
+#                 "label": f"Sector {i}",
+#                 "position": point_at_distance(example_lap, d)
+#             })
+
+#         return sectors
+
+#     # Otherwise split by telemetry samples
+#     total = len(example_lap)
+
+#     indexes = [
+#         total // 3,
+#         total * 2 // 3,
+#         total - 1,
+#     ]
+
+#     sectors = []
+
+#     for i, idx in enumerate(indexes, start=1):
+
+#         sectors.append({
+#             "id": i,
+#             "label": f"Sector {i}",
+#             "position": {
+#                 "x": float(example_lap["X"].iloc[idx]),
+#                 "y": float(example_lap["Y"].iloc[idx]),
+#             }
+#         })
+
+#     return sectors
+
+def build_sector_markers(example_lap):
+    """
+    Creates Sector 1 / Sector 2 markers only.
+    """
+
+    # ----------------------------------------------------
+    # Distance available
+    # ----------------------------------------------------
+    if "Distance" in example_lap.columns:
+
+        total_distance = float(example_lap["Distance"].max())
+
+        sector_distances = [
+            total_distance / 3,
+            total_distance * 2 / 3,
+        ]
+
+        sectors = []
+
+        for i, d in enumerate(sector_distances, start=1):
+
+            sectors.append({
+                "id": i,
+                "label": f"Sector {i}",
+                "position": point_at_distance(example_lap, d)
+            })
+
+        return sectors
+
+    # ----------------------------------------------------
+    # Distance not available
+    # ----------------------------------------------------
+    total = len(example_lap)
+
+    indexes = [
+        total // 3,
+        total * 2 // 3,
+    ]
+
+    sectors = []
+
+    for i, idx in enumerate(indexes, start=1):
+
+        sectors.append({
+            "id": i,
+            "label": f"Sector {i}",
+            "position": {
+                "x": float(example_lap["X"].iloc[idx]),
+                "y": float(example_lap["Y"].iloc[idx]),
+            }
+        })
+
+    return sectors
+
+
+def build_start_finish(example_lap):
+    """
+    Returns the Start / Finish location.
+    """
+
+    return {
+        "x": float(example_lap["X"].iloc[0]),
+        "y": float(example_lap["Y"].iloc[0]),
+    }
+
+
+# ============================================================
+# DRS Zones
+# ============================================================
+
+def plot_drs_zones(example_lap):
+    """
+    Detect contiguous DRS active zones.
+
+    FastF1 DRS values:
+        10 = DRS Active
+        12 = DRS Active
+        14 = DRS Active
+    """
+
+    x_val = example_lap["X"]
+    y_val = example_lap["Y"]
+
+    drs_zones = []
+
+    drs_start = None
+
+    for i, value in enumerate(example_lap["DRS"]):
+
+        if value in (10, 12, 14):
+
+            if drs_start is None:
+                drs_start = i
+
+        else:
+
+            if drs_start is not None:
+
+                drs_end = i - 1
+
+                drs_zones.append({
+
+                    "zone": len(drs_zones) + 1,
+
+                    "start": {
+                        "x": float(x_val.iloc[drs_start]),
+                        "y": float(y_val.iloc[drs_start]),
+                    },
+
+                    "end": {
+                        "x": float(x_val.iloc[drs_end]),
+                        "y": float(y_val.iloc[drs_end]),
+                    },
+
+                    "label": f"DRS {len(drs_zones)+1}"
+
+                })
+
+                drs_start = None
+
+    if drs_start is not None:
+
+        drs_end = len(example_lap["DRS"]) - 1
+
+        drs_zones.append({
+
+            "zone": len(drs_zones) + 1,
+
+            "start": {
+                "x": float(x_val.iloc[drs_start]),
+                "y": float(y_val.iloc[drs_start]),
+            },
+
+            "end": {
+                "x": float(x_val.iloc[drs_end]),
+                "y": float(y_val.iloc[drs_end]),
+            },
+
+            "label": f"DRS {len(drs_zones)+1}"
+
+        })
+
+    return drs_zones
+
+
+# ============================================================
+# Track Geometry
+# ============================================================
+
+def build_track_geometry(example_lap, track_width: float = 200.0) -> dict:
+    
+    """
+    Build track geometry for the frontend.
+
+    Returns:
+        - centerline
+        - inner boundary
+        - outer boundary
+        - DRS zones
+        - sector markers
+        - start/finish
+        - bounds
+    """
+
+    # --------------------------------------------------------
+    # Build helper data
+    # --------------------------------------------------------
+
+    drs_zones = plot_drs_zones(example_lap)
+
+    sectors = build_sector_markers(example_lap)
+
+    start_finish = build_start_finish(example_lap)
+
+    print("Track Keys:", {
+    "sectors": len(sectors),
+    "drs": len(drs_zones)
+    })
+
+    # --------------------------------------------------------
+    # Track Centerline
+    # --------------------------------------------------------
+
+    plot_x_ref = example_lap["X"].to_numpy()
+    plot_y_ref = example_lap["Y"].to_numpy()
+
+    # --------------------------------------------------------
+    # Calculate normal vectors
+    # --------------------------------------------------------
+
+    dx = np.gradient(plot_x_ref)
+    dy = np.gradient(plot_y_ref)
+
+    norm = np.sqrt(dx ** 2 + dy ** 2)
+    norm[norm == 0] = 1.0
+
+    dx /= norm
+    dy /= norm
+
+    nx = -dy
+    ny = dx
+
+    # --------------------------------------------------------
+    # Inner / Outer Track
+    # --------------------------------------------------------
+
+    x_outer = plot_x_ref + nx * (track_width / 2)
+    y_outer = plot_y_ref + ny * (track_width / 2)
+
+    x_inner = plot_x_ref - nx * (track_width / 2)
+    y_inner = plot_y_ref - ny * (track_width / 2)
+
+    # --------------------------------------------------------
+    # Bounds
+    # --------------------------------------------------------
+
+    bounds = {
+        "x_min": float(min(
+            plot_x_ref.min(),
+            x_inner.min(),
+            x_outer.min()
+        )),
+
+        "x_max": float(max(
+            plot_x_ref.max(),
+            x_inner.max(),
+            x_outer.max()
+        )),
+
+        "y_min": float(min(
+            plot_y_ref.min(),
+            y_inner.min(),
+            y_outer.min()
+        )),
+
+        "y_max": float(max(
+            plot_y_ref.max(),
+            y_inner.max(),
+            y_outer.max()
+        )),
+    }
+
+    # --------------------------------------------------------
+    # Return JSON
+    # --------------------------------------------------------
+
+    return {
+
+        # Track
+        "centerline": list(zip(
+            plot_x_ref.round(1).tolist(),
+            plot_y_ref.round(1).tolist()
+        )),
+
+        "inner": list(zip(
+            x_inner.round(1).tolist(),
+            y_inner.round(1).tolist()
+        )),
+
+        "outer": list(zip(
+            x_outer.round(1).tolist(),
+            y_outer.round(1).tolist()
+        )),
+
+        # Start / Finish
+        "start_finish": start_finish,
+
+        # Sector Labels
+        "sectors": sectors,
+
+        # DRS Zones
+        "drs_zones": drs_zones,
+
+        # Track Limits
+        "bounds": bounds,
+    }
+
+
+# ============================================================
+# Race Events
+# ============================================================
+
+def extract_race_events(
+    frames: list,
+    track_statuses: list,
+    sample_every: int = 25,
+) -> list:
+    """
+    Extract race events from telemetry.
+
+    Events include:
+        - DNF
+        - Yellow Flag
+        - Safety Car
+        - Virtual Safety Car
+        - Red Flag
+
+    Events are stored using race time (seconds), so they remain
+    correct even if the replay FPS changes.
+    """
+
+    events = []
+
+    if not frames:
+        return events
+
+    # --------------------------------------------------------
+    # Driver DNFs
+    # --------------------------------------------------------
+
+    previous_drivers = set()
+
+    for i in range(0, len(frames), sample_every):
+
+        frame = frames[i]
+
+        current_drivers = set(
+            frame.get("drivers", {}).keys()
+        )
+
+        if previous_drivers:
+
+            retired = previous_drivers - current_drivers
+
+            for driver_code in retired:
+
+                previous_frame = frames[max(0, i - sample_every)]
+
+                driver_info = previous_frame.get(
+                    "drivers",
+                    {}
+                ).get(driver_code, {})
+
+                events.append({
+
+                    "type": EVENT_DNF,
+
+                    "t": frame["t"],
+
+                    "label": driver_code,
+
+                    "lap": driver_info.get(
+                        "lap",
+                        "?"
+                    ),
+                })
+
+        previous_drivers = current_drivers
+
+    # --------------------------------------------------------
+    # Track Status Events
+    # --------------------------------------------------------
+
+    race_end_time = frames[-1]["t"]
+
+    for status in track_statuses:
+
+        event_type = TRACK_STATUS_TO_EVENT.get(
+            str(status.get("status", ""))
+        )
+
+        if event_type is None:
+            continue
+
+        start_time = status.get("start_time", 0)
+
+        end_time = status.get("end_time")
+
+        if end_time is None:
+            end_time = start_time + 10
+
+        if end_time <= 0:
+            continue
+
+        end_time = min(end_time, race_end_time)
+
+        events.append({
+
+            "type": event_type,
+
+            "t": start_time,
+
+            "end_t": end_time,
+
+            "label": "",
+
+        })
+
+    # --------------------------------------------------------
+    # Sort by race time
+    # --------------------------------------------------------
+
+    events.sort(
+        key=lambda event: event["t"]
+    )
+
+    return events
