@@ -1,0 +1,797 @@
+/* ==========================================================
+   F1 Race Replay UI
+   Global Layout + Replay + Session Banner + Weather
+   ========================================================== */
+
+*{
+    margin:0;
+    padding:0;
+    box-sizing:border-box;
+}
+
+:root{
+    --bg:#050505;
+    --panel:rgba(18,18,18,.92);
+    --panel-border:#2d2d2d;
+    --text:#f2f2f2;
+    --muted:#9ea3a8;
+    --accent:#E10600;
+    --shadow:0 12px 30px rgba(0,0,0,.45);
+    --radius:12px;
+
+    --left-width:270px;
+    --right-width:240px;
+}
+
+html,
+body{
+    width:100%;
+    height:100%;
+    overflow:hidden;
+    background:#000;
+    color:var(--text);
+    font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif;
+}
+
+.hidden{
+    display:none!important;
+}
+
+/* ==========================================================
+   Picker Screen
+   ========================================================== */
+
+.picker{
+    width:520px;
+    max-width:90%;
+    margin:8vh auto;
+    padding:32px;
+    background:#111;
+    border:1px solid #333;
+    border-radius:16px;
+    box-shadow:var(--shadow);
+}
+
+.picker h1{
+    margin-bottom:22px;
+    text-align:center;
+    font-size:28px;
+    color:#fff;
+}
+
+.picker-row{
+    display:flex;
+    flex-wrap:wrap;
+    gap:14px;
+    align-items:flex-end;
+}
+
+.picker-row label{
+    display:flex;
+    flex-direction:column;
+    gap:6px;
+    font-size:12px;
+    color:#999;
+}
+
+.picker-row select{
+    background:#1b1b1b;
+    color:#fff;
+    border:1px solid #444;
+    border-radius:8px;
+    padding:10px 12px;
+    min-width:140px;
+}
+
+.picker-row button{
+    padding:10px 18px;
+    border:none;
+    border-radius:8px;
+    background:var(--accent);
+    color:#fff;
+    font-weight:700;
+    cursor:pointer;
+    transition:.2s;
+}
+
+.picker-row button:hover{
+    background:#ff2b23;
+}
+
+.picker-status{
+    margin-top:18px;
+    color:#999;
+    font-size:13px;
+}
+
+/* ==========================================================
+   Replay Layout
+   ========================================================== */
+
+.replay{
+    position:relative;
+    width:100vw;
+    height:100vh;
+    overflow:hidden;
+    background:#000;
+}
+
+#trackCanvas{
+    position:absolute;
+    inset:0;
+    width:100%;
+    height:100%;
+    z-index:1;
+}
+
+/* ==========================================================
+   Generic Panel
+   ========================================================== */
+
+.panel{
+    position:absolute;
+    background:var(--panel);
+    backdrop-filter:blur(8px);
+    border:1px solid var(--panel-border);
+    border-radius:var(--radius);
+    box-shadow:var(--shadow);
+    padding:14px 16px;
+    z-index:20;
+    color:#fff;
+}
+
+/* ==========================================================
+   Session Banner
+   ========================================================== */
+
+.session-banner{
+    position:absolute;
+    top:16px;
+    left:50%;
+    transform:translateX(-50%);
+    min-width:420px;
+    padding:12px 24px;
+    text-align:center;
+    background:rgba(15,15,15,.92);
+    border:1px solid #333;
+    border-radius:12px;
+    backdrop-filter:blur(12px);
+    z-index:100;
+}
+
+.session-banner b{
+    display:block;
+    font-size:17px;
+    color:#fff;
+    margin-bottom:4px;
+}
+
+/* ==========================================================
+   LEFT SIDEBAR — Weather
+   ========================================================== */
+.weather-panel{
+    position:absolute;
+    top:60px;
+    left:20px;
+} 
+.weather-panel .wp-title{
+    font-size:16px;
+    font-weight:700;
+    margin-bottom:6px;
+    color:#fff;
+}
+
+.weather-panel .wp-row{
+    display:flex;
+    align-items:center;
+    gap:4px;
+    padding:2px 0;
+    font-size:13px;
+    color:#c8c8c8;
+    border-bottom:1px solid rgba(255,255,255,.05);
+}
+
+.weather-icon{
+    width:14px;
+    height:14px;
+    object-fit:contain;
+    flex-shrink:0;
+}
+
+.weather-label{
+    flex:1;
+    color:#fff;
+    font-weight:500;
+}
+
+.weather-value{
+    color:#00d4ff;
+    font-weight:600;
+    font-size:13px;
+}
+/* ==========================================================
+   DRIVER PANEL (stacks below Weather, up to N boxes)
+   ========================================================== */
+
+.driver-info-wrapper{
+    position:absolute;
+    top:255px;
+    left:20px;
+    width:var(--left-width);
+    display:flex;
+    flex-direction:column;
+    gap:14px;
+    z-index:20;
+    max-height:340px;
+    overflow-y:auto;
+    padding-right:4px;
+}
+
+.driver-info-wrapper::-webkit-scrollbar{
+    width:6px;
+}
+
+.driver-info-wrapper::-webkit-scrollbar-thumb{
+    background:#444;
+    border-radius:20px;
+}
+
+.driver-info-box{
+    width:100%;
+    background:rgba(14,14,14,.95);
+    border:2px solid #666;
+    border-radius:12px;
+    overflow:hidden;
+    box-shadow:0 10px 20px rgba(0,0,0,.35);
+    transition:.2s;
+}
+
+.driver-info-box:hover{
+    transform:translateY(-2px);
+    box-shadow:0 16px 30px rgba(0,0,0,.45);
+}
+
+.dip-header{
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+    padding:10px 16px;
+    font-weight:700;
+    font-size:15px;
+    color:#000;
+}
+
+.dip-close{
+    cursor:pointer;
+    font-size:18px;
+    opacity:.75;
+    transition:.2s;
+}
+
+.dip-close:hover{
+    opacity:1;
+    transform:scale(1.15);
+}
+
+.dip-body{
+    padding:14px 16px 16px;
+}
+
+.dip-row{
+    padding:4px 0;
+    color:#ddd;
+    font-size:13px;
+}
+
+.dip-row.dim{
+    color:#8f8f8f;
+}
+
+.dip-bars{
+    margin-top:14px;
+    display:flex;
+    gap:22px;
+}
+
+.dip-bar-col{
+    display:flex;
+    flex-direction:column;
+    align-items:center;
+    gap:6px;
+}
+
+.dip-bar-track{
+    width:22px;
+    height:75px;
+    background:#2b2b2b;
+    border-radius:4px;
+    overflow:hidden;
+    display:flex;
+    align-items:flex-end;
+}
+
+.dip-bar-fill{
+    width:100%;
+    background:#2ecc71;
+}
+
+.dip-bar-fill.brake{
+    background:#e74c3c;
+}
+
+.dip-bar-label{
+    font-size:11px;
+    color:#aaa;
+    font-weight:600;
+}
+
+.dip-tyre-health{
+    margin-top:14px;
+}
+
+.dip-tyre-bar-track{
+    width:100%;
+    height:10px;
+    margin-top:6px;
+    background:#2d2d2d;
+    border-radius:20px;
+    overflow:hidden;
+}
+
+.dip-tyre-bar-fill{
+    height:100%;
+    border-radius:20px;
+}
+
+/* ==========================================================
+   RIGHT SIDEBAR — Leaderboard
+   ========================================================== */
+
+.leaderboard-panel{
+    position:absolute;
+    top:90px;
+    right:20px;
+    width:var(--right-width);
+    height:calc(100vh - 180px);
+    overflow-y:auto;
+    z-index:20;
+}
+
+.leaderboard-panel::-webkit-scrollbar{
+    width:6px;
+}
+
+.leaderboard-panel::-webkit-scrollbar-thumb{
+    background:#444;
+    border-radius:20px;
+}
+
+.lb-title{
+    font-size:18px;
+    font-weight:700;
+    margin-bottom:14px;
+    text-align:center;
+}
+
+.lb-row{
+    display:flex;
+    align-items:center;
+    gap:10px;
+    padding:8px 10px;
+    border-radius:8px;
+    cursor:pointer;
+    transition:.18s;
+}
+
+.lb-row:hover{
+    background:rgba(255,255,255,.08);
+}
+
+.lb-row.selected{
+    background:#ffffff;
+    color:#000;
+}
+
+.lb-pos{
+    width:28px;
+    font-weight:700;
+    text-align:center;
+}
+
+.lb-code{
+    flex:1;
+    font-weight:700;
+    letter-spacing:.4px;
+}
+
+.lb-drs{
+    width:10px;
+    height:10px;
+    border-radius:50%;
+    background:#555;
+}
+
+.lb-drs.on{
+    background:#2ecc71;
+    box-shadow:0 0 8px #2ecc71;
+}
+
+.lb-tyre{
+    width:22px;
+    height:22px;
+    border-radius:6px;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    font-size:10px;
+    font-weight:bold;
+    color:#000;
+}
+
+/* ==========================================================
+   CONTROLS PANEL — left column, below driver boxes
+   ========================================================== */
+
+.controls-legend{
+    position:absolute;
+    top:620px;
+    left:20px;
+    width:var(--left-width);
+    background:rgba(18,18,18,.94);
+    border:1px solid #2d2d2d;
+    border-radius:12px;
+    padding:16px;
+    box-shadow:0 12px 30px rgba(0,0,0,.40);
+    z-index:20;
+}
+
+.cl-title{
+    font-size:18px;
+    font-weight:700;
+    margin-bottom:12px;
+    color:#fff;
+}
+
+.cl-row{
+    display:flex;
+    gap:10px;
+    align-items:center;
+    padding:5px 0;
+    color:#c8c8c8;
+    border-bottom:1px solid rgba(255,255,255,.05);
+    font-size:13px;
+}
+
+.cl-row:last-child{
+    border-bottom:none;
+}
+
+.cl-row b{
+    color:#fff;
+    min-width:90px;
+}
+
+
+
+/* ==========================================================
+   BOTTOM PLAYBACK BAR
+   ========================================================== */
+
+.bottom-bar{
+    position:absolute;
+    left:0;
+    right:0;
+    bottom:0;
+
+    padding:12px 24px 18px;
+
+    display:flex;
+    flex-direction:column;
+    align-items:center;
+
+    background:linear-gradient(
+        transparent,
+        rgba(0,0,0,.55) 25%,
+        rgba(0,0,0,.95)
+    );
+
+    z-index:50;
+}
+
+/* ==========================================================
+   CONTROLS
+   ========================================================== */
+
+.controls{
+
+    width:75%;
+
+    display:flex;
+
+    justify-content:center;
+
+    align-items:center;
+
+    gap:14px;
+
+    margin-bottom:12px;
+}
+
+/* ==========================================================
+   ICON BUTTONS
+   ========================================================== */
+
+.icon-btn{
+
+    width:42px;
+    height:42px;
+
+    display:flex;
+    justify-content:center;
+    align-items:center;
+
+    background:#1b1b1b;
+
+    border:1px solid #444;
+
+    border-radius:8px;
+
+    cursor:pointer;
+
+    transition:.2s ease;
+}
+
+.icon-btn:hover{
+
+    background:#2a2a2a;
+
+    border-color:#777;
+
+    transform:translateY(-1px);
+}
+
+.icon-btn:active{
+
+    transform:scale(.95);
+}
+
+.icon-btn img{
+
+    width:20px;
+    height:20px;
+
+    object-fit:contain;
+
+    pointer-events:none;
+
+    user-select:none;
+}
+
+/* ==========================================================
+   SPEED CONTROL
+   ========================================================== */
+
+.speed-control{
+
+    display:flex;
+
+    align-items:center;
+
+    gap:8px;
+
+    margin-left:8px;
+}
+
+#speedLabel{
+
+    width:42px;
+
+    text-align:center;
+
+    color:#fff;
+
+    font-size:15px;
+
+    font-weight:700;
+
+    font-variant-numeric:tabular-nums;
+}
+
+/* ==========================================================
+   TIME
+   ========================================================== */
+
+.time-label{
+
+    margin-left:18px;
+
+    color:#d5d5d5;
+
+    font-size:14px;
+
+    font-weight:600;
+
+    font-variant-numeric:tabular-nums;
+
+    white-space:nowrap;
+}
+
+/* ==========================================================
+   PROGRESS BAR
+   ========================================================== */
+
+.progress-canvas{
+
+    width:75%;
+
+    height:42px;
+
+    display:block;
+
+    cursor:pointer;
+
+    border-radius:8px;
+
+    background:#101010;
+
+    border:1px solid #2b2b2b;
+}
+
+/* ==========================================================
+   HIDDEN
+   ========================================================== */
+
+.hidden{
+    display:none !important;
+}
+/* ==========================================================
+   FLAG LEGEND
+   ========================================================== */
+
+.legend{
+    position:absolute;
+    right:20px;
+    bottom:78px;
+    display:flex;
+    gap:16px;
+    align-items:center;
+    padding:8px 14px;
+    background:rgba(15,15,15,.92);
+    border:1px solid #333;
+    border-radius:10px;
+    z-index:60;
+    font-size:12px;
+    color:#ddd;
+}
+
+.legend span{
+    display:flex;
+    align-items:center;
+}
+
+.dot{
+    width:10px;
+    height:10px;
+    border-radius:3px;
+    display:inline-block;
+    margin-right:6px;
+}
+
+.dot.yellow{
+    background:#ffdc00;
+}
+
+.dot.red{
+    background:#dc2626;
+}
+
+.dot.orange{
+    background:#ff8c00;
+}
+
+.dot.amber{
+    background:#f59e0b;
+}
+
+/* ==========================================================
+   BACK BUTTON
+   ========================================================== */
+
+.back-btn{
+    position:absolute;
+    top:18px;
+    left:20px;
+    z-index:100;
+    padding:8px 14px;
+    border:none;
+    border-radius:8px;
+    background:rgba(18,18,18,.92);
+    color:#fff;
+    border:1px solid #333;
+    cursor:pointer;
+    transition:.2s;
+}
+
+.back-btn:hover{
+    background:#2b2b2b;
+}
+
+/* ==========================================================
+   SCROLLBARS
+   ========================================================== */
+
+::-webkit-scrollbar{
+    width:8px;
+    height:8px;
+}
+
+::-webkit-scrollbar-track{
+    background:#111;
+}
+
+::-webkit-scrollbar-thumb{
+    background:#444;
+    border-radius:20px;
+}
+
+::-webkit-scrollbar-thumb:hover{
+    background:#666;
+}
+
+/* ==========================================================
+   RESPONSIVE
+   ========================================================== */
+
+@media (max-width:1600px){
+    :root{
+        --left-width:245px;
+        --right-width:220px;
+    }
+    .controls-legend{
+        top:590px;
+    }
+}
+
+@media (max-width:1400px){
+    :root{
+        --left-width:225px;
+        --right-width:205px;
+    }
+    .driver-info-wrapper{
+        top:245px;
+    }
+    .controls-legend{
+        top:570px;
+    }
+}
+
+@media (max-height:900px){
+    .driver-info-wrapper{
+        max-height:260px;
+    }
+    .controls-legend{
+        top:auto;
+        bottom:145px;
+    }
+}
+
+/* ==========================================================
+   ANIMATIONS
+   ========================================================== */
+
+.panel{
+    animation:panelFade .25s ease;
+}
+
+
+
+@keyframes panelFade{
+    from{
+        opacity:0;
+        transform:translateY(8px);
+    }
+    to{
+        opacity:1;
+        transform:translateY(0);
+    }
+}

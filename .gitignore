@@ -1,0 +1,8 @@
+backend/.fastf1-cache
+venv
+backend/__pycache__
+backend/computed_data
+ ../.DS_Store
+
+backend/src/lib/__pycache__
+backend/src/__pycache__

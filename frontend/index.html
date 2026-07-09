@@ -1,0 +1,139 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>F1 Race Replay</title>
+  <link rel="stylesheet" href="/static/style.css">
+</head>
+<body>
+
+  <!-- Session picker (shown until a replay is loaded) -->
+  <div id="picker" class="picker">
+    <h1>🏎️ F1 Race Replay</h1>
+    <div class="picker-row">
+      <label>Year
+        <select id="yearSelect"></select>
+      </label>
+      <label>Round
+        <select id="roundSelect"><option>Loading…</option></select>
+      </label>
+      <label>Session
+        <select id="sessionTypeSelect">
+          <option value="R">Race</option>
+          <option value="S">Sprint</option>
+        </select>
+      </label>
+      <button id="loadBtn">Load Replay</button>
+    </div>
+    <p id="pickerStatus" class="picker-status"></p>
+  </div>
+
+  <!-- Replay view (hidden until data is loaded) -->
+  <div id="replay" class="replay hidden">
+    <div id="sessionBanner" class="session-banner"></div>
+
+    <canvas id="trackCanvas"></canvas>
+
+    <div id="weatherPanel" class="panel weather-panel"></div>
+    <div id="leaderboardPanel" class="panel leaderboard-panel"></div>
+    <!-- Filled by app.js with one .driver-info-box per selected driver (stacked) -->
+    <div id="driverInfoWrapper" class="driver-info-wrapper"></div>
+
+    <div id="controlsLegend" class="panel controls-legend">
+      <div class="cl-title">Controls</div>
+      <div class="cl-row"><b>SPACE</b> Pause/Resume</div>
+      <div class="cl-row"><b>← / →</b> Rewind/FastForward</div>
+      <div class="cl-row"><b>↑ / ↓</b> Speed +/-</div>
+      <div class="cl-row"><b>1-4</b> Speed 0.5x/1x/2x/4x</div>
+      <div class="cl-row"><b>R</b> Restart</div>
+      <div class="cl-row"><b>D</b> Toggle DRS Zones</div>
+      <div class="cl-row"><b>B</b> Toggle Progress Bar</div>
+      <div class="cl-row"><b>Shift+Click</b> Select multiple drivers</div>
+      <div class="cl-row"><b>H</b> Toggle this panel</div>
+    </div>
+
+
+
+   <!-- ==========================================================
+     Bottom Playback Bar
+    ========================================================== -->
+
+    <div class="bottom-bar">
+        <div class="controls">
+            <!-- Rewind -->
+            <button id="rewindBtn" class="icon-btn" title="Rewind 10s">
+                <img src="/static/images/controls/rewind.png" alt="Rewind">
+            </button>
+            <!-- Play / Pause -->
+            <button id="playPauseBtn" class="icon-btn" title="Play / Pause">
+                <img
+                    id="playPauseIcon"
+                    src="/static/images/controls/play.png"
+                    alt="Play">
+            </button>
+            <!-- Forward -->
+            <button id="forwardBtn" class="icon-btn" title="Forward 10s">
+                <img src="/static/images/controls/forward.png" alt="Forward">
+            </button>
+            <!-- Speed -->
+            <div class="speed-control">
+                <button
+                    id="speedDownBtn"
+                    class="icon-btn"
+                    title="Decrease Speed">
+                    <img
+                        src="/static/images/controls/speed-.png"
+                        alt="Speed Down">
+                </button>
+                <span id="speedLabel">1x</span>
+                <button
+                    id="speedUpBtn"
+                    class="icon-btn"
+                    title="Increase Speed">
+                    <img
+                        src="/static/images/controls/speed+.png"
+                        alt="Speed Up">
+                </button>
+            </div>
+            <!-- Time -->
+            <span id="timeLabel" class="time-label">
+                0:00 / 0:00
+            </span>
+        </div>
+
+        <!-- Progress -->
+        <canvas
+            id="progressCanvas"
+            class="progress-canvas">
+        </canvas>
+
+    </div>
+
+    <!-- <div class="bottom-bar">
+      <div class="controls">
+        <button id="rewindBtn" title="Jump back 10s">⏪</button>
+        <button id="playPauseBtn" title="Play/Pause (Space)">▶</button>
+        <button id="forwardBtn" title="Jump forward 10s">⏩</button>
+        <div class="speed-control">
+          <button id="speedDownBtn">−</button>
+          <span id="speedLabel">1x</span>
+          <button id="speedUpBtn">+</button>
+        </div>
+        <span id="timeLabel" class="time-label">0:00 / 0:00</span>
+      </div>
+      <canvas id="progressCanvas" class="progress-canvas"></canvas>
+    </div> -->
+
+    <div id="legend" class="legend">
+      <span><i class="dot yellow"></i>Yellow</span>
+      <span><i class="dot red"></i>Red</span>
+      <span><i class="dot orange"></i>SC</span>
+      <span><i class="dot amber"></i>VSC</span>
+    </div>
+
+    <button id="backToPickerBtn" class="back-btn">← New Replay</button>
+  </div>
+
+  <script src="/static/app.js"></script>
+</body>
+</html>
