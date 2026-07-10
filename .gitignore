@@ -9,3 +9,5 @@ backend/src/__pycache__
 
 .DS_Store
 F1-Race-Replay/.DS_Store
+
+backend/computed_data/
