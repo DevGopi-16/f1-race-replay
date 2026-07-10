@@ -21,9 +21,7 @@ const state = {
   leaderboardGapMode: 'off',  // ← ADD THIS LINE. 'off' | 'leader' | 'interval'
 };
 
-// ---------------------------------------------------------------------
 // Picker screen
-// ---------------------------------------------------------------------
 const yearSelect = document.getElementById("yearSelect");
 const roundSelect = document.getElementById("roundSelect");
 const sessionTypeSelect = document.getElementById("sessionTypeSelect");
@@ -228,9 +226,7 @@ document.getElementById("backToPickerBtn").addEventListener("click", () => {
   pickerStatus.textContent = "";
 });
 
-// ---------------------------------------------------------------------
 // Replay setup
-// ---------------------------------------------------------------------
 const canvas = document.getElementById("trackCanvas");
 const ctx = canvas.getContext("2d");
 const progressCanvas = document.getElementById("progressCanvas");
@@ -292,9 +288,7 @@ function toCanvas([x, y]) {
   return [x * t.scale + t.offsetX, canvas.height - (y * t.scale + t.offsetY)];
 }
 
-// ---------------------------------------------------------------------
 // Track drawing (static — only needs to run once per resize)
-// ---------------------------------------------------------------------
 function drawTrack() {
   const {
     inner,
@@ -305,26 +299,20 @@ function drawTrack() {
     start_finish
   } = state.raceData.track;
 
-  // ==========================
   // Track Boundaries
-  // ==========================
   ctx.strokeStyle = "#3a3a3a";
   ctx.lineWidth = 1;
 
   drawPolyline(inner, false);
   drawPolyline(outer, false);
 
-  // ==========================
   // Center Line
-  // ==========================
   ctx.strokeStyle = "#666";
   ctx.lineWidth = 2;
 
   drawPolyline(centerline, true);
 
-  // ==========================
   // DRS Zones (toggled with 'D')
-  // ==========================
   if (state.showDrsZones) {
     ctx.strokeStyle = "#2ecc40";
     ctx.lineWidth = 5;
@@ -359,9 +347,7 @@ function drawTrack() {
     });
   }
 
-  // ==========================
   // Sector Labels
-  // ==========================
   if (sectors) {
     sectors.forEach(sector => {
 
@@ -394,9 +380,7 @@ function drawTrack() {
     });
   }
 
-  // ==========================
   // Start / Finish
-  // ==========================
 
   if (start_finish) {
 
@@ -435,9 +419,7 @@ function drawPolyline(points, dashed) {
   ctx.restore();
 }
 
-// ---------------------------------------------------------------------
 // Frame interpolation
-// ---------------------------------------------------------------------
 function findFrameIndex(t) {
   const frames = state.raceData.frames;
   let lo = 0, hi = frames.length - 1;
@@ -480,9 +462,7 @@ function lerp(a, b, frac) { return a + (b - a) * frac; }
 
 
 
-// ---------------------------------------------------------------------
 // Main animation loop
-// ---------------------------------------------------------------------
 function tick(nowMs) {
 
     if (!state.raceData) return;
@@ -502,9 +482,7 @@ function tick(nowMs) {
             state.raceData.frames.length - 1
         ].t;
 
-    // -------------------------------------------------
     // Playback
-    // -------------------------------------------------
     if (state.playing) {
 
         state.playheadT = Math.min(
@@ -525,15 +503,11 @@ function tick(nowMs) {
         }
     }
 
-    // -------------------------------------------------
     // Current Frame
-    // -------------------------------------------------
     const frame =
         getInterpolatedDrivers(state.playheadT);
 
-    // -------------------------------------------------
     // Render
-    // -------------------------------------------------
     ctx.clearRect(
         0,
         0,
@@ -545,9 +519,7 @@ function tick(nowMs) {
 
     drawCars(frame);
 
-    // -------------------------------------------------
     // UI
-    // -------------------------------------------------
     updateLeaderboard(frame);
 
     updateWeather(frame);
@@ -558,9 +530,7 @@ function tick(nowMs) {
 
     drawProgressBar(totalT);
 
-    // -------------------------------------------------
     // Next Frame
-    // -------------------------------------------------
     requestAnimationFrame(tick);
 }
 
@@ -604,9 +574,7 @@ function buildStatusBadges(d) {
   return badges.join("");
 }
 
-// ---------------------------------------------------------------------
 // Leaderboard panel
-// ---------------------------------------------------------------------
 
 function updateLeaderboard(frame) {
   const rows = Object.entries(frame.drivers)
@@ -670,9 +638,7 @@ function updateLeaderboard(frame) {
     });
   });
 }
-// ---------------------------------------------------------------------
 // Weather panel
-// ---------------------------------------------------------------------
 function updateWeather(frame) {
   const panel = document.getElementById("weatherPanel");
 
@@ -714,9 +680,7 @@ function updateWeather(frame) {
     </div>
   `;
 }
-// ---------------------------------------------------------------------
 // Driver info panel (multi-select — one box per selected driver)
-// ---------------------------------------------------------------------
 
 // Approximates the ahead/behind gap the same (rough) way the desktop
 // DriverInfoComponent.get_gap_str does: uses race-distance difference
@@ -788,9 +752,6 @@ function updateDriverInfo(frame) {
                 ? '<span style="color:#2ecc40">DRS ●</span>'
                 : '<span style="color:#888">DRS ○</span>';
 
-        // const idx = sortedRows.findIndex(([c]) => c === code);
-        // const ahead = neighborGapLabel(sortedRows, idx, -1) || "Ahead: N/A";
-        // const behind = neighborGapLabel(sortedRows, idx, 1) || "Behind: N/A";
         const ahead = d.ahead
           ? `Ahead (${d.ahead.driver}): +${d.ahead.gap.toFixed(2)}s (${d.ahead.distance.toFixed(1)}m)`
           : "Ahead: N/A";
@@ -918,9 +879,7 @@ function updateDriverInfo(frame) {
 }
 
 
-// ---------------------------------------------------------------------
 // Progress Bar (Centered Timeline)
-// ---------------------------------------------------------------------
 function drawProgressBar(totalT) {
     // Sync canvas resolution with displayed size
     const rect = progressCanvas.getBoundingClientRect();
@@ -938,18 +897,15 @@ function drawProgressBar(totalT) {
 
     progressCtx.clearRect(0, 0, w, h);
 
-    // -------------------------------------------------
     // Timeline occupies only middle 50% of canvas
-    // -------------------------------------------------
     // const LEFT_PAD = w * 0.20;
     // const RIGHT_PAD = w * 0.20;
     // const BAR_W = w - LEFT_PAD - RIGHT_PAD;
     const LEFT_PAD = 0;
     const RIGHT_PAD = 0;
     const BAR_W = w;
-    // -------------------------------------------------
+
     // Background Bar
-    // -------------------------------------------------
     progressCtx.fillStyle = "#1a1a1a";
     progressCtx.fillRect(
         LEFT_PAD,
@@ -958,9 +914,7 @@ function drawProgressBar(totalT) {
         h * 0.30
     );
 
-    // -------------------------------------------------
     // Progress Fill
-    // -------------------------------------------------
     const progressW = (state.playheadT / totalT) * BAR_W;
 
     progressCtx.fillStyle = "#2ecc40";
@@ -971,9 +925,7 @@ function drawProgressBar(totalT) {
         h * 0.30
     );
 
-    // -------------------------------------------------
     // Lap Ticks
-    // -------------------------------------------------
     const totalLaps = state.raceData.meta.total_laps;
 
     progressCtx.strokeStyle = "#555";
@@ -991,9 +943,7 @@ function drawProgressBar(totalT) {
         progressCtx.stroke();
     }
 
-    // -------------------------------------------------
     // Event Markers
-    // -------------------------------------------------
     const eventColors = {
         yellow_flag: "#ffdc00",
         red_flag: "#ff3030",
@@ -1040,9 +990,7 @@ function drawProgressBar(totalT) {
         }
     }
 
-    // -------------------------------------------------
     // Playhead
-    // -------------------------------------------------
     const playX =
         LEFT_PAD +
         (state.playheadT / totalT) * BAR_W;
@@ -1055,9 +1003,7 @@ function drawProgressBar(totalT) {
     progressCtx.lineTo(playX, h);
     progressCtx.stroke();
 }
-// ---------------------------------------------------------------------
 // Click to Seek
-// ---------------------------------------------------------------------
 progressCanvas.addEventListener("click", (e) => {
 
     if (!state.raceData) return;
@@ -1079,9 +1025,8 @@ progressCanvas.addEventListener("click", (e) => {
     state.playheadT = fraction * totalT;
 });
 
-// ---------------------------------------------------------------------
+
 // Time Label
-// ---------------------------------------------------------------------
 function updateTimeLabel(totalT) {
 
     const fmt = (s) => {
@@ -1097,16 +1042,11 @@ function updateTimeLabel(totalT) {
 }
 
 
-// ---------------------------------------------------------------------
 // Controls
-// ---------------------------------------------------------------------
-
 const playPauseBtn = document.getElementById("playPauseBtn");
 const playPauseIcon = document.getElementById("playPauseIcon");
 
-// ----------------------------------------------------
 // Play / Pause
-// ----------------------------------------------------
 function togglePlay() {
 
     state.playing = !state.playing;
@@ -1126,18 +1066,14 @@ function togglePlay() {
 
 playPauseBtn.addEventListener("click", togglePlay);
 
-// ----------------------------------------------------
 // Rewind
-// ----------------------------------------------------
 document.getElementById("rewindBtn").addEventListener("click", () => {
 
     state.playheadT = Math.max(0, state.playheadT - 10);
 
 });
 
-// ----------------------------------------------------
 // Forward
-// ----------------------------------------------------
 document.getElementById("forwardBtn").addEventListener("click", () => {
 
     const totalT =
@@ -1148,9 +1084,7 @@ document.getElementById("forwardBtn").addEventListener("click", () => {
 
 });
 
-// ----------------------------------------------------
 // Playback Speed
-// ----------------------------------------------------
 function setSpeedIndex(i) {
 
     state.speedIndex = Math.max(
@@ -1174,9 +1108,7 @@ document.getElementById("speedDownBtn").addEventListener("click", () => {
 
 });
 
-// ----------------------------------------------------
 // Keyboard Shortcuts
-// ----------------------------------------------------
 window.addEventListener("keydown", (e) => {
 
     if (!state.raceData) return;

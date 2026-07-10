@@ -1,7 +1,7 @@
-/* ==========================================================
-   F1 Race Replay UI
-   Global Layout + Replay + Session Banner + Weather
-   ========================================================== */
+
+   /* F1 Race Replay UI
+   Global Layout + Replay + Session Banner + Weather */
+
 
 *{
     margin:0;
@@ -37,9 +37,8 @@ body{
     display:none!important;
 }
 
-/* ==========================================================
-   Picker Screen
-   ========================================================== */
+/* Picker Screen */
+
 
 .picker{
     width:520px;
@@ -104,9 +103,7 @@ body{
     font-size:13px;
 }
 
-/* ==========================================================
-   Replay Layout
-   ========================================================== */
+/* Replay Layout */
 
 .replay{
     position:relative;
@@ -124,9 +121,7 @@ body{
     z-index:1;
 }
 
-/* ==========================================================
-   Generic Panel
-   ========================================================== */
+/* Generic Panel */
 
 .panel{
     position:absolute;
@@ -140,9 +135,7 @@ body{
     color:#fff;
 }
 
-/* ==========================================================
-   Session Banner
-   ========================================================== */
+/* Session Banner */
 
 .session-banner{
     position:absolute;
@@ -166,9 +159,7 @@ body{
     margin-bottom:4px;
 }
 
-/* ==========================================================
-   LEFT SIDEBAR — Weather
-   ========================================================== */
+/* LEFT SIDEBAR — Weather */
 .weather-panel{
     position:absolute;
     top:60px;
@@ -209,13 +200,8 @@ body{
     font-weight:600;
     font-size:13px;
 }
-/* ==========================================================
-   DRIVER PANEL (stacks below Weather, up to N boxes)
-   ========================================================== */
 
-/* ==========================================================
-   DRIVER PANEL
-   ========================================================== */
+/* DRIVER PANEL */
 
 .driver-info-wrapper{
     position:absolute;
@@ -338,9 +324,7 @@ body{
     color:#ffb347;
 }
 
-/* ==========================================================
-   RIGHT SIDEBAR — Leaderboard
-   ========================================================== */
+/* RIGHT SIDEBAR — Leaderboard */
 
 .leaderboard-panel{
     position:absolute;
@@ -483,9 +467,7 @@ body{
     border:1px solid #ff4040;
 }
 
-/* ==========================================================
-   CONTROLS PANEL — left column, below driver boxes
-   ========================================================== */
+/* CONTROLS PANEL — left column, below driver boxes */
 
 .controls-legend{
     position:absolute;
@@ -528,9 +510,7 @@ body{
 
 
 
-/* ==========================================================
-   BOTTOM PLAYBACK BAR
-   ========================================================== */
+/*BOTTOM PLAYBACK BAR */
 
 .bottom-bar{
     position:absolute;
@@ -553,9 +533,7 @@ body{
     z-index:50;
 }
 
-/* ==========================================================
-   CONTROLS
-   ========================================================== */
+/* CONTROLS */
 
 .controls{
 
@@ -572,9 +550,7 @@ body{
     margin-bottom:12px;
 }
 
-/* ==========================================================
-   ICON BUTTONS
-   ========================================================== */
+/* ICON BUTTONS */
 
 .icon-btn{
 
@@ -622,9 +598,7 @@ body{
     user-select:none;
 }
 
-/* ==========================================================
-   SPEED CONTROL
-   ========================================================== */
+/* SPEED CONTROL */
 
 .speed-control{
 
@@ -652,9 +626,7 @@ body{
     font-variant-numeric:tabular-nums;
 }
 
-/* ==========================================================
-   TIME
-   ========================================================== */
+/* TIME */
 
 .time-label{
 
@@ -671,9 +643,7 @@ body{
     white-space:nowrap;
 }
 
-/* ==========================================================
-   PROGRESS BAR
-   ========================================================== */
+/* PROGRESS BAR */
 
 .progress-canvas{
 
@@ -692,16 +662,12 @@ body{
     border:1px solid #2b2b2b;
 }
 
-/* ==========================================================
-   HIDDEN
-   ========================================================== */
+/*HIDDEN */
 
 .hidden{
     display:none !important;
 }
-/* ==========================================================
-   FLAG LEGEND
-   ========================================================== */
+/* FLAG LEGEND */
 
 .legend{
     position:absolute;
@@ -748,9 +714,7 @@ body{
     background:#f59e0b;
 }
 
-/* ==========================================================
-   BACK BUTTON
-   ========================================================== */
+/* BACK BUTTON */
 
 .back-btn{
     position:absolute;
@@ -771,9 +735,7 @@ body{
     background:#2b2b2b;
 }
 
-/* ==========================================================
-   QUALIFYING / SPRINT QUALIFYING RESULTS VIEW
-   ========================================================== */
+/* QUALIFYING / SPRINT QUALIFYING RESULTS VIEW */
 
 .quali-results{
     position:relative;
@@ -812,9 +774,7 @@ body{
     font-variant-numeric:tabular-nums;
 }
 
-/* ==========================================================
-   SCROLLBARS
-   ========================================================== */
+/* SCROLLBARS */
 
 ::-webkit-scrollbar{
     width:8px;
@@ -834,9 +794,7 @@ body{
     background:#666;
 }
 
-/* ==========================================================
-   RESPONSIVE
-   ========================================================== */
+/* RESPONSIVE */
 
 @media (max-width:1600px){
     :root{
@@ -871,9 +829,7 @@ body{
     }
 }
 
-/* ==========================================================
-   ANIMATIONS
-   ========================================================== */
+/* ANIMATIONS */
 
 .panel{
     animation:panelFade .25s ease;

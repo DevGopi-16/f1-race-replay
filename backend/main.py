@@ -172,9 +172,7 @@ def replay(
     example_lap = _get_example_lap(year, round, session)
     track = build_track_geometry(example_lap)
 
-    # --------------------------------------------------
     # FastF1 official circuit corners
-    # --------------------------------------------------
     try:
         circuit_info = session.get_circuit_info()
 
@@ -281,7 +279,7 @@ def quali(
     }
 
 
-# --- Serve the frontend ---------------------------------------------------
+# Serve the frontend 
 FRONTEND_DIR = Path(__file__).resolve().parent.parent / "frontend"
 
 
