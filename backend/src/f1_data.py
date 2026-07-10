@@ -204,9 +204,6 @@ def get_circuit_rotation(session):
     return circuit.rotation
 
 
-# def get_race_telemetry(session, session_type="R"):
-#     event_name = str(session).replace(" ", "_")
-#     cache_suffix = "sprint" if session_type == "S" else "race"
 def get_race_telemetry(session, session_type="R"):
     event_name = str(session).replace(" ", "_")
     cache_suffix = "sprint" if session_type == "S" else "race"

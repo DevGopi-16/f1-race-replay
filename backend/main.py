@@ -27,6 +27,7 @@ from src.f1_data import (
     load_session,
     get_race_telemetry,
     get_race_weekends_by_year,
+    get_quali_telemetry,
 )
 from src.track_geometry import build_track_geometry, extract_race_events
 from src.serialize import serialize_frames, serialize_driver_colors
@@ -78,76 +79,6 @@ def _get_example_lap(year: int, round_number: int, race_session):
     return fastest_lap.get_telemetry()
 
 
-# @app.get("/api/replay")
-# def replay(
-#     year: int = Query(...),
-#     round: int = Query(..., alias="round"),
-#     session_type: str = Query("R", pattern="^(R|S)$"),
-#     fps: int = Query(8, ge=1, le=25),
-# ):
-#     """Full replay payload: track geometry, driver colors, events, and
-#     downsampled frames — everything the frontend needs in one call.
-#     """
-#     try:
-#         session = load_session(year, round, session_type)
-#     except Exception as e:
-#         raise HTTPException(status_code=502, detail=f"Failed to load session: {e}")
-
-#     try:
-#         race_telemetry = get_race_telemetry(session, session_type=session_type)
-#     except Exception as e:
-#         raise HTTPException(status_code=502, detail=f"Failed to build telemetry: {e}")
-
-#     example_lap = _get_example_lap(year, round, session)
-#     track = build_track_geometry(example_lap)
-#     # --------------------------------------------------
-#     # Add official FastF1 corner information
-#     # --------------------------------------------------
-#     try:
-#         circuit_info = session.get_circuit_info()
-
-#         track["corners"] = []
-
-#         if (
-#             circuit_info is not None
-#             and hasattr(circuit_info, "corners")
-#             and circuit_info.corners is not None
-#         ):
-#             for _, corner in circuit_info.corners.iterrows():
-
-#                 track["corners"].append({
-#                     "number": int(corner["Number"]),
-#                     "letter": "" if str(corner["Letter"]) == "nan" else str(corner["Letter"]),
-#                     "angle": float(corner["Angle"]),
-#                     "distance": float(corner["Distance"])
-#                 })
-
-#     except Exception as e:
-#         print("Corner data unavailable:", e)
-#         track["corners"] = []
-
-#     events = extract_race_events(race_telemetry["frames"], race_telemetry["track_statuses"])
-#     frames = serialize_frames(race_telemetry["frames"], source_fps=SOURCE_FPS, target_fps=fps)
-
-#     event_date = session.event.get("EventDate")
-#     return {
-#         "meta": {
-#             "event_name": session.event.get("EventName", ""),
-#             "circuit_name": session.event.get("Location", ""),
-#             "country": session.event.get("Country", ""),
-#             "year": year,
-#             "round": round,
-#             "date": event_date.strftime("%B %d, %Y") if event_date else "",
-#             "total_laps": race_telemetry["total_laps"],
-#             "session_type": session_type,
-#         },
-#         "driver_colors": serialize_driver_colors(race_telemetry["driver_colors"]),
-#         "max_tyre_life": race_telemetry.get("max_tyre_life", {}),
-#         "track": track,
-#         "events": events,
-#         "frames": frames,
-#         "frame_rate": fps,
-#     }
 @app.get(
     "/api/replay",
     response_class=JSONResponse,
@@ -308,6 +239,47 @@ def replay(
         "frames": frames,
         "frame_rate": fps,
     }
+
+
+@app.get(
+    "/api/quali",
+    summary="Qualifying Results",
+    description="""
+Returns qualifying (or sprint qualifying) session results as a results
+table — NOT a car replay. Qualifying has no synced multi-car timeline the
+way Race/Sprint do (each driver runs isolated flying laps, often at
+different times), so /api/replay's frame-based approach doesn't apply here.
+""",
+)
+def quali(
+    year: int = Query(...),
+    round: int = Query(..., alias="round"),
+    session_type: str = Query("Q", pattern="^(Q|SQ)$"),
+):
+    try:
+        session = load_session(year, round, session_type)
+    except Exception as e:
+        raise HTTPException(status_code=502, detail=f"Failed to load session: {e}")
+
+    try:
+        quali_data = get_quali_telemetry(session, session_type=session_type)
+    except Exception as e:
+        raise HTTPException(status_code=502, detail=f"Failed to build qualifying data: {e}")
+
+    event_date = session.event.get("EventDate")
+    return {
+        "meta": {
+            "event_name": session.event.get("EventName", ""),
+            "circuit_name": session.event.get("Location", ""),
+            "country": session.event.get("Country", ""),
+            "year": year,
+            "round": round,
+            "date": event_date.strftime("%B %d, %Y") if event_date else "",
+            "session_type": session_type,
+        },
+        "results": quali_data["results"],
+    }
+
 
 # --- Serve the frontend ---------------------------------------------------
 FRONTEND_DIR = Path(__file__).resolve().parent.parent / "frontend"
