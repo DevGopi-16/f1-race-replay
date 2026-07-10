@@ -30,6 +30,12 @@ def enable_cache():
 FPS = 25
 DT = 1 / FPS
 
+# Bump this any time the shape of per-frame data changes (fields added,
+# removed, or renamed) — old cache files under a previous version number
+# are simply ignored (treated as "not found") instead of being loaded and
+# causing a KeyError downstream when new code expects a field they don't have.
+CACHE_SCHEMA_VERSION = 3
+
 
 def _process_single_driver(args):
     """Process telemetry data for a single driver - must be top-level for multiprocessing"""
@@ -60,6 +66,15 @@ def _process_single_driver(args):
     total_dist_so_far = 0.0
 
     # iterate laps in order
+    total_dist_so_far = 0.0
+
+    # Pit in/out times: FastF1 puts PitInTime on the lap where the driver
+    # enters the pit lane and PitOutTime on the FOLLOWING (out-)lap — they're
+    # rarely on the same lap. Collected here, paired up chronologically below.
+    pit_in_times = []
+    pit_out_times = []
+
+    # iterate laps in order
     for _, lap in laps_driver.iterlaps():
         # get telemetry for THIS lap only
         lap_tel = lap.get_telemetry()
@@ -67,8 +82,14 @@ def _process_single_driver(args):
         tyre_compund_as_int = get_tyre_compound_int(lap.Compound)
         tyre_life = lap.TyreLife if pd.notna(lap.TyreLife) else 0
 
+        if pd.notna(lap.PitInTime):
+            pit_in_times.append(lap.PitInTime.total_seconds())
+        if pd.notna(lap.PitOutTime):
+            pit_out_times.append(lap.PitOutTime.total_seconds())
+
         if lap_tel.empty:
             continue
+    
 
         t_lap = lap_tel["SessionTime"].dt.total_seconds().to_numpy()
         x_lap = lap_tel["X"].to_numpy()
@@ -119,6 +140,18 @@ def _process_single_driver(args):
     throttle_all = np.concatenate(throttle_all)[order]
     brake_all = np.concatenate(brake_all)[order]
 
+    # Pair up pit-in / pit-out timestamps chronologically (i-th in with
+    # i-th out — a car must fully exit one pit stop before starting the
+    # next). If counts don't match (e.g. retires in the pits), the
+    # unmatched trailing entry is dropped via zip() — minor, acceptable.
+    pit_in_times.sort()
+    pit_out_times.sort()
+    pit_windows = list(zip(pit_in_times, pit_out_times))
+
+    in_pit_all = np.zeros_like(t_all, dtype=float)
+    for pit_in, pit_out in pit_windows:
+        in_pit_all[(t_all >= pit_in) & (t_all <= pit_out)] = 1.0
+
     print(f"Completed telemetry for driver: {driver_code}")
 
     return {
@@ -137,12 +170,12 @@ def _process_single_driver(args):
             "drs": drs_all,
             "throttle": throttle_all,
             "brake": brake_all,
+            "in_pit": in_pit_all,
         },
         "t_min": t_all.min(),
         "t_max": t_all.max(),
         "max_lap": driver_max_lap,
     }
-
 
 def load_session(year, round_number, session_type="R"):
     # session_type: 'R' (Race), 'S' (Sprint) etc.
@@ -171,10 +204,13 @@ def get_circuit_rotation(session):
     return circuit.rotation
 
 
+# def get_race_telemetry(session, session_type="R"):
+#     event_name = str(session).replace(" ", "_")
+#     cache_suffix = "sprint" if session_type == "S" else "race"
 def get_race_telemetry(session, session_type="R"):
     event_name = str(session).replace(" ", "_")
     cache_suffix = "sprint" if session_type == "S" else "race"
-
+    cache_suffix = f"{cache_suffix}_v{CACHE_SCHEMA_VERSION}"
     # Check if this data has already been computed
 
     try:
@@ -259,11 +295,13 @@ def get_race_telemetry(session, session_type="R"):
             data["drs"][order],
             data["throttle"][order],
             data["brake"][order],
+            data["in_pit"][order],
         ]
 
         resampled = [np.interp(timeline, t_sorted, arr) for arr in arrays_to_resample]
         x_resampled, y_resampled, dist_resampled, rel_dist_resampled, lap_resampled, \
-        tyre_resampled, tyre_life_resampled, speed_resampled, gear_resampled, drs_resampled, throttle_resampled, brake_resampled = resampled
+        tyre_resampled, tyre_life_resampled, speed_resampled, gear_resampled, drs_resampled, \
+        throttle_resampled, brake_resampled, in_pit_resampled = resampled
  
         resampled_data[code] = {
             "t": timeline,
@@ -279,8 +317,9 @@ def get_race_telemetry(session, session_type="R"):
             "drs": drs_resampled,
             "throttle": throttle_resampled,
             "brake": brake_resampled,
+            "in_pit": in_pit_resampled,
         }
-
+        
         for t_int in np.unique(tyre_resampled):
             mask = tyre_resampled == t_int
             c_max = np.nanmax(tyre_life_resampled[mask])
@@ -386,8 +425,9 @@ def get_race_telemetry(session, session_type="R"):
                 "drs": int(d['drs'][i]),
                 "throttle": float(d['throttle'][i]),
                 "brake": float(d['brake'][i]),
+                "in_pit": bool(d['in_pit'][i] >= 0.5),
             })
-
+            
         # If for some reason we have no drivers at this instant
         if not snapshot:
             continue
@@ -396,35 +436,100 @@ def get_race_telemetry(session, session_type="R"):
         # Leader = largest race distance covered
         snapshot.sort(key=lambda r: (r.get("lap", 0), r["dist"]), reverse=True)
 
+        # -------------------------------------------------
+        # Calculate gap to leader (meters)
+        # -------------------------------------------------
+
+        leader = snapshot[0]
+
+        for car in snapshot:
+
+            car["gap_m"] = round(
+                leader["dist"] - car["dist"],
+                1
+            )
+
         leader = snapshot[0]
         leader_lap = leader["lap"]
 
         # TODO: This 5c. step seems futile currently as we are not using gaps anywhere, and it doesn't even comput the gaps. I think I left this in when removing the "gaps" feature that was half-finished during the initial development.
 
         # 5c. Compute gap to car in front in SECONDS
-        frame_data = {}
+        # frame_data = {}
 
+        # for idx, car in enumerate(snapshot):
+        #     code = car["code"]
+        #     position = idx + 1
+
+        #     # include speed, gear, drs_active in frame driver dict
+        #     frame_data[code] = {
+        #         "x": car["x"],
+        #         "y": car["y"],
+        #         "dist": car["dist"],
+        #         "lap": car["lap"],
+        #         "rel_dist": round(car["rel_dist"], 4),
+        #         "tyre": car["tyre"],
+        #         "tyre_life": car["tyre_life"],
+        #         "position": position,
+        #         "speed": car["speed"],
+        #         "gear": car["gear"],
+        #         "drs": car["drs"],
+        #         "throttle": car["throttle"],
+        #         "brake": car["brake"],
+        #     }
+
+        frame_data = {}
         for idx, car in enumerate(snapshot):
             code = car["code"]
             position = idx + 1
 
-            # include speed, gear, drs_active in frame driver dict
+            #driver ahead
+
+            if idx == 0:
+                ahead = None
+            else:
+                front = snapshot[idx - 1]
+                ahead = {
+                    "driver": front["code"],
+                    "distance": round(front["dist"] - car["dist"], 1),
+                    "gap": round((front["dist"] - car["dist"]) / 75.0, 2)
+                }
+
+            #driver behind 
+            if idx == len(snapshot) - 1:
+                behind = None
+            else:
+                back = snapshot[idx + 1]
+
+                behind = {
+                    "driver": back["code"],
+                    "distance": round(car["dist"] - back["dist"], 1),
+                    "gap": round((car["dist"] - back["dist"]) / 75.0, 2)
+                }
+
             frame_data[code] = {
+
                 "x": car["x"],
                 "y": car["y"],
+
                 "dist": car["dist"],
                 "lap": car["lap"],
+
                 "rel_dist": round(car["rel_dist"], 4),
-                "tyre": car["tyre"],
-                "tyre_life": car["tyre_life"],
+
                 "position": position,
                 "speed": car["speed"],
                 "gear": car["gear"],
                 "drs": car["drs"],
                 "throttle": car["throttle"],
                 "brake": car["brake"],
+                "tyre": car["tyre"],
+                "tyre_life": int(car["tyre_life"]),
+                "ahead": ahead,
+                "behind": behind,
+                "in_pit": car["in_pit"],
             }
-
+            
         weather_snapshot = {}
         if weather_resampled:
             try:
