@@ -21,11 +21,22 @@
         <select id="sessionTypeSelect">
           <option value="R">Race</option>
           <option value="S">Sprint</option>
+          <option value="Q">Qualifying</option>
+          <option value="SQ">Sprint Qualifying</option>
         </select>
       </label>
       <button id="loadBtn">Load Replay</button>
     </div>
     <p id="pickerStatus" class="picker-status"></p>
+  </div>
+
+  <!-- Qualifying / Sprint Qualifying results (session times table, not a
+       car replay — Q/SQ has no synced multi-car timeline the way Race/
+       Sprint do, so this is a simpler results view). -->
+  <div id="qualiResults" class="quali-results hidden">
+    <button id="backToPickerBtn2" class="back-btn">← New Replay</button>
+    <div id="qualiBanner" class="session-banner"></div>
+    <div id="qualiTable" class="quali-table"></div>
   </div>
 
   <!-- Replay view (hidden until data is loaded) -->
@@ -108,21 +119,6 @@
         </canvas>
 
     </div>
-
-    <!-- <div class="bottom-bar">
-      <div class="controls">
-        <button id="rewindBtn" title="Jump back 10s">⏪</button>
-        <button id="playPauseBtn" title="Play/Pause (Space)">▶</button>
-        <button id="forwardBtn" title="Jump forward 10s">⏩</button>
-        <div class="speed-control">
-          <button id="speedDownBtn">−</button>
-          <span id="speedLabel">1x</span>
-          <button id="speedUpBtn">+</button>
-        </div>
-        <span id="timeLabel" class="time-label">0:00 / 0:00</span>
-      </div>
-      <canvas id="progressCanvas" class="progress-canvas"></canvas>
-    </div> -->
 
     <div id="legend" class="legend">
       <span><i class="dot yellow"></i>Yellow</span>

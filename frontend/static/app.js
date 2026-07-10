@@ -18,6 +18,7 @@ const state = {
   transform: null, // {scale, offsetX, offsetY, flipY}
   showDrsZones: true,    // toggled by 'D'
   showProgressBar: true, // toggled by 'B'
+  leaderboardGapMode: 'off',  // ← ADD THIS LINE. 'off' | 'leader' | 'interval'
 };
 
 // ---------------------------------------------------------------------
@@ -40,6 +41,36 @@ function initPicker() {
   loadSchedule();
 }
 
+// async function loadSchedule() {
+//   roundSelect.innerHTML = "<option>Loading…</option>";
+//   try {
+//     const res = await fetch(`/api/schedule/${yearSelect.value}`);
+//     if (!res.ok) throw new Error(`HTTP ${res.status}`);
+//     const weekends = await res.json();
+//     roundSelect.innerHTML = "";
+//     for (const w of weekends) {
+//       const opt = document.createElement("option");
+//       opt.value = w.round_number;
+//       opt.textContent = `${w.round_number}: ${w.event_name}`;
+//       roundSelect.appendChild(opt);
+//     }
+//   } catch (e) {
+//     roundSelect.innerHTML = "<option>Failed to load</option>";
+//     pickerStatus.textContent = `Couldn't load schedule: ${e.message}`;
+//   }
+// }
+
+// Keyed by round_number, holds each weekend's raw FastF1 EventFormat
+// string (e.g. "conventional", "sprint_qualifying", "sprint_shootout",
+// "sprint") — used to filter which sessions are selectable per round.
+let currentSchedule = {};
+
+// FastF1 has used different EventFormat names for the sprint session
+// across seasons (see f1_data.py's list_sprints, which handles the same
+// variation). Any of these means the weekend has a sprint race + some
+// form of sprint qualifying/shootout.
+const SPRINT_FORMATS = new Set(["sprint", "sprint_qualifying", "sprint_shootout"]);
+
 async function loadSchedule() {
   roundSelect.innerHTML = "<option>Loading…</option>";
   try {
@@ -47,36 +78,148 @@ async function loadSchedule() {
     if (!res.ok) throw new Error(`HTTP ${res.status}`);
     const weekends = await res.json();
     roundSelect.innerHTML = "";
+    currentSchedule = {};
     for (const w of weekends) {
+      currentSchedule[w.round_number] = w.type;
       const opt = document.createElement("option");
       opt.value = w.round_number;
       opt.textContent = `${w.round_number}: ${w.event_name}`;
       roundSelect.appendChild(opt);
     }
+    updateSessionOptions();
   } catch (e) {
     roundSelect.innerHTML = "<option>Failed to load</option>";
     pickerStatus.textContent = `Couldn't load schedule: ${e.message}`;
   }
 }
 
+// Show/hide Sprint + Sprint Qualifying depending on whether the selected
+// round actually has a sprint format — prevents picking a combination
+// FastF1 will reject (e.g. "Session type 'SQ' does not exist for this
+// event" for a normal race weekend).
+function updateSessionOptions() {
+  const format = currentSchedule[roundSelect.value];
+  const isSprintWeekend = SPRINT_FORMATS.has(format);
+
+  const sprintOption = sessionTypeSelect.querySelector('option[value="S"]');
+  const sprintQualiOption = sessionTypeSelect.querySelector('option[value="SQ"]');
+
+  sprintOption.disabled = !isSprintWeekend;
+  sprintQualiOption.disabled = !isSprintWeekend;
+  sprintOption.textContent = isSprintWeekend ? "Sprint" : "Sprint (not available this weekend)";
+  sprintQualiOption.textContent = isSprintWeekend ? "Sprint Qualifying" : "Sprint Qualifying (not available this weekend)";
+
+  // If the currently-selected session is now invalid for this round,
+  // fall back to Race rather than leaving an invalid option selected.
+  if (sessionTypeSelect.value === "S" && !isSprintWeekend) sessionTypeSelect.value = "R";
+  if (sessionTypeSelect.value === "SQ" && !isSprintWeekend) sessionTypeSelect.value = "R";
+}
+
+roundSelect.addEventListener("change", updateSessionOptions);
+
+// document.getElementById("loadBtn").addEventListener("click", async () => {
+//   const year = yearSelect.value;
+//   const round = roundSelect.value;
+//   const sessionType = sessionTypeSelect.value;
+//   pickerStatus.textContent = "Loading replay data — this can take a while the first time (building telemetry cache)…";
+
+//   try {
+//     const res = await fetch(`/api/replay?year=${year}&round=${round}&session_type=${sessionType}&fps=8`);
+//     if (!res.ok) {
+//       const detail = await res.json().catch(() => ({}));
+//       throw new Error(detail.detail || `HTTP ${res.status}`);
+//     }
+//     state.raceData = await res.json();
+//     startReplay();
+//   } catch (e) {
+//     pickerStatus.textContent = `Error: ${e.message}`;
+//   }
+// });
+
 document.getElementById("loadBtn").addEventListener("click", async () => {
   const year = yearSelect.value;
   const round = roundSelect.value;
   const sessionType = sessionTypeSelect.value;
-  pickerStatus.textContent = "Loading replay data — this can take a while the first time (building telemetry cache)…";
+
+  if (!round || isNaN(Number(round))) {
+    pickerStatus.textContent = "Please wait for the round list to finish loading, then pick one.";
+    return;
+  }
+
+  const isQuali = sessionType === "Q" || sessionType === "SQ";
+  pickerStatus.textContent = isQuali
+    ? "Loading qualifying results…"
+    : "Loading replay data — this can take a while the first time (building telemetry cache)…";
 
   try {
-    const res = await fetch(`/api/replay?year=${year}&round=${round}&session_type=${sessionType}&fps=8`);
-    if (!res.ok) {
-      const detail = await res.json().catch(() => ({}));
-      throw new Error(detail.detail || `HTTP ${res.status}`);
+    if (isQuali) {
+      const res = await fetch(`/api/quali?year=${year}&round=${round}&session_type=${sessionType}`);
+      if (!res.ok) {
+        const detail = await res.json().catch(() => ({}));
+        throw new Error(detail.detail || `HTTP ${res.status}`);
+      }
+      const data = await res.json();
+      showQualiResults(data);
+    } else {
+      const res = await fetch(`/api/replay?year=${year}&round=${round}&session_type=${sessionType}&fps=8`);
+      if (!res.ok) {
+        const detail = await res.json().catch(() => ({}));
+        throw new Error(detail.detail || `HTTP ${res.status}`);
+      }
+      state.raceData = await res.json();
+      startReplay();
     }
-    state.raceData = await res.json();
-    startReplay();
   } catch (e) {
     pickerStatus.textContent = `Error: ${e.message}`;
   }
 });
+
+function showQualiResults(data) {
+  document.getElementById("picker").classList.add("hidden");
+  document.getElementById("qualiResults").classList.remove("hidden");
+
+  const m = data.meta;
+  document.getElementById("qualiBanner").innerHTML =
+    `<b>${m.event_name} — ${m.session_type === "SQ" ? "Sprint Qualifying" : "Qualifying"}</b><br>` +
+    `${m.circuit_name}, ${m.country} · ${m.date}`;
+
+  const fmt = (s) => {
+    if (s == null) return "-";
+    const sec = parseFloat(s);
+    const mins = Math.floor(sec / 60);
+    const rem = (sec % 60).toFixed(3);
+    return mins > 0 ? `${mins}:${rem.padStart(6, "0")}` : `${rem}s`;
+  };
+
+  let html = `
+    <table class="quali-results-table">
+      <thead>
+        <tr><th>Pos</th><th>Driver</th><th>Q1</th><th>Q2</th><th>Q3</th></tr>
+      </thead>
+      <tbody>`;
+
+  for (const row of data.results) {
+    const [r, g, b] = row.color || [136, 136, 136];
+    html += `
+      <tr>
+        <td>${row.position}</td>
+        <td style="color:rgb(${r},${g},${b}); font-weight:700">${row.code}</td>
+        <td>${fmt(row.Q1)}</td>
+        <td>${fmt(row.Q2)}</td>
+        <td>${fmt(row.Q3)}</td>
+      </tr>`;
+  }
+
+  html += `</tbody></table>`;
+  document.getElementById("qualiTable").innerHTML = html;
+}
+
+document.getElementById("backToPickerBtn2").addEventListener("click", () => {
+  document.getElementById("qualiResults").classList.add("hidden");
+  document.getElementById("picker").classList.remove("hidden");
+  pickerStatus.textContent = "";
+});
+
 
 document.getElementById("backToPickerBtn").addEventListener("click", () => {
   state.playing = false;
@@ -324,9 +467,10 @@ function getInterpolatedDrivers(t) {
       throttle: lerp(a.throttle, b.throttle, frac),
       brake: lerp(a.brake, b.brake, frac),
       dist: lerp(a.dist, b.dist, frac),
-      // discrete fields: no interpolation, just use the earlier frame
+      // discrete/object fields: no interpolation, just use the earlier frame
       gear: a.gear, drs: a.drs, tyre: a.tyre, tyre_life: a.tyre_life,
       position: a.position, lap: a.lap, rel_dist: a.rel_dist,
+      in_pit: a.in_pit, ahead: a.ahead, behind: a.behind,
     };
   }
   return { drivers: result, lap: fA.lap, weather: fA.weather };
@@ -334,36 +478,7 @@ function getInterpolatedDrivers(t) {
 
 function lerp(a, b, frac) { return a + (b - a) * frac; }
 
-// // ---------------------------------------------------------------------
-// // Main animation loop
-// // ---------------------------------------------------------------------
-// function tick(nowMs) {
-//   if (!state.raceData) return;
 
-//   if (state.lastTickMs === null) state.lastTickMs = nowMs;
-//   const deltaS = (nowMs - state.lastTickMs) / 1000;
-//   state.lastTickMs = nowMs;
-
-//   const totalT = state.raceData.frames[state.raceData.frames.length - 1].t;
-//   if (state.playing) {
-//     state.playheadT = Math.min(totalT, state.playheadT + deltaS * PLAYBACK_SPEEDS[state.speedIndex]);
-//     if (state.playheadT >= totalT) state.playing = false;
-//   }
-
-//   const frame = getInterpolatedDrivers(state.playheadT);
-
-//   ctx.clearRect(0, 0, canvas.width, canvas.height);
-//   drawTrack();
-//   drawCars(frame);
-
-//   updateLeaderboard(frame);
-//   updateWeather(frame);
-//   updateDriverInfo(frame);
-//   updateTimeLabel(totalT);
-//   drawProgressBar(totalT);
-
-//   requestAnimationFrame(tick);
-// }
 
 // ---------------------------------------------------------------------
 // Main animation loop
@@ -473,65 +588,88 @@ function drawCars(frame) {
   }
 }
 
+// Same distance→time approximation used everywhere else in this app
+// (neighborGapLabel, driver info panel) — not a precise physical gap.
+function computeGapSeconds(distA, distB) {
+  if (distA == null || distB == null) return null;
+  const distM = Math.abs(distA - distB) / 10.0;
+  return distM / 55.56;
+}
+
+function buildStatusBadges(d) {
+  const badges = [];
+  if (d.rel_dist === 1) badges.push('<span class="lb-badge out">OUT</span>');
+  if (d.in_pit) badges.push('<span class="lb-badge pit">PIT</span>');
+  if (d.drs >= 10) badges.push('<span class="lb-badge drs">DRS</span>');
+  return badges.join("");
+}
+
 // ---------------------------------------------------------------------
 // Leaderboard panel
 // ---------------------------------------------------------------------
+
 function updateLeaderboard(frame) {
   const rows = Object.entries(frame.drivers)
     .filter(([, d]) => d.position != null)
     .sort((a, b) => a[1].position - b[1].position);
 
   const colors = state.raceData.driver_colors;
-  let html = `<div class="lb-title">Leaderboard</div>`;
-  for (const [code, d] of rows) {
-    const out = d.rel_dist === 1 ? "  OUT" : "";
-    const drsOn = d.drs >= 10;
+  const mode = state.leaderboardGapMode;
+
+  let html = `
+    <div class="lb-header">
+      <span class="lb-title">Leaderboard</span>
+      <span class="lb-toggles">
+        <button class="lb-toggle-btn ${mode === "interval" ? "active" : ""}" data-mode="interval" title="Interval — gap to car ahead">I</button>
+        <button class="lb-toggle-btn ${mode === "leader" ? "active" : ""}" data-mode="leader" title="Gap to leader">L</button>
+      </span>
+    </div>`;
+
+  for (let i = 0; i < rows.length; i++) {
+    const [code, d] = rows[i];
     const selected = state.selectedDrivers.includes(code) ? "selected" : "";
+
+    let gapText = "";
+    if (mode === "leader") {
+      gapText = i === 0 ? "-" : `+${computeGapSeconds(rows[0][1].dist, d.dist)?.toFixed(1) ?? "?"}s`;
+    } else if (mode === "interval") {
+      gapText = i === 0 ? "-" : `+${computeGapSeconds(rows[i - 1][1].dist, d.dist)?.toFixed(1) ?? "?"}s`;
+    }
+
     html += `
       <div class="lb-row ${selected}" data-code="${code}">
         <span class="lb-pos">${d.position}.</span>
-        <span class="lb-code" style="color:${selected ? "#000" : colors[code] || "#fff"}">${code}${out}</span>
-        <span class="lb-tyre" style="background:${colors[code] || "#888"}">${d.tyre ?? "?"}</span>
-        <span class="lb-drs ${drsOn ? "on" : ""}"></span>
+        <span class="lb-code" style="color:${selected ? "#000" : colors[code] || "#fff"}">${code}</span>
+        ${mode !== "off" ? `<span class="lb-gap">${gapText}</span>` : ""}
+        <span class="lb-status">${buildStatusBadges(d)}</span>
       </div>`;
   }
+
   const panel = document.getElementById("leaderboardPanel");
   panel.innerHTML = html;
+
   panel.querySelectorAll(".lb-row").forEach(row => {
     row.addEventListener("click", (e) => {
       const code = row.dataset.code;
       if (e.shiftKey) {
-        // Shift+click: toggle this driver in/out of the selection
         const idx = state.selectedDrivers.indexOf(code);
         if (idx >= 0) state.selectedDrivers.splice(idx, 1);
         else state.selectedDrivers.push(code);
       } else {
-        // Plain click: select just this one (or deselect if it's the only one already selected)
         const onlyThisSelected = state.selectedDrivers.length === 1 && state.selectedDrivers[0] === code;
         state.selectedDrivers = onlyThisSelected ? [] : [code];
       }
     });
   });
+
+  panel.querySelectorAll(".lb-toggle-btn").forEach(btn => {
+    btn.addEventListener("click", (e) => {
+      e.stopPropagation();
+      const clickedMode = btn.dataset.mode;
+      state.leaderboardGapMode = state.leaderboardGapMode === clickedMode ? "off" : clickedMode;
+    });
+  });
 }
-
-// // ---------------------------------------------------------------------
-// // Weather panel
-// // ---------------------------------------------------------------------
-// function updateWeather(frame) {
-//   const panel = document.getElementById("weatherPanel");
-//   if (!frame.weather) { panel.innerHTML = ""; return; }
-//   const w = frame.weather;
-//   const fmt = (v, suffix = "", p = 1) => (v == null ? "N/A" : `${v.toFixed(p)}${suffix}`);
-//   panel.innerHTML = `
-//     <div class="wp-title">Weather</div>
-//     <div class="wp-row">Track: ${fmt(w.track_temp, "°C")}</div>
-//     <div class="wp-row">Air: ${fmt(w.air_temp, "°C")}</div>
-//     <div class="wp-row">Humidity: ${fmt(w.humidity, "%", 0)}</div>
-//     <div class="wp-row">Wind: ${fmt(w.wind_speed, " km/h")}</div>
-//     <div class="wp-row">Rain: ${w.rain_state || "N/A"}</div>
-//   `;
-// }
-
 // ---------------------------------------------------------------------
 // Weather panel
 // ---------------------------------------------------------------------
@@ -600,144 +738,185 @@ function neighborGapLabel(sortedRows, idx, direction) {
 }
 
 function updateDriverInfo(frame) {
-  const wrapper = document.getElementById("driverInfoWrapper");
 
-  if (state.selectedDrivers.length === 0) {
+    const wrapper = document.getElementById("driverInfoWrapper");
+
+    if (state.selectedDrivers.length === 0) {
+        wrapper.innerHTML = "";
+        return;
+    }
+
     wrapper.innerHTML = "";
-    return;
-  }
 
-  const sortedRows = Object.entries(frame.drivers)
-    .filter(([, d]) => d.position != null)
-    .sort((a, b) => a[1].position - b[1].position);
+    const tyreNames = {
+        0: "🟣 C5",
+        1: "🔴 SOFT",
+        2: "🟡 MED",
+        3: "⚪ HARD",
+        4: "🟢 INT",
+        5: "🔵 WET"
+    };
 
-  let html = "";
-  for (const code of state.selectedDrivers) {
-    const d = frame.drivers[code];
-    if (!d) continue;
+    const sortedRows = Object.entries(frame.drivers)
+        .filter(([, d]) => d.position != null)
+        .sort((a, b) => a[1].position - b[1].position);
 
-    const idx = sortedRows.findIndex(([c]) => c === code);
-    const aheadLabel = neighborGapLabel(sortedRows, idx, -1) || "Ahead: N/A";
-    const behindLabel = neighborGapLabel(sortedRows, idx, 1) || "Behind: N/A";
+    for (const code of state.selectedDrivers) {
 
-    const color = state.raceData.driver_colors[code] || "#888";
-    const drsLabel = d.drs >= 10 ? ["DRS: ON", "#2ecc40"]
-                    : d.drs === 8 ? ["DRS: AVAIL", "#f1c40f"]
-                    : ["DRS: OFF", "#888"];
+        const d = frame.drivers[code];
 
-    const maxTyreLife = state.raceData.max_tyre_life[String(d.tyre)] || 30;
-    const tyreHealth = Math.max(0, Math.min(1, 1 - d.tyre_life / maxTyreLife));
-    const tyreColor = tyreHealth > 0.5 ? "#2ecc40" : tyreHealth > 0.25 ? "#f1c40f" : "#e74c3c";
+        if (!d) continue;
 
-    const thr = Math.max(0, Math.min(1, d.throttle / 100));
-    const brk = Math.max(0, Math.min(1, d.brake > 1 ? d.brake / 100 : d.brake));
+        const color =
+            state.raceData.driver_colors[code] || "#888";
 
-    html += `
-      <div class="driver-info-box" style="border-color:${color}">
-        <div class="dip-header" style="background:${color}; color:#000">
-          <span>Driver: ${code}</span>
-          <span class="dip-close" data-code="${code}">✕</span>
+        const tyre =
+            tyreNames[d.tyre] || d.tyre;
+
+        const throttle =
+            Math.round(d.throttle);
+
+        const brake =
+            Math.round(d.brake > 1 ? d.brake : d.brake * 100);
+
+        // Placeholder until backend sends ERS
+        const ers =
+            d.ers ?? 75;
+
+        const drs =
+            d.drs >= 10
+                ? '<span style="color:#2ecc40">DRS ●</span>'
+                : '<span style="color:#888">DRS ○</span>';
+
+        // const idx = sortedRows.findIndex(([c]) => c === code);
+        // const ahead = neighborGapLabel(sortedRows, idx, -1) || "Ahead: N/A";
+        // const behind = neighborGapLabel(sortedRows, idx, 1) || "Behind: N/A";
+        const ahead = d.ahead
+          ? `Ahead (${d.ahead.driver}): +${d.ahead.gap.toFixed(2)}s (${d.ahead.distance.toFixed(1)}m)`
+          : "Ahead: N/A";
+        const behind = d.behind
+          ? `Behind (${d.behind.driver}): -${d.behind.gap.toFixed(2)}s (${d.behind.distance.toFixed(1)}m)`
+          : "Behind: N/A";
+
+        // Tyre life as a bar, same row style as THR/BRK/ERS —
+        // % remaining, color-coded green/yellow/red.
+        const maxTyreLife = state.raceData.max_tyre_life[String(d.tyre)] || 30;
+        const tyreHealth = Math.max(0, Math.min(1, 1 - d.tyre_life / maxTyreLife));
+        const tyrePct = Math.round(tyreHealth * 100);
+        const tyreColor = tyreHealth > 0.5 ? "#2ecc40" : tyreHealth > 0.25 ? "#f1c40f" : "#e74c3c";
+
+        wrapper.innerHTML += `
+
+<div class="driver-panel">
+
+    <div class="driver-header">
+
+        <div class="team-strip"
+             style="background:${color}">
         </div>
-        <div class="dip-body">
-          <div class="dip-row">Speed: ${d.speed.toFixed(0)} km/h</div>
-          <div class="dip-row">Gear: ${d.gear}</div>
-          <div class="dip-row" style="color:${drsLabel[1]}; font-weight:bold">${drsLabel[0]}</div>
-          <div class="dip-row dim">${aheadLabel}</div>
-          <div class="dip-row dim">${behindLabel}</div>
-          <div class="dip-tyre-health">
-            <div class="dip-row">Tyre ${d.tyre} · Life ${Math.round(d.tyre_life)} laps</div>
-            <div class="dip-tyre-bar-track"><div class="dip-tyre-bar-fill" style="width:${tyreHealth * 100}%; background:${tyreColor}"></div></div>
-          </div>
-          <div class="dip-bars">
-            <div class="dip-bar-col">
-              <div class="dip-bar-track"><div class="dip-bar-fill" style="height:${thr * 100}%"></div></div>
-              <div class="dip-bar-label">THR</div>
-            </div>
-            <div class="dip-bar-col">
-              <div class="dip-bar-track"><div class="dip-bar-fill brake" style="height:${brk * 100}%"></div></div>
-              <div class="dip-bar-label">BRK</div>
-            </div>
-          </div>
-        </div>
-      </div>`;
-  }
 
-  wrapper.innerHTML = html;
-  wrapper.querySelectorAll(".dip-close").forEach(btn => {
-    btn.addEventListener("click", () => {
-      const code = btn.dataset.code;
-      state.selectedDrivers = state.selectedDrivers.filter(c => c !== code);
-    });
-  });
+        <div class="driver-code">
+            ${code}
+        </div>
+
+        <div class="driver-position">
+            P${d.position}
+        </div>
+
+    </div>
+
+    <div class="driver-speed">
+        ${Math.round(d.speed)} km/h
+    </div>
+
+    <div class="driver-status">
+
+        <span>${tyre}</span>
+
+        <span>Gear ${d.gear}</span>
+
+        <span>${drs}</span>
+
+    </div>
+
+    <div class="telemetry-row">
+
+        <span>THR</span>
+
+        <div class="telemetry-track">
+
+            <div class="telemetry-fill throttle"
+                 style="width:${throttle}%">
+            </div>
+
+        </div>
+
+        <span>${throttle}%</span>
+
+    </div>
+
+    <div class="telemetry-row">
+
+        <span>BRK</span>
+
+        <div class="telemetry-track">
+
+            <div class="telemetry-fill brake"
+                 style="width:${brake}%">
+            </div>
+
+        </div>
+
+        <span>${brake}%</span>
+
+    </div>
+
+    <div class="telemetry-row">
+
+        <span>ERS</span>
+
+        <div class="telemetry-track">
+
+            <div class="telemetry-fill ers"
+                 style="width:${ers}%">
+            </div>
+
+        </div>
+
+        <span>${ers}%</span>
+
+    </div>
+
+    <div class="telemetry-row">
+
+        <span>TYRE</span>
+
+        <div class="telemetry-track">
+
+            <div class="telemetry-fill"
+                 style="width:${tyrePct}%; background:${tyreColor}">
+            </div>
+
+        </div>
+
+        <span>${Math.round(d.tyre_life)} laps</span>
+
+    </div>
+
+    <div class="gap-row ahead">
+        ${ahead}
+    </div>
+
+    <div class="gap-row behind">
+        ${behind}
+    </div>
+
+</div>
+
+`;
+    }
 }
 
-// // ---------------------------------------------------------------------
-// // Progress bar (timeline with lap ticks + flag/DNF markers)
-// // ---------------------------------------------------------------------
-// function drawProgressBar(totalT) {
-//   const w = progressCanvas.width, h = progressCanvas.height;
-//   progressCtx.clearRect(0, 0, w, h);
-
-//   progressCtx.fillStyle = "#1a1a1a";
-//   progressCtx.fillRect(0, h * 0.3, w, h * 0.4);
-
-//   const progressW = (state.playheadT / totalT) * w;
-//   progressCtx.fillStyle = "#2ecc40";
-//   progressCtx.fillRect(0, h * 0.3, progressW, h * 0.4);
-
-//   // Lap ticks (approximate — even spacing across race duration)
-//   const totalLaps = state.raceData.meta.total_laps;
-//   progressCtx.strokeStyle = "#555";
-//   for (let lap = 1; lap <= totalLaps; lap++) {
-//     const x = (lap / totalLaps) * w;
-//     progressCtx.beginPath();
-//     progressCtx.moveTo(x, h * 0.25);
-//     progressCtx.lineTo(x, h * 0.75);
-//     progressCtx.stroke();
-//   }
-
-//   // Event markers
-//   const eventColors = {
-//     yellow_flag: "#ffdc00", red_flag: "#dc1e1e", safety_car: "#ff8c00", vsc: "#ffa500",
-//   };
-//   for (const ev of state.raceData.events) {
-//     const x1 = (ev.t / totalT) * w;
-//     if (ev.type === "dnf") {
-//       progressCtx.strokeStyle = "#dc1e1e";
-//       progressCtx.lineWidth = 2;
-//       progressCtx.beginPath();
-//       progressCtx.moveTo(x1 - 3, 2); progressCtx.lineTo(x1 + 3, 8);
-//       progressCtx.moveTo(x1 + 3, 2); progressCtx.lineTo(x1 - 3, 8);
-//       progressCtx.stroke();
-//     } else {
-//       const x2 = ((ev.end_t ?? ev.t + 5) / totalT) * w;
-//       progressCtx.fillStyle = eventColors[ev.type] || "#888";
-//       progressCtx.fillRect(x1, 0, Math.max(2, x2 - x1), 6);
-//     }
-//   }
-
-//   // Playhead
-//   const playX = (state.playheadT / totalT) * w;
-//   progressCtx.strokeStyle = "#fff";
-//   progressCtx.lineWidth = 2;
-//   progressCtx.beginPath();
-//   progressCtx.moveTo(playX, 0);
-//   progressCtx.lineTo(playX, h);
-//   progressCtx.stroke();
-// }
-
-// progressCanvas.addEventListener("click", (e) => {
-//   if (!state.raceData) return;
-//   const rect = progressCanvas.getBoundingClientRect();
-//   const frac = (e.clientX - rect.left) / rect.width;
-//   const totalT = state.raceData.frames[state.raceData.frames.length - 1].t;
-//   state.playheadT = Math.max(0, Math.min(totalT, frac * totalT));
-// });
-
-// function updateTimeLabel(totalT) {
-//   const fmt = (s) => `${Math.floor(s / 60)}:${String(Math.floor(s % 60)).padStart(2, "0")}`;
-//   document.getElementById("timeLabel").textContent = `${fmt(state.playheadT)} / ${fmt(totalT)}`;
-// }
 
 // ---------------------------------------------------------------------
 // Progress Bar (Centered Timeline)
@@ -917,68 +1096,6 @@ function updateTimeLabel(totalT) {
         `${fmt(state.playheadT)} / ${fmt(totalT)}`;
 }
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-// // ---------------------------------------------------------------------
-// // Controls
-// // ---------------------------------------------------------------------
-// const playPauseBtn = document.getElementById("playPauseBtn");
-// function togglePlay() {
-//   state.playing = !state.playing;
-//   playPauseBtn.textContent = state.playing ? "⏸" : "▶";
-// }
-// playPauseBtn.addEventListener("click", togglePlay);
-
-// document.getElementById("rewindBtn").addEventListener("click", () => {
-//   state.playheadT = Math.max(0, state.playheadT - 10);
-// });
-// document.getElementById("forwardBtn").addEventListener("click", () => {
-//   const totalT = state.raceData.frames[state.raceData.frames.length - 1].t;
-//   state.playheadT = Math.min(totalT, state.playheadT + 10);
-// });
-
-// function setSpeedIndex(i) {
-//   state.speedIndex = Math.max(0, Math.min(PLAYBACK_SPEEDS.length - 1, i));
-//   document.getElementById("speedLabel").textContent = `${PLAYBACK_SPEEDS[state.speedIndex]}x`;
-// }
-// document.getElementById("speedUpBtn").addEventListener("click", () => setSpeedIndex(state.speedIndex + 1));
-// document.getElementById("speedDownBtn").addEventListener("click", () => setSpeedIndex(state.speedIndex - 1));
-
-// window.addEventListener("keydown", (e) => {
-//   if (!state.raceData) return;
-//   const totalT = state.raceData.frames[state.raceData.frames.length - 1].t;
-//   switch (e.code) {
-//     case "Space": e.preventDefault(); togglePlay(); break;
-//     case "ArrowLeft": state.playheadT = Math.max(0, state.playheadT - 5); break;
-//     case "ArrowRight": state.playheadT = Math.min(totalT, state.playheadT + 5); break;
-//     case "ArrowUp": setSpeedIndex(state.speedIndex + 1); break;
-//     case "ArrowDown": setSpeedIndex(state.speedIndex - 1); break;
-//     case "Digit1": setSpeedIndex(PLAYBACK_SPEEDS.indexOf(0.5)); break;
-//     case "Digit2": setSpeedIndex(PLAYBACK_SPEEDS.indexOf(1.0)); break;
-//     case "Digit3": setSpeedIndex(PLAYBACK_SPEEDS.indexOf(2.0)); break;
-//     case "Digit4": setSpeedIndex(PLAYBACK_SPEEDS.indexOf(4.0)); break;
-//     case "KeyR": state.playheadT = 0; break;
-//     case "KeyD": state.showDrsZones = !state.showDrsZones; break;
-//     case "KeyB":
-//       state.showProgressBar = !state.showProgressBar;
-//       document.querySelector(".bottom-bar").classList.toggle("hidden", !state.showProgressBar);
-//       break;
-//     case "KeyH":
-//       document.getElementById("controlsLegend").classList.toggle("hidden");
-//       break;
-//   }
-// });
 
 // ---------------------------------------------------------------------
 // Controls
