@@ -6,3 +6,6 @@ backend/computed_data
 
 backend/src/lib/__pycache__
 backend/src/__pycache__
+
+.DS_Store
+F1-Race-Replay/.DS_Store
