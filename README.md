@@ -23,7 +23,7 @@ The backend processes telemetry using **FastF1** while the frontend provides smo
 ## ✨ Features
 
 ### 🏁 Race Replay
-- Animated driver movement
+
 - Smooth replay controls
 - Variable playback speed
 - Seek timeline
