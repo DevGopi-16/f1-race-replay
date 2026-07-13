@@ -34,7 +34,7 @@ DT = 1 / FPS
 # removed, or renamed) — old cache files under a previous version number
 # are simply ignored (treated as "not found") instead of being loaded and
 # causing a KeyError downstream when new code expects a field they don't have.
-CACHE_SCHEMA_VERSION = 3
+CACHE_SCHEMA_VERSION = 5
 
 
 def _process_single_driver(args):
@@ -246,6 +246,8 @@ def get_race_telemetry(session, session_type="R"):
         results = pool.map(_process_single_driver, driver_args)
 
     # Process results
+    # Process results
+    latest_first_sample = None  # the LAST driver's first telemetry timestamp
     for result in results:
         if result is None:
             continue
@@ -259,14 +261,40 @@ def get_race_telemetry(session, session_type="R"):
 
         global_t_min = t_min if global_t_min is None else min(global_t_min, t_min)
         global_t_max = t_max if global_t_max is None else max(global_t_max, t_max)
+        latest_first_sample = t_min if latest_first_sample is None else max(latest_first_sample, t_min)
 
     # Ensure we have valid time bounds
     if global_t_min is None or global_t_max is None:
         raise ValueError("No valid telemetry data found for any driver")
 
+    # How far into the timeline (seconds) we need to skip before EVERY
+    # driver has real, non-extrapolated telemetry. Before this point,
+    # np.interp holds the nearest known sample flat for any driver whose
+    # data hasn't started yet — this is why cars can look slightly off the
+    # drawn racing line right at the start (grid/formation-lap period),
+    # with severity varying by circuit.
+    #
+    # Capped at MAX_START_TRIM_SECONDS as a safety net: a single driver
+    # with a delayed/glitched telemetry start (a known, real possibility —
+    # FastF1 has had data-quality gaps in some seasons) shouldn't be able
+    # to silently trim away several real laps for every other driver too.
+    # If the natural offset exceeds the cap, we trim only up to the cap
+    # and accept the original cosmetic mismatch beyond that, rather than
+    # cutting an unknown, possibly large chunk of real race replay.
+    MAX_START_TRIM_SECONDS = 10.0
+    raw_offset = max(0.0, latest_first_sample - global_t_min)
+    playback_start_offset = min(raw_offset, MAX_START_TRIM_SECONDS)
+    if raw_offset > MAX_START_TRIM_SECONDS:
+        print(
+            f"Warning: one or more drivers' telemetry starts {raw_offset:.1f}s "
+            f"into the session — capping trim to {MAX_START_TRIM_SECONDS}s to "
+            f"avoid cutting real race time. Formation-lap offset may still be "
+            f"visible for the affected driver(s)."
+        )
+    
+
     # 2. Create a timeline (start from zero)
     timeline = np.arange(global_t_min, global_t_max, DT) - global_t_min
-
     # 3. Resample each driver's telemetry (x, y, gap) onto the common timeline
     resampled_data = {}
     max_tyre_life_map = {}
@@ -452,29 +480,6 @@ def get_race_telemetry(session, session_type="R"):
         # TODO: This 5c. step seems futile currently as we are not using gaps anywhere, and it doesn't even comput the gaps. I think I left this in when removing the "gaps" feature that was half-finished during the initial development.
 
         # 5c. Compute gap to car in front in SECONDS
-        # frame_data = {}
-
-        # for idx, car in enumerate(snapshot):
-        #     code = car["code"]
-        #     position = idx + 1
-
-        #     # include speed, gear, drs_active in frame driver dict
-        #     frame_data[code] = {
-        #         "x": car["x"],
-        #         "y": car["y"],
-        #         "dist": car["dist"],
-        #         "lap": car["lap"],
-        #         "rel_dist": round(car["rel_dist"], 4),
-        #         "tyre": car["tyre"],
-        #         "tyre_life": car["tyre_life"],
-        #         "position": position,
-        #         "speed": car["speed"],
-        #         "gear": car["gear"],
-        #         "drs": car["drs"],
-        #         "throttle": car["throttle"],
-        #         "brake": car["brake"],
-        #     }
-
         frame_data = {}
         for idx, car in enumerate(snapshot):
             code = car["code"]
@@ -562,6 +567,29 @@ def get_race_telemetry(session, session_type="R"):
             frame_payload["weather"] = weather_snapshot
 
         frames.append(frame_payload)
+
+    # Trim the formation-lap/grid period identified above, then re-zero
+    # time so playback still starts at 0. Shift track-status events by the
+    # same amount so flags/SC/VSC markers stay aligned with the trimmed
+    # timeline.
+    if playback_start_offset > 0 and frames:
+        trim_idx = 0
+        for idx, f in enumerate(frames):
+            if f["t"] >= playback_start_offset:
+                trim_idx = idx
+                break
+
+        if trim_idx > 0:
+            frames = frames[trim_idx:]
+            shift = frames[0]["t"]
+            for f in frames:
+                f["t"] = round(f["t"] - shift, 3)
+
+            for status in formatted_track_statuses:
+                status["start_time"] = max(0.0, status["start_time"] - shift)
+                if status.get("end_time") is not None:
+                    status["end_time"] = max(0.0, status["end_time"] - shift)
+
     print("completed telemetry extraction...")
     print("Saving to cache file...")
     # If computed_data/ directory doesn't exist, create it

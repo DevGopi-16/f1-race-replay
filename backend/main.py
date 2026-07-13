@@ -29,7 +29,8 @@ from src.f1_data import (
     get_race_weekends_by_year,
     get_quali_telemetry,
 )
-from src.track_geometry import build_track_geometry, extract_race_events
+
+from src.track_geometry import build_track_geometry, extract_race_events, point_at_distance
 from src.serialize import serialize_frames, serialize_driver_colors
 
 app = FastAPI(title="F1 Race Replay API")
@@ -183,7 +184,9 @@ def replay(
             and hasattr(circuit_info, "corners")
             and circuit_info.corners is not None
         ):
+            
             for _, corner in circuit_info.corners.iterrows():
+                corner_pos = point_at_distance(example_lap, float(corner["Distance"]))
                 track["corners"].append(
                     {
                         "number": int(corner["Number"]),
@@ -192,6 +195,8 @@ def replay(
                         else str(corner["Letter"]),
                         "angle": float(corner["Angle"]),
                         "distance": float(corner["Distance"]),
+                        "x": corner_pos["x"],
+                        "y": corner_pos["y"],
                     }
                 )
 

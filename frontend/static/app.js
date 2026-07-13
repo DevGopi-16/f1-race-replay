@@ -8,6 +8,32 @@
 
 const PLAYBACK_SPEEDS = [0.1, 0.2, 0.5, 1.0, 2.0, 4.0, 8.0, 16.0, 32.0, 64.0, 128.0, 256.0];
 
+// Turns raw backend/network error text into a plain-English message for
+// the picker screen. The original error is still shown, smaller, below —
+// useful for you to debug, without confusing anyone else using this.
+function friendlyErrorMessage(rawMessage) {
+  const msg = rawMessage || "";
+
+  let friendly;
+  if (/does not exist for this event/i.test(msg)) {
+    friendly = "This session isn't available for the selected round — try a different session type or round.";
+  } else if (/Failed to load session/i.test(msg)) {
+    friendly = "Couldn't load this session. It may not have happened yet, or FastF1 doesn't have data for it.";
+  } else if (/Failed to build telemetry|Failed to build qualifying data/i.test(msg)) {
+    friendly = "Something went wrong processing this session's data. Try again, or pick a different round.";
+  } else if (/HTTP 404/i.test(msg)) {
+    friendly = "That wasn't found. Double check the year and round.";
+  } else if (/HTTP 502/i.test(msg)) {
+    friendly = "The server had trouble reaching F1's data source. Try again in a moment.";
+  } else if (/Failed to fetch|NetworkError/i.test(msg)) {
+    friendly = "Couldn't reach the server — check that it's running.";
+  } else {
+    friendly = "Something went wrong loading this session.";
+  }
+
+  return `${friendly}<br><span class="error-detail">${msg}</span>`;
+}
+
 const state = {
   raceData: null,
   playheadT: 0,
@@ -18,6 +44,7 @@ const state = {
   transform: null, // {scale, offsetX, offsetY, flipY}
   showDrsZones: true,    // toggled by 'D'
   showProgressBar: true, // toggled by 'B'
+  showSectors: true,
   leaderboardGapMode: 'off',  // ← ADD THIS LINE. 'off' | 'leader' | 'interval'
 };
 
@@ -39,24 +66,6 @@ function initPicker() {
   loadSchedule();
 }
 
-// async function loadSchedule() {
-//   roundSelect.innerHTML = "<option>Loading…</option>";
-//   try {
-//     const res = await fetch(`/api/schedule/${yearSelect.value}`);
-//     if (!res.ok) throw new Error(`HTTP ${res.status}`);
-//     const weekends = await res.json();
-//     roundSelect.innerHTML = "";
-//     for (const w of weekends) {
-//       const opt = document.createElement("option");
-//       opt.value = w.round_number;
-//       opt.textContent = `${w.round_number}: ${w.event_name}`;
-//       roundSelect.appendChild(opt);
-//     }
-//   } catch (e) {
-//     roundSelect.innerHTML = "<option>Failed to load</option>";
-//     pickerStatus.textContent = `Couldn't load schedule: ${e.message}`;
-//   }
-// }
 
 // Keyed by round_number, holds each weekend's raw FastF1 EventFormat
 // string (e.g. "conventional", "sprint_qualifying", "sprint_shootout",
@@ -87,7 +96,7 @@ async function loadSchedule() {
     updateSessionOptions();
   } catch (e) {
     roundSelect.innerHTML = "<option>Failed to load</option>";
-    pickerStatus.textContent = `Couldn't load schedule: ${e.message}`;
+    pickerStatus.textContent = friendlyErrorMessage(`Couldn't load schedule: ${e.message}`);
   }
 }
 
@@ -168,7 +177,7 @@ document.getElementById("loadBtn").addEventListener("click", async () => {
       startReplay();
     }
   } catch (e) {
-    pickerStatus.textContent = `Error: ${e.message}`;
+    pickerStatus.innerHTML = friendlyErrorMessage(e.message);
   }
 });
 
@@ -296,7 +305,9 @@ function drawTrack() {
     centerline,
     drs_zones,
     sectors,
-    start_finish
+    sector_segments,
+    start_finish,
+    corners
   } = state.raceData.track;
 
   // Track Boundaries
@@ -312,100 +323,80 @@ function drawTrack() {
 
   drawPolyline(centerline, true);
 
-  // DRS Zones (toggled with 'D')
+  // DRS Zones (toggled with 'D') — dashed green, matches broadcast style
   if (state.showDrsZones) {
-    ctx.strokeStyle = "#2ecc40";
-    ctx.lineWidth = 5;
+    ctx.save();
+    ctx.strokeStyle = "#00ff66";
+    ctx.lineWidth = 4;
+    ctx.setLineDash([10, 8]);
 
     drs_zones.forEach(zone => {
-
-      const [x1, y1] = toCanvas([
-        zone.start.x,
-        zone.start.y
-      ]);
-
-      const [x2, y2] = toCanvas([
-        zone.end.x,
-        zone.end.y
-      ]);
+      const [x1, y1] = toCanvas([zone.start_offset.x, zone.start_offset.y]);
+      const [x2, y2] = toCanvas([zone.end_offset.x, zone.end_offset.y]);
+      
 
       ctx.beginPath();
       ctx.moveTo(x1, y1);
       ctx.lineTo(x2, y2);
       ctx.stroke();
 
-      // Label
-      ctx.fillStyle = "#2ecc40";
+      ctx.fillStyle = "#00ff66";
       ctx.font = "bold 14px Arial";
-
       ctx.fillText(
         zone.label || `DRS ${zone.zone}`,
         (x1 + x2) / 2,
         (y1 + y2) / 2 - 8
       );
-
     });
+
+    ctx.restore(); // undo setLineDash so it doesn't leak into later drawing
   }
 
-  // Sector Labels
-  if (sectors) {
-    sectors.forEach(sector => {
+  // Sector-colored segments + rotated labels (toggled with 'S')
+  if (state.showSectors) {
+    if (sector_segments) {
+      sector_segments.forEach(seg => {
+        ctx.strokeStyle = seg.color;
+        ctx.lineWidth = 6;
+        drawPolyline(seg.centerline, false);
+      });
+    }
 
-        // Hide Sector 3
-        if (sector.label === "S3" || sector.label === "3") {
-            return;
-        }
+    if (sectors) {
+      sectors.forEach(sector => {
+        const [x, y] = toCanvas([sector.position.x, sector.position.y]);
+        const [tx, ty] = toCanvas([sector.tangent_point.x, sector.tangent_point.y]);
+        const angle = Math.atan2(ty - y, tx - x);
 
-        const [x, y] = toCanvas([
-            sector.position.x,
-            sector.position.y
-        ]);
-
-        ctx.beginPath();
-
-        ctx.arc(x, y, 6, 0, Math.PI * 2);
-
-        ctx.fillStyle = "#FFD700";
-        ctx.fill();
-
-        ctx.fillStyle = "#FFFFFF";
-        ctx.font = "bold 18px Arial";
+        ctx.save();
+        ctx.translate(x, y);
+        ctx.rotate(angle);
+        ctx.fillStyle = sector.color || "#FFD700";
+        ctx.font = "bold 15px Arial";
         ctx.textAlign = "center";
-
-        ctx.fillText(
-            sector.label,
-            x,
-            y - 15
-        );
-    });
+        ctx.fillText(`SECTOR ${sector.id}`, 0, -10);
+        ctx.restore();
+      });
+    }
   }
+
 
   // Start / Finish
-
   if (start_finish) {
-
-    const [sx, sy] = toCanvas([
-      start_finish.x,
-      start_finish.y
-    ]);
+    const [sx, sy] = toCanvas([start_finish.x, start_finish.y]);
 
     ctx.beginPath();
-
     ctx.arc(sx, sy, 8, 0, Math.PI * 2);
-
     ctx.fillStyle = "#ff0000";
-
     ctx.fill();
 
     ctx.fillStyle = "#ffffff";
-
     ctx.font = "bold 16px Arial";
-
+    ctx.textAlign = "center";
     ctx.fillText("START", sx, sy - 15);
-
   }
-
 }
+
 function drawPolyline(points, dashed) {
   if (!points.length) return;
   ctx.save();
@@ -520,6 +511,8 @@ function tick(nowMs) {
     drawCars(frame);
 
     // UI
+    updateLapCounter(frame);
+
     updateLeaderboard(frame);
 
     updateWeather(frame);
@@ -574,8 +567,34 @@ function buildStatusBadges(d) {
   return badges.join("");
 }
 
-// Leaderboard panel
+function updateLapCounter(frame) {
+  const totalLaps = state.raceData.meta.total_laps;
+  const currentLap = Math.min(frame.lap ?? 1, totalLaps);
+  document.getElementById("lapCounter").textContent = `Lap: ${currentLap}/${totalLaps}`;
+}
 
+// Tyre compound → single-letter badge + color, matching common F1
+// broadcast graphics convention (not official FIA colors, just widely
+// recognized: red=soft, yellow=medium, white=hard, green=inter, blue=wet).
+const TYRE_BADGE = {
+  0: { letter: "C5", color: "#a349a4" },
+  1: { letter: "S", color: "#ff3333" },
+  2: { letter: "M", color: "#ffd400" },
+  3: { letter: "H", color: "#e8e8e8" },
+  4: { letter: "I", color: "#2ecc40" },
+  5: { letter: "W", color: "#00aeef" },
+};
+
+function buildTyreBadge(d) {
+  const info = TYRE_BADGE[d.tyre] || { letter: "?", color: "#888" };
+  const textColor = info.color === "#e8e8e8" || info.color === "#ffd400" ? "#000" : "#fff";
+  return `
+    <span class="lb-tyre-badge" style="background:${info.color}; color:${textColor}" title="Tyre life: ${Math.round(d.tyre_life)} laps">
+      ${info.letter}<span class="lb-tyre-life">${Math.round(d.tyre_life)}</span>
+    </span>`;
+}
+
+// Leaderboard panel
 function updateLeaderboard(frame) {
   const rows = Object.entries(frame.drivers)
     .filter(([, d]) => d.position != null)
@@ -609,6 +628,7 @@ function updateLeaderboard(frame) {
         <span class="lb-pos">${d.position}.</span>
         <span class="lb-code" style="color:${selected ? "#000" : colors[code] || "#fff"}">${code}</span>
         ${mode !== "off" ? `<span class="lb-gap">${gapText}</span>` : ""}
+        ${buildTyreBadge(d)}
         <span class="lb-status">${buildStatusBadges(d)}</span>
       </div>`;
   }
@@ -743,9 +763,6 @@ function updateDriverInfo(frame) {
         const brake =
             Math.round(d.brake > 1 ? d.brake : d.brake * 100);
 
-        // Placeholder until backend sends ERS
-        const ers =
-            d.ers ?? 75;
 
         const drs =
             d.drs >= 10
@@ -834,22 +851,6 @@ function updateDriverInfo(frame) {
 
     <div class="telemetry-row">
 
-        <span>ERS</span>
-
-        <div class="telemetry-track">
-
-            <div class="telemetry-fill ers"
-                 style="width:${ers}%">
-            </div>
-
-        </div>
-
-        <span>${ers}%</span>
-
-    </div>
-
-    <div class="telemetry-row">
-
         <span>TYRE</span>
 
         <div class="telemetry-track">
@@ -897,10 +898,7 @@ function drawProgressBar(totalT) {
 
     progressCtx.clearRect(0, 0, w, h);
 
-    // Timeline occupies only middle 50% of canvas
-    // const LEFT_PAD = w * 0.20;
-    // const RIGHT_PAD = w * 0.20;
-    // const BAR_W = w - LEFT_PAD - RIGHT_PAD;
+
     const LEFT_PAD = 0;
     const RIGHT_PAD = 0;
     const BAR_W = w;
@@ -1108,7 +1106,8 @@ document.getElementById("speedDownBtn").addEventListener("click", () => {
 
 });
 
-// Keyboard Shortcuts
+
+//Keyboard shortcuts
 window.addEventListener("keydown", (e) => {
 
     if (!state.raceData) return;
@@ -1172,6 +1171,11 @@ window.addEventListener("keydown", (e) => {
 
         case "KeyD":
             state.showDrsZones = !state.showDrsZones;
+
+            break;
+
+        case "KeyS":
+            state.showSectors = !state.showSectors;
 
             break;
 

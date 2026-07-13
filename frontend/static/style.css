@@ -103,6 +103,13 @@ body{
     font-size:13px;
 }
 
+.error-detail{
+    display:block;
+    margin-top:6px;
+    font-size:11px;
+    color:#777;
+    font-family:monospace;
+}
 /* Replay Layout */
 
 .replay{
@@ -325,6 +332,19 @@ body{
 }
 
 /* RIGHT SIDEBAR — Leaderboard */
+.lap-counter-banner{
+    position:absolute;
+    top:50px;
+    right:20px;
+    width:var(--right-width);
+    text-align:center;
+    font-size:15px;
+    font-weight:700;
+    color:#fff;
+    padding:8px 16px;
+    font-variant-numeric:tabular-nums;
+}
+
 
 .leaderboard-panel{
     position:absolute;
@@ -345,6 +365,22 @@ body{
     border-radius:20px;
 }
 
+.lb-tyre-badge{
+    display:flex;
+    align-items:center;
+    gap:2px;
+    font-size:10px;
+    font-weight:800;
+    padding:2px 5px;
+    border-radius:4px;
+    flex-shrink:0;
+}
+
+.lb-tyre-life{
+    font-size:8px;
+    font-weight:600;
+    opacity:.75;
+}
 
 .lb-header{
     display:flex;
