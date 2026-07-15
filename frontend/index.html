@@ -23,6 +23,9 @@
           <option value="S">Sprint</option>
           <option value="Q">Qualifying</option>
           <option value="SQ">Sprint Qualifying</option>
+          <option value="FP1">Practice 1</option>
+          <option value="FP2">Practice 2</option>
+          <option value="FP3">Practice 3</option>
         </select>
       </label>
       <button id="loadBtn">Load Replay</button>
@@ -64,20 +67,6 @@
       <div class="cl-row"><b>B</b> Toggle Progress Bar</div>
       <div class="cl-row"><b>Shift+Click</b> Select multiple drivers</div>
       <div class="cl-row"><b>H</b> Toggle this panel</div>
-    </div>
-
-    <!-- Tyre strategy modal (hidden until Strategy button clicked) -->
-    <!-- <div id="strategyModal" class="strategy-modal hidden">
-      <div class="strategy-modal-inner">
-        <button id="strategyCloseBtn" class="strategy-close-btn">✕</button>
-        <div id="strategyContent"></div>
-      </div>
-    </div> -->
-    <!-- Tyre strategy panel — full view that replaces the replay screen while
-     open, same pattern as the Qualifying results view. -->
-    <div id="strategyPanel" class="strategy-panel hidden">
-      <button id="strategyBackBtn" class="back-btn">← Back to Replay</button>
-      <div id="strategyContent" class="strategy-content"></div>
     </div>
 
    <!--Bottom Playback Bar -->
@@ -142,6 +131,14 @@
 
     <button id="backToPickerBtn" class="back-btn">← New Replay</button>
     <button id="strategyBtn" class="back-btn strategy-btn">🏁 Strategy</button>
+  </div>
+
+  <!-- Tyre strategy panel — full view that replaces the replay screen
+       while open. Sibling of #replay (NOT nested inside it), so hiding
+       #replay doesn't also hide this. -->
+  <div id="strategyPanel" class="strategy-panel hidden">
+    <button id="strategyBackBtn" class="back-btn">← Back to Replay</button>
+    <div id="strategyContent" class="strategy-content"></div>
   </div>
 
   <script src="/static/app.js"></script>

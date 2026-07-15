@@ -282,9 +282,18 @@ def get_circuit_rotation(session):
     return circuit.rotation
 
 
+# def get_race_telemetry(session, session_type="R"):
+#     event_name = str(session).replace(" ", "_")
+#     cache_suffix = "sprint" if session_type == "S" else "race"
+#     cache_suffix = f"{cache_suffix}_v{CACHE_SCHEMA_VERSION}"
 def get_race_telemetry(session, session_type="R"):
     event_name = str(session).replace(" ", "_")
-    cache_suffix = "sprint" if session_type == "S" else "race"
+    if session_type == "S":
+        cache_suffix = "sprint"
+    elif session_type in ("FP1", "FP2", "FP3"):
+        cache_suffix = session_type.lower()
+    else:
+        cache_suffix = "race"
     cache_suffix = f"{cache_suffix}_v{CACHE_SCHEMA_VERSION}"
     # Check if this data has already been computed
 

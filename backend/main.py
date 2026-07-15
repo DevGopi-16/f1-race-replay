@@ -141,10 +141,16 @@ Includes:
         }
     }
 )
+# def replay(
+#     year: int = Query(...),
+#     round: int = Query(..., alias="round"),
+#     session_type: str = Query("R", pattern="^(R|S)$"),
+#     fps: int = Query(8, ge=1, le=25),
+# ):
 def replay(
     year: int = Query(...),
     round: int = Query(..., alias="round"),
-    session_type: str = Query("R", pattern="^(R|S)$"),
+    session_type: str = Query("R", pattern="^(R|S|FP1|FP2|FP3)$"),
     fps: int = Query(8, ge=1, le=25),
 ):
     """

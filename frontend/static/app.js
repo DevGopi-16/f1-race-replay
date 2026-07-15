@@ -11,12 +11,15 @@ const PLAYBACK_SPEEDS = [0.1, 0.2, 0.5, 1.0, 2.0, 4.0, 8.0, 16.0, 32.0, 64.0, 12
 // Turns raw backend/network error text into a plain-English message for
 // the picker screen. The original error is still shown, smaller, below —
 // useful for you to debug, without confusing anyone else using this.
+
 function friendlyErrorMessage(rawMessage) {
   const msg = rawMessage || "";
 
   let friendly;
   if (/does not exist for this event/i.test(msg)) {
     friendly = "This session isn't available for the selected round — try a different session type or round.";
+  } else if (/No valid laps found|No valid telemetry data found/i.test(msg)) {
+    friendly = "This practice session doesn't have enough data to replay — it may have been rained off, cancelled, or too short. Try a different session.";
   } else if (/Failed to load session/i.test(msg)) {
     friendly = "Couldn't load this session. It may not have happened yet, or FastF1 doesn't have data for it.";
   } else if (/Failed to build telemetry|Failed to build qualifying data/i.test(msg)) {
@@ -33,7 +36,6 @@ function friendlyErrorMessage(rawMessage) {
 
   return `${friendly}<br><span class="error-detail">${msg}</span>`;
 }
-
 const state = {
   raceData: null,
   playheadT: 0,
@@ -99,6 +101,7 @@ async function loadSchedule() {
     pickerStatus.textContent = friendlyErrorMessage(`Couldn't load schedule: ${e.message}`);
   }
 }
+
 const COMPOUND_COLORS = {
   SOFT: "#ff3333",
   MEDIUM: "#ffd400",
