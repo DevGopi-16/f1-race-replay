@@ -99,6 +99,54 @@ async function loadSchedule() {
     pickerStatus.textContent = friendlyErrorMessage(`Couldn't load schedule: ${e.message}`);
   }
 }
+const COMPOUND_COLORS = {
+  SOFT: "#ff3333",
+  MEDIUM: "#ffd400",
+  HARD: "#e8e8e8",
+  INTERMEDIATE: "#2ecc40",
+  WET: "#00aeef",
+  UNKNOWN: "#888888",
+};
+
+function renderStrategy(data) {
+  const totalLaps = data.total_laps;
+
+  let html = `
+    <div class="strategy-header-row">
+      <div class="strategy-header">${data.meta.event_name} — Pit Stops</div>
+      <div class="strategy-total-stops">
+        TOTAL PIT STOPS<br><span>${data.total_pit_stops}</span>
+      </div>
+    </div>`;
+
+  for (const drv of data.drivers) {
+    html += `<div class="strategy-row">
+      <span class="strategy-code" style="color:${drv.color}">${drv.code}</span>
+      <div class="strategy-bar">`;
+
+    for (const stint of drv.stints) {
+      const widthPct = (stint.lap_count / totalLaps) * 100;
+      const color = COMPOUND_COLORS[stint.compound] || COMPOUND_COLORS.UNKNOWN;
+      const freshClass = stint.fresh ? "" : "strategy-used";
+
+      html += `<div class="strategy-segment ${freshClass}"
+                    style="width:${widthPct}%; ${stint.fresh ? `background:${color}` : `--used-color:${color}`}"
+                    title="${stint.compound} · Laps ${stint.start_lap}-${stint.end_lap} (${stint.lap_count} laps) · ${stint.fresh ? "New" : "Used"}">
+                  <span class="strategy-segment-label">${stint.end_lap}</span>
+                </div>`;
+    }
+
+    html += `</div><span class="strategy-total-laps">${drv.laps_completed}</span></div>`;
+  }
+
+  html += `
+    <div class="strategy-legend">
+      <span><i class="strategy-legend-swatch" style="background:#e8e8e8"></i>New</span>
+      <span><i class="strategy-legend-swatch strategy-used" style="--used-color:#e8e8e8"></i>Used</span>
+    </div>`;
+
+  document.getElementById("strategyContent").innerHTML = html;
+}
 
 // Show/hide Sprint + Sprint Qualifying depending on whether the selected
 // round actually has a sprint format — prevents picking a combination
@@ -123,25 +171,6 @@ function updateSessionOptions() {
 }
 
 roundSelect.addEventListener("change", updateSessionOptions);
-
-// document.getElementById("loadBtn").addEventListener("click", async () => {
-//   const year = yearSelect.value;
-//   const round = roundSelect.value;
-//   const sessionType = sessionTypeSelect.value;
-//   pickerStatus.textContent = "Loading replay data — this can take a while the first time (building telemetry cache)…";
-
-//   try {
-//     const res = await fetch(`/api/replay?year=${year}&round=${round}&session_type=${sessionType}&fps=8`);
-//     if (!res.ok) {
-//       const detail = await res.json().catch(() => ({}));
-//       throw new Error(detail.detail || `HTTP ${res.status}`);
-//     }
-//     state.raceData = await res.json();
-//     startReplay();
-//   } catch (e) {
-//     pickerStatus.textContent = `Error: ${e.message}`;
-//   }
-// });
 
 document.getElementById("loadBtn").addEventListener("click", async () => {
   const year = yearSelect.value;
@@ -233,6 +262,53 @@ document.getElementById("backToPickerBtn").addEventListener("click", () => {
   document.getElementById("replay").classList.add("hidden");
   document.getElementById("picker").classList.remove("hidden");
   pickerStatus.textContent = "";
+});
+
+
+// document.getElementById("strategyBtn").addEventListener("click", async () => {
+//   const m = state.raceData.meta;
+//   document.getElementById("strategyModal").classList.remove("hidden");
+//   document.getElementById("strategyContent").innerHTML = "Loading…";
+
+//   try {
+//     const res = await fetch(`/api/strategy?year=${m.year}&round=${m.round}&session_type=${m.session_type}`);
+//     if (!res.ok) {
+//       const detail = await res.json().catch(() => ({}));
+//       throw new Error(detail.detail || `HTTP ${res.status}`);
+//     }
+//     const data = await res.json();
+//     renderStrategy(data);
+//   } catch (e) {
+//     document.getElementById("strategyContent").innerHTML = friendlyErrorMessage(e.message);
+//   }
+// });
+
+// document.getElementById("strategyCloseBtn").addEventListener("click", () => {
+//   document.getElementById("strategyModal").classList.add("hidden");
+// });
+
+document.getElementById("strategyBtn").addEventListener("click", async () => {
+  const m = state.raceData.meta;
+  document.getElementById("replay").classList.add("hidden");
+  document.getElementById("strategyPanel").classList.remove("hidden");
+  document.getElementById("strategyContent").innerHTML = "Loading…";
+
+  try {
+    const res = await fetch(`/api/strategy?year=${m.year}&round=${m.round}&session_type=${m.session_type}`);
+    if (!res.ok) {
+      const detail = await res.json().catch(() => ({}));
+      throw new Error(detail.detail || `HTTP ${res.status}`);
+    }
+    const data = await res.json();
+    renderStrategy(data);
+  } catch (e) {
+    document.getElementById("strategyContent").innerHTML = friendlyErrorMessage(e.message);
+  }
+});
+
+document.getElementById("strategyBackBtn").addEventListener("click", () => {
+  document.getElementById("strategyPanel").classList.add("hidden");
+  document.getElementById("replay").classList.remove("hidden");
 });
 
 // Replay setup

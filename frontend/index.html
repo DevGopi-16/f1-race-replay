@@ -32,7 +32,8 @@
 
   <!-- Qualifying / Sprint Qualifying results (session times table, not a
        car replay — Q/SQ has no synced multi-car timeline the way Race/
-       Sprint do, so this is a simpler results view). -->
+       Sprint do, so this is a simpler results view). No Strategy button
+       here — tyre stint strategy is a Race/Sprint concept only. -->
   <div id="qualiResults" class="quali-results hidden">
     <button id="backToPickerBtn2" class="back-btn">← New Replay</button>
     <div id="qualiBanner" class="session-banner"></div>
@@ -65,7 +66,19 @@
       <div class="cl-row"><b>H</b> Toggle this panel</div>
     </div>
 
-
+    <!-- Tyre strategy modal (hidden until Strategy button clicked) -->
+    <!-- <div id="strategyModal" class="strategy-modal hidden">
+      <div class="strategy-modal-inner">
+        <button id="strategyCloseBtn" class="strategy-close-btn">✕</button>
+        <div id="strategyContent"></div>
+      </div>
+    </div> -->
+    <!-- Tyre strategy panel — full view that replaces the replay screen while
+     open, same pattern as the Qualifying results view. -->
+    <div id="strategyPanel" class="strategy-panel hidden">
+      <button id="strategyBackBtn" class="back-btn">← Back to Replay</button>
+      <div id="strategyContent" class="strategy-content"></div>
+    </div>
 
    <!--Bottom Playback Bar -->
 
@@ -128,6 +141,7 @@
     </div>
 
     <button id="backToPickerBtn" class="back-btn">← New Replay</button>
+    <button id="strategyBtn" class="back-btn strategy-btn">🏁 Strategy</button>
   </div>
 
   <script src="/static/app.js"></script>

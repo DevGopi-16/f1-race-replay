@@ -28,6 +28,7 @@ from src.f1_data import (
     get_race_telemetry,
     get_race_weekends_by_year,
     get_quali_telemetry,
+    get_tyre_strategy
 )
 
 from src.track_geometry import build_track_geometry, extract_race_events, point_at_distance
@@ -283,7 +284,44 @@ def quali(
         "results": quali_data["results"],
     }
 
+@app.get(
+    "/api/strategy",
+    summary="Tyre Strategy",
+    description="""
+Returns each driver's tyre stint history (compound + lap range per stint),
+built directly from FastF1's lap data — not derived from replay frames.
+""",
+)
+def strategy(
+    year: int = Query(...),
+    round: int = Query(..., alias="round"),
+    session_type: str = Query("R", pattern="^(R|S)$"),
+):
+    try:
+        session = load_session(year, round, session_type, telemetry=False)
+    except Exception as e:
+        raise HTTPException(status_code=502, detail=f"Failed to load session: {e}")
 
+    try:
+        strategy_data = get_tyre_strategy(session)
+    except Exception as e:
+        raise HTTPException(status_code=502, detail=f"Failed to build tyre strategy: {e}")
+
+    event_date = session.event.get("EventDate")
+    return {
+        "meta": {
+            "event_name": session.event.get("EventName", ""),
+            "circuit_name": session.event.get("Location", ""),
+            "country": session.event.get("Country", ""),
+            "year": year,
+            "round": round,
+            "date": event_date.strftime("%B %d, %Y") if event_date else "",
+            "session_type": session_type,
+        },
+        "total_laps": strategy_data["total_laps"],
+        "total_pit_stops": strategy_data["total_pit_stops"],
+        "drivers": strategy_data["drivers"],
+    }
 # Serve the frontend 
 FRONTEND_DIR = Path(__file__).resolve().parent.parent / "frontend"
 

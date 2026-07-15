@@ -177,10 +177,16 @@ def _process_single_driver(args):
         "max_lap": driver_max_lap,
     }
 
-def load_session(year, round_number, session_type="R"):
+# def load_session(year, round_number, session_type="R"):
+#     # session_type: 'R' (Race), 'S' (Sprint) etc.
+#     session = fastf1.get_session(year, round_number, session_type)
+#     session.load(telemetry=True, weather=True)
+#     return session
+
+def load_session(year, round_number, session_type="R", telemetry=True):
     # session_type: 'R' (Race), 'S' (Sprint) etc.
     session = fastf1.get_session(year, round_number, session_type)
-    session.load(telemetry=True, weather=True)
+    session.load(laps=True, telemetry=telemetry, weather=telemetry)
     return session
 
 
@@ -198,6 +204,78 @@ def get_driver_colors(session):
         rgb_colors[driver] = rgb
     return rgb_colors
 
+def get_tyre_strategy(session):
+    """
+    Builds a per-driver tyre-stint summary directly from FastF1's Laps
+    dataframe (Stint + Compound + FreshTyre columns) — reliable, not
+    derived from noisy per-frame telemetry. Includes whether each stint
+    started on a fresh or used set of tyres (FastF1's FreshTyre column),
+    and total race pit-stop count, matching the standard
+    stint-strategy-chart format (e.g. official Pirelli pit-stop graphics).
+    """
+    laps = session.laps
+    total_laps = int(laps["LapNumber"].max()) if not laps.empty else 0
+    driver_colors = get_driver_colors(session)
+
+    strategy = []
+    total_pit_stops = 0
+
+    for drv in session.drivers:
+        driver_code = session.get_driver(drv)["Abbreviation"]
+        driver_laps = laps.pick_drivers(drv)
+        if driver_laps.empty:
+            continue
+
+        stints = []
+        for stint_num, stint_laps in driver_laps.groupby("Stint"):
+            if stint_laps.empty:
+                continue
+            compound_val = stint_laps["Compound"].iloc[0]
+            compound = str(compound_val) if pd.notna(compound_val) else "UNKNOWN"
+            start_lap = int(stint_laps["LapNumber"].min())
+            end_lap = int(stint_laps["LapNumber"].max())
+
+            fresh_val = stint_laps["FreshTyre"].iloc[0] if "FreshTyre" in stint_laps.columns else None
+            fresh = bool(fresh_val) if pd.notna(fresh_val) else True
+
+            stints.append({
+                "stint": int(stint_num),
+                "compound": compound,
+                "compound_int": get_tyre_compound_int(compound),
+                "start_lap": start_lap,
+                "end_lap": end_lap,
+                "lap_count": end_lap - start_lap + 1,
+                "fresh": fresh,
+            })
+
+        stints.sort(key=lambda s: s["start_lap"])
+
+        # Pit stop count: one fewer than the number of stints (a driver
+        # who never pits has exactly 1 stint and 0 stops).
+        driver_pit_stops = max(0, len(stints) - 1)
+        total_pit_stops += driver_pit_stops
+
+        rgb = driver_colors.get(driver_code, (136, 136, 136))
+        strategy.append({
+            "code": driver_code,
+            "color": f"#{rgb[0]:02x}{rgb[1]:02x}{rgb[2]:02x}",
+            "stints": stints,
+            "pit_stops": driver_pit_stops,
+            "laps_completed": stints[-1]["end_lap"] if stints else 0,
+        })
+
+    try:
+        results = session.results
+        order = {row["Abbreviation"]: idx for idx, (_, row) in enumerate(results.iterrows())}
+        strategy.sort(key=lambda s: order.get(s["code"], 999))
+    except Exception:
+        pass
+
+    return {
+        "total_laps": total_laps,
+        "total_pit_stops": total_pit_stops,
+        "drivers": strategy,
+    }
 
 def get_circuit_rotation(session):
     circuit = session.get_circuit_info()
