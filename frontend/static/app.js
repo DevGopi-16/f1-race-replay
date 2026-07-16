@@ -68,6 +68,13 @@ function initPicker() {
   loadSchedule();
 }
 
+function updateLocalTimeDisplay() {
+  const el = document.getElementById("localTimeValue");
+  if (!el) return;
+  el.textContent = new Date().toLocaleTimeString();
+}
+updateLocalTimeDisplay();
+setInterval(updateLocalTimeDisplay, 1000);
 
 // Keyed by round_number, holds each weekend's raw FastF1 EventFormat
 // string (e.g. "conventional", "sprint_qualifying", "sprint_shootout",
