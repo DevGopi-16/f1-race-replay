@@ -1,120 +1,141 @@
-# 🏎️ F1 Race Replay Web
+<div align="center">
 
-### Full-stack Formula 1 telemetry replay & analysis platform — built with FastAPI, FastF1, and JavaScript
+<img src="https://capsule-render.vercel.app/api?type=waving&color=0:E10600,100:15151E&height=220&section=header&text=F1%20Race%20Replay%20Web&fontSize=42&fontColor=ffffff&animation=fadeIn&fontAlignY=38&desc=Lap-by-lap%20Formula%201%20telemetry%2C%20reconstructed%20from%20real%20session%20data&descAlignY=58&descSize=16" width="100%"/>
 
-<!--![Python](https://img.shields.io/badge/Python-3.10+-blue?logo=python) -->
-![FastAPI](https://img.shields.io/badge/FastAPI-Backend-009688?logo=fastapi)
-![JavaScript](https://img.shields.io/badge/JavaScript-Frontend-yellow?logo=javascript)
-![FastF1](https://img.shields.io/badge/FastF1-Telemetry-red)
-![Canvas](https://img.shields.io/badge/Rendering-HTML5%20Canvas-orange)
-![License](https://img.shields.io/badge/License-MIT-green)
-![Status](https://img.shields.io/badge/Status-Complete-brightgreen)
+<a href="https://github.com/DevGopi-16/f1-race-replay">
+  <img src="https://readme-typing-svg.demolab.com/?lines=Replay+any+F1+session+lap-by-lap+in+your+browser;Live+telemetry+%E2%80%A2+Tyre+strategy+%E2%80%A2+DRS+zones;Built+with+FastAPI+%2B+FastF1+%2B+HTML5+Canvas&font=Fira+Code&center=true&width=650&height=40&color=E10600&vCenter=true&size=20&pause=1500&duration=3000" alt="Typing SVG" />
+</a>
 
-> Replay any Formula 1 session lap-by-lap in the browser — animated cars on an accurate track map, live telemetry, tyre strategy, weather, DRS zones, sector splits, and a full race leaderboard — reconstructed entirely from real FastF1 session data.
+<br/>
 
----
+<img src="https://img.shields.io/badge/FastAPI-Backend-009688?logo=fastapi&logoColor=white&style=for-the-badge" />
+<img src="https://img.shields.io/badge/FastF1-Telemetry-E10600?style=for-the-badge" />
+<img src="https://img.shields.io/badge/JavaScript-Frontend-F7DF1E?logo=javascript&logoColor=black&style=for-the-badge" />
+<img src="https://img.shields.io/badge/Canvas-Rendering-FF6B00?style=for-the-badge" />
+<img src="https://img.shields.io/badge/License-MIT-4CAF50?style=for-the-badge" />
+<img src="https://img.shields.io/badge/Status-Complete-brightgreen?style=for-the-badge" />
 
-## 🎬 Demo
+<br/><br/>
 
-```
-assets/demo/replay-demo.gif
-```
+<img src="https://github.com/DevGopi-16/f1-race-replay/raw/main/assets/demo/replay-demo.gif" width="85%" alt="F1 Race Replay demo — animated cars on track with live leaderboard and telemetry"/>
 
-> Example: replaying the 2025 Singapore Grand Prix at Marina Bay — lap 52/62, full leaderboard with tyre compounds and gaps, live telemetry for the selected driver, and DRS zone / sector overlays on the track map.
+<sub>2025 Singapore GP · Marina Bay · Lap 52/62 — full leaderboard, tyre compounds, live telemetry & DRS overlays</sub>
 
----
+<br/><br/>
 
-## 💡 Why I Built This
+<a href="#-getting-started"><img src="https://img.shields.io/badge/🚀_Quick_Start-15151E?style=for-the-badge"/></a>
+<a href="#-features"><img src="https://img.shields.io/badge/✨_Features-15151E?style=for-the-badge"/></a>
+<a href="#-architecture"><img src="https://img.shields.io/badge/🏗_Architecture-15151E?style=for-the-badge"/></a>
+<a href="#-contributing"><img src="https://img.shields.io/badge/🤝_Contribute-15151E?style=for-the-badge"/></a>
 
-Formula 1 broadcasts show you *what* is happening. FastF1 gives you the raw telemetry that explains *why*. This project bridges the two — turning session-level timing and telemetry data into an interactive, replayable visualization anyone can explore in a browser, without writing a line of Python or touching a notebook.
+</div>
 
-It's also a real engineering exercise: large time-series datasets, client-side interpolation for smooth animation, payload optimization for the browser, and a full rendering pipeline built from scratch on HTML5 Canvas.
+[![divider](https://raw.githubusercontent.com/HiradEmami/readme-ux-kit/master/assets/dividers/animated/unique_effects/divider_cyber_cycle.svg)](https://github.com/DevGopi-16)
 
----
-## 📸 Screenshots
- 
-> Add screenshots or GIFs here.
- 
-```
-assets/screenshots/dashboard.png
-assets/screenshots/leaderboard.png
-assets/screenshots/weather.png
-```
----
+## 💡 Why This Exists
+
+> F1 broadcasts show you *what* is happening. FastF1 gives you the raw telemetry that explains *why*.
+
+This project bridges the two — turning session-level timing and telemetry data into an interactive, replayable visualization anyone can explore in a browser, with zero Python or notebooks required on the viewer's end.
+
+It's also a real engineering exercise in its own right: large time-series datasets, client-side interpolation for smooth animation, payload optimization for the browser, and a full rendering pipeline built from scratch on HTML5 Canvas.
+
+[![divider](https://raw.githubusercontent.com/HiradEmami/readme-ux-kit/master/assets/dividers/animated/bars/divider_circuit_pulse_bar.svg)](https://github.com/DevGopi-16)
 
 ## ✨ Features
 
+<table>
+<tr>
+<td width="50%" valign="top">
+
 ### 🏁 Race Replay
 - Accurate track map with animated car positions
-- Sector visualization (Sector 1 / 2 / 3) and toggleable DRS zone overlays
-- Seekable timeline with race-incident markers (Yellow / Red / Safety Car / VSC)
-- Variable playback speed (0.5x – 4x) with full keyboard control
+- Sector visualization (S1 / S2 / S3) & toggleable DRS zones
+- Seekable timeline with incident markers (🟡 Yellow / 🔴 Red / 🚨 SC / VSC)
+- Variable playback speed (0.5x – 4x)
 
 ### 📊 Live Telemetry
 - Speed, gear, throttle %, brake %, DRS status per driver
-- Tyre compound and remaining tyre life
-- Live gap to the car ahead and behind, with distance in metres
+- Tyre compound & remaining stint life
+- Live gap ahead/behind, in metres
+
+</td>
+<td width="50%" valign="top">
 
 ### 🛞 Tyre Strategy
-- Current compound (Soft / Medium / Hard) and stint age
+- Current compound (Soft / Medium / Hard) & stint age
 - Per-driver tyre indicator on the leaderboard
 
 ### 🌦 Weather
-- Track and air temperature, humidity, wind speed, rain status
+- Track/air temperature, humidity, wind speed, rain status
 
 ### 🏆 Leaderboard
 - Full running order with live time gaps
-- Team-coloured driver tags, tyre compound, and DRS indicators
+- Team-coloured driver tags + DRS indicators
 - Highlighted focus driver with quick stat panel
 
+</td>
+</tr>
+</table>
+
 ### 🔬 Multi-Driver Comparison
-- Shift+click to select multiple drivers simultaneously
-- Overlaid speed / throttle / brake traces for direct comparison
-- Live delta readout between any two selected drivers
+Shift+click to select multiple drivers → overlaid speed / throttle / brake traces, with a live delta readout between any two selected drivers.
+
+<br/>
 
 ### 🎮 Playback Controls
-| Key | Action |
-|---|---|
-| `Space` | Play / Pause |
-| `←` / `→` | Rewind / Forward |
-| `↑` / `↓` | Speed +/- |
-| `1`–`4` | Set speed (0.5x / 1x / 2x / 4x) |
-| `R` | Restart |
-| `D` | Toggle DRS zones |
-| `S` | Toggle sectors |
-| `B` | Toggle progress bar |
-| `Shift + Click` | Select multiple drivers |
-| `H` | Toggle panel visibility |
 
----
+<div align="center">
+
+| Key | Action | Key | Action |
+|:---:|:---|:---:|:---|
+| `Space` | Play / Pause | `1`–`4` | Set speed (0.5x/1x/2x/4x) |
+| `←` `→` | Rewind / Forward | `R` | Restart |
+| `↑` `↓` | Speed +/− | `D` | Toggle DRS zones |
+| `S` | Toggle sectors | `B` | Toggle progress bar |
+| `H` | Toggle panel visibility | `Shift+Click` | Select multiple drivers |
+
+</div>
+
+[![divider](https://raw.githubusercontent.com/HiradEmami/readme-ux-kit/master/assets/dividers/animated/unique_effects/divider_cyber_cycle_mirrored.svg)](https://github.com/DevGopi-16)
 
 ## 🏗 Architecture
 
-```
-┌─────────────┐        ┌──────────────────┐        ┌────────────────────┐
-│   FastF1     │  --->  │  FastAPI Backend  │  --->  │   Browser Frontend  │
-│ (session data)│        │ fetch, process,   │        │  Canvas rendering,  │
-│               │        │ downsample,        │        │  interpolation,     │
-│               │        │ serialize (JSON)   │        │  playback engine    │
-└─────────────┘        └──────────────────┘        └────────────────────┘
+```mermaid
+flowchart LR
+    A[("🏎️ FastF1<br/>Session Data")] -->|fetch & cache| B["⚙️ FastAPI Backend<br/>process · downsample · serialize"]
+    B -->|JSON over HTTP| C["🖥️ Browser Frontend<br/>Canvas rendering · interpolation · playback engine"]
+    C -->|render loop| D[("🎬 Animated Replay")]
+
+    style A fill:#E10600,stroke:#15151E,color:#fff
+    style B fill:#009688,stroke:#15151E,color:#fff
+    style C fill:#F7DF1E,stroke:#15151E,color:#000
+    style D fill:#15151E,stroke:#E10600,color:#fff
 ```
 
-Telemetry is fetched once per session via FastF1, cached locally, downsampled and serialized on the backend, then streamed to the browser where it's interpolated frame-by-frame for smooth playback — without shipping every raw data point over the wire.
+Telemetry is fetched once per session via FastF1, cached locally, downsampled and serialized on the backend, then streamed to the browser — where it's interpolated frame-by-frame for smooth playback without shipping every raw data point over the wire.
 
----
+[![divider](https://raw.githubusercontent.com/HiradEmami/readme-ux-kit/master/assets/dividers/animated/bars/divider_dual_energy_tracks.svg)](https://github.com/DevGopi-16)
 
 ## 🛠 Tech Stack
 
-| Layer | Technology |
-|---|---|
-| Backend | FastAPI (Python) |
-| Data Source | FastF1 |
-| Frontend | HTML5, CSS3, JavaScript (vanilla) |
-| Rendering | HTML5 Canvas / SVG overlays |
+<div align="center">
 
----
+| Layer | Technology |
+|:---|:---|
+| **Backend** | ![FastAPI](https://img.shields.io/badge/-FastAPI-009688?logo=fastapi&logoColor=white) Python |
+| **Data Source** | ![FastF1](https://img.shields.io/badge/-FastF1-E10600) |
+| **Frontend** | ![HTML5](https://img.shields.io/badge/-HTML5-E34F26?logo=html5&logoColor=white) ![CSS3](https://img.shields.io/badge/-CSS3-1572B6?logo=css3&logoColor=white) ![JavaScript](https://img.shields.io/badge/-JavaScript-F7DF1E?logo=javascript&logoColor=black) |
+| **Rendering** | HTML5 Canvas / SVG overlays |
+
+</div>
+
+<br/>
 
 ## 📂 Project Structure
+
+<details>
+<summary><b>Click to expand full directory tree</b></summary>
 
 ```text
 F1-RACE-REPLAY-WEB/
@@ -143,14 +164,17 @@ F1-RACE-REPLAY-WEB/
 └── requirements.txt
 ```
 
----
+</details>
+
+[![divider](https://raw.githubusercontent.com/HiradEmami/readme-ux-kit/master/assets/dividers/animated/unique_effects/divider_cyber_cycle.svg)](https://github.com/DevGopi-16)
 
 ## 🚀 Getting Started
 
 ### Prerequisites
-- Python 3.10+
-- pip
-- Internet access on first run (FastF1 downloads and caches session data)
+
+![Python](https://img.shields.io/badge/Python-3.10+-3776AB?logo=python&logoColor=white)
+![pip](https://img.shields.io/badge/pip-required-blue)
+![Internet](https://img.shields.io/badge/Internet-first%20run%20only-lightgrey)
 
 ### Installation & Run
 
@@ -165,45 +189,61 @@ pip install -r requirements.txt
 uvicorn main:app --reload --port 8000
 ```
 
-Open **http://localhost:8000**
+<div align="center">
+
+**➜ Open [http://localhost:8000](http://localhost:8000)**
+
+</div>
 
 > ℹ️ First load per race takes longer — FastF1 downloads and caches session data locally.
 
----
+<br/>
 
 ## ⚡ Performance
 
 Telemetry is **downsampled server-side** before transmission, then **interpolated client-side** for smooth animation — keeping payloads small without sacrificing playback quality.
 
----
+[![divider](https://raw.githubusercontent.com/HiradEmami/readme-ux-kit/master/assets/dividers/animated/bars/divider_circuit_pulse_bar.svg)](https://github.com/DevGopi-16)
 
-## 🗺 Possible Future Extensions
+## 🗺 Roadmap
 
-- Track dominance map (fastest driver per mini-sector)
-- Pit stop strategy timeline
-- 3D track view (Three.js)
-- Exportable replay clips (GIF/MP4)
-- Live session mode via WebSockets
+- [ ] Track dominance map (fastest driver per mini-sector)
+- [ ] Pit stop strategy timeline
+- [ ] 3D track view (Three.js)
+- [ ] Exportable replay clips (GIF/MP4)
+- [ ] Live session mode via WebSockets
 
----
+<br/>
 
 ## 🤝 Contributing
 
-Contributions, ideas, and feature requests are welcome:
+Contributions, ideas, and feature requests are welcome!
 
-1. Fork the repository
-2. Create a feature branch (`git checkout -b feature/my-feature`)
-3. Commit your changes
-4. Open a Pull Request
+```bash
+# 1. Fork the repository
+# 2. Create a feature branch
+git checkout -b feature/my-feature
 
----
+# 3. Commit your changes
+git commit -m "Add my feature"
+
+# 4. Open a Pull Request
+```
+
+<br/>
 
 ## 📄 License
 
-MIT License.
+Released under the **MIT License** — see [LICENSE](LICENSE) for details.
 
----
+<br/>
+
+<div align="center">
 
 ## ⭐ Support
 
-If this project is useful or interesting to you, a ⭐ on GitHub goes a long way — and feel free to connect if you're working on anything similar with FastF1 or motorsport data.
+If this project is useful or interesting to you, a star on GitHub goes a long way — and feel free to connect if you're working on anything similar with FastF1 or motorsport data.
+
+<img src="https://capsule-render.vercel.app/api?type=waving&color=0:15151E,100:E10600&height=120&section=footer" width="100%"/>
+
+</div>

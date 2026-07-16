@@ -7,10 +7,89 @@
 </head>
 <body>
 
-  <!-- Session picker (shown until a replay is loaded) -->
-  <div id="picker" class="picker-page">
+  <!-- Home dashboard (shown first) -->
+  <div id="homePage" class="home-page">
+    <aside class="home-sidebar">
+      <div class="sidebar-brand"><span class="brand-mark">F1</span></div>
+      <nav class="sidebar-nav">
+        <button class="nav-item active" data-nav="home">🏠<span>Home</span></button>
+        <button class="nav-item" data-nav="replay">▶<span>Replay</span></button>
+        <button class="nav-item" data-nav="sessions">🗓️<span>Sessions</span></button>
+        <button class="nav-item" data-nav="drivers">👤<span>Drivers</span></button>
+        <button class="nav-item" data-nav="telemetry">📈<span>Telemetry</span></button>
+        <button class="nav-item" data-nav="results">📋<span>Results</span></button>
+        <button class="nav-item" data-nav="compare">⚖️<span>Compare</span></button>
+      </nav>
+      <div class="sidebar-bottom">
+        <button class="nav-item" data-nav="settings">⚙️<span>Settings</span></button>
+        <button class="nav-item" data-nav="help">❓<span>Help</span></button>
+      </div>
+    </aside>
+
+    <div class="home-main">
+      <header class="home-topbar">
+        <div class="topbar-search">🔍 <input placeholder="Search coming soon…" disabled></div>
+        <div class="topbar-right">
+          <span class="topbar-clock" id="homeTopClock">--:--:--</span>
+        </div>
+      </header>
+
+      <section class="home-hero">
+        <span class="hero-badge">FASTF1 POWERED</span>
+        <h1>EXPERIENCE EVERY <span class="hero-accent">LAP.</span><br>EVERY DETAIL.</h1>
+        <p>Advanced telemetry. Real-time insights. Relive the race like never before.</p>
+        <div class="hero-actions">
+          <button id="heroStartBtn" class="hero-btn-primary">▶ START NEW REPLAY</button>
+          <button id="heroBrowseBtn" class="hero-btn-secondary">🗂️ BROWSE SESSIONS</button>
+        </div>
+        <div class="hero-features">
+          <div><b>Real Telemetry</b><span>Live &amp; Accurate</span></div>
+          <div><b>Advanced Analytics</b><span>Deep Race Insights</span></div>
+          <div><b>Precise Replay</b><span>Frame Perfect</span></div>
+          <div><b>All Conditions</b><span>Rain or Shine</span></div>
+        </div>
+      </section>
+
+      <section id="recentSessionsSection" class="recent-sessions">
+        <div class="section-header">
+          <h2>Recent Sessions</h2>
+          <label class="section-year-picker">
+            Year
+            <select id="homeYearSelect"></select>
+          </label>
+        </div>
+        <div id="recentSessionsGrid" class="sessions-grid">
+          <p class="sessions-loading">Loading recent sessions…</p>
+        </div>
+      </section>
+
+      <footer class="home-statusbar">
+        <div class="status-item">
+          <span class="status-icon">🗄️</span>
+          <div><div class="status-label">DATA SOURCE</div><div class="status-value">FastF1 API</div></div>
+        </div>
+        <div class="status-item">
+          <span class="status-dot"></span>
+          <div><div class="status-label">CACHE STATUS</div><div class="status-value status-ready">Ready</div></div>
+        </div>
+        <div class="status-item">
+          <span class="status-icon">⏱️</span>
+          <div><div class="status-label">LOCAL TIME</div><div class="status-value" id="homeLocalTime">--:--:--</div></div>
+        </div>
+        <div class="status-item">
+          <span class="status-icon">🏷️</span>
+          <div><div class="status-label">VERSION</div><div class="status-value">v2.1.0</div></div>
+        </div>
+      </footer>
+    </div>
+
+    <div id="homeToast" class="home-toast hidden"></div>
+  </div>
+
+  <!-- Session picker -->
+  <div id="picker" class="picker-page hidden">
     <div class="picker-topbar">
-      <div class="picker-brand"><span class="brand-mark">F1</span> RACE REPLAY</div>
+      <button id="pickerHomeBtn" class="picker-brand picker-home-btn"><span class="brand-mark">F1</span> RACE REPLAY</button>
       <div class="picker-badge">
         <span class="badge-icon">⚡</span>
         <div>
@@ -93,17 +172,14 @@
     </div>
   </div>
 
-  <!-- Qualifying / Sprint Qualifying results (session times table, not a
-       car replay — Q/SQ has no synced multi-car timeline the way Race/
-       Sprint do, so this is a simpler results view). No Strategy button
-       here — tyre stint strategy is a Race/Sprint concept only. -->
+  <!-- Qualifying / Sprint Qualifying results -->
   <div id="qualiResults" class="quali-results hidden">
     <button id="backToPickerBtn2" class="back-btn">← New Replay</button>
     <div id="qualiBanner" class="session-banner"></div>
     <div id="qualiTable" class="quali-table"></div>
   </div>
 
-  <!-- Replay view (hidden until data is loaded) -->
+  <!-- Replay view -->
   <div id="replay" class="replay hidden">
     <div id="sessionBanner" class="session-banner"></div>
 
@@ -112,7 +188,6 @@
     <div id="weatherPanel" class="panel weather-panel"></div>
     <div id="lapCounter" class="panel lap-counter-banner"></div>
     <div id="leaderboardPanel" class="panel leaderboard-panel"></div>
-    <!-- Filled by app.js with one .driver-info-box per selected driver (stacked) -->
     <div id="driverInfoWrapper" class="driver-info-wrapper"></div>
 
     <div id="controlsLegend" class="panel controls-legend">
@@ -129,57 +204,29 @@
       <div class="cl-row"><b>H</b> Toggle this panel</div>
     </div>
 
-   <!--Bottom Playback Bar -->
-
     <div class="bottom-bar">
         <div class="controls">
-            <!-- Rewind -->
             <button id="rewindBtn" class="icon-btn" title="Rewind 10s">
                 <img src="/static/images/controls/rewind.png" alt="Rewind">
             </button>
-            <!-- Play / Pause -->
             <button id="playPauseBtn" class="icon-btn" title="Play / Pause">
-                <img
-                    id="playPauseIcon"
-                    src="/static/images/controls/play.png"
-                    alt="Play">
+                <img id="playPauseIcon" src="/static/images/controls/play.png" alt="Play">
             </button>
-            <!-- Forward -->
             <button id="forwardBtn" class="icon-btn" title="Forward 10s">
                 <img src="/static/images/controls/forward.png" alt="Forward">
             </button>
-            <!-- Speed -->
             <div class="speed-control">
-                <button
-                    id="speedDownBtn"
-                    class="icon-btn"
-                    title="Decrease Speed">
-                    <img
-                        src="/static/images/controls/speed-.png"
-                        alt="Speed Down">
+                <button id="speedDownBtn" class="icon-btn" title="Decrease Speed">
+                    <img src="/static/images/controls/speed-.png" alt="Speed Down">
                 </button>
                 <span id="speedLabel">1x</span>
-                <button
-                    id="speedUpBtn"
-                    class="icon-btn"
-                    title="Increase Speed">
-                    <img
-                        src="/static/images/controls/speed+.png"
-                        alt="Speed Up">
+                <button id="speedUpBtn" class="icon-btn" title="Increase Speed">
+                    <img src="/static/images/controls/speed+.png" alt="Speed Up">
                 </button>
             </div>
-            <!-- Time -->
-            <span id="timeLabel" class="time-label">
-                0:00 / 0:00
-            </span>
+            <span id="timeLabel" class="time-label">0:00 / 0:00</span>
         </div>
-
-        <!-- Progress -->
-        <canvas
-            id="progressCanvas"
-            class="progress-canvas">
-        </canvas>
-
+        <canvas id="progressCanvas" class="progress-canvas"></canvas>
     </div>
 
     <div id="legend" class="legend">
@@ -193,9 +240,6 @@
     <button id="strategyBtn" class="back-btn strategy-btn">🏁 Strategy</button>
   </div>
 
-  <!-- Tyre strategy panel — full view that replaces the replay screen
-       while open. Sibling of #replay (NOT nested inside it), so hiding
-       #replay doesn't also hide this. -->
   <div id="strategyPanel" class="strategy-panel hidden">
     <button id="strategyBackBtn" class="back-btn">← Back to Replay</button>
     <div id="strategyContent" class="strategy-content"></div>

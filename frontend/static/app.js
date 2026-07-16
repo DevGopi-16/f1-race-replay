@@ -56,6 +56,154 @@ const roundSelect = document.getElementById("roundSelect");
 const sessionTypeSelect = document.getElementById("sessionTypeSelect");
 const pickerStatus = document.getElementById("pickerStatus");
 
+// ---------------------------------------------------------------------
+// Home dashboard
+// ---------------------------------------------------------------------
+function showToast(message) {
+  const toast = document.getElementById("homeToast");
+  toast.textContent = message;
+  toast.classList.remove("hidden");
+  clearTimeout(showToast._t);
+  showToast._t = setTimeout(() => toast.classList.add("hidden"), 2200);
+}
+
+function goToPickerScreen() {
+  document.getElementById("homePage").classList.add("hidden");
+  document.getElementById("picker").classList.remove("hidden");
+}
+
+function goToHomeScreen() {
+  document.getElementById("picker").classList.add("hidden");
+  document.getElementById("homePage").classList.remove("hidden");
+  pickerStatus.textContent = "";
+}
+
+document.getElementById("heroStartBtn").addEventListener("click", goToPickerScreen);
+document.getElementById("pickerHomeBtn").addEventListener("click", goToHomeScreen);
+
+document.getElementById("heroBrowseBtn").addEventListener("click", () => {
+  document.getElementById("recentSessionsSection").scrollIntoView({ behavior: "smooth" });
+});
+
+// document.querySelectorAll(".nav-item").forEach(btn => {
+//   btn.addEventListener("click", () => {
+//     const target = btn.dataset.nav;
+//     if (target === "home") return;
+//     if (target === "replay") { goToPickerScreen(); return; }
+//     if (target === "sessions") {
+//       document.getElementById("recentSessionsSection").scrollIntoView({ behavior: "smooth" });
+//       return;
+//     }
+//     showToast(`${btn.textContent.trim()} isn't built yet — coming soon.`);
+//   });
+// });
+
+const NAV_LABELS = {
+  sessions: "Sessions",
+  drivers: "Drivers",
+  telemetry: "Telemetry",
+  results: "Results",
+  compare: "Compare",
+  settings: "Settings",
+  help: "Help",
+};
+
+document.querySelectorAll(".nav-item").forEach(btn => {
+  btn.addEventListener("click", () => {
+    const target = btn.dataset.nav;
+    if (target === "home") return;
+    if (target === "replay") { goToPickerScreen(); return; }
+    if (target === "sessions") {
+      document.getElementById("recentSessionsSection").scrollIntoView({ behavior: "smooth" });
+      return;
+    }
+    const label = NAV_LABELS[target] || target;
+    showToast(`${label} isn't built yet — coming soon.`);
+  });
+});
+
+
+const FLAG_EMOJI = {
+  "Australia": "🇦🇺", "China": "🇨🇳", "Japan": "🇯🇵", "United States": "🇺🇸",
+  "Canada": "🇨🇦", "Monaco": "🇲🇨", "Spain": "🇪🇸", "Austria": "🇦🇹",
+  "United Kingdom": "🇬🇧", "Belgium": "🇧🇪", "Hungary": "🇭🇺", "Netherlands": "🇳🇱",
+  "Italy": "🇮🇹", "Azerbaijan": "🇦🇿", "Singapore": "🇸🇬", "Mexico": "🇲🇽",
+  "Brazil": "🇧🇷", "Qatar": "🇶🇦", "United Arab Emirates": "🇦🇪",
+};
+
+async function loadRecentSessions(year) {
+  const grid = document.getElementById("recentSessionsGrid");
+  grid.innerHTML = `<p class="sessions-loading">Loading recent sessions…</p>`;
+
+  try {
+    const res = await fetch(`/api/schedule/${year}`);
+    if (!res.ok) throw new Error(`HTTP ${res.status}`);
+    const weekends = await res.json();
+
+    const today = new Date();
+    const past = weekends
+      .filter(w => new Date(w.date) <= today)
+      .sort((a, b) => new Date(b.date) - new Date(a.date))
+      .slice(0, 8);
+
+    if (past.length === 0) {
+      grid.innerHTML = `<p class="sessions-loading">No completed sessions yet for ${year} — try a different year above.</p>`;
+      return;
+    }
+
+    grid.innerHTML = past.map(w => `
+      <div class="session-card" data-round="${w.round_number}" data-year="${year}">
+        <span class="session-card-play">▶</span>
+        <div class="session-card-flag">${FLAG_EMOJI[w.country] || "🏁"}</div>
+        <div class="session-card-title">${w.event_name}</div>
+        <div class="session-card-sub">${w.country}</div>
+        <div class="session-card-meta">
+          <span>${w.date}</span>
+          <span class="session-card-type">RACE</span>
+        </div>
+      </div>`).join("");
+
+    grid.querySelectorAll(".session-card").forEach(card => {
+      card.addEventListener("click", async () => {
+        const y = card.dataset.year;
+        const r = card.dataset.round;
+        goToPickerScreen();
+        yearSelect.value = y;
+        await loadSchedule();
+        roundSelect.value = r;
+        updateSessionOptions();
+        sessionTypeSelect.value = "R";
+        submitLoadSession();
+      });
+    });
+  } catch (e) {
+    grid.innerHTML = `<p class="sessions-loading">Couldn't load sessions: ${e.message}</p>`;
+  }
+}
+
+function initHomePage() {
+  const homeYearSelect = document.getElementById("homeYearSelect");
+  const thisYear = new Date().getFullYear();
+  for (let y = thisYear; y >= 2018; y--) {
+    const opt = document.createElement("option");
+    opt.value = y;
+    opt.textContent = y;
+    homeYearSelect.appendChild(opt);
+  }
+  homeYearSelect.addEventListener("change", () => loadRecentSessions(homeYearSelect.value));
+  loadRecentSessions(thisYear);
+
+  const updateClocks = () => {
+    const t = new Date().toLocaleTimeString();
+    document.getElementById("homeTopClock").textContent = t;
+    document.getElementById("homeLocalTime").textContent = t;
+  };
+  updateClocks();
+  setInterval(updateClocks, 1000);
+}
+
+initHomePage();
+
 function initPicker() {
   const thisYear = new Date().getFullYear();
   for (let y = thisYear; y >= 2018; y--) {
@@ -182,7 +330,7 @@ function updateSessionOptions() {
 
 roundSelect.addEventListener("change", updateSessionOptions);
 
-document.getElementById("loadBtn").addEventListener("click", async () => {
+async function submitLoadSession() {
   const year = yearSelect.value;
   const round = roundSelect.value;
   const sessionType = sessionTypeSelect.value;
@@ -218,7 +366,9 @@ document.getElementById("loadBtn").addEventListener("click", async () => {
   } catch (e) {
     pickerStatus.innerHTML = friendlyErrorMessage(e.message);
   }
-});
+}
+
+document.getElementById("loadBtn").addEventListener("click", submitLoadSession);
 
 function showQualiResults(data) {
   document.getElementById("picker").classList.add("hidden");
@@ -273,29 +423,6 @@ document.getElementById("backToPickerBtn").addEventListener("click", () => {
   document.getElementById("picker").classList.remove("hidden");
   pickerStatus.textContent = "";
 });
-
-
-// document.getElementById("strategyBtn").addEventListener("click", async () => {
-//   const m = state.raceData.meta;
-//   document.getElementById("strategyModal").classList.remove("hidden");
-//   document.getElementById("strategyContent").innerHTML = "Loading…";
-
-//   try {
-//     const res = await fetch(`/api/strategy?year=${m.year}&round=${m.round}&session_type=${m.session_type}`);
-//     if (!res.ok) {
-//       const detail = await res.json().catch(() => ({}));
-//       throw new Error(detail.detail || `HTTP ${res.status}`);
-//     }
-//     const data = await res.json();
-//     renderStrategy(data);
-//   } catch (e) {
-//     document.getElementById("strategyContent").innerHTML = friendlyErrorMessage(e.message);
-//   }
-// });
-
-// document.getElementById("strategyCloseBtn").addEventListener("click", () => {
-//   document.getElementById("strategyModal").classList.add("hidden");
-// });
 
 document.getElementById("strategyBtn").addEventListener("click", async () => {
   const m = state.raceData.meta;
