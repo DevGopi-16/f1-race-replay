@@ -245,6 +245,57 @@
     <div id="strategyContent" class="strategy-content"></div>
   </div>
 
+  <!-- telemetry comparison panel-->
+   <div id="telemetryPanel" class="strategy-panel hidden">
+    <button id="telemetryBackBtn" class="back-Btn">← Back</button>
+    <div class="strategy-content telemetry-content-wide">
+      <div class="telemetry-header">📈 Telemetry Comparison</div>
+
+      <div class="telemetry-form">
+        <label>Year <select id="teleYearSelect"></select></label>
+        <label>Round<select id="teleRoundSelect"></select></label>
+        <label>Session
+          <select id="teleSessionSelect">
+            <option value="R">Race</option>
+            <option value="S">Sprint</option>
+            <option value="Q">Qualifying</option>
+            <option value="SQ">Sprint Qualifying</option>
+            <option value="FP1">Practice 1</option>
+            <option value="FP2">Practice 2</option>
+            <option value="FP3">Practice 3</option>
+          </select>
+        </label>
+        <label>Driver A <select id="teleDriverASelect"><option>Load a round first</option></select></label>
+        <label>Driver B <select id="teleDriverBSelect"><option>Load a round first</option></select></label>
+        <button id="teleCompareBtn" class="picker-load-btn telemetry-compare-btn"><span>Compare</span></button>
+      </div>
+
+      <p id="telemetryStatus" class="picker-status"></p>
+
+      <div id="telemetryResults" class="telemetry-results hidden">
+        <div class="telemetry-lap-info">
+          <div id="teleAInfo" class="telemetry-lap-badge"></div>
+          <div id="teleBInfo" class="telemetry-lap-badge"></div>
+        </div>
+
+        <div class="telemetry-chart-block">
+          <div class="telemetry-chart-title">Speed (Km/h)</div>
+          <canvas id="teleSpeedCanvas" class="telemetry-canvas"></canvas>
+        </div>
+        <div class="telemetry-chart-block">
+          <div class="telemetry-chart-title">Throttle (%)</div>
+          <canvas id="teleThrottleCanvas" class="telemetry-canvas"></canvas>
+        </div>
+        <div class="telemetry-chart-block">
+          <div class="telemetry-chart-title">Break (%)</div>
+          <canvas id="teleBreakCanvas" class="telemetry-canvas"></canvas>
+        </div>
+
+        <div id="teleSectorTable"></div>
+      </div>
+    </div>
+   </div>
+
   <script src="/static/app.js"></script>
 </body>
 </html>

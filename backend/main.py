@@ -28,8 +28,11 @@ from src.f1_data import (
     get_race_telemetry,
     get_race_weekends_by_year,
     get_quali_telemetry,
-    get_tyre_strategy
+    get_tyre_strategy,
+    get_session_drivers,
+    get_driver_lap_telemetry,
 )
+from typing import Optional
 
 from src.track_geometry import build_track_geometry, extract_race_events, point_at_distance
 from src.serialize import serialize_frames, serialize_driver_colors
@@ -328,6 +331,66 @@ def strategy(
         "total_pit_stops": strategy_data["total_pit_stops"],
         "drivers": strategy_data["drivers"],
     }
+
+@app.get(
+    "/api/drivers",
+    summary="Session Driver List",
+    description="Lightweight driver list (code, name, color) for a session — used to populate driver-select dropdowns without loading full telemetry.",
+)
+def drivers_list(
+    year: int = Query(...),
+    round: int = Query(..., alias="round"),
+    session_type: str = Query("R", pattern="^(R|S|Q|SQ|FP1|FP2|FP3)$"),
+):
+    try:
+        session = load_session(year, round, session_type, telemetry=False)
+    except Exception as e:
+        raise HTTPException(status_code=502, detail=f"Failed to load session: {e}")
+
+    try:
+        return get_session_drivers(session)
+    except Exception as e:
+        raise HTTPException(status_code=502, detail=f"Failed to list drivers: {e}")
+
+
+@app.get(
+    "/api/telemetry/compare",
+    summary="Driver Telemetry Comparison",
+    description="Speed/Throttle/Brake traces for two drivers' laps (fastest by default), resampled onto a shared distance grid so they overlay directly.",
+)
+def telemetry_compare(
+    year: int = Query(...),
+    round: int = Query(..., alias="round"),
+    session_type: str = Query("R", pattern="^(R|S|Q|SQ|FP1|FP2|FP3)$"),
+    driver_a: str = Query(...),
+    driver_b: str = Query(...),
+    lap_a: Optional[int] = Query(None),
+    lap_b: Optional[int] = Query(None),
+):
+    try:
+        session = load_session(year, round, session_type, telemetry=True)
+    except Exception as e:
+        raise HTTPException(status_code=502, detail=f"Failed to load session: {e}")
+
+    try:
+        data_a = get_driver_lap_telemetry(session, driver_a, lap_a)
+        data_b = get_driver_lap_telemetry(session, driver_b, lap_b)
+    except Exception as e:
+        raise HTTPException(status_code=502, detail=f"Failed to build telemetry comparison: {e}")
+
+    event_date = session.event.get("EventDate")
+    return {
+        "meta": {
+            "event_name": session.event.get("EventName", ""),
+            "year": year,
+            "round": round,
+            "date": event_date.strftime("%B %d, %Y") if event_date else "",
+            "session_type": session_type,
+        },
+        "driver_a": data_a,
+        "driver_b": data_b,
+    }
+
 # Serve the frontend 
 FRONTEND_DIR = Path(__file__).resolve().parent.parent / "frontend"
 

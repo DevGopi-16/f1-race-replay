@@ -108,6 +108,7 @@ const NAV_LABELS = {
   help: "Help",
 };
 
+
 document.querySelectorAll(".nav-item").forEach(btn => {
   btn.addEventListener("click", () => {
     const target = btn.dataset.nav;
@@ -117,9 +118,20 @@ document.querySelectorAll(".nav-item").forEach(btn => {
       document.getElementById("recentSessionsSection").scrollIntoView({ behavior: "smooth" });
       return;
     }
+    if (target === "telemetry") {
+      document.getElementById("homePage").classList.add("hidden");
+      document.getElementById("telemetryPanel").classList.remove("hidden");
+      initTelemetryPanel();
+      return;
+    }
     const label = NAV_LABELS[target] || target;
     showToast(`${label} isn't built yet — coming soon.`);
   });
+});
+
+document.getElementById("telemetryBackBtn").addEventListener("click", () => {
+  document.getElementById("telemetryPanel").classList.add("hidden");
+  document.getElementById("homePage").classList.remove("hidden");
 });
 
 
@@ -1413,6 +1425,190 @@ window.addEventListener("keydown", (e) => {
     }
 
 });
+
+// Telemetry comparison panel
+let teleInitialized = false;
+let teleSchedule = {};
+
+function initTelemetryPanel() {
+  if (teleInitialized) return;
+  teleInitialized = true;
+
+  const yearSel = document.getElementById("teleYearSelect");
+  const thisYear = new Date().getFullYear();
+  for (let y = thisYear; y >= 2018; y--) {
+    const opt = document.createElement("option");
+    opt.value = y; opt.textContent = y;
+    yearSel.appendChild(opt);
+  }
+
+  yearSel.addEventListener("change", teleLoadSchedule);
+  document.getElementById("teleRoundSelect").addEventListener("change", teleLoadDrivers);
+  document.getElementById("teleSessionSelect").addEventListener("change", teleLoadDrivers);
+  document.getElementById("teleCompareBtn").addEventListener("click", teleRunCompare);
+
+  teleLoadSchedule();
+}
+
+async function teleLoadSchedule() {
+  const roundSel = document.getElementById("teleRoundSelect");
+  roundSel.innerHTML = "<option>Loading…</option>";
+  try {
+    const year = document.getElementById("teleYearSelect").value;
+    const res = await fetch(`/api/schedule/${year}`);
+    if (!res.ok) throw new Error(`HTTP ${res.status}`);
+    const weekends = await res.json();
+    roundSel.innerHTML = "";
+    for (const w of weekends) {
+      const opt = document.createElement("option");
+      opt.value = w.round_number;
+      opt.textContent = `${w.round_number}: ${w.event_name}`;
+      roundSel.appendChild(opt);
+    }
+    teleLoadDrivers();
+  } catch (e) {
+    roundSel.innerHTML = "<option>Failed to load</option>";
+  }
+}
+
+async function teleLoadDrivers() {
+  const driverASel = document.getElementById("teleDriverASelect");
+  const driverBSel = document.getElementById("teleDriverBSelect");
+  const status = document.getElementById("telemetryStatus");
+  driverASel.innerHTML = "<option>Loading…</option>";
+  driverBSel.innerHTML = "<option>Loading…</option>";
+  status.innerHTML = "";
+
+  const year = document.getElementById("teleYearSelect").value;
+  const round = document.getElementById("teleRoundSelect").value;
+  const sessionType = document.getElementById("teleSessionSelect").value;
+  if (!round || isNaN(Number(round))) return;
+
+  try {
+    const res = await fetch(`/api/drivers?year=${year}&round=${round}&session_type=${sessionType}`);
+    if (!res.ok) {
+      const detail = await res.json().catch(() => ({}));
+      throw new Error(detail.detail || `HTTP ${res.status}`);
+    }
+    const drivers = await res.json();
+    const optionsHtml = drivers.map(d => `<option value="${d.code}">${d.code} — ${d.name}</option>`).join("");
+    driverASel.innerHTML = optionsHtml;
+    driverBSel.innerHTML = optionsHtml;
+    if (drivers.length > 1) driverBSel.selectedIndex = 1;
+  } catch (e) {
+    driverASel.innerHTML = "<option>Failed to load</option>";
+    driverBSel.innerHTML = "<option>Failed to load</option>";
+    status.innerHTML = friendlyErrorMessage(e.message);
+  }
+}
+
+async function teleRunCompare() {
+  const status = document.getElementById("telemetryStatus");
+  const resultsEl = document.getElementById("telemetryResults");
+  status.textContent = "Loading telemetry…";
+  resultsEl.classList.add("hidden");
+
+  const year = document.getElementById("teleYearSelect").value;
+  const round = document.getElementById("teleRoundSelect").value;
+  const sessionType = document.getElementById("teleSessionSelect").value;
+  const driverA = document.getElementById("teleDriverASelect").value;
+  const driverB = document.getElementById("teleDriverBSelect").value;
+
+  if (!driverA || !driverB) {
+    status.textContent = "Pick two drivers to compare.";
+    return;
+  }
+  if (driverA === driverB) {
+    status.textContent = "Pick two different drivers.";
+    return;
+  }
+
+  try {
+    const res = await fetch(`/api/telemetry/compare?year=${year}&round=${round}&session_type=${sessionType}&driver_a=${driverA}&driver_b=${driverB}`);
+    if (!res.ok) {
+      const detail = await res.json().catch(() => ({}));
+      throw new Error(detail.detail || `HTTP ${res.status}`);
+    }
+    const data = await res.json();
+    status.textContent = "";
+    renderTelemetryCompare(data);
+  } catch (e) {
+    status.innerHTML = friendlyErrorMessage(e.message);
+  }
+}
+
+function fmtLapTime(seconds) {
+  if (seconds == null) return "-";
+  const mins = Math.floor(seconds / 60);
+  const rem = (seconds % 60).toFixed(3);
+  return `${mins}:${rem.padStart(6, "0")}`;
+}
+
+function drawTelemetryLine(canvasId, seriesA, seriesB, colorA, colorB, minY, maxY) {
+  const canvas = document.getElementById(canvasId);
+  const rect = canvas.getBoundingClientRect();
+  canvas.width = Math.floor(rect.width);
+  canvas.height = Math.floor(rect.height);
+  const c = canvas.getContext("2d");
+  const w = canvas.width, h = canvas.height;
+  c.clearRect(0, 0, w, h);
+
+  const range = maxY - minY || 1;
+  const toY = (v) => h - ((v - minY) / range) * h;
+  const toX = (i, len) => (i / (len - 1)) * w;
+
+  const drawSeries = (series, color) => {
+    c.strokeStyle = color;
+    c.lineWidth = 2;
+    c.beginPath();
+    series.forEach((v, i) => {
+      const x = toX(i, series.length);
+      const y = toY(v);
+      if (i === 0) c.moveTo(x, y); else c.lineTo(x, y);
+    });
+    c.stroke();
+  };
+
+  drawSeries(seriesA, colorA);
+  drawSeries(seriesB, colorB);
+}
+
+function renderTelemetryCompare(data) {
+  const a = data.driver_a, b = data.driver_b;
+  const colorA = state.raceData?.driver_colors?.[a.driver] || "#00aeef";
+  const colorB = state.raceData?.driver_colors?.[b.driver] || "#ff3333";
+
+  document.getElementById("teleAInfo").innerHTML =
+    `<b style="color:${colorA}">${a.driver}</b> · Lap ${a.lap_number} · ${fmtLapTime(a.lap_time)} · ${a.compound}`;
+  document.getElementById("teleBInfo").innerHTML =
+    `<b style="color:${colorB}">${b.driver}</b> · Lap ${b.lap_number} · ${fmtLapTime(b.lap_time)} · ${b.compound}`;
+
+  document.getElementById("telemetryResults").classList.remove("hidden");
+
+  const speedMax = Math.max(...a.speed, ...b.speed) * 1.05;
+  drawTelemetryLine("teleSpeedCanvas", a.speed, b.speed, colorA, colorB, 0, speedMax);
+  drawTelemetryLine("teleThrottleCanvas", a.throttle, b.throttle, colorA, colorB, 0, 100);
+  drawTelemetryLine("teleBrakeCanvas", a.brake, b.brake, colorA, colorB, 0, 100);
+
+  const sectorRows = ["sector1", "sector2", "sector3"].map((key, i) => {
+    const ta = a.sector_times[key], tb = b.sector_times[key];
+    const delta = (ta != null && tb != null) ? (ta - tb) : null;
+    const deltaText = delta == null ? "-" : `${delta >= 0 ? "+" : ""}${delta.toFixed(3)}s`;
+    const deltaColor = delta == null ? "#999" : delta < 0 ? "#2ecc40" : "#ff4444";
+    return `<div class="telemetry-sector-row">
+      <span>Sector ${i + 1}</span>
+      <span style="color:${colorA}">${ta != null ? ta.toFixed(3) + "s" : "-"}</span>
+      <span style="color:${colorB}">${tb != null ? tb.toFixed(3) + "s" : "-"}</span>
+      <span style="color:${deltaColor}">${deltaText}</span>
+    </div>`;
+  }).join("");
+
+  document.getElementById("teleSectorTable").innerHTML = `
+    <div class="telemetry-sector-row" style="font-weight:700; color:#9aa1ad;">
+      <span>Sector</span><span>${a.driver}</span><span>${b.driver}</span><span>Delta (A − B)</span>
+    </div>
+    ${sectorRows}`;
+}
 
 initPicker();
 setSpeedIndex(state.speedIndex);

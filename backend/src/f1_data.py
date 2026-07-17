@@ -191,8 +191,6 @@ def load_session(year, round_number, session_type="R", telemetry=True):
 
 
 # The following functions require a loaded session object
-
-
 def get_driver_colors(session):
     color_mapping = fastf1.plotting.get_driver_color_mapping(session)
 
@@ -203,6 +201,94 @@ def get_driver_colors(session):
         rgb = tuple(int(hex_color[i : i + 2], 16) for i in (0, 2, 4))
         rgb_colors[driver] = rgb
     return rgb_colors
+
+def get_session_drivers(session):
+    """Lightweight driver list (code, name, color) for populating dropdowns
+    — doesn't need telemetry loaded, just session.results.
+    """
+    results = session.results
+    colors = get_driver_colors(session)
+    drivers = []
+    for _, row in results.iterrows():
+        code = row.get("Abbreviation")
+        if not code or pd.isna(code):
+            continue
+        full_name = row.get("FullName", code)
+        rgb = colors.get(code, (136, 136, 136))
+        drivers.append({
+            "code": code,
+            "name": str(full_name) if pd.notna(full_name) else code,
+            "color": f"#{rgb[0]:02x}{rgb[1]:02x}{rgb[2]:02x}",
+        })
+    return drivers
+
+
+def get_driver_lap_telemetry(session, driver_code, lap_number=None, n_points=400):
+    """One driver's telemetry for a single lap (their fastest lap by
+    default, or a specific lap_number), resampled onto a fixed-size
+    distance grid (not time) — so two different drivers' laps can be
+    directly compared point-for-point on a shared X-axis regardless of
+    how long each lap took or how many raw samples FastF1 recorded.
+    """
+    driver_laps = session.laps.pick_drivers(driver_code)
+    if driver_laps.empty:
+        raise ValueError(f"No laps found for driver '{driver_code}'")
+
+    if lap_number is not None:
+        lap_rows = driver_laps[driver_laps["LapNumber"] == lap_number]
+        if lap_rows.empty:
+            raise ValueError(f"Lap {lap_number} not found for driver '{driver_code}'")
+        lap = lap_rows.iloc[0]
+    else:
+        lap = driver_laps.pick_fastest()
+        if lap is None:
+            raise ValueError(f"No valid lap found for driver '{driver_code}'")
+
+    telemetry = lap.get_telemetry()
+    if telemetry is None or telemetry.empty or "Distance" not in telemetry.columns:
+        raise ValueError(f"No telemetry available for driver '{driver_code}'")
+
+    dist = telemetry["Distance"].to_numpy()
+    speed = telemetry["Speed"].to_numpy()
+    throttle = telemetry["Throttle"].to_numpy()
+    brake = telemetry["Brake"].to_numpy().astype(float) * 100.0
+    gear = telemetry["nGear"].to_numpy()
+
+    total_distance = float(dist.max())
+    grid = np.linspace(0, total_distance, n_points)
+
+    order = np.argsort(dist)
+    dist_sorted = dist[order]
+
+    speed_r = np.interp(grid, dist_sorted, speed[order])
+    throttle_r = np.interp(grid, dist_sorted, throttle[order])
+    brake_r = np.interp(grid, dist_sorted, brake[order])
+
+    idxs = np.searchsorted(dist_sorted, grid, side="right") - 1
+    idxs = np.clip(idxs, 0, len(dist_sorted) - 1)
+    gear_r = gear[order][idxs].astype(int)
+
+    sector_times = {
+        "sector1": parse_time_string(str(lap.get("Sector1Time"))) if pd.notna(lap.get("Sector1Time")) else None,
+        "sector2": parse_time_string(str(lap.get("Sector2Time"))) if pd.notna(lap.get("Sector2Time")) else None,
+        "sector3": parse_time_string(str(lap.get("Sector3Time"))) if pd.notna(lap.get("Sector3Time")) else None,
+    }
+    lap_time = parse_time_string(str(lap.get("LapTime"))) if pd.notna(lap.get("LapTime")) else None
+    compound = str(lap.get("Compound", "UNKNOWN")) if pd.notna(lap.get("Compound")) else "UNKNOWN"
+
+    return {
+        "driver": driver_code,
+        "lap_number": int(lap["LapNumber"]),
+        "distance": [round(d, 1) for d in grid.tolist()],
+        "speed": [round(s, 1) for s in speed_r.tolist()],
+        "throttle": [round(t, 1) for t in throttle_r.tolist()],
+        "brake": [round(b, 1) for b in brake_r.tolist()],
+        "gear": gear_r.tolist(),
+        "lap_time": lap_time,
+        "sector_times": sector_times,
+        "compound": compound,
+        "total_distance": round(total_distance, 1),
+    }
 
 def get_tyre_strategy(session):
     """
