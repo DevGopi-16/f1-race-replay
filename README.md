@@ -140,11 +140,26 @@ Telemetry is fetched once per session via FastF1, cached locally, downsampled an
 ```text
 F1-RACE-REPLAY-WEB/
 │
+├── assets/
+│   ├── banners.md
+│   ├── dividers/
+│   ├── file_headers/
+│   ├── headers/
+│   ├── icons/
+│   ├── loadings/
+│   ├── progress_bars/
+│   └── visuals/
+│
 ├── backend/
 │   ├── .fastf1-cache/          # FastF1 local data cache
 │   ├── computed_data/          # Precomputed/serialized race data
+│   ├── data/
+│   │   └── drivers.json
 │   ├── src/
 │   │   ├── lib/
+│   │   │   ├── settings.py
+│   │   │   ├── time.py
+│   │   │   └── tyres.py
 │   │   ├── f1_data.py          # FastF1 data loading & processing
 │   │   ├── serialize.py        # Telemetry serialization for the frontend
 │   │   └── track_geometry.py   # Track map / coordinate generation
@@ -152,12 +167,17 @@ F1-RACE-REPLAY-WEB/
 │   └── requirements.txt
 │
 ├── frontend/
+│   ├── index.html
 │   ├── static/
-│   │   ├── images/{controls,tyres,weather}/
+│   │   ├── images/
+│   │   │   ├── banners/
+│   │   │   ├── controls/
+│   │   │   ├── drivers/
+│   │   │   ├── teams/
+│   │   │   ├── tyres/
+│   │   │   └── weather/
 │   │   ├── app.js              # Playback engine & UI logic
 │   │   └── style.css
-│   └── templates/
-│       └── index.html
 │
 ├── .gitignore
 ├── README.md

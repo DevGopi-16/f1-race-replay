@@ -202,9 +202,31 @@ def get_driver_colors(session):
         rgb_colors[driver] = rgb
     return rgb_colors
 
+# def get_session_drivers(session):
+#     """Lightweight driver list (code, name, color) for populating dropdowns
+#     — doesn't need telemetry loaded, just session.results.
+#     """
+#     results = session.results
+#     colors = get_driver_colors(session)
+#     drivers = []
+#     for _, row in results.iterrows():
+#         code = row.get("Abbreviation")
+#         if not code or pd.isna(code):
+#             continue
+#         full_name = row.get("FullName", code)
+#         rgb = colors.get(code, (136, 136, 136))
+#         drivers.append({
+#             "code": code,
+#             "name": str(full_name) if pd.notna(full_name) else code,
+#             "color": f"#{rgb[0]:02x}{rgb[1]:02x}{rgb[2]:02x}",
+#         })
+#     return drivers
+
 def get_session_drivers(session):
-    """Lightweight driver list (code, name, color) for populating dropdowns
-    — doesn't need telemetry loaded, just session.results.
+    """Driver roster for a session: code, name, team, session position,
+    points, and team color — built from session.results, so it works
+    without loading telemetry (fast, used for dropdowns and the
+    Drivers roster view alike).
     """
     results = session.results
     colors = get_driver_colors(session)
@@ -214,12 +236,20 @@ def get_session_drivers(session):
         if not code or pd.isna(code):
             continue
         full_name = row.get("FullName", code)
+        team = row.get("TeamName", "")
+        position = row.get("Position")
+        points = row.get("Points")
         rgb = colors.get(code, (136, 136, 136))
         drivers.append({
             "code": code,
             "name": str(full_name) if pd.notna(full_name) else code,
+            "team": str(team) if pd.notna(team) else "",
+            "position": int(position) if pd.notna(position) else None,
+            "points": float(points) if pd.notna(points) else None,
             "color": f"#{rgb[0]:02x}{rgb[1]:02x}{rgb[2]:02x}",
         })
+
+    drivers.sort(key=lambda d: (d["position"] is None, d["position"] or 999))
     return drivers
 
 

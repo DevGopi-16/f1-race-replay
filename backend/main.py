@@ -12,7 +12,7 @@ in this project's src/ directory. Copy them over before running.
 
 Run with:  uvicorn main:app --reload --port 8000
 """
-
+import json
 import sys
 from pathlib import Path
 import time
@@ -47,6 +47,11 @@ app.add_middleware(
 )
 
 SOURCE_FPS = 25  # must match DT = 1/FPS in f1_data.py
+
+DATA_DIR = Path(__file__).parent / "data"
+
+with open(DATA_DIR / "drivers.json", "r", encoding="utf-8") as f:
+    DRIVERS = json.load(f)
 
 
 @app.on_event("startup")
@@ -144,6 +149,19 @@ Includes:
         }
     }
 )
+@app.get("/api/driver/{code}")
+def get_driver(code: str):
+    code = code.lower()
+
+    for driver in DRIVERS:
+        if driver["id"] == code:
+            return driver
+
+    raise HTTPException(
+        status_code=404,
+        detail="Driver not found"
+    )
+
 # def replay(
 #     year: int = Query(...),
 #     round: int = Query(..., alias="round"),

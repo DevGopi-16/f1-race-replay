@@ -244,58 +244,224 @@
     <button id="strategyBackBtn" class="back-btn">← Back to Replay</button>
     <div id="strategyContent" class="strategy-content"></div>
   </div>
+   <!--TELEMETRY COMPARISON PANEL -->
+  <div id="telemetryPanel" class="strategy-panel hidden">
+      <button id="telemetryBackBtn" class="back-btn">
+          ← Back <!--add css-->
+      </button>
+      <div class="strategy-content telemetry-content-wide">
 
-  <!-- telemetry comparison panel-->
-   <div id="telemetryPanel" class="strategy-panel hidden">
-    <button id="telemetryBackBtn" class="back-Btn">← Back</button>
-    <div class="strategy-content telemetry-content-wide">
-      <div class="telemetry-header">📈 Telemetry Comparison</div>
+          <!-- Header -->
+          <div class="telemetry-header">
+              📈 Telemetry Comparison
+          </div>
 
-      <div class="telemetry-form">
-        <label>Year <select id="teleYearSelect"></select></label>
-        <label>Round<select id="teleRoundSelect"></select></label>
-        <label>Session
-          <select id="teleSessionSelect">
-            <option value="R">Race</option>
-            <option value="S">Sprint</option>
-            <option value="Q">Qualifying</option>
-            <option value="SQ">Sprint Qualifying</option>
-            <option value="FP1">Practice 1</option>
-            <option value="FP2">Practice 2</option>
-            <option value="FP3">Practice 3</option>
-          </select>
-        </label>
-        <label>Driver A <select id="teleDriverASelect"><option>Load a round first</option></select></label>
-        <label>Driver B <select id="teleDriverBSelect"><option>Load a round first</option></select></label>
-        <button id="teleCompareBtn" class="picker-load-btn telemetry-compare-btn"><span>Compare</span></button>
+          <!-- Filters -->
+          <div class="telemetry-form">
+
+              <label>
+                  Year
+                  <select id="teleYearSelect"></select>
+              </label>
+
+              <label>
+                  Round
+                  <select id="teleRoundSelect"></select>
+              </label>
+
+              <label>
+                  Session
+                  <select id="teleSessionSelect">
+                      <option value="R">Race</option>
+                      <option value="S">Sprint</option>
+                      <option value="Q">Qualifying</option>
+                      <option value="SQ">Sprint Qualifying</option>
+                      <option value="FP1">Practice 1</option>
+                      <option value="FP2">Practice 2</option>
+                      <option value="FP3">Practice 3</option>
+                  </select>
+              </label>
+
+              <label>
+                  Driver A
+                  <select id="teleDriverASelect">
+                      <option>Load a round first</option>
+                  </select>
+              </label>
+
+              <label>
+                  Driver B
+                  <select id="teleDriverBSelect">
+                      <option>Load a round first</option>
+                  </select>
+              </label>
+
+              <button id="teleCompareBtn"
+                  class="picker-load-btn telemetry-compare-btn">
+                  <span>Compare</span>
+              </button>
+
+          </div>
+
+          <p id="telemetryStatus" class="picker-status"></p>
+
+          <!-- RESULTS -->
+
+          <div id="telemetryResults"
+              class="telemetry-results hidden">
+
+              <!-- Driver Summary -->
+
+              <div class="telemetry-lap-info">
+
+                  <div id="teleAInfo"
+                      class="telemetry-lap-badge">
+                  </div>
+
+                  <div class="telemetry-delta"
+                      id="teleDelta">
+                      Δ --
+                  </div>
+
+                  <div id="teleBInfo"
+                      class="telemetry-lap-badge">
+                  </div>
+
+              </div>
+
+              <!-- KPI Cards -->
+
+              <div class="telemetry-kpis">
+
+                  <div class="telemetry-kpi">
+                      <div class="telemetry-kpi-title">
+                          Lap Delta
+                      </div>
+                      <div id="teleDeltaCard"
+                          class="telemetry-kpi-value">
+                          --
+                      </div>
+                  </div>
+
+                  <div class="telemetry-kpi">
+                      <div class="telemetry-kpi-title">
+                          Top Speed
+                      </div>
+                      <div id="teleTopSpeed"
+                          class="telemetry-kpi-value">
+                          --
+                      </div>
+                  </div>
+
+                  <div class="telemetry-kpi">
+                      <div class="telemetry-kpi-title">
+                          Avg Speed
+                      </div>
+                      <div id="teleAvgSpeed"
+                          class="telemetry-kpi-value">
+                          --
+                      </div>
+                  </div>
+
+                  <div class="telemetry-kpi">
+                      <div class="telemetry-kpi-title">
+                          Brake Time
+                      </div>
+                      <div id="teleBrakeTime"
+                          class="telemetry-kpi-value">
+                          --
+                      </div>
+                  </div>
+
+              </div>
+
+              <!-- Dashboard -->
+
+              <div class="telemetry-dashboard">
+
+                  <!-- LEFT -->
+
+                  <div class="telemetry-main">
+
+                      <div class="telemetry-chart-block">
+
+                          <div class="telemetry-chart-title">
+                              Speed (km/h)
+                          </div>
+
+                          <canvas id="teleSpeedCanvas"
+                                  class="telemetry-canvas">
+                          </canvas>
+
+                      </div>
+
+                      <div class="telemetry-chart-block">
+
+                          <div class="telemetry-chart-title">
+                              Throttle (%)
+                          </div>
+
+                          <canvas id="teleThrottleCanvas"
+                                  class="telemetry-canvas">
+                          </canvas>
+
+                      </div>
+
+                      <div class="telemetry-chart-block">
+
+                          <div class="telemetry-chart-title">
+                              Brake (%)
+                          </div>
+
+                          <!-- renamed from teleBreakCanvas -->
+
+                          <canvas id="teleBrakeCanvas"
+                                  class="telemetry-canvas">
+                          </canvas>
+
+                      </div>
+
+                  </div>
+
+                  <!-- RIGHT -->
+
+                  <aside class="telemetry-sidebar">
+
+                      <div class="telemetry-card">
+
+                          <h3>
+                              Sector Comparison
+                          </h3>
+
+                          <div id="teleSectorTable">
+                          </div>
+
+                      </div>
+
+                      <div class="telemetry-card">
+
+                          <h3>
+                              Session Summary
+                          </h3>
+
+                          <div id="teleInsights">
+
+                              Select two drivers
+                              to generate telemetry.
+
+                          </div>
+
+                      </div>
+
+                  </aside>
+
+              </div>
+
+          </div>
+
       </div>
 
-      <p id="telemetryStatus" class="picker-status"></p>
-
-      <div id="telemetryResults" class="telemetry-results hidden">
-        <div class="telemetry-lap-info">
-          <div id="teleAInfo" class="telemetry-lap-badge"></div>
-          <div id="teleBInfo" class="telemetry-lap-badge"></div>
-        </div>
-
-        <div class="telemetry-chart-block">
-          <div class="telemetry-chart-title">Speed (Km/h)</div>
-          <canvas id="teleSpeedCanvas" class="telemetry-canvas"></canvas>
-        </div>
-        <div class="telemetry-chart-block">
-          <div class="telemetry-chart-title">Throttle (%)</div>
-          <canvas id="teleThrottleCanvas" class="telemetry-canvas"></canvas>
-        </div>
-        <div class="telemetry-chart-block">
-          <div class="telemetry-chart-title">Break (%)</div>
-          <canvas id="teleBreakCanvas" class="telemetry-canvas"></canvas>
-        </div>
-
-        <div id="teleSectorTable"></div>
-      </div>
-    </div>
-   </div>
-
+  </div>
   <script src="/static/app.js"></script>
 </body>
 </html>

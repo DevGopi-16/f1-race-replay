@@ -1094,7 +1094,7 @@ body::after{
 
 /* TELEMETRY COMPARISON */
 
-.telemetry-content-wide{ max-width:980px; }
+/* .telemetry-content-wide{ max-width:980px; }
 
 .telemetry-header{
     font-size:20px;
@@ -1180,7 +1180,8 @@ body::after{
     padding:8px 4px;
     font-size:13px;
     border-top:1px solid rgba(255,255,255,.06);
-}
+} */
+
 
 .gap-row{
     padding:6px 12px;
@@ -1748,16 +1749,17 @@ body::after{
     z-index:20;
 }
 
-.strategy-content{
-    max-width:900px;
-    margin:0 auto;
-    background:var(--glass-bg-strong);
-    backdrop-filter:blur(var(--glass-blur)) saturate(160%);
-    -webkit-backdrop-filter:blur(var(--glass-blur)) saturate(160%);
-    border:1px solid var(--glass-border);
-    border-radius:20px;
-    padding:28px 32px;
-    box-shadow:var(--shadow);
+
+#telemetryPanel .strategy-content{
+
+    max-width:none;
+
+    width:95vw;
+
+    margin:20px auto;
+
+    padding:28px;
+
 }
 
 /* QUALIFYING / SPRINT QUALIFYING RESULTS VIEW */
@@ -1822,6 +1824,197 @@ body::after{
 
 ::-webkit-scrollbar-thumb:hover{
     background:rgba(255,255,255,.3);
+}
+
+/* TELEMETRY COMPARISON */
+
+.telemetry-content-wide{
+    width:100%;
+    max-width:1800px;
+    margin:0 auto;
+    padding:24px;
+    box-sizing:border-box;
+}
+
+/* Header */
+
+.telemetry-header{
+    font-size:24px;
+    font-weight:800;
+    color:#fff;
+    margin-bottom:24px;
+}
+
+/* Filters */
+
+.telemetry-form{
+    display:grid;
+    grid-template-columns:repeat(auto-fit,minmax(170px,1fr));
+    gap:16px;
+    align-items:end;
+    margin-bottom:24px;
+}
+
+.telemetry-form label{
+    display:flex;
+    flex-direction:column;
+    gap:6px;
+    font-size:11px;
+    color:#9aa1ad;
+    font-weight:700;
+    text-transform:uppercase;
+}
+
+.telemetry-form select{
+    background:rgba(255,255,255,.05);
+    color:#fff;
+    border:1px solid var(--glass-border);
+    border-radius:10px;
+    padding:10px 12px;
+    min-height:42px;
+}
+
+.telemetry-compare-btn{
+    height:42px;
+    padding:0 24px;
+    white-space:nowrap;
+}
+
+/* Driver Summary */
+
+.telemetry-results{
+    margin-top:24px;
+}
+
+.telemetry-lap-info{
+    display:grid;
+    grid-template-columns:1fr auto 1fr;
+    gap:16px;
+    align-items:center;
+    margin-bottom:24px;
+}
+
+.telemetry-lap-badge{
+    background:rgba(255,255,255,.04);
+    border:1px solid var(--glass-border);
+    border-radius:12px;
+    padding:16px;
+    color:#ddd;
+    font-size:13px;
+}
+
+.telemetry-delta{
+    font-size:24px;
+    font-weight:700;
+    color:#00d084;
+}
+
+/* KPI Cards */
+
+.telemetry-kpis{
+    display:grid;
+    grid-template-columns:repeat(auto-fit,minmax(180px,1fr));
+    gap:16px;
+    margin-bottom:24px;
+}
+
+.telemetry-kpi{
+    background:rgba(255,255,255,.04);
+    border:1px solid var(--glass-border);
+    border-radius:12px;
+    padding:16px;
+}
+
+.telemetry-kpi-title{
+    color:#8f97a4;
+    font-size:11px;
+    text-transform:uppercase;
+}
+
+.telemetry-kpi-value{
+    font-size:24px;
+    font-weight:700;
+    color:#fff;
+    margin-top:8px;
+}
+
+/* Dashboard Layout */
+
+.telemetry-dashboard{
+    display:grid;
+    grid-template-columns:3fr 1fr;
+    gap:20px;
+}
+
+.telemetry-main{
+    display:flex;
+    flex-direction:column;
+    gap:20px;
+}
+
+.telemetry-sidebar{
+    display:flex;
+    flex-direction:column;
+    gap:20px;
+}
+
+/* Chart Card */
+
+.telemetry-chart-block{
+    background:rgba(255,255,255,.03);
+    border:1px solid var(--glass-border);
+    border-radius:14px;
+    padding:16px;
+}
+
+.telemetry-chart-title{
+    font-size:13px;
+    font-weight:700;
+    color:#9aa1ad;
+    margin-bottom:12px;
+    text-transform:uppercase;
+    letter-spacing:.6px;
+}
+
+.telemetry-canvas{
+    width:100%;
+    height:280px;
+    display:block;
+    background:transparent;
+}
+
+/* Sidebar Cards */
+
+.telemetry-card{
+    background:rgba(255,255,255,.03);
+    border:1px solid var(--glass-border);
+    border-radius:14px;
+    padding:16px;
+}
+
+/* Sector Table */
+
+.telemetry-sector-row{
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+    padding:12px 0;
+    font-size:13px;
+    border-top:1px solid rgba(255,255,255,.08);
+}
+
+/* Responsive */
+
+@media (max-width:1100px){
+
+    .telemetry-dashboard{
+        grid-template-columns:1fr;
+    }
+
+    .telemetry-lap-info{
+        grid-template-columns:1fr;
+    }
+
 }
 
 /* RESPONSIVE */

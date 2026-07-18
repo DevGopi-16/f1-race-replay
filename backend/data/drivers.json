@@ -1,0 +1,19 @@
+[
+  {
+    "id": "max_verstappen",
+    "name": "Max Verstappen",
+    "number": 1,
+    "team": "Red Bull",
+    "country": "Netherlands",
+    "age": 28,
+    "height": "181 cm",
+    "weight": "72 kg",
+    "world_titles": 4,
+    "wins": 65,
+    "podiums": 118,
+    "poles": 44,
+    "biography": "Max Verstappen is a Dutch Formula One driver competing for Oracle Red Bull Racing. He made his Formula One debut in 2015 and has become one of the most successful drivers in the sport.",
+    "image": "/static/drivers/verstappen.png",
+    "banner": "/static/banners/verstappen.jpg"
+  }
+]
