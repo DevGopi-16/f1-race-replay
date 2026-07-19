@@ -436,6 +436,8 @@ import sys
 from pathlib import Path
 import time
 import requests
+import datetime
+import asyncio
 
 from fastapi import FastAPI, HTTPException, Query
 from fastapi.middleware.cors import CORSMiddleware
@@ -454,6 +456,8 @@ from src.f1_data import (
 )
 from src.driver_panel import build_driver_panel
 from typing import Optional
+# from src.driver_panel import get_season_stats_cached
+from src.driver_panel import build_driver_panel, get_season_stats_cached, warm_season_stats
 
 from src.track_geometry import build_track_geometry, extract_race_events, point_at_distance
 from src.serialize import serialize_frames, serialize_driver_colors
@@ -475,10 +479,32 @@ with open(DATA_DIR / "drivers.json", "r", encoding="utf-8") as f:
     DRIVERS = json.load(f)
 
 
-@app.on_event("startup")
-def _startup():
-    enable_cache()
+# @app.on_event("startup")
+# def _startup():
+#     enable_cache()
 
+
+# @app.on_event("startup")
+# async def warm_driver_stats_cache():
+#     current_year = datetime.date.today().year
+#     print(f"[startup] Warming driver stats cache for {current_year}...")
+#     get_season_stats_cached(current_year)
+#     print("[startup] Driver stats cache ready.")
+
+@app.on_event("startup")
+async def warm_driver_stats_cache():
+    current_year = datetime.date.today().year
+
+    def _compute():
+        print(f"[startup] Warming driver stats cache for {current_year} (background)...")
+        get_season_stats_cached(current_year)
+        print("[startup] Driver stats cache ready.")
+
+    # Fire-and-forget in a background thread so the server binds and starts
+    # serving requests immediately, instead of blocking on ~13 rounds worth
+    # of FastF1 session loads before Uvicorn even accepts a connection.
+    loop = asyncio.get_event_loop()
+    loop.run_in_executor(None, _compute)
 
 @app.get("/api/schedule/{year}")
 def schedule(year: int):

@@ -4,6 +4,7 @@
   <meta charset="UTF-8">
   <title>F1 Race Replay</title>
   <link rel="stylesheet" href="/static/style.css">
+  <link rel="stylesheet" href="/static/driver-panel.css">
 </head>
 <body>
 
@@ -250,38 +251,10 @@
           ← Back <!--add css-->
       </button>
       <div class="strategy-content telemetry-content-wide">
-
           <!-- Header -->
           <div class="telemetry-header">
               📈 Telemetry Comparison
           </div>
-
-          <!-- Filters -->
-          <div class="telemetry-form">
-
-              <label>
-                  Year
-                  <select id="teleYearSelect"></select>
-              </label>
-
-              <label>
-                  Round
-                  <select id="teleRoundSelect"></select>
-              </label>
-
-              <label>
-                  Session
-                  <select id="teleSessionSelect">
-                      <option value="R">Race</option>
-                      <option value="S">Sprint</option>
-                      <option value="Q">Qualifying</option>
-                      <option value="SQ">Sprint Qualifying</option>
-                      <option value="FP1">Practice 1</option>
-                      <option value="FP2">Practice 2</option>
-                      <option value="FP3">Practice 3</option>
-                  </select>
-              </label>
-
               <label>
                   Driver A
                   <select id="teleDriverASelect">
@@ -300,9 +273,6 @@
                   class="picker-load-btn telemetry-compare-btn">
                   <span>Compare</span>
               </button>
-
-          </div>
-
           <p id="telemetryStatus" class="picker-status"></p>
 
           <!-- RESULTS -->
@@ -462,6 +432,23 @@
       </div>
 
   </div>
+
+  <!-- DRIVERS PANEL -->
+  <div id="driversPanel" class="strategy-panel hidden">
+      <button id="driversBackBtn" class="back-btn">← Back</button>
+
+      <div class="strategy-content telemetry-content-wide">
+
+          <!-- Header -->
+          <div class="telemetry-header">
+              👤 Drivers
+          </div>
+          <div id="drivers-panel"></div>
+
+      </div>
+  </div>
+
+  <script src="/static/driver-panel.js"></script>
   <script src="/static/app.js"></script>
 </body>
 </html>
