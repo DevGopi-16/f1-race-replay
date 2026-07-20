@@ -170,51 +170,6 @@ def _fastest_lap_driver_code(season: int, round_: int) -> str | None:
     return fastest["Driver"] if fastest is not None else None
 
 
-# def _compute_season_stats(season: int) -> dict[str, dict]:
-#     """
-#     Returns { driver_code: {podiums, poles, avg_finish} }.
-#     Keyed by 3-letter driver code (e.g. "VER") since that's common to both
-#     FastF1 results and Jolpica standings entries, avoiding any driverId
-#     mismatch issues (like the Lindblad case) entirely.
-#     """
-#     stats: dict[str, dict] = {}
-
-#     for round_ in _completed_rounds(season):
-#         try:
-#             race = _race_results(season, round_)
-#             for _, row in race.iterrows():
-#                 code = row.get("Abbreviation")
-#                 if not code:
-#                     continue
-#                 entry = stats.setdefault(code, {"podiums": 0, "poles": 0, "fastest_laps": 0, "finishes": []})
-#                 position = row.get("Position")
-#                 if position and not (isinstance(position, float) and position != position):
-#                     pos = int(position)
-#                     entry["finishes"].append(pos)
-#                     if pos <= 3:
-#                         entry["podiums"] += 1
-#         except Exception as e:
-#             print(f"[driver_panel] skipping race round {round_} ({season}): {e}")
-
-#         try:
-#             quali = _qualifying_results(season, round_)
-#             for _, row in quali.iterrows():
-#                 code = row.get("Abbreviation")
-#                 if not code:
-#                     continue
-#                 entry = stats.setdefault(code, {"podiums": 0, "poles": 0, "fastest_laps": 0, "finishes": []})
-#                 if row.get("Position") == 1:
-#                     entry["poles"] += 1
-#         except Exception as e:
-#             print(f"[driver_panel] skipping qualifying round {round_} ({season}): {e}")
-
-#         try:
-#             fl_code = _fastest_lap_driver_code(season, round_)
-#             if fl_code:
-#                 entry = stats.setdefault(fl_code, {"podiums": 0, "poles": 0, "fastest_laps": 0, "finishes": []})
-#                 entry["fastest_laps"] += 1
-#         except Exception as e:
-#             print(f"[driver_panel] skipping fastest-lap calc for round {round_} ({season}): {e}")
 
 
 def _compute_season_stats(season: int) -> dict[str, dict]:
@@ -317,13 +272,36 @@ def get_season_stats_cached(season: int) -> dict[str, dict]:
     return {}
 
 
+# def warm_season_stats(season: int) -> None:
+#     """Computes and persists stats to disk. Call only from a background thread."""
+#     path = _disk_cache_path(season)
+#     if os.path.exists(path):
+#         age = time.time() - os.path.getmtime(path)
+#         if age < STATS_CACHE_TTL_SECONDS:
+#             return  # already fresh, nothing to do
+
+#     stats = _compute_season_stats(season)
+#     os.makedirs(COMPUTED_DATA_DIR, exist_ok=True)
+#     with open(path, "w") as f:
+#         json.dump(stats, f, indent=2)
+
+
 def warm_season_stats(season: int) -> None:
     """Computes and persists stats to disk. Call only from a background thread."""
     path = _disk_cache_path(season)
     if os.path.exists(path):
         age = time.time() - os.path.getmtime(path)
         if age < STATS_CACHE_TTL_SECONDS:
-            return  # already fresh, nothing to do
+            # Even if "fresh" by age, don't trust a corrupted/placeholder
+            # file — validate it actually contains usable stats before
+            # skipping the recompute.
+            try:
+                with open(path) as f:
+                    cached = json.load(f)
+                if isinstance(cached, dict) and cached:
+                    return  # genuinely fresh and valid, nothing to do
+            except (json.JSONDecodeError, OSError):
+                pass  # fall through and recompute
 
     stats = _compute_season_stats(season)
     os.makedirs(COMPUTED_DATA_DIR, exist_ok=True)
