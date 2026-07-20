@@ -172,8 +172,99 @@ def _fastest_lap_driver_code(season: int, round_: int) -> str | None:
 
 
 
+# def _compute_season_stats(season: int) -> dict[str, dict]:
+#     stats: dict[str, dict] = {}
+
+#     schedule = fastf1.get_event_schedule(season, include_testing=False)
+#     round_names = dict(zip(schedule["RoundNumber"], schedule["EventName"]))
+
+#     for round_ in sorted(_completed_rounds(season)):
+#         try:
+#             race = _race_results(season, round_)
+#             for _, row in race.iterrows():
+#                 code = row.get("Abbreviation")
+#                 if not code:
+#                     continue
+#                 entry = stats.setdefault(code, {
+#                     "podiums": 0, "poles": 0, "fastest_laps": 0,
+#                     "finishes": [], "history": [],
+#                 })
+
+#                 pos_str = row.get("Position")
+#                 pos = None
+#                 if pos_str and not (isinstance(pos_str, float) and pos_str != pos_str):
+#                     pos = int(pos_str)
+#                     entry["finishes"].append(pos)
+#                     if pos <= 3:
+#                         entry["podiums"] += 1
+
+#                 points_val = row.get("Points")
+#                 points = float(points_val) if points_val is not None and not (
+#                     isinstance(points_val, float) and points_val != points_val
+#                 ) else 0.0
+
+#                 entry["history"].append({
+#                     "round": round_,
+#                     "event_name": round_names.get(round_, f"Round {round_}"),
+#                     "position": pos,
+#                     "points": points,
+#                 })
+#         except Exception as e:
+#             print(f"[driver_panel] skipping race round {round_} ({season}): {e}")
+
+#         try:
+#             quali = _qualifying_results(season, round_)
+#             for _, row in quali.iterrows():
+#                 code = row.get("Abbreviation")
+#                 if not code:
+#                     continue
+#                 entry = stats.setdefault(code, {
+#                     "podiums": 0, "poles": 0, "fastest_laps": 0,
+#                     "finishes": [], "history": [],
+#                 })
+#                 if row.get("Position") == 1:
+#                     entry["poles"] += 1
+#         except Exception as e:
+#             print(f"[driver_panel] skipping qualifying round {round_} ({season}): {e}")
+
+#         try:
+#             fl_code = _fastest_lap_driver_code(season, round_)
+#             if fl_code:
+#                 entry = stats.setdefault(fl_code, {
+#                     "podiums": 0, "poles": 0, "fastest_laps": 0,
+#                     "finishes": [], "history": [],
+#                 })
+#                 entry["fastest_laps"] += 1
+#         except Exception as e:
+#             print(f"[driver_panel] skipping fastest-lap calc for round {round_} ({season}): {e}")
+
+#     for entry in stats.values():
+#         # Sort by round, then compute a running cumulative-points total
+#         history = sorted(entry["history"], key=lambda h: h["round"])
+#         cumulative = 0.0
+#         for h in history:
+#             cumulative += h["points"]
+#             h["cumulative_points"] = round(cumulative, 1)
+#         entry["history"] = history
+
+#         finishes = entry.pop("finishes")
+#         entry["avg_finish"] = round(sum(finishes) / len(finishes), 1) if finishes else None
+
+#     return stats
+
+"""
+Patch for backend/src/driver_panel.py — replace _compute_season_stats with
+this version. The only behavioral change: qualifying position is now
+recorded per-round (not just whether it was P1), and merged into each
+driver's `history` entries as `quali_position`. Everything else is
+identical to before.
+"""
+
 def _compute_season_stats(season: int) -> dict[str, dict]:
     stats: dict[str, dict] = {}
+    # NEW: code -> {round: quali_position}, populated during the qualifying
+    # loop below, merged into `history` entries after the main loop.
+    quali_positions: dict[str, dict[int, int]] = {}
 
     schedule = fastf1.get_event_schedule(season, include_testing=False)
     round_names = dict(zip(schedule["RoundNumber"], schedule["EventName"]))
@@ -222,8 +313,18 @@ def _compute_season_stats(season: int) -> dict[str, dict]:
                     "podiums": 0, "poles": 0, "fastest_laps": 0,
                     "finishes": [], "history": [],
                 })
-                if row.get("Position") == 1:
-                    entry["poles"] += 1
+
+                qpos_str = row.get("Position")
+                qpos = None
+                if qpos_str and not (isinstance(qpos_str, float) and qpos_str != qpos_str):
+                    qpos = int(qpos_str)
+                    if qpos == 1:
+                        entry["poles"] += 1
+
+                # NEW: record every driver's quali position for this round,
+                # not just whether they got pole.
+                if qpos is not None:
+                    quali_positions.setdefault(code, {})[round_] = qpos
         except Exception as e:
             print(f"[driver_panel] skipping qualifying round {round_} ({season}): {e}")
 
@@ -238,13 +339,16 @@ def _compute_season_stats(season: int) -> dict[str, dict]:
         except Exception as e:
             print(f"[driver_panel] skipping fastest-lap calc for round {round_} ({season}): {e}")
 
-    for entry in stats.values():
-        # Sort by round, then compute a running cumulative-points total
+    for code, entry in stats.items():
+        # Sort by round, then compute a running cumulative-points total,
+        # and attach this driver's quali position for that round (if any).
         history = sorted(entry["history"], key=lambda h: h["round"])
         cumulative = 0.0
+        driver_quali = quali_positions.get(code, {})
         for h in history:
             cumulative += h["points"]
             h["cumulative_points"] = round(cumulative, 1)
+            h["quali_position"] = driver_quali.get(h["round"])  # NEW
         entry["history"] = history
 
         finishes = entry.pop("finishes")

@@ -9,7 +9,7 @@
     "image": "static/images/drivers/verstappen.png",
     "teamLogo": "static/images/teams/red-bull.png",
     "flag": "static/images/flags/nl.png",
-    "banner": "static/images/banners/verstappen.png",
+    "banner": "static/images/newbanners/verstappen.png",
     "description": "Max Verstappen is a dominant force in Formula 1, known for his aggressive yet controlled driving style. He has already secured multiple world championships and often extracts performance beyond the car's limits.",
     "id": "max_verstappen"
   },
@@ -23,7 +23,7 @@
     "image": "static/images/drivers/hadjar.png",
     "teamLogo": "static/images/teams/red-bull.png",
     "flag": "static/images/flags/fr.png",
-    "banner": "static/images/banners/hadjar.png",
+    "banner": "static/images/newbanners/hadjar.png",
     "description": "Isack Hadjar earned promotion to Red Bull's senior team for 2026 after a strong rookie season with Racing Bulls, becoming Max Verstappen's latest teammate.",
     "id": "hadjar"
   },
@@ -37,7 +37,7 @@
     "image": "static/images/drivers/hamilton.png",
     "teamLogo": "static/images/teams/ferrari.png",
     "flag": "static/images/flags/gb.png",
-    "banner": "static/images/banners/hamilton.png",
+    "banner": "static/images/newbanners/hamilton.png",
     "description": "Lewis Hamilton is one of the most accomplished drivers in F1 history, holding numerous records including seven world titles. He continues to push boundaries, advocating for diversity and sustainability in and out of the cockpit.",
     "id": "hamilton"
   },
@@ -51,7 +51,7 @@
     "image": "static/images/drivers/leclerc.png",
     "teamLogo": "static/images/teams/ferrari.png",
     "flag": "static/images/flags/mc.png",
-    "banner": "static/images/banners/leclerc.png",
+    "banner": "static/images/newbanners/leclerc.png",
     "description": "Charles Leclerc is known for his raw speed, particularly in qualifying, and his passion for racing shines through his aggressive attacks. He aims to lead Ferrari back to championship contention.",
     "id": "leclerc"
   },
@@ -65,7 +65,7 @@
     "image": "static/images/drivers/norris.png",
     "teamLogo": "static/images/teams/mclaren.png",
     "flag": "static/images/flags/gb.png",
-    "banner": "static/images/banners/norris.png",
+    "banner": "static/images/newbanners/norris.png",
     "description": "Lando Norris is a rising talent with sharp racecraft and a strong personality off-track. He consistently delivers strong qualifying performances and is viewed as one of the future stars of the sport.",
     "id": "norris"
   },
@@ -79,7 +79,7 @@
     "image": "static/images/drivers/piastri.png",
     "teamLogo": "static/images/teams/mclaren.png",
     "flag": "static/images/flags/au.png",
-    "banner": "static/images/banners/piastri.png",
+    "banner": "static/images/newbanners/piastri.png",
     "description": "Oscar Piastri brings a methodical approach to racing, combining technical feedback with calm consistency. His adaptability and maturity for his age have gained praise across the paddock.",
     "id": "piastri"
   },
@@ -93,7 +93,7 @@
     "image": "static/images/drivers/russell.png",
     "teamLogo": "static/images/teams/mercedes.png",
     "flag": "static/images/flags/gb.png",
-    "banner": "static/images/banners/russell.png",
+    "banner": "static/images/newbanners/russell.png",
     "description": "George Russell is a strong all-around driver who blends precision with perseverance and is often praised for making the most of his machinery. He offers steady consistency and has gradually matured into a championship contender.",
     "id": "russell"
   },
@@ -107,7 +107,7 @@
     "image": "static/images/drivers/antonelli.png",
     "teamLogo": "static/images/teams/mercedes.png",
     "flag": "static/images/flags/it.png",
-    "banner": "static/images/banners/antonelli.png",
+    "banner": "static/images/newbanners/antonelli.png",
     "description": "Kimi Antonelli is a rookie sensation who's attracted attention by achieving milestones early in his career and showing composure beyond his years. He's expected to grow rapidly and bring fresh energy to the grid.",
     "id": "antonelli"
   },
@@ -121,7 +121,7 @@
     "image": "static/images/drivers/alonso.png",
     "teamLogo": "static/images/teams/aston-martin.png",
     "flag": "static/images/flags/es.png",
-    "banner": "static/images/banners/alonso.png",
+    "banner": "static/images/newbanners/alonso.png",
     "description": "Two-time world champion Fernando Alonso is a veteran legend known for his fierce competitiveness, tactical acumen, and refusal to settle for anything less than excellence. Even in his 40s, he continues to push hard and mentor younger drivers.",
     "id": "alonso"
   },
@@ -135,7 +135,7 @@
     "image": "static/images/drivers/stroll.png",
     "teamLogo": "static/images/teams/aston-martin.png",
     "flag": "static/images/flags/ca.png",
-    "banner": "static/images/banners/stroll.png",
+    "banner": "static/images/newbanners/stroll.png",
     "description": "Lance Stroll combines raw pace with tenacity, often putting up strong performances in midfield battles. He is working to balance peak results with consistency over a full season.",
     "id": "stroll"
   },
@@ -149,7 +149,7 @@
     "image": "static/images/drivers/gasly.png",
     "teamLogo": "static/images/teams/alpine.png",
     "flag": "static/images/flags/fr.png",
-    "banner": "static/images/banners/gasly.png",
+    "banner": "static/images/newbanners/gasly.png",
     "description": "Pierre Gasly is a versatile driver with strong qualifying skills and a resilience that allows him to capitalize in variable conditions. He brings experience and adaptability to his team's strategies.",
     "id": "gasly"
   },
@@ -163,7 +163,7 @@
     "image": "static/images/drivers/colapinto.png",
     "teamLogo": "static/images/teams/alpine.png",
     "flag": "static/images/flags/ar.png",
-    "banner": "static/images/banners/colapinto.png",
+    "banner": "static/images/newbanners/colapinto.png",
     "description": "Franco Colapinto enters F1 as a determined rookie with impressive junior results and a composed demeanor under pressure. He's ready to seize opportunities and build experience quickly.",
     "id": "colapinto"
   },
@@ -177,7 +177,7 @@
     "image": "static/images/drivers/sainz.png",
     "teamLogo": "static/images/teams/williams.png",
     "flag": "static/images/flags/es.png",
-    "banner": "static/images/banners/sainz.png",
+    "banner": "static/images/newbanners/sainz.png",
     "description": "Carlos Sainz is a seasoned competitor who excels in strategic thinking and race execution, often outperforming the car's baseline in the midfield. He also contributes off track as a voice for driver interests in the GPDA.",
     "id": "sainz"
   },
@@ -191,7 +191,7 @@
     "image": "static/images/drivers/albon.png",
     "teamLogo": "static/images/teams/williams.png",
     "flag": "static/images/flags/th.png",
-    "banner": "static/images/banners/albon.png",
+    "banner": "static/images/newbanners/albon.png",
     "description": "Alexander Albon is a dependable and experienced driver who often maximizes outcomes for his team even in challenging cars. He brings depth of knowledge and resilience to his race weekends.",
     "id": "albon"
   },
@@ -205,7 +205,7 @@
     "image": "static/images/drivers/hulkenberg.png",
     "teamLogo": "static/images/teams/audi.png",
     "flag": "static/images/flags/de.png",
-    "banner": "static/images/banners/hulkenberg.png",
+    "banner": "static/images/newbanners/hulkenberg.png",
     "description": "Nico Hulkenberg is a veteran presence with extensive experience across many teams, now racing for Audi as the German manufacturer takes over the former Sauber entry.",
     "id": "hulkenberg"
   },
@@ -219,7 +219,7 @@
     "image": "static/images/drivers/bortoleto.png",
     "teamLogo": "static/images/teams/audi.png",
     "flag": "static/images/flags/br.png",
-    "banner": "static/images/banners/bortoleto.png",
+    "banner": "static/images/newbanners/bortoleto.png",
     "description": "Gabriel Bortoleto continues into his second season with the Audi works team, having impressed as a rookie with strong junior credentials.",
     "id": "bortoleto"
   },
@@ -233,7 +233,7 @@
     "image": "static/images/drivers/ocon.png",
     "teamLogo": "static/images/teams/haas.png",
     "flag": "static/images/flags/fr.png",
-    "banner": "static/images/banners/ocon.png",
+    "banner": "static/images/newbanners/ocon.png",
     "description": "Esteban Ocon is a consistent and determined driver who often punches above his weight, especially in tricky conditions. He combines solid technical feedback with a steady approach in racecraft.",
     "id": "ocon"
   },
@@ -247,7 +247,7 @@
     "image": "static/images/drivers/bearman.png",
     "teamLogo": "static/images/teams/haas.png",
     "flag": "static/images/flags/gb.png",
-    "banner": "static/images/banners/bearman.png",
+    "banner": "static/images/newbanners/bearman.png",
     "description": "Oliver Bearman is a promising young driver known for dominating lower categories and bringing raw speed into F1. He is still growing his racecraft, but eyes high potential ahead.",
     "id": "bearman"
   },
@@ -261,7 +261,7 @@
     "image": "static/images/drivers/lawson.png",
     "teamLogo": "static/images/teams/rb.png",
     "flag": "static/images/flags/nz.png",
-    "banner": "static/images/banners/lawson.png",
+    "banner": "static/images/newbanners/lawson.png",
     "description": "Liam Lawson retains his seat at Racing Bulls for 2026, bringing continuity to the team as he partners rookie Arvid Lindblad.",
     "id": "lawson"
   },
@@ -275,7 +275,7 @@
     "image": "static/images/drivers/lindblad.png",
     "teamLogo": "static/images/teams/rb.png",
     "flag": "static/images/flags/gb.png",
-    "banner": "static/images/banners/lindblad.png",
+    "banner": "static/images/newbanners/lindblad.png",
     "description": "Arvid Lindblad is the sole rookie on the 2026 grid, stepping up from Formula 2 to Racing Bulls after becoming the youngest-ever race winner in both F3 and F2.",
     "id": "arvid_lindblad"
  },
@@ -289,7 +289,7 @@
     "image": "static/images/drivers/perez.png",
     "teamLogo": "static/images/teams/cadillac.png",
     "flag": "static/images/flags/mx.png",
-    "banner": "static/images/banners/perez.png",
+    "banner": "static/images/newbanners/perez.png",
     "description": "Sergio Perez returns to the grid after a year out, bringing race-winning experience to lead Cadillac's historic debut season alongside Valtteri Bottas.",
     "id": "perez"
   },
@@ -303,7 +303,7 @@
     "image": "static/images/drivers/bottas.png",
     "teamLogo": "static/images/teams/cadillac.png",
     "flag": "static/images/flags/fi.png",
-    "banner": "static/images/banners/bottas.png",
+    "banner": "static/images/newbanners/bottas.png",
     "description": "Valtteri Bottas returns to a full-time race seat with Cadillac, bringing over 200 race starts of experience to the new American team's debut season.",
     "id": "bottas"
   }
