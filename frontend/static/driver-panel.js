@@ -59,6 +59,13 @@
     return code ? `https://flagcdn.com/w40/${code}.png` : "";
   }
 
+  function splitName(name) {
+    const parts = String(name || "").trim().split(/\s+/);
+    if (parts.length <= 1) return { first: "", last: parts[0] || "" };
+    const last = parts.pop();
+    return { first: parts.join(" "), last };
+  }
+
 
   function escapeAttr(str) {
     return String(str).replace(/"/g, "&quot;");
@@ -243,7 +250,10 @@
                 <span class="dp-hero-pos" style="color:${color}; border-color:${color}40; background:${color}22;">
                   ${d.position === 1 ? "CURRENTLY 1ST" : `P${d.position ?? "-"}`}
                 </span>
-                <h1 class="dp-hero-name" style="color:${color};">${d.name}</h1>
+                <div class="dp-name-block">
+                  ${splitName(d.name).first ? `<p class="dp-name-script">${splitName(d.name).first}</p>` : ""}
+                  <h1 class="dp-hero-name" style="color:${color};">${splitName(d.name).last}</h1>
+                </div>
                 <div class="dp-hero-teamrow">
                   ${d.teamLogo ? `<img class="dp-hero-teamlogo" src="${assetPath(d.teamLogo)}" alt="" onerror="this.remove()">` : ""}
                   <span style="color:${color};" class="dp-hero-teamname">${d.team || ""}</span>
@@ -259,7 +269,10 @@
                 <span class="dp-hero-pos" style="color:${color}; border-color:${color}40; background:${color}22;">
                   ${d.position === 1 ? "CURRENTLY 1ST" : `P${d.position ?? "-"}`}
                 </span>
-                <h1 class="dp-hero-name" style="color:${color};">${d.name}</h1>
+                <div class="dp-name-block">
+                  ${splitName(d.name).first ? `<p class="dp-name-script">${splitName(d.name).first}</p>` : ""}
+                  <h1 class="dp-hero-name" style="color:${color};">${splitName(d.name).last}</h1>
+                </div>
                 <div class="dp-hero-teamrow">
                   ${d.teamLogo ? `<img class="dp-hero-teamlogo" src="${assetPath(d.teamLogo)}" alt="" onerror="this.remove()">` : ""}
                   <span style="color:${color};" class="dp-hero-teamname">${d.team || ""}</span>
@@ -460,49 +473,7 @@
     `;
   }
 
-  // function profileHeroInnerHTML(d, color) {
-  //   return `
-  //     <p class="dp-profile-eyebrow">Driver Profile</p>
-  //     <h1 class="dp-hero-name">${d.name}</h1>
-  //     <p class="dp-profile-teamtext">${d.team || ""}</p>
-  //     <div class="dp-profile-meta-inline">
-  //       ${d.flag ? `<img class="dp-flag" src="${assetPath(d.flag)}" alt="" onerror="this.remove()">` : ""}
-  //       <span>${d.nationality || ""}</span>
-  //       ${d.number ? `
-  //         <span class="dp-profile-meta-sep">|</span>
-  //         <span class="dp-profile-meta-num">${d.number}</span>
-  //         <span>Driver Number</span>
-  //       ` : ""}
-  //     </div>
-  //     <span class="dp-hero-pos" style="color:${color}; border-color:${color}40; background:${color}22;">
-  //       ${d.position === 1 ? "CURRENTLY 1ST" : `P${d.position ?? "-"}`}
-  //     </span>
-  //   `;
-  // }
 
-
-  // function profileHeroInnerHTML(d, color) {
-  //   return `
-  //     <p class="dp-profile-eyebrow">Driver Profile</p>
-  //     <h1 class="dp-profile-name">${d.name}</h1>
-  //     <div class="dp-profile-teamrow">
-  //       ${d.teamLogo ? `<img class="dp-profile-teamlogo" src="${assetPath(d.teamLogo)}" alt="" onerror="this.remove()">` : ""}
-  //       <span class="dp-profile-teamtext" style="color:${color};">${d.team || ""}</span>
-  //     </div>
-  //     <div class="dp-profile-meta-inline">
-  //       ${flagUrl(d.nationality) ? `<img class="dp-profile-flag" src="${flagUrl(d.nationality)}" alt="" onerror="this.remove()">` : ""}
-  //       <span>${d.nationality || ""}</span>
-  //       ${d.number ? `
-  //         <span class="dp-profile-meta-sep">|</span>
-  //         <span class="dp-profile-meta-num">${d.number}</span>
-  //         <span>Driver Number</span>
-  //       ` : ""}
-  //     </div>
-  //     <span class="dp-hero-pos" style="color:${color}; border-color:${color}40; background:${color}22;">
-  //       ${d.position === 1 ? "CURRENTLY 1ST" : `P${d.position ?? "-"}`}
-  //     </span>
-  //   `;
-  // }
   function profileHeroInnerHTML(d, color) {
     return `
       <span class="dp-hero-pos dp-profile-pos-badge" style="color:${color}; border-color:${color}40; background:${color}22;">
@@ -510,7 +481,10 @@
       </span>
       <div class="dp-profile-textblock">
         <p class="dp-profile-eyebrow">Driver Profile</p>
-        <h1 class="dp-profile-name" style="color:${color};">${d.name}</h1>
+        <div class="dp-name-block">
+          ${splitName(d.name).first ? `<p class="dp-name-script">${splitName(d.name).first}</p>` : ""}
+          <h1 class="dp-profile-name">${splitName(d.name).last}</h1>
+        </div>
         <div class="dp-profile-teamrow">
           ${d.teamLogo ? `<img class="dp-profile-teamlogo" src="${assetPath(d.teamLogo)}" alt="" onerror="this.remove()">` : ""}
           <span class="dp-profile-teamtext" style="color:${color};">${d.team || ""}</span>
