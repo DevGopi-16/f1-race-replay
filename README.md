@@ -152,7 +152,7 @@ F1-RACE-REPLAY-WEB/
 │
 ├── backend/
 │   ├── .fastf1-cache/              # FastF1 local data cache
-│   ├── computed_data/       #Precomputed/serialized race data
+│   ├── computed_data/              # Precomputed/serialized race data
 │   ├── data/
 │   │   └── drivers.json
 │   ├── src/
@@ -160,11 +160,11 @@ F1-RACE-REPLAY-WEB/
 │   │   │   ├── settings.py
 │   │   │   ├── time.py
 │   │   │   └── tyres.py
-│   │   ├── driver_panel.py      # Driver roster & profile API
-│   │   ├── f1_data.py       #FastF1 data loading & processing
-│   │   ├── serialize.py    #Telemetryserializatnforthe frend 
-│   │   └── track_geometry.py  #Trackmap/coordinate generation
-│   ├── main.py               # FastAPIapplication entry point
+│   │   ├── driver_panel.py         # Driver roster & profile API
+│   │   ├── f1_data.py              # FastF1 data loading & processing
+│   │   ├── serialize.py            # Telemetry serialization for frontend
+│   │   └── track_geometry.py       # Track map & coordinate generation
+│   ├── main.py                     # FastAPI application entry point
 │   └── requirements.txt
 │
 ├── frontend/
@@ -177,9 +177,10 @@ F1-RACE-REPLAY-WEB/
 │   │   │   ├── teams/
 │   │   │   ├── tyres/
 │   │   │   └── weather/
-│   │   ├── app.js                  # Playbackengine&UIlogic
+│   │   ├── app.js                  # Playback engine & UI logic
 │   │   ├── driver-panel.css        # Driver panel styling
-│   │   ├── driver-panel.js         # Driver panelinteractions
+│   │   ├── driver-panel.js         # Driver panel interactions
+│   │   ├── replay.css              # Race replay UI styling
 │   │   └── style.css
 │
 ├── .gitignore

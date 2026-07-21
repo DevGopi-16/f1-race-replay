@@ -1,5 +1,6 @@
 /* ===== Driver Panel — Glassmorphism Edition ===== */
 /* Dark theme, team-color accents, frosted-glass surfaces throughout. */
+@import url('https://fonts.googleapis.com/css2?family=Caveat:wght@600;700&family=Anton&display=swap');
 
 #drivers-panel {
   color: #fff;
@@ -289,12 +290,79 @@
   inset: 0;
   background: linear-gradient(to top, rgba(0,0,0,0.92) 10%, rgba(0,0,0,0.35) 50%, transparent 85%);
 }
+/* .dp-hero-scrim-content {
+  position: absolute;
+  left: 0; right: 0; bottom: 0;
+  padding: 24px 32px;
+  z-index: 1;
+} */
+
+/* .dp-hero-scrim-content {
+  position: absolute;
+  inset: 0;
+  padding: 24px 32px;
+  z-index: 1;
+}
+.dp-profile-hero .dp-hero-scrim-content {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+}
+.dp-profile-pos-badge {
+  position: absolute;
+  top: 24px;
+  left: 32px;
+  margin-bottom: 0;
+}
+.dp-profile-textblock {
+  max-width: 640px;
+} */
+
 .dp-hero-scrim-content {
   position: absolute;
   left: 0; right: 0; bottom: 0;
   padding: 24px 32px;
   z-index: 1;
 }
+/* .dp-profile-hero .dp-hero-scrim-content {
+  top: 0;
+  bottom: 0;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+} */
+
+.dp-profile-hero .dp-hero-scrim-content {
+  top: 0;
+  bottom: 0;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  padding-bottom: 28px;
+  padding-left: 72px;
+}
+
+
+
+/* .dp-profile-pos-badge {
+  position: absolute;
+  top: 24px;
+  left: 32px;
+  margin-bottom: 0;
+} */
+
+.dp-profile-pos-badge {
+  position: absolute;
+  top: 24px;
+  left: 72px;
+  margin-bottom: 0;
+}
+.dp-profile-textblock {
+  max-width: 640px;
+}
+
+
+
 .dp-hero-driverimg {
   position: absolute;
   right: 40px;
@@ -336,6 +404,15 @@
   backdrop-filter: blur(6px);
   -webkit-backdrop-filter: blur(6px);
 }
+
+/* .dp-hero-name {
+  font-size: 40px;
+  font-weight: 900;
+  line-height: 1.05;
+  letter-spacing: -0.02em;
+  color: #fff;
+  margin: 0 0 10px;
+} */
 
 .dp-hero-name {
   font-size: 40px;
@@ -830,10 +907,12 @@
 }
 
 /* Let the name/team text settle in just after the wipe clears it */
+/* .dp-hero-scrim-content {
+  animation: dp-fade-up .5s ease .5s both;
+} */
 .dp-hero-scrim-content {
   animation: dp-fade-up .5s ease .5s both;
 }
-
 /* --- Profile page: two-column layout (Bio/Stats/Form | Charts) --- */
 .dp-profile-grid {
   display: grid;
@@ -854,7 +933,6 @@
 .dp-profile-col-right .dp-charts-row {
   margin-top: 0;
 }
-
 
 
 
@@ -889,21 +967,85 @@
   color: rgba(255, 255, 255, 0.55);
   margin: 0 0 6px;
 }
-.dp-profile-teamtext {
-  font-size: 15px;
-  color: #bbb;
-  margin: 4px 0 14px;
+
+/* .dp-profile-name {
+  font-size: clamp(20px, 3vw, 42px);
+  font-weight: 900;
+  line-height: 1.1;
+  letter-spacing: -0.015em;
+  color: #fff;
+  margin: 4px 0 22px;
+  text-shadow: 0 4px 24px rgba(0,0,0,0.55), 0 1px 4px rgba(0,0,0,0.5);
+  word-break: break-word;
+  overflow-wrap: break-word;
+  max-width: 90%;
+} */
+
+
+.dp-profile-name {
+  font-size: clamp(20px, 3vw, 42px);
+  font-weight: 900;
+  line-height: 1.1;
+  letter-spacing: -0.015em;
+  margin: 4px 0 22px;
+  text-shadow: 0 4px 24px rgba(0,0,0,0.55), 0 1px 4px rgba(0,0,0,0.5);
+  word-break: break-word;
+  overflow-wrap: break-word;
+  max-width: 90%;
 }
+/* 
+.dp-profile-teamrow {
+  display: flex;
+  align-items: flex-end;
+  gap: 10px;
+  margin: 0 0 14px;
+} */
+
+.dp-profile-teamrow {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin: 40px 0 14px;
+}
+
+
+.dp-profile-teamlogo {
+  width: 30px;
+  height: 30px;
+  object-fit: contain;
+  filter: drop-shadow(0 0 8px var(--team-color));
+}
+
+
+
+.dp-profile-teamtext {
+  font-size: 16px;
+  font-weight: 700;
+  margin: 0;
+}
+.dp-profile-flag {
+  height: 16px;
+  width: auto;
+  border-radius: 3px;
+  box-shadow: 0 0 0 1px rgba(255,255,255,0.3);
+}
+
+
+
 .dp-profile-meta-inline {
   display: flex;
   align-items: center;
   gap: 8px;
   font-size: 13px;
   color: #aaa;
+  margin-top: 6px;
   margin-bottom: 14px;
   flex-wrap: wrap;
 }
+
+/* .dp-profile-meta-inline .dp-flag { height: 14px; } */
 .dp-profile-meta-inline .dp-flag { height: 14px; }
+
 .dp-profile-meta-sep { color: #555; }
 .dp-profile-meta-num { font-weight: 800; color: #fff; }
 
