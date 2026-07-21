@@ -1,5 +1,8 @@
 /* F1 Race Replay UI — Glassmorphism Theme
-   Global Layout + Replay + Session Banner + Weather */
+   Base / Home / Picker / Strategy / Telemetry-Compare / Qualifying
+   NOTE: Replay-page-only styles (track view, controls, leaderboard,
+   driver panel, bottom bar, progress bar, legend) now live in
+   replay.css — that file must load AFTER this one. */
 
 *{
     margin:0;
@@ -215,9 +218,6 @@ body::after{
     animation:fadeUp3d .7s cubic-bezier(.2,.8,.2,1) both;
 }
 
-/* Fill the empty right side of the hero card with theme-matched
-   glow + a ring motif + drifting speed-line streaks. Purely
-   decorative, sits behind the text/buttons. */
 .home-hero::before{
     content:"";
     position:absolute;
@@ -956,711 +956,7 @@ body::after{
     .picker-statusbar{ flex-wrap:wrap; gap:14px; }
 }
 
-/* Replay Layout */
-
-.replay{
-    position:relative;
-    width:100vw;
-    height:100vh;
-    overflow:hidden;
-    background:transparent;
-    z-index:1;
-}
-
-#trackCanvas{
-    position:absolute;
-    inset:0;
-    width:100%;
-    height:100%;
-    z-index:1;
-}
-
-.panel{
-    position:absolute;
-    background:var(--panel);
-    backdrop-filter:blur(var(--glass-blur)) saturate(160%);
-    -webkit-backdrop-filter:blur(var(--glass-blur)) saturate(160%);
-    border:1px solid var(--panel-border);
-    border-radius:var(--radius);
-    box-shadow:var(--shadow);
-    padding:14px 16px;
-    z-index:20;
-    color:#fff;
-}
-
-.session-banner{
-    position:absolute;
-    top:16px;
-    left:50%;
-    transform:translateX(-50%);
-    min-width:420px;
-    padding:12px 24px;
-    text-align:center;
-    background:var(--glass-bg-strong);
-    border:1px solid var(--glass-border);
-    border-radius:14px;
-    backdrop-filter:blur(var(--glass-blur)) saturate(160%);
-    -webkit-backdrop-filter:blur(var(--glass-blur)) saturate(160%);
-    box-shadow:var(--shadow);
-    z-index:100;
-}
-
-.session-banner b{
-    display:block;
-    font-size:17px;
-    color:#fff;
-    margin-bottom:4px;
-}
-
-.weather-panel{
-    position:absolute;
-    top:60px;
-    left:20px;
-}
-
-.weather-panel .wp-title{
-    font-size:16px;
-    font-weight:700;
-    margin-bottom:6px;
-    color:#fff;
-}
-
-.weather-panel .wp-row{
-    display:flex;
-    align-items:center;
-    gap:4px;
-    padding:2px 0;
-    font-size:13px;
-    color:#c8c8c8;
-    border-bottom:1px solid rgba(255,255,255,.06);
-}
-
-.weather-icon{
-    width:14px;
-    height:14px;
-    object-fit:contain;
-    flex-shrink:0;
-}
-
-.weather-label{
-    flex:1;
-    color:#fff;
-    font-weight:500;
-}
-
-.weather-value{
-    color:#5fd4ff;
-    font-weight:600;
-    font-size:13px;
-}
-
-.driver-info-wrapper{
-    position:absolute;
-    top:255px;
-    left:20px;
-    width:280px;
-    display:flex;
-    flex-direction:column;
-    gap:12px;
-    z-index:20;
-}
-
-.driver-panel{
-    background:var(--glass-bg-strong);
-    backdrop-filter:blur(var(--glass-blur)) saturate(160%);
-    -webkit-backdrop-filter:blur(var(--glass-blur)) saturate(160%);
-    border:1px solid var(--glass-border);
-    border-radius:var(--radius);
-    overflow:hidden;
-    box-shadow:var(--shadow);
-    color:#fff;
-    transition:.2s;
-}
-
-.driver-panel:hover{
-    box-shadow:0 10px 40px rgba(0,0,0,.55), inset 0 1px 0 rgba(255,255,255,.1);
-}
-
-.driver-header{
-    height:34px;
-    display:flex;
-    align-items:center;
-    background:rgba(0,0,0,.35);
-}
-
-.team-strip{
-    width:8px;
-    height:100%;
-}
-
-.driver-code{
-    flex:1;
-    padding-left:12px;
-    font-size:18px;
-    font-weight:700;
-}
-
-.driver-position{
-    padding-right:12px;
-    color:#FFD700;
-    font-weight:700;
-}
-
-.driver-speed{
-    text-align:center;
-    font-size:28px;
-    font-weight:800;
-    padding:10px 0;
-}
-
-.driver-status{
-    display:flex;
-    justify-content:space-between;
-    align-items:center;
-    padding:0 12px 10px;
-    color:#ddd;
-    font-size:13px;
-}
-
-.telemetry-content-wide{ max-width:980px; }
-
-.telemetry-header{
-    font-size:20px;
-    font-weight:800;
-    color:#fff;
-    margin-bottom:20px;
-}
-
-.telemetry-form{
-    display:flex;
-    flex-wrap:wrap;
-    gap:12px;
-    align-items:flex-end;
-    margin-bottom:14px;
-}
-
-.telemetry-form label{
-    display:flex;
-    flex-direction:column;
-    gap:5px;
-    font-size:11px;
-    color:#9aa1ad;
-    font-weight:700;
-}
-
-.telemetry-form select{
-    background:rgba(255,255,255,.05);
-    color:#fff;
-    border:1px solid var(--glass-border);
-    border-radius:8px;
-    padding:8px 10px;
-    min-width:130px;
-}
-
-.telemetry-compare-btn{
-    width:auto;
-    padding:10px 22px;
-    letter-spacing:1px;
-    font-size:12px;
-}
-
-.telemetry-results{ margin-top:20px; }
-
-.telemetry-lap-info{
-    display:flex;
-    gap:14px;
-    margin-bottom:18px;
-}
-
-.telemetry-lap-badge{
-    flex:1;
-    background:rgba(255,255,255,.04);
-    border:1px solid var(--glass-border);
-    border-radius:10px;
-    padding:10px 14px;
-    font-size:12px;
-    color:#ccc;
-}
-
-.telemetry-chart-block{ margin-bottom:20px; }
-
-.telemetry-chart-title{
-    font-size:12px;
-    font-weight:700;
-    color:#9aa1ad;
-    margin-bottom:6px;
-    text-transform:uppercase;
-    letter-spacing:.5px;
-}
-
-.telemetry-canvas{
-    width:100%;
-    height:150px;
-    display:block;
-    border-radius:10px;
-    background:rgba(255,255,255,.03);
-    border:1px solid var(--glass-border);
-}
-
-.telemetry-sector-row{
-    display:flex;
-    justify-content:space-between;
-    padding:8px 4px;
-    font-size:13px;
-    border-top:1px solid rgba(255,255,255,.06);
-}
-
-.telemetry-row{
-    display:flex;
-    align-items:center;
-    gap:8px;
-    padding:5px 12px;
-}
-
-.telemetry-row span:first-child{
-    width:34px;
-    color:#aaa;
-    font-size:12px;
-    font-weight:700;
-}
-
-.telemetry-row span:last-child{
-    width:40px;
-    text-align:right;
-    font-size:12px;
-}
-
-.telemetry-track{
-    flex:1;
-    height:8px;
-    background:rgba(255,255,255,.08);
-    border-radius:20px;
-    overflow:hidden;
-}
-
-.telemetry-fill{
-    height:100%;
-    border-radius:20px;
-    transition:width .15s linear;
-}
-
-.telemetry-fill.throttle{
-    background:linear-gradient(90deg, #1fa83c, #2ecc40);
-}
-
-.telemetry-fill.brake{
-    background:linear-gradient(90deg, #cc2020, #ff4040);
-}
-
-.telemetry-fill.ers{
-    background:#00bfff;
-}
-
-.gap-row{
-    padding:6px 12px;
-    font-size:12px;
-    font-weight:600;
-}
-
-.ahead{
-    color:#2ecc40;
-}
-
-.behind{
-    color:#ffb347;
-}
-
-.lap-counter-banner{
-    position:absolute;
-    top:50px;
-    right:20px;
-    width:var(--right-width);
-    text-align:center;
-    font-size:15px;
-    font-weight:700;
-    color:#fff;
-    padding:8px 16px;
-    font-variant-numeric:tabular-nums;
-    text-shadow:0 2px 8px rgba(0,0,0,.4);
-}
-
-.leaderboard-panel{
-    position:absolute;
-    top:100px;
-    right:20px;
-    width:var(--right-width);
-    max-height:calc(100vh - 220px);
-    overflow-y:auto;
-    overflow-x:hidden;
-    z-index:20;
-    scrollbar-gutter:stable;
-}
-
-.leaderboard-panel::-webkit-scrollbar{
-    width:8px;
-}
-
-.leaderboard-panel::-webkit-scrollbar-track{
-    background:rgba(255,255,255,.03);
-    border-radius:20px;
-}
-
-.leaderboard-panel::-webkit-scrollbar-thumb{
-    background:rgba(255,255,255,.35);
-    border-radius:20px;
-    border:1px solid rgba(255,255,255,.1);
-}
-
-.leaderboard-panel::-webkit-scrollbar-thumb:hover{
-    background:rgba(255,255,255,.5);
-}
-
-.lb-tyre-badge{
-    display:flex;
-    align-items:center;
-    gap:2px;
-    font-size:10px;
-    font-weight:800;
-    padding:2px 5px;
-    border-radius:4px;
-    flex-shrink:0;
-}
-
-.lb-tyre-life{
-    font-size:8px;
-    font-weight:600;
-    opacity:.75;
-}
-
-.lb-header{
-    display:flex;
-    justify-content:space-between;
-    align-items:center;
-    margin-bottom:14px;
-}
-
-.lb-title{
-    font-size:18px;
-    font-weight:700;
-}
-
-.lb-toggles{
-    display:flex;
-    gap:6px;
-}
-
-.lb-toggle-btn{
-    width:22px;
-    height:22px;
-    border-radius:50%;
-    border:1px solid var(--glass-border);
-    background:rgba(255,255,255,.06);
-    backdrop-filter:blur(8px);
-    color:#ccc;
-    font-size:11px;
-    font-weight:700;
-    cursor:pointer;
-    display:flex;
-    align-items:center;
-    justify-content:center;
-    padding:0;
-    transition:.15s;
-}
-
-.lb-toggle-btn:hover{
-    border-color:rgba(255,255,255,.4);
-}
-
-.lb-toggle-btn.active{
-    background:#2ecc71;
-    border-color:#2ecc71;
-    color:#000;
-    box-shadow:0 0 12px rgba(46,204,113,.5);
-}
-
-.lb-gap{
-    font-size:12px;
-    color:#999;
-    font-variant-numeric:tabular-nums;
-    min-width:44px;
-    text-align:right;
-}
-
-.lb-row.selected .lb-gap{
-    color:#333;
-}
-
-.lb-row{
-    display:flex;
-    align-items:center;
-    gap:10px;
-    padding:8px 10px;
-    border-radius:10px;
-    cursor:pointer;
-    transition:.18s;
-}
-
-.lb-row:hover{
-    background:rgba(255,255,255,.08);
-    backdrop-filter:blur(6px);
-}
-
-.lb-row.selected{
-    background:rgba(255,255,255,.92);
-    color:#000;
-}
-
-.lb-pos{
-    width:28px;
-    font-weight:700;
-    text-align:center;
-}
-
-.lb-code{
-    flex:1;
-    font-weight:700;
-    letter-spacing:.4px;
-}
-
-.lb-status{
-    display:flex;
-    gap:4px;
-    flex-shrink:0;
-    margin-left:auto;
-}
-
-.lb-badge{
-    font-size:9px;
-    font-weight:700;
-    padding:2px 6px;
-    border-radius:4px;
-    letter-spacing:.3px;
-    white-space:nowrap;
-}
-
-.lb-badge.drs{
-    background:rgba(46,204,113,.15);
-    color:#2ecc71;
-    border:1px solid #2ecc71;
-}
-
-.lb-badge.pit{
-    background:rgba(255,140,0,.15);
-    color:#ff8c00;
-    border:1px solid #ff8c00;
-}
-
-.lb-badge.out{
-    background:rgba(255,64,64,.15);
-    color:#ff4040;
-    border:1px solid #ff4040;
-}
-
-.controls-legend{
-    position:absolute;
-    top:620px;
-    left:20px;
-    width:var(--left-width);
-    background:var(--glass-bg-strong);
-    backdrop-filter:blur(var(--glass-blur)) saturate(160%);
-    -webkit-backdrop-filter:blur(var(--glass-blur)) saturate(160%);
-    border:1px solid var(--glass-border);
-    border-radius:var(--radius);
-    padding:16px;
-    box-shadow:var(--shadow);
-    z-index:20;
-}
-
-.cl-title{
-    font-size:18px;
-    font-weight:700;
-    margin-bottom:12px;
-    color:#fff;
-}
-
-.cl-row{
-    display:flex;
-    gap:10px;
-    align-items:center;
-    padding:5px 0;
-    color:#c8c8c8;
-    border-bottom:1px solid rgba(255,255,255,.06);
-    font-size:13px;
-}
-
-.cl-row:last-child{
-    border-bottom:none;
-}
-
-.cl-row b{
-    color:#fff;
-    min-width:90px;
-}
-
-.bottom-bar{
-    position:absolute;
-    left:0;
-    right:0;
-    bottom:0;
-    padding:12px 24px 18px;
-    display:flex;
-    flex-direction:column;
-    align-items:center;
-    background:linear-gradient(
-        transparent,
-        rgba(5,5,7,.9) 25%,
-        rgba(5,5,7,.98)
-    );
-    z-index:50;
-}
-
-.controls{
-    width:75%;
-    display:flex;
-    justify-content:center;
-    align-items:center;
-    gap:14px;
-    margin-bottom:12px;
-}
-
-.icon-btn{
-    width:42px;
-    height:42px;
-    display:flex;
-    justify-content:center;
-    align-items:center;
-    background:#1c1e24;
-    border:1px solid rgba(255,255,255,.15);
-    border-radius:12px;
-    cursor:pointer;
-    box-shadow:inset 0 1px 0 rgba(255,255,255,.08);
-    transition:.2s ease;
-}
-
-.icon-btn:hover{
-    background:rgba(255,255,255,.12);
-    border-color:rgba(255,255,255,.3);
-    transform:translateY(-1px);
-}
-
-.icon-btn:active{
-    transform:scale(.95);
-}
-
-.icon-btn img{
-    width:20px;
-    height:20px;
-    object-fit:contain;
-    pointer-events:none;
-    user-select:none;
-}
- 
-.speed-control{
-    display:flex;
-    align-items:center;
-    gap:8px;
-    margin-left:8px;
-    background:#1c1e24;
-    border:1px solid rgba(255,255,255,.15);
-    border-radius:10px;
-    padding:2px 8px;
-}
-
-#speedLabel{
-    width:42px;
-    text-align:center;
-    color:#fff;
-    font-size:15px;
-    font-weight:700;
-    font-variant-numeric:tabular-nums;
-}
-
-.time-label{
-    margin-left:18px;
-    color:#d5d5d5;
-    font-size:14px;
-    font-weight:600;
-    font-variant-numeric:tabular-nums;
-    white-space:nowrap;
-}
-
-
-.progress-canvas{
-    width:75%;
-    height:42px;
-    display:block;
-    cursor:pointer;
-    border-radius:10px;
-    background:#111318;
-    border:1px solid rgba(255,255,255,.12);
-}
-
-.hidden{
-    display:none !important;
-}
-
-.legend{
-    position:absolute;
-    right:20px;
-    bottom:78px;
-    display:flex;
-    gap:16px;
-    align-items:center;
-    padding:8px 14px;
-    background:var(--glass-bg-strong);
-    backdrop-filter:blur(var(--glass-blur)) saturate(160%);
-    -webkit-backdrop-filter:blur(var(--glass-blur)) saturate(160%);
-    border:1px solid var(--glass-border);
-    border-radius:12px;
-    box-shadow:var(--shadow);
-    z-index:60;
-    font-size:12px;
-    color:#ddd;
-}
-
-.legend span{
-    display:flex;
-    align-items:center;
-}
-
-.dot{
-    width:10px;
-    height:10px;
-    border-radius:3px;
-    display:inline-block;
-    margin-right:6px;
-}
-
-.dot.yellow{ background:#ffdc00; }
-.dot.red{ background:#dc2626; }
-.dot.orange{ background:#ff8c00; }
-.dot.amber{ background:#f59e0b; }
-
-.back-btn{
-    position:absolute;
-    top:18px;
-    left:20px;
-    z-index:100;
-    padding:8px 14px;
-    border:1px solid var(--glass-border);
-    border-radius:10px;
-    background:rgba(255,255,255,.06);
-    backdrop-filter:blur(14px) saturate(160%);
-    -webkit-backdrop-filter:blur(14px) saturate(160%);
-    color:#fff;
-    cursor:pointer;
-    transition:.2s;
-    box-shadow:var(--shadow);
-}
-
-.back-btn:hover{
-    background:rgba(255,255,255,.12);
-    transform:translateY(-1px);
-}
-
-.strategy-btn{
-    left:170px;
-}
+/*STRATEGY PANEL (pit-stop view) */
 
 .strategy-header-row{
     display:flex;
@@ -1780,18 +1076,16 @@ body::after{
     z-index:20;
 }
 
-
 #telemetryPanel .strategy-content{
-
     max-width:none;
-
     width:95vw;
-
     margin:20px auto;
-
     padding:28px;
-
 }
+
+/* ============================================================
+   QUALIFYING / SPRINT QUALIFYING RESULTS VIEW
+   ============================================================ */
 
 .quali-results{
     position:relative;
@@ -1835,6 +1129,8 @@ body::after{
     font-variant-numeric:tabular-nums;
 }
 
+/* SCROLLBARS (global default) */
+
 ::-webkit-scrollbar{
     width:8px;
     height:8px;
@@ -1852,6 +1148,10 @@ body::after{
 ::-webkit-scrollbar-thumb:hover{
     background:rgba(255,255,255,.3);
 }
+
+/* ============================================================
+   TELEMETRY COMPARISON PANEL (separate from replay's driver panel)
+   ============================================================ */
 
 .telemetry-content-wide{
     width:100%;
@@ -2012,63 +1312,37 @@ body::after{
     border-top:1px solid rgba(255,255,255,.08);
 }
 
-
 @media (max-width:1100px){
-
     .telemetry-dashboard{
         grid-template-columns:1fr;
     }
-
     .telemetry-lap-info{
         grid-template-columns:1fr;
     }
-
 }
 
-@media (max-width:1600px){
-    :root{
-        --left-width:245px;
-        --right-width:220px;
-    }
-    .controls-legend{
-        top:590px;
-    }
+/* 
+   SHARED — used across multiple pages (replay, quali, strategy,
+   telemetry, drivers panels all use the same back button) */
+
+.back-btn{
+    position:absolute;
+    top:18px;
+    left:20px;
+    z-index:100;
+    padding:8px 14px;
+    border:1px solid var(--glass-border);
+    border-radius:10px;
+    background:rgba(255,255,255,.06);
+    backdrop-filter:blur(14px) saturate(160%);
+    -webkit-backdrop-filter:blur(14px) saturate(160%);
+    color:#fff;
+    cursor:pointer;
+    transition:.2s;
+    box-shadow:var(--shadow);
 }
 
-@media (max-width:1400px){
-    :root{
-        --left-width:225px;
-        --right-width:205px;
-    }
-    .driver-info-wrapper{
-        top:245px;
-    }
-    .controls-legend{
-        top:570px;
-    }
-}
-
-@media (max-height:900px){
-    .driver-info-wrapper{
-        max-height:260px;
-    }
-    .controls-legend{
-        top:auto;
-        bottom:145px;
-    }
-}
-
-.panel{
-    animation:panelFade .3s ease;
-}
-
-@keyframes panelFade{
-    from{
-        opacity:0;
-        transform:translateY(8px) scale(.98);
-    }
-    to{
-        opacity:1;
-        transform:translateY(0) scale(1);
-    }
+.back-btn:hover{
+    background:rgba(255,255,255,.12);
+    transform:translateY(-1px);
 }
