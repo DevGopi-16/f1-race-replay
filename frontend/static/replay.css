@@ -1,0 +1,677 @@
+/* F1 Race Replay UI — REPLAY PAGE STYLES
+   Extracted from style.css. Covers the #replay view only:
+   track canvas, session banner, weather, driver panels, leaderboard,
+   controls legend, bottom playback bar, flag legend.
+
+   IMPORTANT: this file depends on CSS variables defined in :root
+   inside style.css (--glass-bg, --glass-border, --glass-blur, --panel,
+   --shadow, --radius, --left-width, --right-width, etc).
+   Load style.css BEFORE this file. */
+
+/* Replay Layout */
+
+.replay{
+    position:relative;
+    width:100vw;
+    height:100vh;
+    overflow:hidden;
+    background:transparent;
+    z-index:1;
+}
+
+#trackCanvas{
+    position:absolute;
+    inset:0;
+    width:100%;
+    height:100%;
+    z-index:1;
+}
+
+/* Generic Panel — frosted glass card (weather / lap counter / leaderboard) */
+
+.panel{
+    position:absolute;
+    background:var(--panel);
+    backdrop-filter:blur(var(--glass-blur)) saturate(160%);
+    -webkit-backdrop-filter:blur(var(--glass-blur)) saturate(160%);
+    border:1px solid var(--panel-border);
+    border-radius:var(--radius);
+    box-shadow:var(--shadow);
+    padding:14px 16px;
+    z-index:20;
+    color:#fff;
+    animation:panelFade .3s ease;
+}
+
+@keyframes panelFade{
+    from{
+        opacity:0;
+        transform:translateY(8px) scale(.98);
+    }
+    to{
+        opacity:1;
+        transform:translateY(0) scale(1);
+    }
+}
+
+/* Session Banner */
+
+.session-banner{
+    position:absolute;
+    top:16px;
+    left:50%;
+    transform:translateX(-50%);
+    min-width:420px;
+    padding:12px 24px;
+    text-align:center;
+    background:var(--glass-bg-strong);
+    border:1px solid var(--glass-border);
+    border-radius:14px;
+    backdrop-filter:blur(var(--glass-blur)) saturate(160%);
+    -webkit-backdrop-filter:blur(var(--glass-blur)) saturate(160%);
+    box-shadow:var(--shadow);
+    z-index:100;
+}
+
+.session-banner b{
+    display:block;
+    font-size:17px;
+    color:#fff;
+    margin-bottom:4px;
+}
+
+/* LEFT SIDEBAR — Weather */
+
+.weather-panel{
+    position:absolute;
+    top:60px;
+    left:20px;
+}
+
+.weather-panel .wp-title{
+    font-size:16px;
+    font-weight:700;
+    margin-bottom:6px;
+    color:#fff;
+}
+
+.weather-panel .wp-row{
+    display:flex;
+    align-items:center;
+    gap:4px;
+    padding:2px 0;
+    font-size:13px;
+    color:#c8c8c8;
+    border-bottom:1px solid rgba(255,255,255,.06);
+}
+
+.weather-icon{
+    width:14px;
+    height:14px;
+    object-fit:contain;
+    flex-shrink:0;
+}
+
+.weather-label{
+    flex:1;
+    color:#fff;
+    font-weight:500;
+}
+
+.weather-value{
+    color:#5fd4ff;
+    font-weight:600;
+    font-size:13px;
+}
+
+/* DRIVER PANEL */
+
+.driver-info-wrapper{
+    position:absolute;
+    top:255px;
+    left:20px;
+    width:280px;
+    display:flex;
+    flex-direction:column;
+    gap:12px;
+    z-index:20;
+}
+
+.driver-panel{
+    background:var(--glass-bg-strong);
+    backdrop-filter:blur(var(--glass-blur)) saturate(160%);
+    -webkit-backdrop-filter:blur(var(--glass-blur)) saturate(160%);
+    border:1px solid var(--glass-border);
+    border-radius:var(--radius);
+    overflow:hidden;
+    box-shadow:var(--shadow);
+    color:#fff;
+    transition:.2s;
+}
+
+.driver-panel:hover{
+    box-shadow:0 10px 40px rgba(0,0,0,.55), inset 0 1px 0 rgba(255,255,255,.1);
+}
+
+.driver-header{
+    height:34px;
+    display:flex;
+    align-items:center;
+    background:rgba(0,0,0,.35);
+}
+
+.team-strip{
+    width:8px;
+    height:100%;
+}
+
+.driver-code{
+    flex:1;
+    padding-left:12px;
+    font-size:18px;
+    font-weight:700;
+}
+
+.driver-position{
+    padding-right:12px;
+    color:#FFD700;
+    font-weight:700;
+}
+
+.driver-speed{
+    text-align:center;
+    font-size:28px;
+    font-weight:800;
+    padding:10px 0;
+}
+
+.driver-status{
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+    padding:0 12px 10px;
+    color:#ddd;
+    font-size:13px;
+}
+
+/* Driver panel telemetry bars (THR / BRK / TYRE) */
+
+.telemetry-row{
+    display:flex;
+    align-items:center;
+    gap:8px;
+    padding:5px 12px;
+}
+
+.telemetry-row span:first-child{
+    width:34px;
+    color:#aaa;
+    font-size:12px;
+    font-weight:700;
+}
+
+.telemetry-row span:last-child{
+    width:40px;
+    text-align:right;
+    font-size:12px;
+}
+
+.telemetry-track{
+    flex:1;
+    height:8px;
+    background:rgba(255,255,255,.08);
+    border-radius:20px;
+    overflow:hidden;
+}
+
+.telemetry-fill{
+    height:100%;
+    border-radius:20px;
+    transition:width .15s linear;
+}
+
+.telemetry-fill.throttle{
+    background:linear-gradient(90deg, #1fa83c, #2ecc40);
+}
+
+.telemetry-fill.brake{
+    background:linear-gradient(90deg, #cc2020, #ff4040);
+}
+
+.telemetry-fill.ers{
+    background:#00bfff;
+}
+
+.gap-row{
+    padding:6px 12px;
+    font-size:12px;
+    font-weight:600;
+}
+
+.ahead{
+    color:#2ecc40;
+}
+
+.behind{
+    color:#ffb347;
+}
+
+/* RIGHT SIDEBAR — Leaderboard */
+
+.lap-counter-banner{
+    position:absolute;
+    top:50px;
+    right:20px;
+    width:var(--right-width);
+    text-align:center;
+    font-size:15px;
+    font-weight:700;
+    color:#fff;
+    padding:8px 16px;
+    font-variant-numeric:tabular-nums;
+    text-shadow:0 2px 8px rgba(0,0,0,.4);
+}
+
+.leaderboard-panel{
+    position:absolute;
+    top:100px;
+    right:20px;
+    width:var(--right-width);
+    max-height:calc(100vh - 220px);
+    overflow-y:auto;
+    overflow-x:hidden;
+    z-index:20;
+    scrollbar-gutter:stable;
+}
+
+.leaderboard-panel::-webkit-scrollbar{
+    width:8px;
+}
+
+.leaderboard-panel::-webkit-scrollbar-track{
+    background:rgba(255,255,255,.03);
+    border-radius:20px;
+}
+
+.leaderboard-panel::-webkit-scrollbar-thumb{
+    background:rgba(255,255,255,.35);
+    border-radius:20px;
+    border:1px solid rgba(255,255,255,.1);
+}
+
+.leaderboard-panel::-webkit-scrollbar-thumb:hover{
+    background:rgba(255,255,255,.5);
+}
+
+.lb-tyre-badge{
+    display:flex;
+    align-items:center;
+    gap:2px;
+    font-size:10px;
+    font-weight:800;
+    padding:2px 5px;
+    border-radius:4px;
+    flex-shrink:0;
+}
+
+.lb-tyre-life{
+    font-size:8px;
+    font-weight:600;
+    opacity:.75;
+}
+
+.lb-header{
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+    margin-bottom:14px;
+}
+
+.lb-title{
+    font-size:18px;
+    font-weight:700;
+}
+
+.lb-toggles{
+    display:flex;
+    gap:6px;
+}
+
+.lb-toggle-btn{
+    width:22px;
+    height:22px;
+    border-radius:50%;
+    border:1px solid var(--glass-border);
+    background:rgba(255,255,255,.06);
+    backdrop-filter:blur(8px);
+    color:#ccc;
+    font-size:11px;
+    font-weight:700;
+    cursor:pointer;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    padding:0;
+    transition:.15s;
+}
+
+.lb-toggle-btn:hover{
+    border-color:rgba(255,255,255,.4);
+}
+
+.lb-toggle-btn.active{
+    background:#2ecc71;
+    border-color:#2ecc71;
+    color:#000;
+    box-shadow:0 0 12px rgba(46,204,113,.5);
+}
+
+.lb-gap{
+    font-size:12px;
+    color:#999;
+    font-variant-numeric:tabular-nums;
+    min-width:44px;
+    text-align:right;
+}
+
+.lb-row.selected .lb-gap{
+    color:#333;
+}
+
+.lb-row{
+    display:flex;
+    align-items:center;
+    gap:10px;
+    padding:8px 10px;
+    border-radius:10px;
+    cursor:pointer;
+    transition:.18s;
+}
+
+.lb-row:hover{
+    background:rgba(255,255,255,.08);
+    backdrop-filter:blur(6px);
+}
+
+.lb-row.selected{
+    background:rgba(255,255,255,.92);
+    color:#000;
+}
+
+.lb-pos{
+    width:28px;
+    font-weight:700;
+    text-align:center;
+}
+
+.lb-code{
+    flex:1;
+    font-weight:700;
+    letter-spacing:.4px;
+}
+
+.lb-status{
+    display:flex;
+    gap:4px;
+    flex-shrink:0;
+    margin-left:auto;
+}
+
+.lb-badge{
+    font-size:9px;
+    font-weight:700;
+    padding:2px 6px;
+    border-radius:4px;
+    letter-spacing:.3px;
+    white-space:nowrap;
+}
+
+.lb-badge.drs{
+    background:rgba(46,204,113,.15);
+    color:#2ecc71;
+    border:1px solid #2ecc71;
+}
+
+.lb-badge.pit{
+    background:rgba(255,140,0,.15);
+    color:#ff8c00;
+    border:1px solid #ff8c00;
+}
+
+.lb-badge.out{
+    background:rgba(255,64,64,.15);
+    color:#ff4040;
+    border:1px solid #ff4040;
+}
+
+/* CONTROLS PANEL — left column, below driver boxes */
+
+.controls-legend{
+    position:absolute;
+    top:620px;
+    left:20px;
+    width:var(--left-width);
+    background:var(--glass-bg-strong);
+    backdrop-filter:blur(var(--glass-blur)) saturate(160%);
+    -webkit-backdrop-filter:blur(var(--glass-blur)) saturate(160%);
+    border:1px solid var(--glass-border);
+    border-radius:var(--radius);
+    padding:16px;
+    box-shadow:var(--shadow);
+    z-index:20;
+}
+
+.cl-title{
+    font-size:18px;
+    font-weight:700;
+    margin-bottom:12px;
+    color:#fff;
+}
+
+.cl-row{
+    display:flex;
+    gap:10px;
+    align-items:center;
+    padding:5px 0;
+    color:#c8c8c8;
+    border-bottom:1px solid rgba(255,255,255,.06);
+    font-size:13px;
+}
+
+.cl-row:last-child{
+    border-bottom:none;
+}
+
+.cl-row b{
+    color:#fff;
+    min-width:90px;
+}
+
+/* BOTTOM PLAYBACK BAR (flattened — no blur, see notes) */
+
+.bottom-bar{
+    position:absolute;
+    left:0;
+    right:0;
+    bottom:0;
+    padding:12px 24px 18px;
+    display:flex;
+    flex-direction:column;
+    align-items:center;
+    background:linear-gradient(
+        transparent,
+        rgba(5,5,7,.9) 25%,
+        rgba(5,5,7,.98)
+    );
+    z-index:50;
+}
+
+/* CONTROLS */
+
+.controls{
+    width:75%;
+    display:flex;
+    justify-content:center;
+    align-items:center;
+    gap:14px;
+    margin-bottom:12px;
+}
+
+/* ICON BUTTONS (flattened — no blur, see notes) */
+
+.icon-btn{
+    width:42px;
+    height:42px;
+    display:flex;
+    justify-content:center;
+    align-items:center;
+    background:#1c1e24;
+    border:1px solid rgba(255,255,255,.15);
+    border-radius:12px;
+    cursor:pointer;
+    box-shadow:inset 0 1px 0 rgba(255,255,255,.08);
+    transition:.2s ease;
+}
+
+.icon-btn:hover{
+    background:rgba(255,255,255,.12);
+    border-color:rgba(255,255,255,.3);
+    transform:translateY(-1px);
+}
+
+.icon-btn:active{
+    transform:scale(.95);
+}
+
+.icon-btn img{
+    width:20px;
+    height:20px;
+    object-fit:contain;
+    pointer-events:none;
+    user-select:none;
+}
+
+/* SPEED CONTROL (flattened — no blur) */
+
+.speed-control{
+    display:flex;
+    align-items:center;
+    gap:8px;
+    margin-left:8px;
+    background:#1c1e24;
+    border:1px solid rgba(255,255,255,.15);
+    border-radius:10px;
+    padding:2px 8px;
+}
+
+#speedLabel{
+    width:42px;
+    text-align:center;
+    color:#fff;
+    font-size:15px;
+    font-weight:700;
+    font-variant-numeric:tabular-nums;
+}
+
+/* TIME */
+
+.time-label{
+    margin-left:18px;
+    color:#d5d5d5;
+    font-size:14px;
+    font-weight:600;
+    font-variant-numeric:tabular-nums;
+    white-space:nowrap;
+}
+
+/* PROGRESS BAR (flattened — no blur, solid background) */
+
+.progress-canvas{
+    width:75%;
+    height:42px;
+    display:block;
+    cursor:pointer;
+    border-radius:10px;
+    background:#111318;
+    border:1px solid rgba(255,255,255,.12);
+}
+
+/* FLAG LEGEND */
+
+.legend{
+    position:absolute;
+    right:20px;
+    bottom:78px;
+    display:flex;
+    gap:16px;
+    align-items:center;
+    padding:8px 14px;
+    background:var(--glass-bg-strong);
+    backdrop-filter:blur(var(--glass-blur)) saturate(160%);
+    -webkit-backdrop-filter:blur(var(--glass-blur)) saturate(160%);
+    border:1px solid var(--glass-border);
+    border-radius:12px;
+    box-shadow:var(--shadow);
+    z-index:60;
+    font-size:12px;
+    color:#ddd;
+}
+
+.legend span{
+    display:flex;
+    align-items:center;
+}
+
+.dot{
+    width:10px;
+    height:10px;
+    border-radius:3px;
+    display:inline-block;
+    margin-right:6px;
+}
+
+.dot.yellow{ background:#ffdc00; }
+.dot.red{ background:#dc2626; }
+.dot.orange{ background:#ff8c00; }
+.dot.amber{ background:#f59e0b; }
+
+/* "Strategy" bottom-bar button offset (only used within #replay) */
+
+.strategy-btn{
+    left:170px;
+}
+
+/* RESPONSIVE — replay-only layout adjustments */
+
+@media (max-width:1600px){
+    :root{
+        --left-width:245px;
+        --right-width:220px;
+    }
+    .controls-legend{
+        top:590px;
+    }
+}
+
+@media (max-width:1400px){
+    :root{
+        --left-width:225px;
+        --right-width:205px;
+    }
+    .driver-info-wrapper{
+        top:245px;
+    }
+    .controls-legend{
+        top:570px;
+    }
+}
+
+@media (max-height:900px){
+    .driver-info-wrapper{
+        max-height:260px;
+    }
+    .controls-legend{
+        top:auto;
+        bottom:145px;
+    }
+}
