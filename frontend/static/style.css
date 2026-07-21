@@ -1083,9 +1083,7 @@ body::after{
     padding:28px;
 }
 
-/* ============================================================
-   QUALIFYING / SPRINT QUALIFYING RESULTS VIEW
-   ============================================================ */
+/*QUALIFYING / SPRINT QUALIFYING RESULTS VIEW */
 
 .quali-results{
     position:relative;
@@ -1149,9 +1147,7 @@ body::after{
     background:rgba(255,255,255,.3);
 }
 
-/* ============================================================
-   TELEMETRY COMPARISON PANEL (separate from replay's driver panel)
-   ============================================================ */
+/* TELEMETRY COMPARISON PANEL (separate from replay's driver panel) */
 
 .telemetry-content-wide{
     width:100%;
