@@ -2097,6 +2097,21 @@ const ctx = canvas.getContext("2d");
 const progressCanvas = document.getElementById("progressCanvas");
 const progressCtx = progressCanvas.getContext("2d");
 
+// function startReplay() {
+//   document.getElementById("picker").classList.add("hidden");
+//   document.getElementById("replay").classList.remove("hidden");
+
+//   state.playheadT = 0;
+//   state.playing = true;
+//   state.selectedDrivers = [];
+//   state.lastTickMs = null;
+
+//   resizeCanvases();
+//   computeTransform();
+//   renderSessionBanner();
+//   requestAnimationFrame(tick);
+// }
+
 function startReplay() {
   document.getElementById("picker").classList.add("hidden");
   document.getElementById("replay").classList.remove("hidden");
@@ -2105,6 +2120,9 @@ function startReplay() {
   state.playing = true;
   state.selectedDrivers = [];
   state.lastTickMs = null;
+
+  playPauseIcon.src = "/static/images/controls/pause.png";
+  playPauseIcon.alt = "Pause";
 
   resizeCanvases();
   computeTransform();
@@ -2321,12 +2339,9 @@ function tick(nowMs) {
         );
 
         if (state.playheadT >= totalT) {
-
             state.playing = false;
-
             playPauseIcon.src =
                 "/static/images/controls/play.png";
-
             playPauseIcon.alt = "Play";
         }
     }
