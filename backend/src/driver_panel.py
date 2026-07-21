@@ -1,91 +1,3 @@
-# """
-# backend/src/driver_panel.py
-
-# Pulls live driver championship standings from the Jolpica F1 API
-# (https://api.jolpi.ca/ergast/f1) — the community-maintained successor to
-# Ergast — and merges them with static per-driver metadata (team color,
-# banner, description) stored in data/drivers.json.
-
-# Calling the standings endpoint WITHOUT a round number returns the
-# standings as of the most recently completed race automatically, so no
-# round needs to be chosen or guessed by the caller.
-# """
-
-# import requests
-
-# JOLPICA_BASE = "https://api.jolpi.ca/ergast/f1"
-
-
-# def fetch_driver_standings(season: int, round_: int | None = None) -> list[dict]:
-#     """
-#     Calls Jolpica for driver championship standings. This is just the
-#     standings table — no session telemetry, no timing data — so it's
-#     fast and available the same day as a race, unlike FastF1 session data.
-#     """
-#     if round_:
-#         url = f"{JOLPICA_BASE}/{season}/{round_}/driverstandings/"
-#     else:
-#         url = f"{JOLPICA_BASE}/{season}/driverstandings/"
-
-#     resp = requests.get(url, timeout=10)
-#     resp.raise_for_status()
-
-#     standings_lists = resp.json()["MRData"]["StandingsTable"]["StandingsLists"]
-#     if not standings_lists:
-#         return []
-
-#     return standings_lists[0]["DriverStandings"]
-
-
-# def _static_lookup(static_drivers: list) -> dict:
-#     """
-#     Index static driver entries (from drivers.json) by driverId, lowercased.
-#     Jolpica's Driver.driverId (e.g. "max_verstappen") matches the driverId
-#     field already used in drivers.json — direct join, no fuzzy matching.
-#     """
-#     lookup = {}
-#     for entry in static_drivers:
-#         key = entry.get("driverId") or entry.get("id")
-#         if key:
-#             lookup[str(key).lower()] = entry
-#     return lookup
-
-
-# def build_driver_panel(season: int, static_drivers: list, round_: int | None = None) -> list[dict]:
-#     """
-#     season, round_: which championship standings to fetch from Jolpica.
-#                     round_=None returns the latest available standings —
-#                     no need to know or guess which round is "safe" to use.
-#     static_drivers: contents of data/drivers.json (a list of dicts).
-
-#     Returns one merged list, sorted by championship position.
-#     """
-#     standings = fetch_driver_standings(season, round_)
-#     static_by_key = _static_lookup(static_drivers)
-
-#     merged = []
-#     for entry in standings:
-#         driver = entry.get("Driver", {})
-#         constructors = entry.get("Constructors", [])
-#         driver_id = driver.get("driverId", "")
-#         static_entry = static_by_key.get(driver_id.lower(), {})
-
-#         merged.append({
-#             **static_entry,  # teamColor, banner, description, image, flag, etc.
-#             "code": driver.get("code") or static_entry.get("code", ""),
-#             "name": f"{driver.get('givenName', '')} {driver.get('familyName', '')}".strip(),
-#             "team": constructors[0]["name"] if constructors else static_entry.get("team", ""),
-#             "position": int(entry["position"]) if entry.get("position") else None,
-#             "points": float(entry["points"]) if entry.get("points") else 0.0,
-#             "wins": int(entry["wins"]) if entry.get("wins") else 0,
-#             "color": static_entry.get("teamColor", "#888888"),
-#         })
-
-#     merged.sort(key=lambda d: (d["position"] is None, d["position"] or 999))
-#     return merged
-
-
-
 """
 backend/src/driver_panel.py
 
@@ -170,55 +82,19 @@ def _fastest_lap_driver_code(season: int, round_: int) -> str | None:
     return fastest["Driver"] if fastest is not None else None
 
 
-# def _compute_season_stats(season: int) -> dict[str, dict]:
-#     """
-#     Returns { driver_code: {podiums, poles, avg_finish} }.
-#     Keyed by 3-letter driver code (e.g. "VER") since that's common to both
-#     FastF1 results and Jolpica standings entries, avoiding any driverId
-#     mismatch issues (like the Lindblad case) entirely.
-#     """
-#     stats: dict[str, dict] = {}
-
-#     for round_ in _completed_rounds(season):
-#         try:
-#             race = _race_results(season, round_)
-#             for _, row in race.iterrows():
-#                 code = row.get("Abbreviation")
-#                 if not code:
-#                     continue
-#                 entry = stats.setdefault(code, {"podiums": 0, "poles": 0, "fastest_laps": 0, "finishes": []})
-#                 position = row.get("Position")
-#                 if position and not (isinstance(position, float) and position != position):
-#                     pos = int(position)
-#                     entry["finishes"].append(pos)
-#                     if pos <= 3:
-#                         entry["podiums"] += 1
-#         except Exception as e:
-#             print(f"[driver_panel] skipping race round {round_} ({season}): {e}")
-
-#         try:
-#             quali = _qualifying_results(season, round_)
-#             for _, row in quali.iterrows():
-#                 code = row.get("Abbreviation")
-#                 if not code:
-#                     continue
-#                 entry = stats.setdefault(code, {"podiums": 0, "poles": 0, "fastest_laps": 0, "finishes": []})
-#                 if row.get("Position") == 1:
-#                     entry["poles"] += 1
-#         except Exception as e:
-#             print(f"[driver_panel] skipping qualifying round {round_} ({season}): {e}")
-
-#         try:
-#             fl_code = _fastest_lap_driver_code(season, round_)
-#             if fl_code:
-#                 entry = stats.setdefault(fl_code, {"podiums": 0, "poles": 0, "fastest_laps": 0, "finishes": []})
-#                 entry["fastest_laps"] += 1
-#         except Exception as e:
-#             print(f"[driver_panel] skipping fastest-lap calc for round {round_} ({season}): {e}")
-
+"""
+Patch for backend/src/driver_panel.py — replace _compute_season_stats with
+this version. The only behavioral change: qualifying position is now
+recorded per-round (not just whether it was P1), and merged into each
+driver's `history` entries as `quali_position`. Everything else is
+identical to before.
+"""
 
 def _compute_season_stats(season: int) -> dict[str, dict]:
     stats: dict[str, dict] = {}
+    # NEW: code -> {round: quali_position}, populated during the qualifying
+    # loop below, merged into `history` entries after the main loop.
+    quali_positions: dict[str, dict[int, int]] = {}
 
     schedule = fastf1.get_event_schedule(season, include_testing=False)
     round_names = dict(zip(schedule["RoundNumber"], schedule["EventName"]))
@@ -267,8 +143,18 @@ def _compute_season_stats(season: int) -> dict[str, dict]:
                     "podiums": 0, "poles": 0, "fastest_laps": 0,
                     "finishes": [], "history": [],
                 })
-                if row.get("Position") == 1:
-                    entry["poles"] += 1
+
+                qpos_str = row.get("Position")
+                qpos = None
+                if qpos_str and not (isinstance(qpos_str, float) and qpos_str != qpos_str):
+                    qpos = int(qpos_str)
+                    if qpos == 1:
+                        entry["poles"] += 1
+
+                # NEW: record every driver's quali position for this round,
+                # not just whether they got pole.
+                if qpos is not None:
+                    quali_positions.setdefault(code, {})[round_] = qpos
         except Exception as e:
             print(f"[driver_panel] skipping qualifying round {round_} ({season}): {e}")
 
@@ -283,13 +169,16 @@ def _compute_season_stats(season: int) -> dict[str, dict]:
         except Exception as e:
             print(f"[driver_panel] skipping fastest-lap calc for round {round_} ({season}): {e}")
 
-    for entry in stats.values():
-        # Sort by round, then compute a running cumulative-points total
+    for code, entry in stats.items():
+        # Sort by round, then compute a running cumulative-points total,
+        # and attach this driver's quali position for that round (if any).
         history = sorted(entry["history"], key=lambda h: h["round"])
         cumulative = 0.0
+        driver_quali = quali_positions.get(code, {})
         for h in history:
             cumulative += h["points"]
             h["cumulative_points"] = round(cumulative, 1)
+            h["quali_position"] = driver_quali.get(h["round"])  # NEW
         entry["history"] = history
 
         finishes = entry.pop("finishes")
@@ -317,13 +206,36 @@ def get_season_stats_cached(season: int) -> dict[str, dict]:
     return {}
 
 
+# def warm_season_stats(season: int) -> None:
+#     """Computes and persists stats to disk. Call only from a background thread."""
+#     path = _disk_cache_path(season)
+#     if os.path.exists(path):
+#         age = time.time() - os.path.getmtime(path)
+#         if age < STATS_CACHE_TTL_SECONDS:
+#             return  # already fresh, nothing to do
+
+#     stats = _compute_season_stats(season)
+#     os.makedirs(COMPUTED_DATA_DIR, exist_ok=True)
+#     with open(path, "w") as f:
+#         json.dump(stats, f, indent=2)
+
+
 def warm_season_stats(season: int) -> None:
     """Computes and persists stats to disk. Call only from a background thread."""
     path = _disk_cache_path(season)
     if os.path.exists(path):
         age = time.time() - os.path.getmtime(path)
         if age < STATS_CACHE_TTL_SECONDS:
-            return  # already fresh, nothing to do
+            # Even if "fresh" by age, don't trust a corrupted/placeholder
+            # file — validate it actually contains usable stats before
+            # skipping the recompute.
+            try:
+                with open(path) as f:
+                    cached = json.load(f)
+                if isinstance(cached, dict) and cached:
+                    return  # genuinely fresh and valid, nothing to do
+            except (json.JSONDecodeError, OSError):
+                pass  # fall through and recompute
 
     stats = _compute_season_stats(season)
     os.makedirs(COMPUTED_DATA_DIR, exist_ok=True)
