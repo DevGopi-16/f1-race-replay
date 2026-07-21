@@ -3,7 +3,7 @@
 
 #drivers-panel {
   color: #fff;
-  max-width: 1152px;
+  max-width: 1200px;
   margin: 0 auto;
   position: relative;
   perspective: 1400px;
@@ -791,3 +791,247 @@
   border-radius: 999px;
   transition: width .5s cubic-bezier(.2,.8,.2,1);
 }
+
+
+
+
+
+
+
+/* --- Banner wipe/reveal (PPT-style) --- */
+@keyframes dp-banner-wipe {
+  0%   { clip-path: polygon(0 0, 6% 0, 0% 100%, 0% 100%); }
+  100% { clip-path: polygon(0 0, 106% 0, 100% 100%, 0% 100%); }
+}
+
+@keyframes dp-banner-wipe-edge {
+  0%   { left: -2%; opacity: 1; }
+  85%  { opacity: 1; }
+  100% { left: 100%; opacity: 0; }
+}
+
+.dp-hero-banner-frame,
+.dp-hero-fallback {
+  animation: dp-banner-wipe .85s cubic-bezier(.65, 0, .35, 1) both;
+}
+
+/* Bright leading edge that "cuts" across as the wipe uncovers the banner */
+.dp-hero-banner-frame::before {
+  content: "";
+  position: absolute;
+  top: -10%;
+  bottom: -10%;
+  width: 4px;
+  background: linear-gradient(180deg, transparent, rgba(255,255,255,0.85), transparent);
+  transform: skewX(-12deg);
+  z-index: 2;
+  pointer-events: none;
+  animation: dp-banner-wipe-edge .85s cubic-bezier(.65, 0, .35, 1) both;
+}
+
+/* Let the name/team text settle in just after the wipe clears it */
+.dp-hero-scrim-content {
+  animation: dp-fade-up .5s ease .5s both;
+}
+
+/* --- Profile page: two-column layout (Bio/Stats/Form | Charts) --- */
+.dp-profile-grid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 16px;
+  align-items: start;
+}
+@media (min-width: 900px) {
+  .dp-profile-grid { grid-template-columns: minmax(280px, 380px) 1fr; }
+}
+.dp-profile-col-left,
+.dp-profile-col-right {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  min-width: 0;
+}
+.dp-profile-col-right .dp-charts-row {
+  margin-top: 0;
+}
+
+
+
+
+.dp-profile-grid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 16px;
+  align-items: start;
+}
+@media (min-width: 900px) {
+  .dp-profile-grid { grid-template-columns: minmax(280px, 380px) 1fr; }
+}
+.dp-profile-col-left,
+.dp-profile-col-right {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  min-width: 0;
+}
+.dp-profile-col-right .dp-charts-row {
+  margin-top: 0;
+}
+
+
+
+/* --- Profile hero content restructure --- */
+.dp-profile-eyebrow {
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.15em;
+  text-transform: uppercase;
+  color: rgba(255, 255, 255, 0.55);
+  margin: 0 0 6px;
+}
+.dp-profile-teamtext {
+  font-size: 15px;
+  color: #bbb;
+  margin: 4px 0 14px;
+}
+.dp-profile-meta-inline {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 13px;
+  color: #aaa;
+  margin-bottom: 14px;
+  flex-wrap: wrap;
+}
+.dp-profile-meta-inline .dp-flag { height: 14px; }
+.dp-profile-meta-sep { color: #555; }
+.dp-profile-meta-num { font-weight: 800; color: #fff; }
+
+/* --- Box header row (title + right-side controls) --- */
+.dp-box-header-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  margin-bottom: 14px;
+  flex-wrap: wrap;
+}
+.dp-box-header-row .dp-desc-header { margin-bottom: 0; }
+
+.dp-select-group { display: flex; gap: 8px; }
+.dp-select {
+  background: rgba(255, 255, 255, 0.06);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  color: #ddd;
+  font-size: 12px;
+  padding: 6px 10px;
+  border-radius: 8px;
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  cursor: pointer;
+  outline: none;
+}
+.dp-select:hover { border-color: rgba(255, 255, 255, 0.25); }
+
+.dp-view-all-btn {
+  background: rgba(255, 255, 255, 0.06);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  color: #ccc;
+  font-size: 11px;
+  font-weight: 700;
+  padding: 5px 12px;
+  border-radius: 999px;
+  cursor: pointer;
+  transition: background .2s, color .2s, border-color .2s;
+}
+.dp-view-all-btn:hover {
+  background: rgba(255, 255, 255, 0.14);
+  color: #fff;
+  border-color: rgba(255, 255, 255, 0.25);
+}
+
+/* --- Bottom row: Recent Races | Team&Car+NextRace | Key Strengths --- */
+.dp-bottom-grid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 16px;
+  margin-top: 16px;
+}
+@media (min-width: 1100px) {
+  .dp-bottom-grid { grid-template-columns: 2fr 1fr 1fr; }
+}
+
+.dp-teamcar-row { display: flex; align-items: center; gap: 12px; }
+.dp-teamcar-logo { width: 36px; height: 36px; object-fit: contain; flex-shrink: 0; }
+.dp-teamcar-name { font-weight: 700; font-size: 14px; color: #fff; margin: 0; }
+.dp-teamcar-car { font-size: 12px; color: #888; margin: 2px 0 0; }
+
+.dp-nextrace-row { display: flex; align-items: center; gap: 12px; }
+.dp-nextrace-icon {
+  width: 32px; height: 32px; flex-shrink: 0;
+  display: flex; align-items: center; justify-content: center;
+  border-radius: 8px;
+  background: rgba(255, 255, 255, 0.06);
+  font-size: 15px;
+}
+.dp-nextrace-info { flex: 1; min-width: 0; }
+.dp-nextrace-name { font-weight: 700; font-size: 13px; color: #fff; margin: 0; }
+.dp-nextrace-date { font-size: 11px; color: #888; margin: 2px 0 0; }
+.dp-nextrace-link {
+  font-size: 11px;
+  font-weight: 700;
+  text-decoration: none;
+  white-space: nowrap;
+}
+.dp-nextrace-link:hover { text-decoration: underline; }
+
+.dp-strengths-list { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 10px; }
+.dp-strengths-list li { display: flex; align-items: center; gap: 8px; font-size: 13px; color: #ddd; }
+.dp-strength-check {
+  width: 16px; height: 16px; flex-shrink: 0;
+  border-radius: 50%;
+  background: rgba(46, 204, 113, 0.15);
+  color: #2ecc71;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 10px;
+}
+
+.dp-social-label {
+  font-size: 10px;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: #888;
+  margin: 16px 0 10px;
+}
+.dp-social-row { display: flex; gap: 10px; }
+.dp-social-icon {
+  width: 32px; height: 32px;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.06);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  display: flex; align-items: center; justify-content: center;
+  color: #ccc;
+  font-size: 12px;
+  font-weight: 700;
+  cursor: pointer;
+  text-decoration: none;
+  transition: background .2s, color .2s, border-color .2s;
+}
+.dp-social-icon:hover {
+  background: rgba(255, 255, 255, 0.14);
+  color: #fff;
+  border-color: rgba(255, 255, 255, 0.25);
+}
+
+
+.dp-bio-meta-row {
+  display: flex;
+  gap: 24px;
+  margin-top: 14px;
+  padding-top: 14px;
+  border-top: 1px solid rgba(255, 255, 255, 0.08);
+  flex-wrap: wrap;
+}
+.dp-bio-meta-item { display: flex; flex-direction: column; gap: 2px; }
+.dp-bio-meta-label { font-size: 10px; text-transform: uppercase; letter-spacing: 0.08em; color: #888; }
+.dp-bio-meta-value { font-size: 13px; font-weight: 700; color: #fff; }
