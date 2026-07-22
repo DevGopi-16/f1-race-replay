@@ -483,7 +483,7 @@
         <p class="dp-profile-eyebrow">Driver Profile</p>
         <div class="dp-name-block">
           ${splitName(d.name).first ? `<p class="dp-name-script">${splitName(d.name).first}</p>` : ""}
-          <h1 class="dp-profile-name">${splitName(d.name).last}</h1>
+          <h1 class="dp-profile-name" style="color:${color};">${splitName(d.name).last}</h1>
         </div>
         <div class="dp-profile-teamrow">
           ${d.teamLogo ? `<img class="dp-profile-teamlogo" src="${assetPath(d.teamLogo)}" alt="" onerror="this.remove()">` : ""}
@@ -607,32 +607,91 @@
     `;
   }
 
-  function strengthsSocialHTML(d) {
-    const color = d.color || "#888";
-    const strengths = d.strengths || [];
-    const social = d.social || {};
+  // function strengthsSocialHTML(d) {
+  //   const color = d.color || "#888";
+  //   const strengths = d.strengths || [];
+  //   const social = d.social || {};
 
+  //   return `
+  //     <div class="dp-desc-box">
+  //       <div class="dp-desc-header">
+  //         <div class="dp-desc-bar" style="background:${color};"></div>
+  //         <h2>Key Strengths</h2>
+  //       </div>
+  //       ${strengths.length ? `
+  //         <ul class="dp-strengths-list">
+  //           ${strengths.map(s => `<li><span class="dp-strength-check">&#10003;</span>${s}</li>`).join("")}
+  //         </ul>
+  //       ` : `<p class="dp-empty">No strengths listed yet.</p>`}
+
+  //       <p class="dp-social-label">Social</p>
+  //       <div class="dp-social-row">
+  //         <a class="dp-social-icon" href="${social.instagram || '#'}" ${social.instagram ? 'target="_blank" rel="noopener"' : 'aria-disabled="true"'} title="Instagram">IG</a>
+  //         <a class="dp-social-icon" href="${social.x || '#'}" ${social.x ? 'target="_blank" rel="noopener"' : 'aria-disabled="true"'} title="X">X</a>
+  //         <a class="dp-social-icon" href="${social.youtube || '#'}" ${social.youtube ? 'target="_blank" rel="noopener"' : 'aria-disabled="true"'} title="YouTube">YT</a>
+  //       </div>
+  //     </div>
+  //   `;
+  // }
+
+  const SOCIAL_ICONS = {
+    instagram: {
+      label: "Instagram",
+      color: "#E1306C",
+      svg: `<svg viewBox="0 0 24 24" width="16" height="16" fill="currentColor"><path d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zm0-2.163c-3.259 0-3.667.014-4.947.072-4.358.2-6.78 2.618-6.98 6.98-.059 1.281-.073 1.689-.073 4.948 0 3.259.014 3.668.072 4.948.2 4.358 2.618 6.78 6.98 6.98 1.281.058 1.689.072 4.948.072 3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.667-.072-4.947-.196-4.354-2.617-6.78-6.979-6.98-1.281-.059-1.69-.073-4.949-.073zm0 5.838a6.162 6.162 0 100 12.324 6.162 6.162 0 000-12.324zm0 10.162a4 4 0 110-8 4 4 0 010 8zm6.406-11.845a1.44 1.44 0 100 2.881 1.44 1.44 0 000-2.881z"/></svg>`
+    },
+    x: {
+      label: "X",
+      color: "#ffffff",
+      svg: `<svg viewBox="0 0 24 24" width="14" height="14" fill="currentColor"><path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z"/></svg>`
+    },
+    youtube: {
+      label: "YouTube",
+      color: "#FF0000",
+      svg: `<svg viewBox="0 0 24 24" width="16" height="16" fill="currentColor"><path d="M23.498 6.186a3.016 3.016 0 00-2.122-2.136C19.505 3.545 12 3.545 12 3.545s-7.505 0-9.377.505A3.017 3.017 0 00.502 6.186C0 8.07 0 12 0 12s0 3.93.502 5.814a3.016 3.016 0 002.122 2.136c1.871.505 9.376.505 9.376.505s7.505 0 9.377-.505a3.015 3.015 0 002.122-2.136C24 15.93 24 12 24 12s0-3.93-.502-5.814zM9.545 15.568V8.432L15.818 12l-6.273 3.568z"/></svg>`
+    },
+  };
+
+  function socialIconHTML(key, url) {
+    const icon = SOCIAL_ICONS[key];
+    if (!icon) return "";
+    const active = Boolean(url);
     return `
-      <div class="dp-desc-box">
-        <div class="dp-desc-header">
-          <div class="dp-desc-bar" style="background:${color};"></div>
-          <h2>Key Strengths</h2>
-        </div>
-        ${strengths.length ? `
-          <ul class="dp-strengths-list">
-            ${strengths.map(s => `<li><span class="dp-strength-check">&#10003;</span>${s}</li>`).join("")}
-          </ul>
-        ` : `<p class="dp-empty">No strengths listed yet.</p>`}
-
-        <p class="dp-social-label">Social</p>
-        <div class="dp-social-row">
-          <a class="dp-social-icon" href="${social.instagram || '#'}" ${social.instagram ? 'target="_blank" rel="noopener"' : 'aria-disabled="true"'} title="Instagram">IG</a>
-          <a class="dp-social-icon" href="${social.x || '#'}" ${social.x ? 'target="_blank" rel="noopener"' : 'aria-disabled="true"'} title="X">X</a>
-          <a class="dp-social-icon" href="${social.youtube || '#'}" ${social.youtube ? 'target="_blank" rel="noopener"' : 'aria-disabled="true"'} title="YouTube">YT</a>
-        </div>
-      </div>
+      <a class="dp-social-icon" href="${url || '#'}"
+        style="--social-color:${icon.color};"
+        ${active ? 'target="_blank" rel="noopener"' : 'aria-disabled="true" tabindex="-1"'}
+        title="${icon.label}">
+        ${icon.svg}
+      </a>
     `;
   }
+
+function strengthsSocialHTML(d) {
+  const color = d.color || "#888";
+  const strengths = d.strengths || [];
+  const social = d.social || {};
+
+  return `
+    <div class="dp-desc-box">
+      <div class="dp-desc-header">
+        <div class="dp-desc-bar" style="background:${color};"></div>
+        <h2>Key Strengths</h2>
+      </div>
+      ${strengths.length ? `
+        <ul class="dp-strengths-list">
+          ${strengths.map(s => `<li><span class="dp-strength-check">&#10003;</span>${s}</li>`).join("")}
+        </ul>
+      ` : `<p class="dp-empty">No strengths listed yet.</p>`}
+
+      <p class="dp-social-label">Social</p>
+      <div class="dp-social-row">
+        ${socialIconHTML("instagram", social.instagram)}
+        ${socialIconHTML("x", social.x)}
+        ${socialIconHTML("youtube", social.youtube)}
+      </div>
+    </div>
+  `;
+}
 
   function profilePageHTML(d) {
     const color = d.color || "#888";

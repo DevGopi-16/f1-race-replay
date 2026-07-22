@@ -299,6 +299,32 @@
   z-index: 1;
 }
 
+/* Home panel banner: text sabse aage
+#dp-hero-trigger .dp-hero-scrim-content {
+  z-index: 10;
+  position: absolute;
+} */
+
+/* Home panel banner: text ko right side shift karo */
+#dp-hero-trigger .dp-hero-scrim-content {
+  padding-left: 70px; 
+}
+
+#dp-hero-trigger .dp-hero-banner-frame::before {
+  z-index: 1;
+}
+
+/* Home panel hero: text ko hamesha aage rakho */
+#dp-hero-trigger .dp-hero-scrim-content {
+  z-index: 20 !important;
+}
+#dp-hero-trigger .dp-hero-banner-frame::before {
+  z-index: 1 !important;
+}
+#dp-hero-trigger .dp-hero-driverimg {
+  z-index: 2 !important;
+}
+
 
 .dp-profile-hero .dp-hero-scrim-content {
   top: 0;
@@ -364,14 +390,7 @@
   -webkit-backdrop-filter: blur(6px);
 }
 
-/* .dp-hero-name {
-  font-size: 40px;
-  font-weight: 900;
-  line-height: 1.05;
-  letter-spacing: -0.02em;
-  color: #fff;
-  margin: 0 0 10px;
-} */
+
 
 .dp-hero-name {
   font-size: 40px;
@@ -380,6 +399,7 @@
   letter-spacing: -0.02em;
   color: #fff;
   margin: 0 0 10px;
+  text-transform: uppercase;
 }
 @media (min-width: 768px) { .dp-hero-name { font-size: 52px; } }
 
@@ -547,6 +567,7 @@
   margin-bottom: 20px;
   padding: 6px 14px;
   transition: color .2s, background .2s, border-color .2s;
+  
 }
 .dp-profile-back:hover {
   color: #fff;
@@ -872,6 +893,8 @@
 .dp-hero-scrim-content {
   animation: dp-fade-up .5s ease .5s both;
 }
+
+
 /* --- Profile page: two-column layout (Bio/Stats/Form | Charts) --- */
 .dp-profile-grid {
   display: grid;
@@ -939,6 +962,7 @@
   word-break: break-word;
   overflow-wrap: break-word;
   max-width: 90%;
+  text-transform: uppercase;
 }
 
 
@@ -1087,7 +1111,8 @@
   margin: 16px 0 10px;
 }
 .dp-social-row { display: flex; gap: 10px; }
-.dp-social-icon {
+
+/* .dp-social-icon {
   width: 32px; height: 32px;
   border-radius: 50%;
   background: rgba(255, 255, 255, 0.06);
@@ -1104,6 +1129,31 @@
   background: rgba(255, 255, 255, 0.14);
   color: #fff;
   border-color: rgba(255, 255, 255, 0.25);
+} */
+
+.dp-social-icon {
+  --social-color: #ccc;
+  width: 34px; height: 34px;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.06);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  display: flex; align-items: center; justify-content: center;
+  color: #ccc;
+  cursor: pointer;
+  text-decoration: none;
+  transition: background .2s, color .2s, border-color .2s, transform .25s;
+}
+.dp-social-icon svg { display: block; }
+.dp-social-icon:hover {
+  background: color-mix(in srgb, var(--social-color) 20%, rgba(255,255,255,0.08));
+  color: var(--social-color);
+  border-color: var(--social-color);
+  transform: translateY(-2px);
+}
+.dp-social-icon[aria-disabled="true"] {
+  opacity: 0.35;
+  cursor: default;
+  pointer-events: none;
 }
 
 

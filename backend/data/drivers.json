@@ -11,6 +11,11 @@
     "flag": "static/images/flags/nl.png",
     "banner": "static/images/newbanners/verstappen.png",
     "description": "Max Verstappen is a dominant force in Formula 1, known for his aggressive yet controlled driving style. He has already secured multiple world championships and often extracts performance beyond the car's limits.",
+    "social": {
+      "instagram": "https://instagram.com/maxverstappen1",
+      "x": "https://x.com/Max33Verstappen",
+      "youtube": "https://youtube.com/@maxverstappen1"
+    },
     "id": "max_verstappen"
   },
   {
@@ -25,6 +30,11 @@
     "flag": "static/images/flags/fr.png",
     "banner": "static/images/newbanners/hadjar.png",
     "description": "Isack Hadjar earned promotion to Red Bull's senior team for 2026 after a strong rookie season with Racing Bulls, becoming Max Verstappen's latest teammate.",
+    "social": {
+      "instagram": "https://instagram.com/isackhadjar",
+      "x": "",
+      "youtube": ""
+    },
     "id": "hadjar"
   },
   {
@@ -39,6 +49,11 @@
     "flag": "static/images/flags/gb.png",
     "banner": "static/images/newbanners/hamilton.png",
     "description": "Lewis Hamilton is one of the most accomplished drivers in F1 history, holding numerous records including seven world titles. He continues to push boundaries, advocating for diversity and sustainability in and out of the cockpit.",
+    "social": {
+      "instagram": "https://instagram.com/lewishamilton",
+      "x": "https://x.com/LewisHamilton",
+      "youtube": "https://youtube.com/@lewishamilton"
+    },
     "id": "hamilton"
   },
   {
@@ -53,6 +68,11 @@
     "flag": "static/images/flags/mc.png",
     "banner": "static/images/newbanners/leclerc.png",
     "description": "Charles Leclerc is known for his raw speed, particularly in qualifying, and his passion for racing shines through his aggressive attacks. He aims to lead Ferrari back to championship contention.",
+    "social": {
+      "instagram": "https://instagram.com/charles_leclerc",
+      "x": "https://x.com/Charles_Leclerc",
+      "youtube": ""
+    },
     "id": "leclerc"
   },
   {
@@ -67,6 +87,11 @@
     "flag": "static/images/flags/gb.png",
     "banner": "static/images/newbanners/norris.png",
     "description": "Lando Norris is a rising talent with sharp racecraft and a strong personality off-track. He consistently delivers strong qualifying performances and is viewed as one of the future stars of the sport.",
+    "social": {
+      "instagram": "https://instagram.com/lando",
+      "x": "https://x.com/LandoNorris",
+      "youtube": "https://youtube.com/@LandoNorris"
+    },
     "id": "norris"
   },
   {
@@ -81,6 +106,11 @@
     "flag": "static/images/flags/au.png",
     "banner": "static/images/newbanners/piastri.png",
     "description": "Oscar Piastri brings a methodical approach to racing, combining technical feedback with calm consistency. His adaptability and maturity for his age have gained praise across the paddock.",
+    "social": {
+      "instagram": "https://instagram.com/oscarpiastri",
+      "x": "https://x.com/OscarPiastri",
+      "youtube": ""
+    },
     "id": "piastri"
   },
   {
@@ -95,6 +125,11 @@
     "flag": "static/images/flags/gb.png",
     "banner": "static/images/newbanners/russell.png",
     "description": "George Russell is a strong all-around driver who blends precision with perseverance and is often praised for making the most of his machinery. He offers steady consistency and has gradually matured into a championship contender.",
+    "social": {
+      "instagram": "https://instagram.com/georgerussell63",
+      "x": "https://x.com/GeorgeRussell63",
+      "youtube": ""
+    },
     "id": "russell"
   },
   {
@@ -109,6 +144,11 @@
     "flag": "static/images/flags/it.png",
     "banner": "static/images/newbanners/antonelli.png",
     "description": "Kimi Antonelli is a rookie sensation who's attracted attention by achieving milestones early in his career and showing composure beyond his years. He's expected to grow rapidly and bring fresh energy to the grid.",
+    "social": {
+      "instagram": "https://instagram.com/kimi.antonelli",
+      "x": "",
+      "youtube": ""
+    },
     "id": "antonelli"
   },
   {
@@ -123,6 +163,11 @@
     "flag": "static/images/flags/es.png",
     "banner": "static/images/newbanners/alonso.png",
     "description": "Two-time world champion Fernando Alonso is a veteran legend known for his fierce competitiveness, tactical acumen, and refusal to settle for anything less than excellence. Even in his 40s, he continues to push hard and mentor younger drivers.",
+    "social": {
+      "instagram": "https://instagram.com/fernandoalo_oficial",
+      "x": "https://x.com/alo_oficial",
+      "youtube": ""
+    },
     "id": "alonso"
   },
   {
@@ -137,6 +182,11 @@
     "flag": "static/images/flags/ca.png",
     "banner": "static/images/newbanners/stroll.png",
     "description": "Lance Stroll combines raw pace with tenacity, often putting up strong performances in midfield battles. He is working to balance peak results with consistency over a full season.",
+    "social": {
+      "instagram": "https://instagram.com/lance_stroll",
+      "x": "https://x.com/lance_stroll",
+      "youtube": ""
+    },
     "id": "stroll"
   },
   {
@@ -151,6 +201,11 @@
     "flag": "static/images/flags/fr.png",
     "banner": "static/images/newbanners/gasly.png",
     "description": "Pierre Gasly is a versatile driver with strong qualifying skills and a resilience that allows him to capitalize in variable conditions. He brings experience and adaptability to his team's strategies.",
+    "social": {
+      "instagram": "https://instagram.com/pierregasly",
+      "x": "https://x.com/PierreGASLY",
+      "youtube": ""
+    },
     "id": "gasly"
   },
   {
@@ -165,6 +220,11 @@
     "flag": "static/images/flags/ar.png",
     "banner": "static/images/newbanners/colapinto.png",
     "description": "Franco Colapinto enters F1 as a determined rookie with impressive junior results and a composed demeanor under pressure. He's ready to seize opportunities and build experience quickly.",
+    "social": {
+      "instagram": "https://instagram.com/francocolapinto",
+      "x": "https://x.com/FrancoColapinto",
+      "youtube": ""
+    },
     "id": "colapinto"
   },
   {
@@ -179,6 +239,11 @@
     "flag": "static/images/flags/es.png",
     "banner": "static/images/newbanners/sainz.png",
     "description": "Carlos Sainz is a seasoned competitor who excels in strategic thinking and race execution, often outperforming the car's baseline in the midfield. He also contributes off track as a voice for driver interests in the GPDA.",
+    "social": {
+      "instagram": "https://instagram.com/carlossainz55",
+      "x": "https://x.com/Carlossainz55",
+      "youtube": ""
+    },
     "id": "sainz"
   },
   {
@@ -193,6 +258,11 @@
     "flag": "static/images/flags/th.png",
     "banner": "static/images/newbanners/albon.png",
     "description": "Alexander Albon is a dependable and experienced driver who often maximizes outcomes for his team even in challenging cars. He brings depth of knowledge and resilience to his race weekends.",
+    "social": {
+      "instagram": "https://instagram.com/alex_albon",
+      "x": "https://x.com/alex_albon",
+      "youtube": ""
+    },
     "id": "albon"
   },
   {
@@ -207,6 +277,11 @@
     "flag": "static/images/flags/de.png",
     "banner": "static/images/newbanners/hulkenberg.png",
     "description": "Nico Hulkenberg is a veteran presence with extensive experience across many teams, now racing for Audi as the German manufacturer takes over the former Sauber entry.",
+    "social": {
+      "instagram": "https://instagram.com/nicohulkenberg",
+      "x": "https://x.com/HulkHulkenberg",
+      "youtube": ""
+    },
     "id": "hulkenberg"
   },
   {
@@ -221,6 +296,11 @@
     "flag": "static/images/flags/br.png",
     "banner": "static/images/newbanners/bortoleto.png",
     "description": "Gabriel Bortoleto continues into his second season with the Audi works team, having impressed as a rookie with strong junior credentials.",
+    "social": {
+      "instagram": "https://instagram.com/gabrielbortoleto_",
+      "x": "",
+      "youtube": ""
+    },
     "id": "bortoleto"
   },
   {
@@ -235,6 +315,11 @@
     "flag": "static/images/flags/fr.png",
     "banner": "static/images/newbanners/ocon.png",
     "description": "Esteban Ocon is a consistent and determined driver who often punches above his weight, especially in tricky conditions. He combines solid technical feedback with a steady approach in racecraft.",
+    "social": {
+      "instagram": "https://instagram.com/estebanocon",
+      "x": "https://x.com/OconEsteban",
+      "youtube": ""
+    },
     "id": "ocon"
   },
   {
@@ -249,6 +334,11 @@
     "flag": "static/images/flags/gb.png",
     "banner": "static/images/newbanners/bearman.png",
     "description": "Oliver Bearman is a promising young driver known for dominating lower categories and bringing raw speed into F1. He is still growing his racecraft, but eyes high potential ahead.",
+    "social": {
+      "instagram": "https://instagram.com/oliverbearman",
+      "x": "https://x.com/oliverbearman1",
+      "youtube": ""
+    },
     "id": "bearman"
   },
   {
@@ -263,6 +353,11 @@
     "flag": "static/images/flags/nz.png",
     "banner": "static/images/newbanners/lawson.png",
     "description": "Liam Lawson retains his seat at Racing Bulls for 2026, bringing continuity to the team as he partners rookie Arvid Lindblad.",
+    "social": {
+      "instagram": "https://instagram.com/liamlawson30",
+      "x": "https://x.com/LiamLawson30",
+      "youtube": ""
+    },
     "id": "lawson"
   },
   {
@@ -277,8 +372,13 @@
     "flag": "static/images/flags/gb.png",
     "banner": "static/images/newbanners/lindblad.png",
     "description": "Arvid Lindblad is the sole rookie on the 2026 grid, stepping up from Formula 2 to Racing Bulls after becoming the youngest-ever race winner in both F3 and F2.",
+    "social": {
+      "instagram": "https://instagram.com/arvidlindblad",
+      "x": "",
+      "youtube": ""
+    },
     "id": "arvid_lindblad"
- },
+  },
   {
     "driverId": "perez",
     "number": 11,
@@ -291,6 +391,11 @@
     "flag": "static/images/flags/mx.png",
     "banner": "static/images/newbanners/perez.png",
     "description": "Sergio Perez returns to the grid after a year out, bringing race-winning experience to lead Cadillac's historic debut season alongside Valtteri Bottas.",
+    "social": {
+      "instagram": "https://instagram.com/schecoperez",
+      "x": "https://x.com/SChecoPerez",
+      "youtube": ""
+    },
     "id": "perez"
   },
   {
@@ -305,6 +410,11 @@
     "flag": "static/images/flags/fi.png",
     "banner": "static/images/newbanners/bottas.png",
     "description": "Valtteri Bottas returns to a full-time race seat with Cadillac, bringing over 200 race starts of experience to the new American team's debut season.",
+    "social": {
+      "instagram": "https://instagram.com/valtteribottas",
+      "x": "https://x.com/ValtteriBottas",
+      "youtube": ""
+    },
     "id": "bottas"
   }
 ]
