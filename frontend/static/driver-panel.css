@@ -422,6 +422,7 @@
   backdrop-filter: blur(16px) saturate(160%);
   -webkit-backdrop-filter: blur(16px) saturate(160%);
 }
+
 .dp-stat-card {
   border-radius: 14px;
   border: 1px solid;
@@ -1065,7 +1066,16 @@
   margin-top: 16px;
 }
 @media (min-width: 1100px) {
-  .dp-bottom-grid { grid-template-columns: 2fr 1fr 1fr; }
+  .dp-bottom-grid { grid-template-columns: 1.4fr 1fr; }
+}
+/* --- NEW: Team & Car | Next Race | Key Strengths (3 equal columns) --- */
+.dp-triple-grid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 16px;
+}
+@media (min-width: 900px) {
+  .dp-triple-grid { grid-template-columns:  1fr 1fr; }
 }
 
 .dp-teamcar-row { display: flex; align-items: center; gap: 12px; }
@@ -1207,4 +1217,26 @@
 }
 @media (min-width: 768px) {
   .dp-profile-textblock .dp-name-script { font-size: 44px; }
+}
+
+
+
+.dp-nextrace-flag {
+  width: 32px;
+  height: 22px;
+  border-radius: 4px;
+  object-fit: cover;
+  flex-shrink: 0;
+}
+.dp-nextrace-countdown {
+  margin-left: auto;
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 0.05em;
+}
+.dp-nextrace-row {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 10px 0;
 }

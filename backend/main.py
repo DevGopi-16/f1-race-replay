@@ -24,6 +24,7 @@ from fastapi import FastAPI, HTTPException, Query
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.staticfiles import StaticFiles
 from fastapi.responses import FileResponse, JSONResponse
+from src.track_geometry import get_track_map_with_telemetry
 
 from src.f1_data import (
     enable_cache,
@@ -60,17 +61,6 @@ with open(DATA_DIR / "drivers.json", "r", encoding="utf-8") as f:
     DRIVERS = json.load(f)
 
 
-# @app.on_event("startup")
-# def _startup():
-#     enable_cache()
-
-
-# @app.on_event("startup")
-# async def warm_driver_stats_cache():
-#     current_year = datetime.date.today().year
-#     print(f"[startup] Warming driver stats cache for {current_year}...")
-#     get_season_stats_cached(current_year)
-#     print("[startup] Driver stats cache ready.")
 
 @app.on_event("startup")
 async def warm_driver_stats_cache():
@@ -396,33 +386,6 @@ def drivers_list(
         raise HTTPException(status_code=502, detail=f"Failed to list drivers: {e}")
 
 
-# @app.get(
-#     "/api/drivers/panel",
-#     summary="Driver Panel",
-#     description="""
-# Full driver panel for a session: live position/points/team/color pulled
-# straight from FastF1 (same source as /api/drivers), merged with static
-# banner/description metadata from data/drivers.json. Powers the sidebar
-# "Drivers" tab.
-# """,
-# )
-# def drivers_panel(
-#     year: int = Query(...),
-#     round: int = Query(..., alias="round"),
-#     session_type: str = Query("R", pattern="^(R|S|Q|SQ|FP1|FP2|FP3)$"),
-# ):
-#     try:
-#         session = load_session(year, round, session_type, telemetry=False)
-#     except Exception as e:
-#         raise HTTPException(status_code=502, detail=f"Failed to load session: {e}")
-
-#     try:
-#         session_drivers = get_session_drivers(session)
-#     except Exception as e:
-#         raise HTTPException(status_code=502, detail=f"Failed to list drivers: {e}")
-
-#     return build_driver_panel(session_drivers, DRIVERS)
-
 @app.get(
     "/api/drivers/panel",
     summary="Driver Panel",
@@ -495,3 +458,12 @@ def index():
 
 
 app.mount("/static", StaticFiles(directory=FRONTEND_DIR / "static"), name="static")
+
+
+
+@app.get("/api/track-map/{year}/{gp}/{session_type}/{driver_code}")
+def track_map(year: int, gp: str, session_type: str, driver_code: str):
+    try:
+        return get_track_map_with_telemetry(year, gp, session_type, driver_code)
+    except Exception as e:
+        return {"error": str(e)}
