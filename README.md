@@ -162,7 +162,7 @@ F1-RACE-REPLAY-WEB/
 │   │   │   └── tyres.py
 │   │   ├── driver_panel.py         # Driver roster & profile API
 │   │   ├── f1_data.py              # FastF1 data loading & processing
-│   │   ├── serialize.py         #Telemetry serialization for frontend
+│   │   ├── serialize.py            # Telemetry serialization for frontend
 │   │   └── track_geometry.py       # Track map & coordinate generation
 │   ├── main.py                     # FastAPI application entry point
 │   └── requirements.txt
@@ -177,11 +177,13 @@ F1-RACE-REPLAY-WEB/
 │   │   │   ├── teams/
 │   │   │   ├── tyres/
 │   │   │   └── weather/
-│   │   ├── app.js               #Playback engine & UI logic
-│   │   ├── driver-panel.css      # Driver panel styling
-│   │   ├── driver-panel.js       # Driver panel interactions
+│   │   ├── app.js                  # Playback engine & UI logic
+│   │   ├── driver-panel.css        # Driver panel styling
+│   │   ├── driver-panel.js         # Driver panel interactions
 │   │   ├── replay.css              # Race replay UI styling
-│   │   ├── session-panel.js   #Sessionselectionpanel& filters
+│   │   ├── session-panel.js        # Session selection panel & filters
+│   │   ├── track-map.css           # Interactive track map styling
+│   │   ├── track-map.js            # Track map rendering & driver positions
 │   │   └── style.css
 │
 ├── .gitignore
