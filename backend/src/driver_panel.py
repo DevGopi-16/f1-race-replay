@@ -54,6 +54,33 @@ def _completed_rounds(season: int) -> list[int]:
     completed = schedule[schedule["EventDate"] < cutoff]
     return completed["RoundNumber"].tolist()
 
+def _upcoming_races(season: int, count: int = 4) -> list[dict]:
+    """
+    Returns the next `count` scheduled races after the last completed
+    round, or an empty list if the season has no more races left.
+    """
+    schedule = fastf1.get_event_schedule(season, include_testing=False)
+    completed = set(_completed_rounds(season))
+
+    if completed:
+        last_completed = max(completed)
+    else:
+        last_completed = 0
+
+    upcoming = schedule[schedule["RoundNumber"] > last_completed]
+    if upcoming.empty:
+        return []
+
+    races = []
+    for _, event in upcoming.head(count).iterrows():
+        races.append({
+            "name": event["EventName"],
+            "date": event["EventDate"].strftime("%Y-%m-%d"),   # ISO format for reliable JS parsing
+            "display_date": event["EventDate"].strftime("%B %d, %Y"),
+            "country": event.get("Country", ""),
+        })
+    return races
+
 def _race_results(season: int, round_: int):
     session = fastf1.get_session(season, round_, "R")
     session.load(laps=False, telemetry=False, weather=False, messages=False)
@@ -206,20 +233,6 @@ def get_season_stats_cached(season: int) -> dict[str, dict]:
     return {}
 
 
-# def warm_season_stats(season: int) -> None:
-#     """Computes and persists stats to disk. Call only from a background thread."""
-#     path = _disk_cache_path(season)
-#     if os.path.exists(path):
-#         age = time.time() - os.path.getmtime(path)
-#         if age < STATS_CACHE_TTL_SECONDS:
-#             return  # already fresh, nothing to do
-
-#     stats = _compute_season_stats(season)
-#     os.makedirs(COMPUTED_DATA_DIR, exist_ok=True)
-#     with open(path, "w") as f:
-#         json.dump(stats, f, indent=2)
-
-
 def warm_season_stats(season: int) -> None:
     """Computes and persists stats to disk. Call only from a background thread."""
     path = _disk_cache_path(season)
@@ -253,10 +266,24 @@ def _static_lookup(static_drivers: list) -> dict:
             lookup[str(key).lower()] = entry
     return lookup
 
+def _compute_age(born_str: str | None) -> int | None:
+    if not born_str:
+        return None
+    try:
+        born_date = datetime.datetime.strptime(born_str, "%Y-%m-%d")
+        today = datetime.datetime.now()
+        age = today.year - born_date.year
+        if (today.month, today.day) < (born_date.month, born_date.day):
+            age -= 1
+        return age
+    except ValueError:
+        return None
+
 def build_driver_panel(season: int, static_drivers: list, round_: int | None = None) -> list[dict]:
     standings = fetch_driver_standings(season, round_)
     season_stats = get_season_stats_cached(season) or {}
     static_by_key = _static_lookup(static_drivers)
+    upcoming_races = _upcoming_races(season, count=4)
 
     merged = []
     for entry in standings:
@@ -281,6 +308,8 @@ def build_driver_panel(season: int, static_drivers: list, round_: int | None = N
             "avg_finish": extra.get("avg_finish"),
             "color": static_entry.get("teamColor", "#888888"),
             "history": extra.get("history", []),
+            "next_races": upcoming_races,
+            "age":  _compute_age(static_entry.get("born")), 
         })
 
     merged.sort(key=lambda d: (d["position"] is None, d["position"] or 999))

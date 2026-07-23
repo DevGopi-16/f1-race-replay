@@ -32,10 +32,6 @@
     }
   }
 
-  // function assetPath(path) {
-  //   if (!path) return "";
-  //   return "/" + String(path).replace(/^\/+/, "");
-  // }
   function assetPath(path) {
     if (!path) return "";
     return "/" + String(path).replace(/^\/+/, "");
@@ -59,6 +55,34 @@
     return code ? `https://flagcdn.com/w40/${code}.png` : "";
   }
 
+  const COUNTRY_TO_ISO = {
+    "Belgium": "be", "Hungary": "hu", "Netherlands": "nl", "Italy": "it",
+    "Azerbaijan": "az", "Singapore": "sg", "United States": "us",
+    "Mexico": "mx", "Brazil": "br", "United Arab Emirates": "ae",
+    "Australia": "au", "China": "cn", "Japan": "jp", "Bahrain": "bh",
+    "Saudi Arabia": "sa", "Monaco": "mc", "Spain": "es", "Canada": "ca",
+    "Austria": "at", "United Kingdom": "gb", "Qatar": "qa",
+  };
+
+  function raceFlagUrl(country) {
+    const code = COUNTRY_TO_ISO[country];
+    return code ? `https://flagcdn.com/w40/${code}.png` : "";
+  }
+
+  function daysUntil(isoDateStr) {
+    const target = new Date(isoDateStr);
+    const now = new Date();
+    now.setHours(0, 0, 0, 0);
+    const diff = Math.ceil((target - now) / (1000 * 60 * 60 * 24));
+    return diff;
+  }
+
+  function formatBornDate(isoStr) {
+    if (!isoStr) return "";
+    const d = new Date(isoStr);
+    return d.toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" });
+  }
+
   function splitName(name) {
     const parts = String(name || "").trim().split(/\s+/);
     if (parts.length <= 1) return { first: "", last: parts[0] || "" };
@@ -66,7 +90,19 @@
     return { first: parts.join(" "), last };
   }
 
-
+  const TEAM_INFO = {
+    "Mercedes": { fullName: "Mercedes-AMG PETRONAS F1 Team", car: "Mercedes W17" },
+    "Red Bull": { fullName: "Oracle Red Bull Racing", car: "Red Bull RB22" },
+    "Ferrari": { fullName: "Scuderia Ferrari HP", car: "Ferrari SF-26" },
+    "McLaren": { fullName: "McLaren Formula 1 Team", car: "McLaren MCL40" },
+    "Aston Martin": { fullName: "Aston Martin Aramco F1 Team", car: "Aston Martin AMR26" },
+    "Alpine": { fullName: "BWT Alpine F1 Team", car: "Alpine A526" },
+    "Williams": { fullName: "Atlassian Williams Racing", car: "Williams FW48" },
+    "Racing Bulls": { fullName: "Visa Cash App Racing Bulls F1 Team", car: "RB VCARB03" },
+    "Kick Sauber": { fullName: "Stake F1 Team Kick Sauber", car: "Sauber C45" },
+    "Haas": { fullName: "MoneyGram Haas F1 Team", car: "Haas VF-26" },
+    "Cadillac": { fullName: "Cadillac Formula 1 Team", car: "Cadillac CD-01" },
+  };
   function escapeAttr(str) {
     return String(str).replace(/"/g, "&quot;");
   }
@@ -215,7 +251,13 @@
 
     if (_viewMode === "profile") {
       const selected = _drivers.find(d => d.code === _selectedCode) || _drivers[0];
-      if (selected) drawCharts(selected);
+      if (selected) {
+        drawCharts(selected);
+        console.log("selected driver object:", selected);
+        if (typeof loadTrackMap === "function") {
+          loadTrackMap(2026, "British Grand Prix", "R", selected.code, "track-map-container");
+        }
+      }
     }
   }
 
@@ -227,7 +269,14 @@
       raf = requestAnimationFrame(() => {
         if (_viewMode !== "profile" || !_container) return;
         const selected = _drivers.find(d => d.code === _selectedCode) || _drivers[0];
-        if (selected) drawCharts(selected);
+        // if (selected) drawCharts(selected);
+        if (selected) {
+          drawCharts(selected);
+          console.log("selected driver object:", selected);
+          if (typeof loadTrackMap === "function") {
+            loadTrackMap(2026, "British Grand Prix", "R", selected.code, "track-map-container");
+          }
+        }
       });
     };
     window.addEventListener("resize", _resizeHandler);
@@ -483,7 +532,7 @@
         <p class="dp-profile-eyebrow">Driver Profile</p>
         <div class="dp-name-block">
           ${splitName(d.name).first ? `<p class="dp-name-script">${splitName(d.name).first}</p>` : ""}
-          <h1 class="dp-profile-name">${splitName(d.name).last}</h1>
+          <h1 class="dp-profile-name" style="color:${color};">${splitName(d.name).last}</h1>
         </div>
         <div class="dp-profile-teamrow">
           ${d.teamLogo ? `<img class="dp-profile-teamlogo" src="${assetPath(d.teamLogo)}" alt="" onerror="this.remove()">` : ""}
@@ -516,7 +565,7 @@
         </div>
       `;
     }
-    const rows = _resultsExpanded ? history : history.slice(0, 4);
+    const rows = _resultsExpanded ? history : history.slice(0, 5);
     return `
       <div class="dp-desc-box">
         <div class="dp-box-header-row">
@@ -558,6 +607,10 @@
 
   function teamCarHTML(d) {
     const color = d.color || "#888";
+    const teamInfo = TEAM_INFO[d.team] || {};
+    const displayName = teamInfo.fullName || d.team || "-";
+    const carName = teamInfo.car || d.car;
+
     return `
       <div class="dp-desc-box">
         <div class="dp-desc-header">
@@ -567,17 +620,19 @@
         <div class="dp-teamcar-row">
           ${d.teamLogo ? `<img class="dp-teamcar-logo" src="${assetPath(d.teamLogo)}" alt="" onerror="this.remove()">` : ""}
           <div>
-            <p class="dp-teamcar-name">${d.team || "-"}</p>
-            ${d.car ? `<p class="dp-teamcar-car">Car: ${d.car}</p>` : ""}
+            <p class="dp-teamcar-name">${displayName}</p>
+            ${carName ? `<p class="dp-teamcar-car">Car: ${carName}</p>` : ""}
           </div>
         </div>
       </div>
     `;
   }
 
+ 
   function nextRaceHTML(d) {
     const color = d.color || "#888";
-    if (!d.next_race) {
+    const races = d.next_races || [];
+    if (!races.length) {
       return `
         <div class="dp-desc-box">
           <div class="dp-desc-header">
@@ -588,28 +643,80 @@
         </div>
       `;
     }
-    const nr = d.next_race;
     return `
       <div class="dp-desc-box">
         <div class="dp-desc-header">
           <div class="dp-desc-bar" style="background:${color};"></div>
           <h2>Next Race</h2>
         </div>
-        <div class="dp-nextrace-row">
-          <div class="dp-nextrace-icon">🏁</div>
-          <div class="dp-nextrace-info">
-            <p class="dp-nextrace-name">${nr.name || "-"}</p>
-            <p class="dp-nextrace-date">${nr.date || ""}</p>
-          </div>
-          ${nr.calendar_url ? `<a class="dp-nextrace-link" style="color:${color};" href="${nr.calendar_url}" target="_blank" rel="noopener">View Calendar &rsaquo;</a>` : ""}
+        ${races.map(nr => {
+          const days = daysUntil(nr.date);
+          const flag = raceFlagUrl(nr.country);
+          return `
+            <div class="dp-nextrace-row">
+              ${flag ? `<img class="dp-nextrace-flag" src="${flag}" alt="" onerror="this.remove()">` : `<div class="dp-nextrace-icon">🏁</div>`}
+              <div class="dp-nextrace-info">
+                <p class="dp-nextrace-name">${nr.name || "-"}</p>
+                <p class="dp-nextrace-date">${nr.display_date || nr.date || ""}</p>
+              </div>
+              ${days >= 0 ? `<span class="dp-nextrace-countdown" style="color:${color};">${days}d</span>` : ""}
+            </div>
+          `;
+        }).join("")}
+      </div>
+    `;
+  }
+
+
+  function trackMapHTML(d) {
+    const color = d.color || "#888";
+    return `
+      <div class="dp-desc-box">
+        <div class="dp-desc-header">
+          <div class="dp-desc-bar" style="background:${color};"></div>
+          <h2>Track Map</h2>
+        </div>
+        <div class="card" id="track-map-card">
+          <div class="track-map-container" id="track-map-container"></div>
         </div>
       </div>
     `;
   }
 
+  const SOCIAL_ICONS = {
+    instagram: {
+      label: "Instagram",
+      color: "#E1306C",
+      svg: `<svg viewBox="0 0 24 24" width="16" height="16" fill="currentColor"><path d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zm0-2.163c-3.259 0-3.667.014-4.947.072-4.358.2-6.78 2.618-6.98 6.98-.059 1.281-.073 1.689-.073 4.948 0 3.259.014 3.668.072 4.948.2 4.358 2.618 6.78 6.98 6.98 1.281.058 1.689.072 4.948.072 3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.667-.072-4.947-.196-4.354-2.617-6.78-6.979-6.98-1.281-.059-1.69-.073-4.949-.073zm0 5.838a6.162 6.162 0 100 12.324 6.162 6.162 0 000-12.324zm0 10.162a4 4 0 110-8 4 4 0 010 8zm6.406-11.845a1.44 1.44 0 100 2.881 1.44 1.44 0 000-2.881z"/></svg>`
+    },
+    x: {
+      label: "X",
+      color: "#ffffff",
+      svg: `<svg viewBox="0 0 24 24" width="14" height="14" fill="currentColor"><path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z"/></svg>`
+    },
+    youtube: {
+      label: "YouTube",
+      color: "#FF0000",
+      svg: `<svg viewBox="0 0 24 24" width="16" height="16" fill="currentColor"><path d="M23.498 6.186a3.016 3.016 0 00-2.122-2.136C19.505 3.545 12 3.545 12 3.545s-7.505 0-9.377.505A3.017 3.017 0 00.502 6.186C0 8.07 0 12 0 12s0 3.93.502 5.814a3.016 3.016 0 002.122 2.136c1.871.505 9.376.505 9.376.505s7.505 0 9.377-.505a3.015 3.015 0 002.122-2.136C24 15.93 24 12 24 12s0-3.93-.502-5.814zM9.545 15.568V8.432L15.818 12l-6.273 3.568z"/></svg>`
+    },
+  };
+
+  function socialIconHTML(key, url) {
+    const icon = SOCIAL_ICONS[key];
+    if (!icon) return "";
+    const active = Boolean(url);
+    return `
+      <a class="dp-social-icon" href="${url || '#'}"
+        style="--social-color:${icon.color};"
+        ${active ? 'target="_blank" rel="noopener"' : 'aria-disabled="true" tabindex="-1"'}
+        title="${icon.label}">
+        ${icon.svg}
+      </a>
+    `;
+  }
   function strengthsSocialHTML(d) {
     const color = d.color || "#888";
-    const strengths = d.strengths || [];
+    const strengths = (d.strengths && d.strengths.length) ? d.strengths : computeAutoStrengths(d);
     const social = d.social || {};
 
     return `
@@ -624,14 +731,37 @@
           </ul>
         ` : `<p class="dp-empty">No strengths listed yet.</p>`}
 
-        <p class="dp-social-label">Social</p>
+        <div class="dp-desc-header" style="margin-top:38px;">
+          <div class="dp-desc-bar" style="background:${color};"></div>
+          <h2>Social</h2>
+        </div>
         <div class="dp-social-row">
-          <a class="dp-social-icon" href="${social.instagram || '#'}" ${social.instagram ? 'target="_blank" rel="noopener"' : 'aria-disabled="true"'} title="Instagram">IG</a>
-          <a class="dp-social-icon" href="${social.x || '#'}" ${social.x ? 'target="_blank" rel="noopener"' : 'aria-disabled="true"'} title="X">X</a>
-          <a class="dp-social-icon" href="${social.youtube || '#'}" ${social.youtube ? 'target="_blank" rel="noopener"' : 'aria-disabled="true"'} title="YouTube">YT</a>
+          ${socialIconHTML("instagram", social.instagram)}
+          ${socialIconHTML("x", social.x)}
+          ${socialIconHTML("youtube", social.youtube)}
         </div>
       </div>
     `;
+  }
+
+  function computeAutoStrengths(d) {
+    const strengths = [];
+    const poles = d.poles || 0;
+    const podiums = d.podiums || 0;
+    const fastestLaps = d.fastest_laps || 0;
+    const avgFinish = d.avg_finish;
+    const wins = d.wins || 0;
+    const points = d.points || 0;
+
+    if (poles >= 3) strengths.push("Strong Qualifier");
+    if (podiums >= 5) strengths.push("Consistent Podium Finisher");
+    if (fastestLaps >= 3) strengths.push("Race Pace Specialist");
+    if (avgFinish != null && avgFinish <= 5) strengths.push("Reliable Top Finisher");
+    if (wins >= 3) strengths.push("Race Winner");
+    if (points >= 150) strengths.push("Championship Contender");
+    if (poles >= 5 && wins >= 5) strengths.push("Dominant Performer");
+
+    return strengths;
   }
 
   function profilePageHTML(d) {
@@ -675,6 +805,8 @@
       </div>
 
       <div class="dp-full-profile">
+
+        <!-- Row 1: Biography + Team&Car | Performance Overview -->
         <div class="dp-profile-grid">
           <div class="dp-profile-col-left">
             ${d.description ? `
@@ -686,28 +818,14 @@
               <p>${d.description}</p>
               <div class="dp-bio-meta-row">
                 ${d.age != null ? bioMetaItemHTML("Age", d.age) : ""}
-                ${d.born ? bioMetaItemHTML("Born", d.born) : ""}
+                ${d.born ? bioMetaItemHTML("Born", formatBornDate(d.born)) : ""}
                 ${d.nationality ? bioMetaItemHTML("Nationality", d.nationality) : ""}
                 ${d.debut ? bioMetaItemHTML("Debut", d.debut) : ""}
               </div>
             </div>
           ` : `<p class="dp-empty">No biography available yet.</p>`}
 
-            <div class="dp-desc-box">
-              <div class="dp-desc-header">
-                <div class="dp-desc-bar" style="background:${color};"></div>
-                <h2>Season Statistics</h2>
-              </div>
-              ${history.length ? `
-                <div class="dp-stats-row" style="padding:12px 0 0; background:none; backdrop-filter:none;">
-                  ${statCardHTML("RACES", extra.racesEntered, color)}
-                  ${statCardHTML("BEST FINISH", extra.bestFinish != null ? `P${extra.bestFinish}` : "-", color)}
-                  ${statCardHTML("WORST FINISH", extra.worstFinish != null ? `P${extra.worstFinish}` : "-", color)}
-                  ${statCardHTML("DNFs", extra.dnfs, color)}
-                  ${statCardHTML("AVG PTS/RACE", extra.avgPoints, color)}
-                </div>
-              ` : `<p class="dp-empty">No round-by-round data available yet for this season.</p>`}
-            </div>
+            ${teamCarHTML(d)}
           </div>
 
           <div class="dp-profile-col-right">
@@ -758,20 +876,40 @@
           </div>
         </div>
 
-        <div class="dp-bottom-grid">
-          ${raceResultsBoxHTML(d)}
-          <div class="dp-profile-col-left">
-            ${teamCarHTML(d)}
-            ${nextRaceHTML(d)}
+        <!-- Row 2: Season Statistics (full width) -->
+        <div class="dp-desc-box" style="margin-top:16px;">
+          <div class="dp-desc-header">
+            <div class="dp-desc-bar" style="background:${color};"></div>
+            <h2>Season Statistics</h2>
           </div>
+          ${history.length ? `
+            <div class="dp-stats-row dp-stats-row-compact" style="background:none; backdrop-filter:none;">
+              ${statCardHTML("RACES", extra.racesEntered, color)}
+              ${statCardHTML("BEST FINISH", extra.bestFinish != null ? `P${extra.bestFinish}` : "-", color)}
+              ${statCardHTML("WORST FINISH", extra.worstFinish != null ? `P${extra.worstFinish}` : "-", color)}
+              ${statCardHTML("DNFs", extra.dnfs, color)}
+              ${statCardHTML("AVG PTS/RACE", extra.avgPoints, color)}
+            </div>
+          ` : `<p class="dp-empty">No round-by-round data available yet for this season.</p>`}
+        </div>
+
+        <!-- Row 3a: Next Race | Key Strengths (2 equal columns) -->
+        <div class="dp-triple-grid" style="margin-top:16px;">
+          ${nextRaceHTML(d)}
           ${strengthsSocialHTML(d)}
         </div>
 
+        <!-- Row 3b: Recent Races | Track Map (2 columns) -->
+        <div class="dp-bottom-grid" style="margin-top:16px;">
+          ${raceResultsBoxHTML(d)}
+          ${trackMapHTML(d)}
+        </div>
+
+        <!-- Row 4: Teammate Comparison (full width) -->
         ${teammateComparisonHTML(d)}
       </div>
     `;
   }
-
   function topDriverCardHTML(d, isSelected) {
     const color = d.color || "#888";
     const medal = d.position === 1 ? "#FFD700" : d.position === 2 ? "#C0C0C0" : d.position === 3 ? "#CD7F32" : "#444";

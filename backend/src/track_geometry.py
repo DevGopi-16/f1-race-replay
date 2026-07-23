@@ -8,7 +8,7 @@
 
 
 
-
+import fastf1
 import numpy as np
 
 # Event Constants
@@ -26,6 +26,48 @@ TRACK_STATUS_TO_EVENT = {
     "7": EVENT_VSC,
 }
 
+import fastf1
+import numpy as np
+
+def get_track_map_with_telemetry(year: int, gp: str, session_type: str, driver_code: str):
+    """
+    Returns track coordinates colored by speed for a given driver's fastest lap.
+    driver_code: 3-letter code, e.g. 'ANT', 'RUS'
+    """
+    session = fastf1.get_session(year, gp, session_type)
+    session.load(telemetry=True, laps=True, weather=False)
+
+    lap = session.laps.pick_driver(driver_code).pick_fastest()
+    tel = lap.get_telemetry()
+
+    x = tel['X'].to_numpy()
+    y = tel['Y'].to_numpy()
+    speed = tel['Speed'].to_numpy()
+
+    # Normalize coordinates to a 0-1000 box for easy frontend scaling
+    x_norm = ((x - x.min()) / (x.max() - x.min()) * 1000).tolist()
+    y_norm = ((y - y.min()) / (y.max() - y.min()) * 1000).tolist()
+
+    points = [
+        {"x": round(x_norm[i], 1), "y": round(y_norm[i], 1), "speed": round(float(speed[i]), 1)}
+        for i in range(len(x_norm))
+    ]
+
+    def format_laptime(td):
+        total_seconds = td.total_seconds()
+        minutes = int(total_seconds // 60)
+        seconds = total_seconds % 60
+        return f"{minutes}:{seconds:06.3f}"
+
+
+    return {
+        "driver": driver_code,
+        "gp": gp,
+        "lap_time": format_laptime(lap['LapTime']),
+        "max_speed": round(float(speed.max()), 1),
+        "min_speed": round(float(speed.min()), 1),
+        "points": points
+    }
 
 # Helper Functions
 

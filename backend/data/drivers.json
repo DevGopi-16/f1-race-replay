@@ -5,12 +5,19 @@
     "givenName": "Max",
     "familyName": "Verstappen",
     "nationality": "Dutch",
+    "born": "1997-09-30",
+    "debut": "2015",
     "teamColor": "#3671C6",
     "image": "static/images/drivers/verstappen.png",
     "teamLogo": "static/images/teams/red-bull.png",
     "flag": "static/images/flags/nl.png",
     "banner": "static/images/newbanners/verstappen.png",
     "description": "Max Verstappen is a dominant force in Formula 1, known for his aggressive yet controlled driving style. He has already secured multiple world championships and often extracts performance beyond the car's limits.",
+    "social": {
+      "instagram": "https://instagram.com/maxverstappen1",
+      "x": "https://x.com/Max33Verstappen",
+      "youtube": "https://youtube.com/@maxverstappen1"
+    },
     "id": "max_verstappen"
   },
   {
@@ -19,12 +26,19 @@
     "givenName": "Isack",
     "familyName": "Hadjar",
     "nationality": "French",
+    "born": "2005-09-28",
+    "debut": "2025",
     "teamColor": "#3671C6",
     "image": "static/images/drivers/hadjar.png",
     "teamLogo": "static/images/teams/red-bull.png",
     "flag": "static/images/flags/fr.png",
     "banner": "static/images/newbanners/hadjar.png",
     "description": "Isack Hadjar earned promotion to Red Bull's senior team for 2026 after a strong rookie season with Racing Bulls, becoming Max Verstappen's latest teammate.",
+    "social": {
+      "instagram": "https://instagram.com/isackhadjar",
+      "x": "",
+      "youtube": ""
+    },
     "id": "hadjar"
   },
   {
@@ -33,12 +47,19 @@
     "givenName": "Lewis",
     "familyName": "Hamilton",
     "nationality": "British",
+    "born": "1985-01-07",
+    "debut": "2007",
     "teamColor": "#E8002D",
     "image": "static/images/drivers/hamilton.png",
     "teamLogo": "static/images/teams/ferrari.png",
     "flag": "static/images/flags/gb.png",
     "banner": "static/images/newbanners/hamilton.png",
     "description": "Lewis Hamilton is one of the most accomplished drivers in F1 history, holding numerous records including seven world titles. He continues to push boundaries, advocating for diversity and sustainability in and out of the cockpit.",
+    "social": {
+      "instagram": "https://instagram.com/lewishamilton",
+      "x": "https://x.com/LewisHamilton",
+      "youtube": "https://youtube.com/@lewishamilton"
+    },
     "id": "hamilton"
   },
   {
@@ -47,12 +68,19 @@
     "givenName": "Charles",
     "familyName": "Leclerc",
     "nationality": "Monegasque",
+    "born": "1997-10-16",
+    "debut": "2018",
     "teamColor": "#E8002D",
     "image": "static/images/drivers/leclerc.png",
     "teamLogo": "static/images/teams/ferrari.png",
     "flag": "static/images/flags/mc.png",
     "banner": "static/images/newbanners/leclerc.png",
     "description": "Charles Leclerc is known for his raw speed, particularly in qualifying, and his passion for racing shines through his aggressive attacks. He aims to lead Ferrari back to championship contention.",
+    "social": {
+      "instagram": "https://instagram.com/charles_leclerc",
+      "x": "https://x.com/Charles_Leclerc",
+      "youtube": ""
+    },
     "id": "leclerc"
   },
   {
@@ -61,12 +89,19 @@
     "givenName": "Lando",
     "familyName": "Norris",
     "nationality": "British",
+    "born": "1999-11-13",
+    "debut": "2019",
     "teamColor": "#FF8000",
     "image": "static/images/drivers/norris.png",
     "teamLogo": "static/images/teams/mclaren.png",
     "flag": "static/images/flags/gb.png",
     "banner": "static/images/newbanners/norris.png",
     "description": "Lando Norris is a rising talent with sharp racecraft and a strong personality off-track. He consistently delivers strong qualifying performances and is viewed as one of the future stars of the sport.",
+    "social": {
+      "instagram": "https://instagram.com/lando",
+      "x": "https://x.com/LandoNorris",
+      "youtube": "https://youtube.com/@LandoNorris"
+    },
     "id": "norris"
   },
   {
@@ -75,12 +110,19 @@
     "givenName": "Oscar",
     "familyName": "Piastri",
     "nationality": "Australian",
+    "born": "2001-04-11",
+    "debut": "2023",
     "teamColor": "#FF8000",
     "image": "static/images/drivers/piastri.png",
     "teamLogo": "static/images/teams/mclaren.png",
     "flag": "static/images/flags/au.png",
     "banner": "static/images/newbanners/piastri.png",
     "description": "Oscar Piastri brings a methodical approach to racing, combining technical feedback with calm consistency. His adaptability and maturity for his age have gained praise across the paddock.",
+    "social": {
+      "instagram": "https://instagram.com/oscarpiastri",
+      "x": "https://x.com/OscarPiastri",
+      "youtube": ""
+    },
     "id": "piastri"
   },
   {
@@ -89,12 +131,19 @@
     "givenName": "George",
     "familyName": "Russell",
     "nationality": "British",
+    "born": "1998-02-15",
+    "debut": "2019",
     "teamColor": "#27F4D2",
     "image": "static/images/drivers/russell.png",
     "teamLogo": "static/images/teams/mercedes.png",
     "flag": "static/images/flags/gb.png",
     "banner": "static/images/newbanners/russell.png",
     "description": "George Russell is a strong all-around driver who blends precision with perseverance and is often praised for making the most of his machinery. He offers steady consistency and has gradually matured into a championship contender.",
+    "social": {
+      "instagram": "https://instagram.com/georgerussell63",
+      "x": "https://x.com/GeorgeRussell63",
+      "youtube": ""
+    },
     "id": "russell"
   },
   {
@@ -103,12 +152,19 @@
     "givenName": "Kimi",
     "familyName": "Antonelli",
     "nationality": "Italian",
+    "born": "2006-08-25",
+    "debut": "2025",
     "teamColor": "#27F4D2",
     "image": "static/images/drivers/antonelli.png",
     "teamLogo": "static/images/teams/mercedes.png",
     "flag": "static/images/flags/it.png",
     "banner": "static/images/newbanners/antonelli.png",
     "description": "Kimi Antonelli is a rookie sensation who's attracted attention by achieving milestones early in his career and showing composure beyond his years. He's expected to grow rapidly and bring fresh energy to the grid.",
+    "social": {
+      "instagram": "https://instagram.com/kimi.antonelli",
+      "x": "",
+      "youtube": ""
+    },
     "id": "antonelli"
   },
   {
@@ -117,12 +173,19 @@
     "givenName": "Fernando",
     "familyName": "Alonso",
     "nationality": "Spanish",
+    "born": "1981-07-29",
+    "debut": "2001",
     "teamColor": "#00665F",
     "image": "static/images/drivers/alonso.png",
     "teamLogo": "static/images/teams/aston-martin.png",
     "flag": "static/images/flags/es.png",
     "banner": "static/images/newbanners/alonso.png",
     "description": "Two-time world champion Fernando Alonso is a veteran legend known for his fierce competitiveness, tactical acumen, and refusal to settle for anything less than excellence. Even in his 40s, he continues to push hard and mentor younger drivers.",
+    "social": {
+      "instagram": "https://instagram.com/fernandoalo_oficial",
+      "x": "https://x.com/alo_oficial",
+      "youtube": ""
+    },
     "id": "alonso"
   },
   {
@@ -131,12 +194,19 @@
     "givenName": "Lance",
     "familyName": "Stroll",
     "nationality": "Canadian",
+    "born": "1998-10-29",
+    "debut": "2017",
     "teamColor": "#00665F",
     "image": "static/images/drivers/stroll.png",
     "teamLogo": "static/images/teams/aston-martin.png",
     "flag": "static/images/flags/ca.png",
     "banner": "static/images/newbanners/stroll.png",
     "description": "Lance Stroll combines raw pace with tenacity, often putting up strong performances in midfield battles. He is working to balance peak results with consistency over a full season.",
+    "social": {
+      "instagram": "https://instagram.com/lance_stroll",
+      "x": "https://x.com/lance_stroll",
+      "youtube": ""
+    },
     "id": "stroll"
   },
   {
@@ -145,12 +215,19 @@
     "givenName": "Pierre",
     "familyName": "Gasly",
     "nationality": "French",
+    "born": "1996-02-07",
+    "debut": "2017",
     "teamColor": "#0093CC",
     "image": "static/images/drivers/gasly.png",
     "teamLogo": "static/images/teams/alpine.png",
     "flag": "static/images/flags/fr.png",
     "banner": "static/images/newbanners/gasly.png",
     "description": "Pierre Gasly is a versatile driver with strong qualifying skills and a resilience that allows him to capitalize in variable conditions. He brings experience and adaptability to his team's strategies.",
+    "social": {
+      "instagram": "https://instagram.com/pierregasly",
+      "x": "https://x.com/PierreGASLY",
+      "youtube": ""
+    },
     "id": "gasly"
   },
   {
@@ -159,12 +236,19 @@
     "givenName": "Franco",
     "familyName": "Colapinto",
     "nationality": "Argentine",
+    "born": "2003-05-27",
+    "debut": "2024",
     "teamColor": "#0093CC",
     "image": "static/images/drivers/colapinto.png",
     "teamLogo": "static/images/teams/alpine.png",
     "flag": "static/images/flags/ar.png",
     "banner": "static/images/newbanners/colapinto.png",
     "description": "Franco Colapinto enters F1 as a determined rookie with impressive junior results and a composed demeanor under pressure. He's ready to seize opportunities and build experience quickly.",
+    "social": {
+      "instagram": "https://instagram.com/francocolapinto",
+      "x": "https://x.com/FrancoColapinto",
+      "youtube": ""
+    },
     "id": "colapinto"
   },
   {
@@ -173,12 +257,19 @@
     "givenName": "Carlos",
     "familyName": "Sainz",
     "nationality": "Spanish",
+    "born": "1994-09-01",
+    "debut": "2015",
     "teamColor": "#6692FF",
     "image": "static/images/drivers/sainz.png",
     "teamLogo": "static/images/teams/williams.png",
     "flag": "static/images/flags/es.png",
     "banner": "static/images/newbanners/sainz.png",
     "description": "Carlos Sainz is a seasoned competitor who excels in strategic thinking and race execution, often outperforming the car's baseline in the midfield. He also contributes off track as a voice for driver interests in the GPDA.",
+    "social": {
+      "instagram": "https://instagram.com/carlossainz55",
+      "x": "https://x.com/Carlossainz55",
+      "youtube": ""
+    },
     "id": "sainz"
   },
   {
@@ -187,12 +278,19 @@
     "givenName": "Alexander",
     "familyName": "Albon",
     "nationality": "Thai",
+    "born": "1996-03-23",
+    "debut": "2019",
     "teamColor": "#6692FF",
     "image": "static/images/drivers/albon.png",
     "teamLogo": "static/images/teams/williams.png",
     "flag": "static/images/flags/th.png",
     "banner": "static/images/newbanners/albon.png",
     "description": "Alexander Albon is a dependable and experienced driver who often maximizes outcomes for his team even in challenging cars. He brings depth of knowledge and resilience to his race weekends.",
+    "social": {
+      "instagram": "https://instagram.com/alex_albon",
+      "x": "https://x.com/alex_albon",
+      "youtube": ""
+    },
     "id": "albon"
   },
   {
@@ -201,12 +299,19 @@
     "givenName": "Nico",
     "familyName": "Hulkenberg",
     "nationality": "German",
+    "born": "1987-08-19",
+    "debut": "2010",
     "teamColor": "#00E701",
     "image": "static/images/drivers/hulkenberg.png",
     "teamLogo": "static/images/teams/audi.png",
     "flag": "static/images/flags/de.png",
     "banner": "static/images/newbanners/hulkenberg.png",
     "description": "Nico Hulkenberg is a veteran presence with extensive experience across many teams, now racing for Audi as the German manufacturer takes over the former Sauber entry.",
+    "social": {
+      "instagram": "https://instagram.com/nicohulkenberg",
+      "x": "https://x.com/HulkHulkenberg",
+      "youtube": ""
+    },
     "id": "hulkenberg"
   },
   {
@@ -215,12 +320,19 @@
     "givenName": "Gabriel",
     "familyName": "Bortoleto",
     "nationality": "Brazilian",
+    "born": "2004-10-14",
+    "debut": "2025",
     "teamColor": "#00E701",
     "image": "static/images/drivers/bortoleto.png",
     "teamLogo": "static/images/teams/audi.png",
     "flag": "static/images/flags/br.png",
     "banner": "static/images/newbanners/bortoleto.png",
     "description": "Gabriel Bortoleto continues into his second season with the Audi works team, having impressed as a rookie with strong junior credentials.",
+    "social": {
+      "instagram": "https://instagram.com/gabrielbortoleto_",
+      "x": "",
+      "youtube": ""
+    },
     "id": "bortoleto"
   },
   {
@@ -229,12 +341,19 @@
     "givenName": "Esteban",
     "familyName": "Ocon",
     "nationality": "French",
+    "born": "1996-09-17",
+    "debut": "2016",
     "teamColor": "#B6BABD",
     "image": "static/images/drivers/ocon.png",
     "teamLogo": "static/images/teams/haas.png",
     "flag": "static/images/flags/fr.png",
     "banner": "static/images/newbanners/ocon.png",
     "description": "Esteban Ocon is a consistent and determined driver who often punches above his weight, especially in tricky conditions. He combines solid technical feedback with a steady approach in racecraft.",
+    "social": {
+      "instagram": "https://instagram.com/estebanocon",
+      "x": "https://x.com/OconEsteban",
+      "youtube": ""
+    },
     "id": "ocon"
   },
   {
@@ -243,12 +362,19 @@
     "givenName": "Oliver",
     "familyName": "Bearman",
     "nationality": "British",
+    "born": "2004-05-24",
+    "debut": "2024",
     "teamColor": "#B6BABD",
     "image": "static/images/drivers/bearman.png",
     "teamLogo": "static/images/teams/haas.png",
     "flag": "static/images/flags/gb.png",
     "banner": "static/images/newbanners/bearman.png",
     "description": "Oliver Bearman is a promising young driver known for dominating lower categories and bringing raw speed into F1. He is still growing his racecraft, but eyes high potential ahead.",
+    "social": {
+      "instagram": "https://instagram.com/oliverbearman",
+      "x": "https://x.com/oliverbearman1",
+      "youtube": ""
+    },
     "id": "bearman"
   },
   {
@@ -257,12 +383,19 @@
     "givenName": "Liam",
     "familyName": "Lawson",
     "nationality": "New Zealander",
+    "born": "2002-02-11",
+    "debut": "2023",
     "teamColor": "#6C98FF",
     "image": "static/images/drivers/lawson.png",
     "teamLogo": "static/images/teams/rb.png",
     "flag": "static/images/flags/nz.png",
     "banner": "static/images/newbanners/lawson.png",
     "description": "Liam Lawson retains his seat at Racing Bulls for 2026, bringing continuity to the team as he partners rookie Arvid Lindblad.",
+    "social": {
+      "instagram": "https://instagram.com/liamlawson30",
+      "x": "https://x.com/LiamLawson30",
+      "youtube": ""
+    },
     "id": "lawson"
   },
   {
@@ -271,26 +404,40 @@
     "givenName": "Arvid",
     "familyName": "Lindblad",
     "nationality": "British",
+    "born": "2007-08-08",
+    "debut": "2026",
     "teamColor": "#6C98FF",
     "image": "static/images/drivers/lindblad.png",
     "teamLogo": "static/images/teams/rb.png",
     "flag": "static/images/flags/gb.png",
     "banner": "static/images/newbanners/lindblad.png",
     "description": "Arvid Lindblad is the sole rookie on the 2026 grid, stepping up from Formula 2 to Racing Bulls after becoming the youngest-ever race winner in both F3 and F2.",
+    "social": {
+      "instagram": "https://instagram.com/arvidlindblad",
+      "x": "",
+      "youtube": ""
+    },
     "id": "arvid_lindblad"
- },
+  },
   {
     "driverId": "perez",
     "number": 11,
     "givenName": "Sergio",
     "familyName": "Perez",
     "nationality": "Mexican",
+    "born": "1990-01-26",
+    "debut": "2011",
     "teamColor": "#8B0000",
     "image": "static/images/drivers/perez.png",
     "teamLogo": "static/images/teams/cadillac.png",
     "flag": "static/images/flags/mx.png",
     "banner": "static/images/newbanners/perez.png",
     "description": "Sergio Perez returns to the grid after a year out, bringing race-winning experience to lead Cadillac's historic debut season alongside Valtteri Bottas.",
+    "social": {
+      "instagram": "https://instagram.com/schecoperez",
+      "x": "https://x.com/SChecoPerez",
+      "youtube": ""
+    },
     "id": "perez"
   },
   {
@@ -299,12 +446,19 @@
     "givenName": "Valtteri",
     "familyName": "Bottas",
     "nationality": "Finnish",
+    "born": "1989-08-28",
+    "debut": "2013",
     "teamColor": "#8B0000",
     "image": "static/images/drivers/bottas.png",
     "teamLogo": "static/images/teams/cadillac.png",
     "flag": "static/images/flags/fi.png",
     "banner": "static/images/newbanners/bottas.png",
     "description": "Valtteri Bottas returns to a full-time race seat with Cadillac, bringing over 200 race starts of experience to the new American team's debut season.",
+    "social": {
+      "instagram": "https://instagram.com/valtteribottas",
+      "x": "https://x.com/ValtteriBottas",
+      "youtube": ""
+    },
     "id": "bottas"
   }
 ]
