@@ -7,6 +7,8 @@
   <link rel="stylesheet" href="/static/driver-panel.css">
   <link rel="stylesheet" href="/static/replay.css">
   <link rel="stylesheet" href="/static/track-map.css">
+  <link rel="stylesheet" href="/static/session-panel.css">
+
   
 
 </head>
@@ -90,6 +92,25 @@
 
     <div id="homeToast" class="home-toast hidden"></div>
   </div>
+  
+  <!-- Sessions browser (race grid) -->
+   <!-- Sessions browser (race grid) -->
+  <div id="sessionsPanel" class="strategy-panel hidden">
+    <button id="sessionsBackBtn" class="back-btn">← Back</button>
+    <div class="strategy-content sessions-panel-content">
+      <div class="section-header">
+        <h2 class="sessions-panel-title">Browse Sessions</h2>
+        <label class="section-year-picker">
+          Year
+          <select id="sessionsYearSelect"></select>
+        </label>
+      </div>
+      <div id="raceGrid" class="race-grid" role="listbox">
+        <p class="sessions-loading">Loading sessions…</p>
+      </div>
+    </div>
+  </div>
+  
 
   <!-- Session picker -->
   <div id="picker" class="picker-page hidden">
@@ -449,6 +470,7 @@
 
   <script src="/static/driver-panel.js"></script>
   <script src="/static/track-map.js"></script>
+  <script src="/static/session-panel.js"></script>
   <script src="/static/app.js"></script>
 </body>
 </html>

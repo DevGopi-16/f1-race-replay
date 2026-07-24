@@ -112,8 +112,15 @@ document.querySelectorAll(".nav-item").forEach(btn => {
     const target = btn.dataset.nav;
     if (target === "home") return;
     if (target === "replay") { goToPickerScreen(); return; }
+    // if (target === "sessions") {
+    //   document.getElementById("homePage").classList.add("hidden");
+    //   document.getElementById("sessionsPanel").classList.remove("hidden");
+    //   return;
+    // }
     if (target === "sessions") {
-      document.getElementById("recentSessionsSection").scrollIntoView({ behavior: "smooth" });
+      document.getElementById("homePage").classList.add("hidden");
+      document.getElementById("sessionsPanel").classList.remove("hidden");
+      initSessionsPanel();
       return;
     }
     if (target === "telemetry") {
@@ -140,6 +147,11 @@ document.getElementById("telemetryBackBtn").addEventListener("click", () => {
 
 document.getElementById("driversBackBtn").addEventListener("click", () => {
   document.getElementById("driversPanel").classList.add("hidden");
+  document.getElementById("homePage").classList.remove("hidden");
+});
+
+document.getElementById("sessionsBackBtn").addEventListener("click", () => {
+  document.getElementById("sessionsPanel").classList.add("hidden");
   document.getElementById("homePage").classList.remove("hidden");
 });
 
