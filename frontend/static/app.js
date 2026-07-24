@@ -93,9 +93,10 @@ function goToHomeScreen() {
 document.getElementById("heroStartBtn").addEventListener("click", goToPickerScreen);
 document.getElementById("pickerHomeBtn").addEventListener("click", goToHomeScreen);
 
-document.getElementById("heroBrowseBtn").addEventListener("click", () => {
-  document.getElementById("recentSessionsSection").scrollIntoView({ behavior: "smooth" });
-});
+document.getElementById("viewFullLeaderboardBtn").addEventListener("click", () => {
+  goToPickerScreen();
+  showToast("Load a session to see the full live leaderboard");
+})
 
 const NAV_LABELS = {
   sessions: "Sessions",

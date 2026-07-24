@@ -8,8 +8,7 @@
   <link rel="stylesheet" href="/static/replay.css">
   <link rel="stylesheet" href="/static/track-map.css">
   <link rel="stylesheet" href="/static/session-panel.css">
-
-  
+  <link rel="stylesheet" href="/static/home-dashboard.css">
 
 </head>
 <body>
@@ -26,6 +25,7 @@
         <button class="nav-item" data-nav="telemetry">📈<span>Telemetry</span></button>
         <button class="nav-item" data-nav="results">📋<span>Results</span></button>
         <button class="nav-item" data-nav="compare">⚖️<span>Compare</span></button>
+        <button class="nav-item" data-nav="favorites">⭐<span>Favorites</span></button>
       </nav>
       <div class="sidebar-bottom">
         <button class="nav-item" data-nav="settings">⚙️<span>Settings</span></button>
@@ -35,40 +35,235 @@
 
     <div class="home-main">
       <header class="home-topbar">
-        <div class="topbar-search">🔍 <input placeholder="Search coming soon…" disabled></div>
+        <div class="topbar-search">🔍 <input placeholder="Search sessions, drivers, tracks…" disabled></div>
         <div class="topbar-right">
           <span class="topbar-clock" id="homeTopClock">--:--:--</span>
+          <button class="topbar-icon-btn" title="Notifications">🔔<span class="dot-badge"></span></button>
+          <button class="topbar-icon-btn" title="Settings">⚙️</button>
+          <div class="topbar-profile">
+            <div class="avatar-fallback"></div>
+            <div class="profile-meta">
+              <span class="profile-name">Racer</span>
+              <span class="profile-tier">PRO</span>
+            </div>
+            <span>▾</span>
+          </div>
         </div>
       </header>
 
-      <section class="home-hero">
-        <span class="hero-badge">FASTF1 POWERED</span>
-        <h1>EXPERIENCE EVERY <span class="hero-accent">LAP.</span><br>EVERY DETAIL.</h1>
-        <p>Advanced telemetry. Real-time insights. Relive the race like never before.</p>
-        <div class="hero-actions">
-          <button id="heroStartBtn" class="hero-btn-primary">▶ START NEW REPLAY</button>
-          <button id="heroBrowseBtn" class="hero-btn-secondary">🗂️ BROWSE SESSIONS</button>
-        </div>
-        <div class="hero-features">
-          <div><b>Real Telemetry</b><span>Live &amp; Accurate</span></div>
-          <div><b>Advanced Analytics</b><span>Deep Race Insights</span></div>
-          <div><b>Precise Replay</b><span>Frame Perfect</span></div>
-          <div><b>All Conditions</b><span>Rain or Shine</span></div>
-        </div>
-      </section>
+      <div class="home-content-grid">
+        <!-- ================= MAIN COLUMN ================= -->
+        <div class="home-col-main">
 
-      <section id="recentSessionsSection" class="recent-sessions">
-        <div class="section-header">
-          <h2>Recent Sessions</h2>
-          <label class="section-year-picker">
-            Year
-            <select id="homeYearSelect"></select>
-          </label>
+          <section class="home-hero" id="homeHero">
+            <span class="hero-badge"><span class="hp-live-dot"></span> LIVE TIMING</span>
+            <!-- id hooks: fill from the currently-featured/most-recent session -->
+            <p class="hero-race-line" id="heroRaceName">2024 British Grand Prix</p>
+            <p class="hero-track-line" id="heroTrackName">📍 Silverstone Circuit</p>
+            <h1>EXPERIENCE EVERY <span class="hero-accent">LAP.</span><br>EVERY DETAIL.</h1>
+            <p class="hero-desc">Advanced telemetry. Real-time insights. Relive the race like never before.</p>
+            <div class="hero-actions">
+              <button id="heroStartBtn" class="hero-btn-primary">▶ START NEW REPLAY</button>
+              <button id="heroBrowseBtn" class="hero-btn-secondary">🗂️ BROWSE SESSIONS</button>
+            </div>
+            <div class="hero-features">
+              <div><b>Real Telemetry</b><span>Live &amp; Accurate</span></div>
+              <div><b>Advanced Analytics</b><span>Deep Race Insights</span></div>
+              <div><b>Precise Replay</b><span>Frame Perfect</span></div>
+              <div><b>All Conditions</b><span>Rain or Shine</span></div>
+            </div>
+          </section>
+
+          <!-- Track / Weather / Tyres / Fastest lap -->
+          <section class="home-info-row" id="homeInfoRow">
+
+            <div class="hp-panel" id="trackOverviewCard">
+              <div class="hp-panel-header">
+                <span class="hp-panel-title">Track Overview</span>
+                <button class="hp-card-close">✕</button>
+              </div>
+              <p class="track-mini-name" id="trackMiniName">Silverstone Circuit</p>
+              <p class="track-mini-length" id="trackMiniLength">5.891 km</p>
+              <div class="track-mini-shape" id="trackMiniShape">
+                <!-- app.js: replace with the real circuit outline (reuse track-map.js geometry) -->
+                <svg viewBox="0 0 200 90"><path d="M20 60 C10 40 30 15 60 15 L120 15 C150 15 160 30 150 45 C170 50 175 65 155 70 L60 70 C30 70 25 70 20 60 Z"/></svg>
+              </div>
+              <div class="hp-stat-trio">
+                <div><div class="stat-label">Turns</div><div class="stat-value" id="trackTurns">18</div></div>
+                <div><div class="stat-label">Straight</div><div class="stat-value" id="trackStraight">1.02 km</div></div>
+                <div><div class="stat-label">Lap Record</div><div class="stat-value" id="trackLapRecord">1:27.097</div></div>
+              </div>
+            </div>
+
+            <div class="hp-panel" id="weatherCard">
+              <div class="hp-panel-header"><span class="hp-panel-title">Weather Conditions</span></div>
+              <div class="weather-now">
+                <span class="weather-icon" id="weatherIcon">⛅</span>
+                <div>
+                  <div class="weather-temp" id="weatherTemp">22°C</div>
+                  <div class="weather-desc" id="weatherDesc">Partly Cloudy</div>
+                </div>
+              </div>
+              <div class="weather-grid">
+                <div><span class="w-label">AIR TEMP</span></div><div class="w-value" id="weatherAirTemp">22°C</div>
+                <div><span class="w-label">TRACK TEMP</span></div><div class="w-value" id="weatherTrackTemp">31°C</div>
+                <div><span class="w-label">WIND</span></div><div class="w-value" id="weatherWind">12 km/h</div>
+                <div><span class="w-label">HUMIDITY</span></div><div class="w-value" id="weatherHumidity">72%</div>
+              </div>
+              <div class="hp-link-row"><span>VIEW FULL WEATHER</span><span>›</span></div>
+            </div>
+
+            <div class="hp-panel" id="tyreCard">
+              <div class="hp-panel-header"><span class="hp-panel-title">Tyre Compounds</span></div>
+              <div class="tyre-row" id="tyreRow">
+                <div class="tyre-chip">
+                  <div class="tyre-ring soft">S</div>
+                  <span class="tyre-label">SOFT</span>
+                  <span class="tyre-sets" id="tyreSoftSets">2 SETS</span>
+                </div>
+                <div class="tyre-chip">
+                  <div class="tyre-ring medium">M</div>
+                  <span class="tyre-label">MEDIUM</span>
+                  <span class="tyre-sets" id="tyreMediumSets">3 SETS</span>
+                </div>
+                <div class="tyre-chip">
+                  <div class="tyre-ring hard">H</div>
+                  <span class="tyre-label">HARD</span>
+                  <span class="tyre-sets" id="tyreHardSets">1 SET</span>
+                </div>
+                <div class="tyre-chip">
+                  <div class="tyre-ring inter">I</div>
+                  <span class="tyre-label">INTERMEDIATE</span>
+                  <span class="tyre-sets" id="tyreInterSets">2 SETS</span>
+                </div>
+              </div>
+            </div>
+
+            <div class="hp-panel" id="fastestLapCard">
+              <div class="hp-panel-header"><span class="hp-panel-title">Fastest Lap</span></div>
+              <div class="fastest-driver">
+                <div class="avatar-fallback" id="fastestDriverAvatar"></div>
+                <div>
+                  <div class="fd-name" id="fastestDriverName">Max Verstappen</div>
+                  <div class="fd-team" id="fastestDriverTeam">Red Bull Racing</div>
+                </div>
+              </div>
+              <div class="fastest-time" id="fastestTime">1:25.634</div>
+              <span class="fastest-lap-badge" id="fastestLapNumber">LAP 32</span>
+              <div class="hp-stat-trio">
+                <div><div class="stat-label">Speed Trap</div><div class="stat-value" id="fastestSpeedTrap">342.6 km/h</div></div>
+              </div>
+              <div class="fastest-sectors">
+                <div><div class="fs-label">SECTOR 1</div><div class="fs-value s1" id="fastestSector1">28.341</div></div>
+                <div><div class="fs-label">SECTOR 2</div><div class="fs-value s2" id="fastestSector2">31.654</div></div>
+                <div><div class="fs-label">SECTOR 3</div><div class="fs-value s3" id="fastestSector3">25.639</div></div>
+              </div>
+            </div>
+
+          </section>
+
+          <!-- Recent sessions -->
+          <section id="recentSessionsSection" class="recent-sessions">
+            <div class="section-header">
+              <h2>Recent Sessions</h2>
+              <label class="section-year-picker">
+                Year
+                <select id="homeYearSelect"></select>
+              </label>
+            </div>
+            <div id="recentSessionsGrid" class="sessions-grid">
+              <p class="sessions-loading">Loading recent sessions…</p>
+            </div>
+          </section>
+
         </div>
-        <div id="recentSessionsGrid" class="sessions-grid">
-          <p class="sessions-loading">Loading recent sessions…</p>
+
+        <!-- ================= RIGHT RAIL ================= -->
+        <div class="home-col-side">
+
+          <div class="hp-panel" id="liveTimingPanel">
+            <div class="hp-panel-header">
+              <span class="hp-panel-title"><span class="hp-live-dot"></span> Live Timing</span>
+              <span class="section-year-picker" id="liveTimingLap">LAP 32 / 52</span>
+            </div>
+            <div id="liveTimingList">
+              <!-- app.js: render one .live-timing-row per driver from the live/replay leaderboard feed -->
+              <div class="live-timing-row leader">
+                <span class="lt-pos">1</span>
+                <span class="lt-driver">
+                  <img class="lt-avatar" src="/static/images/drivers/verstappen.png" alt="VER" onerror="this.style.display='none'">
+                  <span class="lt-team-dot" style="background:#e10600"></span>VER
+                </span>
+                <span class="lt-gap">1:25.634</span>
+                <span class="lt-tag">Leader</span>
+              </div>
+              <div class="live-timing-row">
+                <span class="lt-pos">2</span>
+                <span class="lt-driver">
+                  <img class="lt-avatar" src="/static/images/drivers/leclerc.png" alt="LEC" onerror="this.style.display='none'">
+                  <span class="lt-team-dot" style="background:#c00000"></span>LEC
+                </span>
+                <span class="lt-gap">+3.217</span>
+                <span></span>
+              </div>
+              <div class="live-timing-row">
+                <span class="lt-pos">3</span>
+                <span class="lt-driver">
+                  <img class="lt-avatar" src="/static/images/drivers/norris.png" alt="NOR" onerror="this.style.display='none'">
+                  <span class="lt-team-dot" style="background:#ff8700"></span>NOR
+                </span>
+                <span class="lt-gap">+6.638</span>
+                <span></span>
+              </div>
+              <div class="live-timing-row">
+                <span class="lt-pos">4</span>
+                <span class="lt-driver">
+                  <img class="lt-avatar" src="/static/images/drivers/piastri.png" alt="PIA" onerror="this.style.display='none'">
+                  <span class="lt-team-dot" style="background:#ff8700"></span>PIA
+                </span>
+                <span class="lt-gap">+9.102</span>
+                <span></span>
+              </div>
+              <div class="live-timing-row">
+                <span class="lt-pos">5</span>
+                <span class="lt-driver">
+                  <img class="lt-avatar" src="/static/images/drivers/hamilton.png" alt="HAM" onerror="this.style.display='none'">
+                  <span class="lt-team-dot" style="background:#00d2be"></span>HAM
+                </span>
+                <span class="lt-gap">+12.453</span>
+                <span></span>
+              </div>
+            </div>
+            <button class="hp-panel-footer-btn" id="viewFullLeaderboardBtn">📊 VIEW FULL LEADERBOARD</button>
+          </div>
+
+          <div class="hp-panel" id="trackMapMiniPanel">
+            <div class="hp-panel-header">
+              <span class="hp-panel-title">Track Map</span>
+              <span class="live-badge-pill">LIVE</span>
+            </div>
+            <div class="track-map-mini" id="trackMapMini">
+              <!-- app.js / track-map.js: render the live circuit map with driver dots here -->
+              <svg viewBox="0 0 300 160">
+                <path d="M30 100 C15 70 45 25 95 25 L190 25 C235 25 250 45 235 65 C265 70 275 95 245 105 L95 105 C50 105 40 105 30 100 Z"/>
+                <circle cx="235" cy="65" r="4"></circle>
+              </svg>
+            </div>
+            <button class="hp-panel-footer-btn" id="viewTrackDetailsBtn">📐 VIEW TRACK DETAILS</button>
+          </div>
+
+          <div class="hp-panel" id="upcomingSessionsPanel">
+            <div class="hp-panel-header"><span class="hp-panel-title">Upcoming Sessions</span></div>
+            <div id="upcomingSessionsList">
+              <div class="upcoming-row"><span class="up-icon">🏁</span><span class="up-name">Practice 3</span><span class="up-date">SAT 12:30</span></div>
+              <div class="upcoming-row"><span class="up-icon">🏁</span><span class="up-name">Qualifying</span><span class="up-date">SAT 16:00</span></div>
+              <div class="upcoming-row"><span class="up-icon">🚩</span><span class="up-name">Race</span><span class="up-date">SUN 15:00</span></div>
+            </div>
+            <button class="hp-panel-footer-btn" id="viewFullScheduleBtn">📅 FULL WEEKEND SCHEDULE</button>
+          </div>
+
         </div>
-      </section>
+      </div>
 
       <footer class="home-statusbar">
         <div class="status-item">
@@ -80,21 +275,24 @@
           <div><div class="status-label">CACHE STATUS</div><div class="status-value status-ready">Ready</div></div>
         </div>
         <div class="status-item">
-          <span class="status-icon">⏱️</span>
-          <div><div class="status-label">LOCAL TIME</div><div class="status-value" id="homeLocalTime">--:--:--</div></div>
+          <span class="status-icon">📡</span>
+          <div><div class="status-label">TELEMETRY STREAM</div><div class="status-value status-ready">Real-time</div></div>
         </div>
         <div class="status-item">
           <span class="status-icon">🏷️</span>
-          <div><div class="status-label">VERSION</div><div class="status-value">v2.1.0</div></div>
+          <div><div class="status-label">APP VERSION</div><div class="status-value">v2.1.0</div></div>
+        </div>
+        <div class="status-item">
+          <span class="status-icon">⏱️</span>
+          <div><div class="status-label">LOCAL TIME</div><div class="status-value" id="homeLocalTime">--:--:--</div></div>
         </div>
       </footer>
     </div>
 
     <div id="homeToast" class="home-toast hidden"></div>
   </div>
-  
+
   <!-- Sessions browser (race grid) -->
-   <!-- Sessions browser (race grid) -->
   <div id="sessionsPanel" class="strategy-panel hidden">
     <button id="sessionsBackBtn" class="back-btn">← Back</button>
     <div class="strategy-content sessions-panel-content">
@@ -110,7 +308,7 @@
       </div>
     </div>
   </div>
-  
+
 
   <!-- Session picker -->
   <div id="picker" class="picker-page hidden">
