@@ -4,3 +4,10 @@ fastf1>=3.3.0
 numpy>=1.26.0
 pandas>=2.2.0
 requests>=2.31.0
+
+sqlalchemy
+psycopg2-binary
+passlib[bcrypt]
+python-jose[cryptography]
+python-multipart
+pydantic[email]

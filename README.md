@@ -151,11 +151,21 @@ F1-RACE-REPLAY-WEB/
 │   └── visuals/
 │
 ├── backend/
+│   ├── .env                          ← secrets (DATABASE_URL, JWT_SECRET, GOOGLE_CLIENT_ID) — must stay gitignored
+│   ├── .env.example                  ← template with placeholder values, safe to commit
 │   ├── .fastf1-cache/
 │   ├── computed_data/
 │   ├── data/
 │   │   └── drivers.json
 │   ├── src/
+│   │   ├── auth/                     ← NEW: signup/login/Google sign-in module
+│   │   │   ├── __init__.py
+│   │   │   ├── database.py
+│   │   │   ├── models.py             (User table: username, email, password, google_id, picture_url, is_pro)
+│   │   │   ├── schemas.py
+│   │   │   ├── security.py           (password hashing, JWT)
+│   │   │   ├── dependencies.py       (get_current_user)
+│   │   │   └── routes.py             (/auth/signup, /login, /google, /me, /logout)
 │   │   ├── lib/
 │   │   │   ├── settings.py
 │   │   │   ├── time.py
@@ -164,11 +174,11 @@ F1-RACE-REPLAY-WEB/
 │   │   ├── f1_data.py
 │   │   ├── serialize.py
 │   │   └── track_geometry.py
-│   ├── main.py
-│   └── requirements.txt
+│   ├── main.py                       (updated: auth router wired in, dotenv loaded)
+│   └── requirements.txt              (updated: + sqlalchemy, psycopg2-binary, passlib, python-jose, google-auth, python-dotenv)
 │
 ├── frontend/
-│   ├── index.html
+│   ├── index.html                    (updated: account-badge-root, auth.css/auth.js links)
 │   ├── static/
 │   │   ├── images/
 │   │   │   ├── banners/
@@ -177,9 +187,12 @@ F1-RACE-REPLAY-WEB/
 │   │   │   ├── teams/
 │   │   │   ├── tyres/
 │   │   │   └── weather/
+│   │   ├── auth.css                  ← NEW: login/signup modal + account badge styling
+│   │   ├── auth.js                   ← NEW: signup/login/Google sign-in logic
 │   │   ├── app.js
 │   │   ├── driver-panel.css
 │   │   ├── driver-panel.js
+│   │   ├── home-dashboard.css
 │   │   ├── replay.css
 │   │   ├── session-panel.css
 │   │   ├── session-panel.js
@@ -187,7 +200,7 @@ F1-RACE-REPLAY-WEB/
 │   │   ├── track-map.js
 │   │   └── style.css
 │
-├── .gitignore
+├── .gitignore                        (updated: .env, venv, __pycache__, .fastf1-cache, computed_data, .DS_Store)
 ├── README.md
 └── requirements.txt
 ```

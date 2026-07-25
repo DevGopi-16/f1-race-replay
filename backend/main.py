@@ -1,3 +1,6 @@
+from dotenv import load_dotenv
+load_dotenv()
+
 """FastAPI backend for the web race replay.
 
 This wraps your EXISTING src/f1_data.py pipeline unchanged — same caching,
@@ -12,6 +15,8 @@ in this project's src/ directory. Copy them over before running.
 
 Run with:  uvicorn main:app --reload --port 8000
 """
+
+
 import json
 import sys
 from pathlib import Path
@@ -44,6 +49,11 @@ from src.driver_panel import build_driver_panel, get_season_stats_cached, warm_s
 from src.track_geometry import build_track_geometry, extract_race_events, point_at_distance
 from src.serialize import serialize_frames, serialize_driver_colors
 
+# --- Auth (Racer PRO signup/login) ---
+from src.auth.routes import router as auth_router
+from src.auth.database import Base, engine
+
+
 app = FastAPI(title="F1 Race Replay API")
 
 app.add_middleware(
@@ -52,6 +62,13 @@ app.add_middleware(
     allow_methods=["*"],
     allow_headers=["*"],
 )
+
+# Creates the `users` table if it doesn't exist yet.
+# For anything beyond local dev, use Alembic migrations instead.
+Base.metadata.create_all(bind=engine)
+
+app.include_router(auth_router)
+
 
 SOURCE_FPS = 25  # must match DT = 1/FPS in f1_data.py
 

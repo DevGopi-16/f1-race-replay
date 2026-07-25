@@ -9,6 +9,7 @@
   <link rel="stylesheet" href="/static/track-map.css">
   <link rel="stylesheet" href="/static/session-panel.css">
   <link rel="stylesheet" href="/static/home-dashboard.css">
+  <link rel="stylesheet" href="/static/auth.css">
 
 </head>
 <body>
@@ -40,14 +41,16 @@
           <span class="topbar-clock" id="homeTopClock">--:--:--</span>
           <button class="topbar-icon-btn" title="Notifications">🔔<span class="dot-badge"></span></button>
           <button class="topbar-icon-btn" title="Settings">⚙️</button>
-          <div class="topbar-profile">
+          <div id="account-badge-root"></div>
+          <!-- <div class="topbar-profile">
             <div class="avatar-fallback"></div>
             <div class="profile-meta">
               <span class="profile-name">Racer</span>
               <span class="profile-tier">PRO</span>
             </div>
             <span>▾</span>
-          </div>
+          </div> -->
+
         </div>
       </header>
 
@@ -670,5 +673,6 @@
   <script src="/static/track-map.js"></script>
   <script src="/static/session-panel.js"></script>
   <script src="/static/app.js"></script>
+  <script src="/static/auth.js"></script>
 </body>
 </html>
