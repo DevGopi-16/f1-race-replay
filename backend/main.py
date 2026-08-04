@@ -52,6 +52,11 @@ from src.serialize import serialize_frames, serialize_driver_colors
 # --- Auth (Racer PRO signup/login) ---
 from src.auth.routes import router as auth_router
 from src.auth.database import Base, engine
+from src.timing_tower import build_timing_tower
+from src.race_control import build_race_control_feed
+from src.minisectors import build_minisectors
+from src.live.session_watcher import run_forever as run_live_watcher
+from src.live.state import live_state
 
 
 app = FastAPI(title="F1 Race Replay API")
@@ -85,7 +90,7 @@ async def warm_driver_stats_cache():
 
     def _compute():
         print(f"[startup] Warming driver stats cache for {current_year} (background)...")
-        get_season_stats_cached(current_year)
+        warm_season_stats(current_year)
         print("[startup] Driver stats cache ready.")
 
     # Fire-and-forget in a background thread so the server binds and starts
@@ -93,6 +98,22 @@ async def warm_driver_stats_cache():
     # of FastF1 session loads before Uvicorn even accepts a connection.
     loop = asyncio.get_event_loop()
     loop.run_in_executor(None, _compute)
+
+
+@app.on_event("startup")
+async def start_live_watcher():
+    """Background loop that auto-detects live F1 sessions and starts
+    capturing them — see src/live/session_watcher.py."""
+    loop = asyncio.get_event_loop()
+    loop.run_in_executor(None, run_live_watcher)
+
+
+@app.get("/api/live/status")
+def live_status():
+    """Lets the frontend show a LIVE badge vs REPLAY, and know which
+    session (if any) is currently being captured."""
+    return live_state.snapshot()
+
 
 @app.get("/api/schedule/{year}")
 def schedule(year: int):
@@ -465,9 +486,44 @@ def telemetry_compare(
         "driver_b": data_b,
     }
 
+
+
+@app.get(
+    "/api/race-control",
+    summary="Race Control Messages",
+    description="Penalties, deleted lap times, investigations, and flags for a completed session, most recent first.",
+)
+def race_control(
+    year: int = Query(...),
+    round: int = Query(..., alias="round"),
+    session_type: str = Query("R", pattern="^(R|S|Q|SQ|FP1|FP2|FP3)$"),
+):
+    try:
+        rows = build_race_control_feed(year, round, session_type)
+    except Exception as e:
+        raise HTTPException(status_code=502, detail=f"Failed to load race control messages: {e}")
+    return {"messages": rows}
+
+
+
+@app.get(
+    "/api/minisectors",
+    summary="Minisectors",
+    description="Per-driver fastest-lap speed broken into equal distance segments, flagged for which driver was fastest through each one. Heavier than other endpoints — needs full car telemetry.",
+)
+def minisectors(
+    year: int = Query(...),
+    round: int = Query(..., alias="round"),
+    session_type: str = Query("R", pattern="^(R|S|Q|SQ|FP1|FP2|FP3)$"),
+):
+    try:
+        data = build_minisectors(year, round, session_type)
+    except Exception as e:
+        raise HTTPException(status_code=502, detail=f"Failed to build minisectors: {e}")
+    return data
+
 # Serve the frontend 
 FRONTEND_DIR = Path(__file__).resolve().parent.parent / "frontend"
-
 
 @app.get("/")
 def index():
@@ -484,3 +540,58 @@ def track_map(year: int, gp: str, session_type: str, driver_code: str):
         return get_track_map_with_telemetry(year, gp, session_type, driver_code)
     except Exception as e:
         return {"error": str(e)}
+    
+
+
+@app.get(
+    "/api/timing-tower",
+    summary="Timing Tower",
+    description="Position, gaps, sector times, tyre compound and pit status for every driver in a completed session.",
+)
+def timing_tower(
+    year: int = Query(...),
+    round: int = Query(..., alias="round"),
+    session_type: str = Query("R", pattern="^(R|S|Q|SQ|FP1|FP2|FP3)$"),
+):
+    # Serve from the live capture if this exact session is currently
+    # being captured — otherwise fall back to the existing FastF1 path
+    # unchanged, so replays/historical sessions work exactly as before.
+    if live_state.matches(year, round, session_type):
+        snap = live_state.snapshot()
+        return {
+            "meta": {
+                "event_name": snap["meta"].get("event_name", ""),
+                "circuit_name": "",
+                "year": year,
+                "round": round,
+                "date": "",
+                "session_type": session_type,
+            },
+            "rows": snap["rows"],
+            "is_live": True,
+        }
+
+    try:
+        session = load_session(year, round, session_type, telemetry=False)
+    except Exception as e:
+        raise HTTPException(status_code=502, detail=f"Failed to load session: {e}")
+
+    try:
+        rows = build_timing_tower(session)
+    except Exception as e:
+        raise HTTPException(status_code=502, detail=f"Failed to build timing tower: {e}")
+
+    event_date = session.event.get("EventDate")
+    return {
+        "meta": {
+            "event_name": session.event.get("EventName", ""),
+            "circuit_name": session.event.get("Location", ""),
+            "year": year,
+            "round": round,
+            "date": event_date.strftime("%B %d, %Y") if event_date else "",
+            "session_type": session_type,
+        },
+        "rows": rows,
+        "is_live": False,
+    }
+

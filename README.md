@@ -151,56 +151,67 @@ F1-RACE-REPLAY-WEB/
 │   └── visuals/
 │
 ├── backend/
-│   ├── .env                          ← secrets (DATABASE_URL, JWT_SECRET, GOOGLE_CLIENT_ID) — must stay gitignored
-│   ├── .env.example                  ← template with placeholder values, safe to commit
+│   ├── .env
+│   ├── .env.example
 │   ├── .fastf1-cache/
 │   ├── computed_data/
 │   ├── data/
 │   │   └── drivers.json
+│   │
 │   ├── src/
-│   │   ├── auth/                     ← NEW: signup/login/Google sign-in module
+│   │   ├── auth/
 │   │   │   ├── __init__.py
 │   │   │   ├── database.py
-│   │   │   ├── models.py             (User table: username, email, password, google_id, picture_url, is_pro)
+│   │   │   ├── models.py
 │   │   │   ├── schemas.py
-│   │   │   ├── security.py           (password hashing, JWT)
-│   │   │   ├── dependencies.py       (get_current_user)
-│   │   │   └── routes.py             (/auth/signup, /login, /google, /me, /logout)
+│   │   │   ├── security.py
+│   │   │   ├── dependencies.py
+│   │   │   └── routes.py
+│   │   │
 │   │   ├── lib/
 │   │   │   ├── settings.py
 │   │   │   ├── time.py
 │   │   │   └── tyres.py
+│   │   │
 │   │   ├── driver_panel.py
 │   │   ├── f1_data.py
+│   │   ├── minisectors.py
+│   │   ├── race_control.py
+│   │   ├── timing_tower.py
 │   │   ├── serialize.py
 │   │   └── track_geometry.py
-│   ├── main.py                       (updated: auth router wired in, dotenv loaded)
-│   └── requirements.txt              (updated: + sqlalchemy, psycopg2-binary, passlib, python-jose, google-auth, python-dotenv)
+│   │
+│   ├── main.py
+│   └── requirements.txt
 │
 ├── frontend/
-│   ├── index.html                    (updated: account-badge-root, auth.css/auth.js links)
-│   ├── static/
-│   │   ├── images/
-│   │   │   ├── banners/
-│   │   │   ├── controls/
-│   │   │   ├── drivers/
-│   │   │   ├── teams/
-│   │   │   ├── tyres/
-│   │   │   └── weather/
-│   │   ├── auth.css                  ← NEW: login/signup modal + account badge styling
-│   │   ├── auth.js                   ← NEW: signup/login/Google sign-in logic
-│   │   ├── app.js
-│   │   ├── driver-panel.css
-│   │   ├── driver-panel.js
-│   │   ├── home-dashboard.css
-│   │   ├── replay.css
-│   │   ├── session-panel.css
-│   │   ├── session-panel.js
-│   │   ├── track-map.css
-│   │   ├── track-map.js
-│   │   └── style.css
+│   ├── index.html
+│   │
+│   └── static/
+│       ├── images/
+│       │   ├── banners/
+│       │   ├── controls/
+│       │   ├── drivers/
+│       │   ├── teams/
+│       │   ├── tyres/
+│       │   └── weather/
+│       │
+│       ├── auth.css
+│       ├── auth.js
+│       ├── app.js
+│       ├── driver-panel.css
+│       ├── driver-panel.js
+│       ├── home-dashboard.css
+│       ├── replay.css
+│       ├── session-panel.css
+│       ├── session-panel.js
+│       ├── style.css
+│       ├── timing-tower.css
+│       ├── timing-tower.js
+│       ├── track-map.css
+│       └── track-map.js
 │
-├── .gitignore                        (updated: .env, venv, __pycache__, .fastf1-cache, computed_data, .DS_Store)
+├── .gitignore
 ├── README.md
 └── requirements.txt
 ```

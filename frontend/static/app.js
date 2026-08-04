@@ -93,10 +93,24 @@ function goToHomeScreen() {
 document.getElementById("heroStartBtn").addEventListener("click", goToPickerScreen);
 document.getElementById("pickerHomeBtn").addEventListener("click", goToHomeScreen);
 
+// document.getElementById("viewFullLeaderboardBtn").addEventListener("click", () => {
+//   goToPickerScreen();
+//   showToast("Load a session to see the full live leaderboard");
+// })
+
 document.getElementById("viewFullLeaderboardBtn").addEventListener("click", () => {
-  goToPickerScreen();
-  showToast("Load a session to see the full live leaderboard");
-})
+  // Hide current homepage view and show the Telemetry panel
+  document.getElementById("homePage").classList.add("hidden");
+  document.getElementById("telemetryPanel").classList.remove("hidden");
+  
+  // Highlight the active navigation item on the left sidebar
+  document.querySelectorAll(".nav-item").forEach(item => {
+    item.classList.toggle("active", item.dataset.nav === "telemetry");
+  });
+
+  // Initialize the telemetry panel scripts & content
+  initTelemetryPanel();
+});
 
 const NAV_LABELS = {
   sessions: "Sessions",
@@ -214,6 +228,66 @@ async function loadRecentSessions(year) {
   }
 }
 
+
+// --- LIVE WEATHER & WEEKEND FETCHERS ---
+async function updateHomepageLiveWeekend() {
+  const currentYear = new Date().getFullYear();
+
+  try {
+    const res = await fetch(`/api/schedule/${currentYear}`);
+    if (!res.ok) return;
+    const schedule = await res.json();
+
+    const today = new Date();
+
+    // Find current or next upcoming round
+    let currentRound = schedule.find(w => new Date(w.date) >= today);
+    if (!currentRound && schedule.length > 0) {
+      currentRound = schedule[schedule.length - 1]; // Fallback to last race
+    }
+
+    if (!currentRound) return;
+
+    // Fetch live weather via Open-Meteo API using circuit coordinates
+    const lat = currentRound.location?.lat || 52.0786;
+    const lon = currentRound.location?.long || -1.0169;
+    fetchLiveWeather(lat, lon);
+  } catch (err) {
+    console.warn("Could not load current weekend data:", err);
+  }
+}
+
+async function fetchLiveWeather(lat, lon) {
+  try {
+    const res = await fetch(
+      `https://api.open-meteo.com/v1/forecast?latitude=${lat}&longitude=${lon}&current=temperature_2m,relative_humidity_2m,wind_speed_10m,weather_code`
+    );
+    if (!res.ok) return;
+    const data = await res.json();
+    const current = data.current;
+
+    const isRaining = current.weather_code >= 51;
+    const weatherText = isRaining ? "Rain / Wet Track" : "Clear / Dry";
+
+    // Update elements by ID
+    const heroTemp = document.getElementById("weatherHeroTemp");
+    const heroSub = document.getElementById("weatherHeroSubtext");
+    const airTemp = document.getElementById("weatherAirTemp");
+    const trackTemp = document.getElementById("weatherTrackTemp");
+    const wind = document.getElementById("weatherWind");
+    const humidity = document.getElementById("weatherHumidity");
+
+    if (heroTemp) heroTemp.textContent = `${Math.round(current.temperature_2m)}°C`;
+    if (heroSub) heroSub.textContent = weatherText;
+    if (airTemp) airTemp.textContent = `${Math.round(current.temperature_2m)}°C`;
+    if (trackTemp) trackTemp.textContent = `${Math.round(current.temperature_2m + 9)}°C`;
+    if (wind) wind.innerHTML = `${Math.round(current.wind_speed_10m)} <small>km/h</small>`;
+    if (humidity) humidity.textContent = `${Math.round(current.relative_humidity_2m)}%`;
+  } catch (e) {
+    console.warn("Live weather fetch failed:", e);
+  }
+}
+
 function initHomePage() {
   const homeYearSelect = document.getElementById("homeYearSelect");
   const thisYear = new Date().getFullYear();
@@ -233,9 +307,13 @@ function initHomePage() {
   };
   updateClocks();
   setInterval(updateClocks, 1000);
+
+  // Load live weather for current race weekend on homepage load
+  updateHomepageLiveWeekend();
 }
 
 initHomePage();
+
 
 function initPicker() {
   const thisYear = new Date().getFullYear();
