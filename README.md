@@ -151,24 +151,50 @@ F1-RACE-REPLAY-WEB/
 │   └── visuals/
 │
 ├── backend/
-│   ├── .fastf1-cache/              # FastF1 local data cache
-│   ├── computed_data/              # Precomputed/serialized race data
+│   ├── .env
+│   ├── .env.example
+│   ├── .fastf1-cache/
+│   ├── computed_data/
 │   ├── data/
 │   │   └── drivers.json
+│   │
 │   ├── src/
+│   │   ├── auth/
+│   │   │   ├── __init__.py
+│   │   │   ├── database.py
+│   │   │   ├── models.py
+│   │   │   ├── schemas.py
+│   │   │   ├── security.py
+│   │   │   ├── dependencies.py
+│   │   │   └── routes.py
+│   │   │
 │   │   ├── lib/
 │   │   │   ├── settings.py
 │   │   │   ├── time.py
 │   │   │   └── tyres.py
+<<<<<<< HEAD
 │   │   ├── driver_panel.py         # Driver roster & profile API
 │   │   ├── f1_data.py              # FastF1 data loading & processing
 │   │   ├── serialize.py            # Telemetry serialization for frontend
 │   │   └── track_geometry.py       # Track map & coordinate generation
 │   ├── main.py                     # FastAPI application entry point
+=======
+│   │   │
+│   │   ├── driver_panel.py
+│   │   ├── f1_data.py
+│   │   ├── minisectors.py
+│   │   ├── race_control.py
+│   │   ├── timing_tower.py
+│   │   ├── serialize.py
+│   │   └── track_geometry.py
+│   │
+│   ├── main.py
+>>>>>>> newhome
 │   └── requirements.txt
 │
 ├── frontend/
 │   ├── index.html
+<<<<<<< HEAD
 │   ├── static/
 │   │   ├── images/
 │   │   │   ├── banners/
@@ -185,6 +211,32 @@ F1-RACE-REPLAY-WEB/
 │   │   ├── track-map.css           # Interactive track map styling
 │   │   ├── track-map.js            # Track map rendering & driver positions
 │   │   └── style.css
+=======
+│   │
+│   └── static/
+│       ├── images/
+│       │   ├── banners/
+│       │   ├── controls/
+│       │   ├── drivers/
+│       │   ├── teams/
+│       │   ├── tyres/
+│       │   └── weather/
+│       │
+│       ├── auth.css
+│       ├── auth.js
+│       ├── app.js
+│       ├── driver-panel.css
+│       ├── driver-panel.js
+│       ├── home-dashboard.css
+│       ├── replay.css
+│       ├── session-panel.css
+│       ├── session-panel.js
+│       ├── style.css
+│       ├── timing-tower.css
+│       ├── timing-tower.js
+│       ├── track-map.css
+│       └── track-map.js
+>>>>>>> newhome
 │
 ├── .gitignore
 ├── README.md
