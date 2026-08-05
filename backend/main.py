@@ -535,7 +535,8 @@ def minisectors(
     return data
 
 # Serve the frontend 
-FRONTEND_DIR = Path(__file__).resolve().parent.parent / "frontend"
+# FRONTEND_DIR = Path(__file__).resolve().parent.parent / "frontend"
+FRONTEND_DIR = Path(__file__).resolve().parent / "frontend"
 
 @app.get("/")
 def index():
