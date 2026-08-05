@@ -11,3 +11,7 @@ passlib[bcrypt]
 python-jose[cryptography]
 python-multipart
 pydantic[email]
+
+google-auth
+google-auth-oauthlib
+google-auth-httplib2
