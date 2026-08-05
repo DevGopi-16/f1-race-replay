@@ -13,7 +13,7 @@ SETUP: this backend expects your original `src/f1_data.py` (and the
 present alongside the new src/track_geometry.py and src/serialize.py files
 in this project's src/ directory. Copy them over before running.
 
-Run with:  uvicorn main:app --reload --port 8000
+Run with: uvicorn main:app --reload --port 8000 
 """
 
 
@@ -43,6 +43,7 @@ from src.f1_data import (
 )
 from src.driver_panel import build_driver_panel
 from typing import Optional
+from src.next_session import get_next_session
 # from src.driver_panel import get_season_stats_cached
 from src.driver_panel import build_driver_panel, get_season_stats_cached, warm_season_stats
 
@@ -113,6 +114,17 @@ def live_status():
     """Lets the frontend show a LIVE badge vs REPLAY, and know which
     session (if any) is currently being captured."""
     return live_state.snapshot()
+
+
+@app.get("/api/next-session")
+def next_session(year: int = Query(...)):
+    """Next upcoming session (any type) with a precise UTC timestamp —
+    powers the countdown badge on the Telemetry tab."""
+    try:
+        result = get_next_session(year)
+    except Exception as e:
+        raise HTTPException(status_code=502, detail=f"Failed to find next session: {e}")
+    return result or {}
 
 
 @app.get("/api/schedule/{year}")
@@ -562,6 +574,7 @@ def timing_tower(
             "meta": {
                 "event_name": snap["meta"].get("event_name", ""),
                 "circuit_name": "",
+                "country": snap["meta"].get("country", ""),
                 "year": year,
                 "round": round,
                 "date": "",
@@ -586,6 +599,7 @@ def timing_tower(
         "meta": {
             "event_name": session.event.get("EventName", ""),
             "circuit_name": session.event.get("Location", ""),
+            "country": session.event.get("Country", ""),
             "year": year,
             "round": round,
             "date": event_date.strftime("%B %d, %Y") if event_date else "",

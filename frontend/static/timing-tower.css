@@ -357,8 +357,9 @@
 
 #telLiveTimingList .tt-header,
 #telLiveTimingList .tt-row {
-  grid-template-columns: 30px 100px 56px 40px 76px 70px 76px 44px 44px 44px;
+  grid-template-columns: 40px 2fr 70px 50px 1fr 1fr 1fr 60px 60px 60px;
   min-width: 580px;
+  max-width: 1400px;
 }
 
 #telLiveTimingList .tt-row {
@@ -513,6 +514,7 @@
 .ts-empty { background: #2a2e38; }
 
 .tt-avatar {
+  object-position: top center;
   width: 18px;
   height: 18px;
   border-radius: 50%;
@@ -679,6 +681,7 @@
 }
 
 #liveTimingList .tt-avatar {
+  object-position: top center;
   width: 16px !important;
   height: 16px !important;
   border-radius: 50%;
@@ -690,29 +693,30 @@
 /* --- Telemetry Tab Sizing (Kept large & spacious) --- */
 
 #telLiveTimingList .tt-row {
-  font-size: 14px !important;
-  padding: 9px 6px !important;
+  font-size: 18px !important;
+  padding: 14px 8px !important;
 }
 
 #telLiveTimingList .tt-header {
-  font-size: 11px !important;
+  font-size: 14px !important;
 }
 
 #telLiveTimingList .tt-pos,
 #telLiveTimingList .tt-code {
-  font-size: 14px !important;
+  font-size: 18px !important;
 }
 
 #telLiveTimingList .tt-gap,
 #telLiveTimingList .tt-interval,
 #telLiveTimingList .tt-lastlap,
 #telLiveTimingList .tt-sector {
-  font-size: 13px !important;
+  font-size: 17px !important;
 }
 
 #telLiveTimingList .tt-avatar {
-  width: 26px !important;
-  height: 26px !important;
+  object-position: top center;
+  width: 40px !important;
+  height: 40px !important;
   border-radius: 50%;
   object-fit: cover;
   flex-shrink: 0;
@@ -745,4 +749,290 @@
   pointer-events: none;
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.4);
   white-space: nowrap;
+}
+/* --- Phase 1: two-line driver cell (code + team name), stacked lap times --- */
+.tt-driver-text {
+  display: flex;
+  flex-direction: column;
+  line-height: 1.25;
+  min-width: 0;
+}
+
+.tt-team-name {
+  font-size: 0.72em;
+  font-weight: 600;
+  opacity: 0.85;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.tt-lastlap {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  line-height: 1.25;
+}
+
+.tt-lastlap-current {
+  color: inherit;
+}
+
+.tt-lastlap-best {
+  font-size: 0.78em;
+  font-weight: 700;
+  color: #3ddc84;
+}
+
+/* Telemetry tab: scale the new elements up to match its bigger row height */
+#telLiveTimingList .tt-team-name {
+  font-size: 12px;
+}
+
+#telLiveTimingList .tt-lastlap-best {
+  font-size: 14px;
+}
+
+/* --- Phase 2: Minisector & Times expansion block --- */
+.mst-block {
+  grid-column: 1 / -1;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  padding: 6px 12px 10px 60px;
+  background: rgba(255, 255, 255, 0.02);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+}
+
+.mst-line {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.mst-dashes {
+  display: flex;
+  gap: 2px;
+  flex: 1;
+  max-width: 400px;
+}
+
+.mst-dash {
+  height: 6px;
+  flex: 1;
+  border-radius: 2px;
+  background: #2a2e38;
+}
+
+.mst-dash.mst-yellow { background: #ffd12e; }
+.mst-dash.mst-purple { background: #c86bff; }
+.mst-dash.mst-empty { background: #1b1e26; }
+
+.mst-time {
+  width: 60px;
+  text-align: right;
+  font-size: 12px;
+  color: #b8bfc9;
+  font-variant-numeric: tabular-nums;
+}
+
+.mst-time.mst-best {
+  color: #3ddc84;
+}
+
+.mst-delta {
+  width: 55px;
+  text-align: right;
+  font-size: 12px;
+  font-weight: 700;
+  color: #c86bff;
+  font-variant-numeric: tabular-nums;
+}
+
+/* Retired: superseded by the per-row minisector breakdown (Phase 2) */
+#telMinisectionsPanel {
+  display: none;
+}
+
+/* --- Phase 3: position-change arrows --- */
+.tt-code-row {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+}
+
+.tt-pos-change {
+  font-size: 0.7em;
+  font-weight: 700;
+}
+
+.tt-pos-up { color: #3ddc84; }
+.tt-pos-down { color: #e10600; }
+
+/* --- Phase 3: SPEED/DRS column (Telemetry tab only) --- */
+#telLiveTimingList .tt-header,
+#telLiveTimingList .tt-row {
+  grid-template-columns: 40px 1.8fr 70px 60px 50px 1fr 1fr 1fr 60px 60px 60px !important;
+}
+
+.tt-speed {
+  display: none;
+}
+
+#telLiveTimingList .tt-speed {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 2px;
+}
+
+#telLiveTimingList .tt-drs-badge {
+  font-size: 11px;
+  font-weight: 800;
+  letter-spacing: 0.03em;
+  color: #3ddc84;
+}
+
+#telLiveTimingList .tt-speed-value {
+  font-size: 12px;
+  color: #b8bfc9;
+  font-variant-numeric: tabular-nums;
+}
+
+/* --- Phase 3: pit-stop stint history icons --- */
+.tt-pits {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 3px;
+}
+
+.tt-stint-history {
+  display: flex;
+  gap: 2px;
+}
+
+.tt-stint-icon {
+  width: 13px;
+  height: 13px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 7px;
+  font-weight: 800;
+  color: #14161c;
+  flex-shrink: 0;
+}
+
+.tt-pit-count {
+  font-size: 9px;
+  color: #9099a8;
+  white-space: nowrap;
+}
+
+#telLiveTimingList .tt-stint-icon {
+  width: 16px;
+  height: 16px;
+  font-size: 8px;
+}
+
+#telLiveTimingList .tt-pit-count {
+  font-size: 11px;
+}
+
+/* Reduce excess top whitespace above the Telemetry tab's content —
+   .strategy-panel's shared padding-top:100px (style.css) makes sense
+   for panels with a hero image, but leaves dead space here. Scoped to
+   #telemetryPanel only so other panels using .strategy-panel keep
+   their original spacing. */
+#telemetryPanel {
+  padding-top: 24px !important;
+}
+
+/* --- Session header bar --- */
+.tsh-bar {
+  display: flex;
+  align-items: center;
+  padding: 14px 4px;
+  margin-bottom: 16px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.tsh-titles {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+}
+
+.tsh-event {
+  font-size: 20px;
+  font-weight: 700;
+  color: #f2f2f2;
+}
+
+.tsh-status {
+  font-size: 11px;
+  font-weight: 800;
+  letter-spacing: 0.05em;
+  padding: 4px 10px;
+  border-radius: 5px;
+}
+
+.tsh-replay {
+  color: #9099a8;
+  background: rgba(255, 255, 255, 0.06);
+}
+
+.tsh-live {
+  color: #3ddc84;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  background: rgba(61, 220, 132, 0.12);
+}
+
+.tsh-live-dot {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: #3ddc84;
+  animation: hp-pulse 1.6s ease-in-out infinite;
+}
+
+/* --- Flag + next-event countdown --- */
+.tsh-titles {
+  align-items: center;
+  gap: 16px;
+}
+
+.tsh-flag {
+  font-size: 32px;
+  line-height: 1;
+}
+
+.tsh-title-col {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+}
+
+.tsh-bar {
+  justify-content: space-between;
+}
+
+.tsh-next {
+  text-align: right;
+}
+
+.tsh-next-label {
+  font-size: 12px;
+  color: #9099a8;
+}
+
+.tsh-next-countdown {
+  font-size: 13px;
+  font-weight: 700;
+  color: #f2f2f2;
+  letter-spacing: 0.03em;
 }

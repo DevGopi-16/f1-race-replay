@@ -62,6 +62,35 @@ def _count_pit_stops(driver_laps):
     return int(driver_laps["PitInTime"].notna().sum())
 
 
+def _stint_history(driver_laps):
+    """Ordered list of compounds used across all stints, e.g.
+    ["MEDIUM", "HARD", "HARD"] — powers the pit-stop history icons,
+    distinct from the current-compound tyre chip which only shows the
+    most recent stint."""
+    if driver_laps is None or len(driver_laps) == 0 or "Stint" not in driver_laps or "Compound" not in driver_laps:
+        return []
+    try:
+        sorted_laps = driver_laps.sort_values("LapNumber") if "LapNumber" in driver_laps else driver_laps
+        history = sorted_laps.groupby("Stint")["Compound"].first().tolist()
+        return [c for c in history if c is not None and not pd.isna(c)]
+    except (TypeError, ValueError, KeyError):
+        return []
+
+
+def _position_change(grid_position, current_position):
+    """Positive = gained positions since the start (started P5, now P2 -> +3,
+    shown as an up arrow). Negative = lost positions (down arrow). None if
+    either position is unknown (e.g. non-race sessions with no grid)."""
+    if grid_position is None or current_position is None:
+        return None
+    try:
+        if pd.isna(grid_position) or pd.isna(current_position):
+            return None
+        return int(grid_position) - int(current_position)
+    except (TypeError, ValueError):
+        return None
+
+
 def build_timing_tower(session):
     if session.results is None or len(session.results) == 0:
         raise ValueError("No results available for this session yet")
@@ -122,9 +151,15 @@ def build_timing_tower(session):
                 pass
 
         team_color = res.get("TeamColor")
+        current_position = int(res["Position"]) if not pd.isna(res.get("Position")) else None
+        grid_position = res.get("GridPosition")
+        grid_position = int(grid_position) if grid_position is not None and not pd.isna(grid_position) else None
+
         rows.append(
             {
-                "position": int(res["Position"]) if not pd.isna(res.get("Position")) else None,
+                "position": current_position,
+                "grid_position": grid_position,
+                "position_change": _position_change(grid_position, current_position),
                 "driver_code": code,
                 "driver_name": res.get("FullName") or res.get("BroadcastName"),
                 "team": res.get("TeamName"),
@@ -152,6 +187,7 @@ def build_timing_tower(session):
                 "compound": last_lap.get("Compound") if last_lap is not None else None,
                 "tyre_laps": tyre_laps,
                 "pit_count": _count_pit_stops(driver_laps),
+                "stint_history": _stint_history(driver_laps),
                 "pit_status": pit_status,
                 "status": res.get("Status"),
             }

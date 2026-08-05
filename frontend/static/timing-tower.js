@@ -21,8 +21,52 @@ const DRIVER_IMAGE = {
   STR: "stroll.png", GAS: "gasly.png", OCO: "ocon.png", ALB: "albon.png",
   SAI: "sainz.png", HAD: "hadjar.png", LAW: "lawson.png", HUL: "hulkenberg.png",
   BEA: "bearman.png", COL: "colapinto.png", BOR: "bortoleto.png", PER: "perez.png",
-  BOT: "bottas.png", LIN: "lindblad.png",
+  BOT: "bottas.png", LIN: "lindblad.png", TSU: "tsunoda.png",
 };
+
+const TEAM_NAME = {
+  VER: "Red Bull Racing", LAW: "Red Bull Racing",
+  NOR: "McLaren", PIA: "McLaren",
+  LEC: "Ferrari", HAM: "Ferrari",
+  RUS: "Mercedes", ANT: "Mercedes",
+  ALO: "Aston Martin", STR: "Aston Martin",
+  GAS: "Alpine", COL: "Alpine",
+  OCO: "Haas F1 Team", BEA: "Haas F1 Team",
+  ALB: "Williams", SAI: "Williams",
+  HAD: "Racing Bulls", LIN: "Racing Bulls",
+  HUL: "Audi", BOR: "Audi",
+  PER: "Cadillac", BOT: "Cadillac",
+};
+
+// Tracks each driver's fastest last_lap seen so far this session —
+// client-side, since the live feed doesn't send an authoritative
+// "best lap" field per update. Reset whenever a new session starts
+// (createTimingTower's load() gets a fresh session/round).
+function _parseLapSeconds(str) {
+  if (!str) return null;
+  const parts = String(str).split(":");
+  if (parts.length === 2) return parseInt(parts[0], 10) * 60 + parseFloat(parts[1]);
+  const n = parseFloat(str);
+  return isNaN(n) ? null : n;
+}
+
+function _stintHistoryHtml(stintHistory) {
+  if (!stintHistory || stintHistory.length === 0) return "";
+  const icons = stintHistory
+    .map((compound) => {
+      const cls = TYRE_CLASS[compound] || "tt-tyre-hard";
+      const letter = TYRE_LETTER[compound] || "?";
+      return `<span class="tt-stint-icon ${cls}">${letter}</span>`;
+    })
+    .join("");
+  return `<span class="tt-stint-history">${icons}</span>`;
+}
+
+function _positionChangeHtml(change) {
+  if (change == null || change === 0) return "";
+  const up = change > 0;
+  return `<span class="tt-pos-change ${up ? "tt-pos-up" : "tt-pos-down"}">${up ? "▲" : "▼"}${Math.abs(change)}</span>`;
+}
 
 function sectorHtml(sector) {
   if (!sector) return '<span class="tt-sector">—</span>';
@@ -30,7 +74,7 @@ function sectorHtml(sector) {
   return `<span class="tt-sector ${cls}">${sector.time.toFixed(3)}</span>`;
 }
 
-function rowHtml(row, prevRow) {
+function rowHtml(row, prevRow, bestLapDisplay) {
   const tyreCls = TYRE_CLASS[row.compound] || "tt-tyre-hard";
   const tyreLetter = TYRE_LETTER[row.compound] || "?";
   const dotColor = row.team_color || "#888";
@@ -44,6 +88,7 @@ function rowHtml(row, prevRow) {
 
   return `
     <div class="tt-row ${isLeader ? "tt-leader" : ""} ${changed ? "tt-flash" : ""}"
+         data-driver-code="${row.driver_code}"
          data-status="${isOut ? "out" : "active"}"
          data-favorite="${row.is_favorite ? "true" : "false"}"
          style="--row-team-color:${dotColor}; background: linear-gradient(90deg, transparent 85%, ${dotColor}22 100%);"
@@ -55,14 +100,29 @@ function rowHtml(row, prevRow) {
             ? `<img class="tt-avatar" src="/static/images/drivers/${DRIVER_IMAGE[row.driver_code]}" alt="" onerror="this.style.display='none'">`
             : ""
         }
-        <span class="tt-team-dot" style="background:${dotColor}"></span>
-        <span class="tt-code">${row.driver_code || "-"}</span>
+        <span class="tt-driver-text">
+          <span class="tt-code-row">
+            <span class="tt-code">${row.driver_code || "-"}</span>
+            ${_positionChangeHtml(row.position_change)}
+          </span>
+          <span class="tt-team-name" style="color:${dotColor}">${TEAM_NAME[row.driver_code] || ""}</span>
+        </span>
       </span>
       <span class="tt-tyre">${tyreHtml}</span>
-      <span class="tt-pits">${row.pit_count != null ? row.pit_count : "-"}</span>
+      <span class="tt-speed">
+        <span class="tt-drs-badge">DRS</span>
+        <span class="tt-speed-value">0 km/h</span>
+      </span>
+      <span class="tt-pits">
+        ${_stintHistoryHtml(row.stint_history)}
+        <span class="tt-pit-count">${row.pit_count != null ? row.pit_count + " PIT" : "-"}</span>
+      </span>
       <span class="tt-gap">${row.gap || ""}</span>
       <span class="tt-interval">${row.interval || ""}</span>
-      <span class="tt-lastlap">${row.last_lap || "-"}</span>
+      <span class="tt-lastlap">
+        <span class="tt-lastlap-current">${row.last_lap || "-"}</span>
+        ${bestLapDisplay ? `<span class="tt-lastlap-best">${bestLapDisplay}</span>` : ""}
+      </span>
       ${sectorHtml(row.sectors && row.sectors.s1)}
       ${sectorHtml(row.sectors && row.sectors.s2)}
       ${sectorHtml(row.sectors && row.sectors.s3)}
@@ -76,6 +136,7 @@ function tableHeaderHtml() {
       <span></span>
       <span>Driver</span>
       <span class="tt-align-center">Tyre</span>
+      <span class="tt-align-center">Speed</span>
       <span class="tt-align-center">Pits</span>
       <span class="tt-align-right">Gap</span>
       <span class="tt-align-right">Int</span>
@@ -116,6 +177,17 @@ function average(arr) {
  */
 function createTimingTower(ids) {
   let previousRows = [];
+  let bestLaps = {}; // driver_code -> { seconds, display }
+
+  function trackBestLap(driverCode, lastLapDisplay) {
+    const seconds = _parseLapSeconds(lastLapDisplay);
+    if (seconds == null) return bestLaps[driverCode]?.display || "";
+    const current = bestLaps[driverCode];
+    if (!current || seconds < current.seconds) {
+      bestLaps[driverCode] = { seconds, display: lastLapDisplay };
+    }
+    return bestLaps[driverCode].display;
+  }
 
   function renderStatus(message) {
     const root = document.getElementById(ids.list);
@@ -132,7 +204,10 @@ function createTimingTower(ids) {
     }
     const prevMap = {};
     previousRows.forEach((r) => { prevMap[r.driver_code] = r; });
-    root.innerHTML = tableHeaderHtml() + rows.map((row) => rowHtml(row, prevMap[row.driver_code])).join("");
+    root.innerHTML = tableHeaderHtml() + rows.map((row) => {
+      const bestLapDisplay = trackBestLap(row.driver_code, row.last_lap);
+      return rowHtml(row, prevMap[row.driver_code], bestLapDisplay);
+    }).join("");
     previousRows = rows;
     root.querySelectorAll(".tt-flash").forEach((el) => {
       el.addEventListener("animationend", () => el.classList.remove("tt-flash"), { once: true });
@@ -219,6 +294,9 @@ function createTimingTower(ids) {
       renderRows(data.rows);
       renderLeaderGauge(data.rows);
       renderStatsFooter(data.rows);
+      if (ids.showSessionHeader) {
+        renderSessionHeader(data.meta || {}, sessionType, !!data.is_live, year);
+      }
       return data;
     } catch (err) {
       renderStatus(`Couldn't load timing tower: ${err.message}`);
@@ -338,6 +416,7 @@ const TelemetryTimingTower = createTimingTower({
   list: "telLiveTimingList",
   leader: "telRaceLeaderGauge",
   stats: "telRaceStatsFooter",
+  showSessionHeader: true,
 });
 const TelemetryRaceControl = createRaceControl({ list: "telRaceControlList" });
 
@@ -356,18 +435,27 @@ document.addEventListener("DOMContentLoaded", async function () {
 
   if (document.getElementById("telLiveTimingList")) {
     const featured = await TelemetryTimingTower.autoLoadLatest();
+    // renderSessionHeader now called automatically inside load() itself,
+    // using the real API response — this placeholder call is redundant.
     if (featured && document.getElementById("telRaceControlList")) {
       TelemetryRaceControl.load(featured.year, featured.round, "R");
     }
-    if (featured && document.getElementById("telMinisectors")) {
-      TelemetryMinisectors.load(featured.year, featured.round, "R");
-    }
+    // Retired: the standalone minisector panel expected the old flat
+    // "segments" shape. Phase 2 merged this same data (now split per
+    // sector) directly into each row via injectMinisectorBreakdown()
+    // above, so this panel is now redundant rather than needing a
+    // second parser for the new shape.
+    // if (featured && document.getElementById("telMinisectors")) {
+    //   TelemetryMinisectors.load(featured.year, featured.round, "R");
+    // }
     if (featured && document.getElementById("telTyreStrategy")) {
       TelemetryTyreStrategy.load(featured.year, featured.round, "R");
     }
     if (featured) {
+      await injectMinisectorBreakdown("telLiveTimingList", featured.year, featured.round, "R");
       setInterval(() => TelemetryTimingTower.load(featured.year, featured.round, "R"), AUTO_REFRESH_MS);
       setInterval(() => TelemetryRaceControl.load(featured.year, featured.round, "R"), AUTO_REFRESH_MS);
+      setInterval(() => injectMinisectorBreakdown("telLiveTimingList", featured.year, featured.round, "R"), AUTO_REFRESH_MS);
     }
   }
 });
@@ -544,3 +632,163 @@ const TelemetryTyreStrategy = createTyreStrategy({ container: "telTyreStrategy" 
     if (e.target.closest("[data-tooltip]")) tip.style.display = "none";
   });
 })();
+
+
+// --- Phase 2: Minisector & Times expansion block, inserted below each
+// driver's row in the Telemetry tab. Purely additive — reads /api/minisectors
+// and injects sibling <div class="mst-block"> elements after matching
+// .tt-row elements by data-driver-code. Never modifies rowHtml/renderRows.
+
+function _mstDashClass(seg) {
+  if (seg.is_best) return "mst-dash mst-purple";
+  if (seg.speed != null) return "mst-dash mst-yellow";
+  return "mst-dash mst-empty";
+}
+
+function _mstSectorLineHtml(sectorKey, driverData) {
+  const segments = (driverData.sector_segments && driverData.sector_segments[sectorKey]) || [];
+  const ownTime = driverData.sector_times ? driverData.sector_times[sectorKey] : null;
+  const delta = driverData.sector_deltas ? driverData.sector_deltas[sectorKey] : null;
+  const bestTime = ownTime != null && delta != null ? (ownTime + delta) : null;
+
+  const dashes = segments.map((seg) => `<span class="${_mstDashClass(seg)}"></span>`).join("");
+
+  return `
+    <div class="mst-line">
+      <span class="mst-dashes">${dashes}</span>
+      <span class="mst-time">${ownTime != null ? ownTime.toFixed(3) : "-"}</span>
+      <span class="mst-time mst-best">${bestTime != null ? bestTime.toFixed(3) : "-"}</span>
+      <span class="mst-delta">${delta != null ? delta.toFixed(3) : "-"}</span>
+    </div>
+  `;
+}
+
+function _mstBlockHtml(driverData) {
+  return `
+    <div class="mst-block" data-mst-for="${driverData.driver_code}">
+      ${_mstSectorLineHtml("s1", driverData)}
+      ${_mstSectorLineHtml("s2", driverData)}
+      ${_mstSectorLineHtml("s3", driverData)}
+    </div>
+  `;
+}
+
+async function injectMinisectorBreakdown(containerId, year, round, sessionType) {
+  const container = document.getElementById(containerId);
+  if (!container) return;
+
+  try {
+    const res = await fetch(`/api/minisectors?year=${year}&round=${round}&session_type=${sessionType}`);
+    const data = await res.json();
+    if (!res.ok) throw new Error(data.detail || "Failed to load minisectors");
+
+    // Remove any previously-injected blocks before re-inserting fresh ones
+    container.querySelectorAll(".mst-block").forEach((el) => el.remove());
+
+    (data.drivers || []).forEach((driverData) => {
+      const row = container.querySelector(`.tt-row[data-driver-code="${driverData.driver_code}"]`);
+      if (!row) return; // driver not in top N computed, or row not yet rendered
+      row.insertAdjacentHTML("afterend", _mstBlockHtml(driverData));
+    });
+  } catch (err) {
+    console.error("injectMinisectorBreakdown failed", err);
+  }
+}
+
+
+// --- Session header bar: event name + session type + Live/Replay badge.
+// Injected above the Telemetry tab's live-timing section. Purely
+// additive — reads data already present in the /api/timing-tower
+// response (meta, is_live), no new endpoint needed.
+
+const SESSION_TYPE_LABEL = {
+  FP1: "Practice 1", FP2: "Practice 2", FP3: "Practice 3",
+  Q: "Qualifying", SQ: "Sprint Qualifying", S: "Sprint", R: "Race",
+};
+
+function renderSessionHeader(meta, sessionType, isLive, year) {
+  const container = document.querySelector("#telemetryPanel .telemetry-content-wide");
+  if (!container) return;
+
+  const existing = document.getElementById("telSessionHeader");
+  if (existing) existing.remove();
+
+  const sessionLabel = SESSION_TYPE_LABEL[sessionType] || sessionType;
+  const statusHtml = isLive
+    ? `<span class="tsh-status tsh-live"><span class="tsh-live-dot"></span> LIVE</span>`
+    : `<span class="tsh-status tsh-replay">REPLAY</span>`;
+  const flag = COUNTRY_FLAG[meta.country] || "";
+
+  const header = document.createElement("div");
+  header.id = "telSessionHeader";
+  header.className = "tsh-bar";
+  header.innerHTML = `
+    <div class="tsh-titles">
+      ${flag ? `<span class="tsh-flag">${flag}</span>` : ""}
+      <div class="tsh-title-col">
+        <div class="tsh-event">${meta.event_name || ""}: ${sessionLabel}</div>
+        ${statusHtml}
+      </div>
+    </div>
+  `;
+
+  container.insertBefore(header, container.firstChild);
+
+  if (year) {
+    _renderNextEventBadge(year);
+  }
+}
+
+
+// --- Country flag + "Next session" countdown, added to the session header.
+
+const COUNTRY_FLAG = {
+  Australia: "🇦🇺", China: "🇨🇳", Japan: "🇯🇵", "United States": "🇺🇸",
+  Canada: "🇨🇦", Monaco: "🇲🇨", Spain: "��🇸", Austria: "🇦🇹",
+  "United Kingdom": "🇬🇧", Belgium: "🇧🇪", Hungary: "🇭🇺", Netherlands: "��🇱",
+  Italy: "🇮🇹", Azerbaijan: "🇦🇿", Singapore: "🇸🇬", Mexico: "🇲🇽",
+  Brazil: "🇧🇷", "United Arab Emirates": "🇦🇪", "Saudi Arabia": "🇸🇦", Qatar: "🇶🇦",
+};
+
+function _findNextEvent(schedule, now) {
+  const upcoming = schedule.filter((e) => new Date(e.date + "T00:00:00Z") > now);
+  if (upcoming.length === 0) return null;
+  upcoming.sort((a, b) => a.date.localeCompare(b.date));
+  return upcoming[0];
+}
+
+function _daysUntil(dateStr, now) {
+  const target = new Date(dateStr + "T00:00:00Z");
+  const diffMs = target - now;
+  return Math.max(0, Math.ceil(diffMs / (1000 * 60 * 60 * 24)));
+}
+
+async function _renderNextEventBadge(year) {
+  const el = document.getElementById("telSessionHeader");
+  if (!el) return;
+  try {
+    const res = await fetch(`/api/schedule/${year}`);
+    const schedule = await res.json();
+    const now = new Date();
+    const next = _findNextEvent(schedule, now);
+    if (!next) return;
+
+    const days = _daysUntil(next.date, now);
+    const flag = COUNTRY_FLAG[next.country] || "";
+    const badge = document.createElement("div");
+    badge.className = "tsh-next";
+    badge.innerHTML = `
+      <div class="tsh-next-label">Next: ${next.country} - ${next.event_name}</div>
+      <div class="tsh-next-countdown">${days} DAY${days === 1 ? "" : "S"}</div>
+    `;
+    el.appendChild(badge);
+
+    // Prepend flag to the existing event title, if not already added
+    const titleEl = el.querySelector(".tsh-event");
+    if (titleEl && flag && !titleEl.dataset.flagged) {
+      titleEl.dataset.flagged = "true";
+    }
+  } catch (err) {
+    console.error("Next-event badge failed", err);
+  }
+}
