@@ -177,7 +177,9 @@ function average(arr) {
  */
 function createTimingTower(ids) {
   let previousRows = [];
+  let currentRawRows = [];
   let bestLaps = {}; // driver_code -> { seconds, display }
+  let visibleCount = 10; // Default to top 10 drivers only
 
   function trackBestLap(driverCode, lastLapDisplay) {
     const seconds = _parseLapSeconds(lastLapDisplay);
@@ -195,19 +197,50 @@ function createTimingTower(ids) {
     root.innerHTML = `<div class="tt-status-msg">${message}</div>`;
   }
 
+  function renderControls() {
+    return `
+      <div class="tt-filter-controls" style="display: flex; justify-content: flex-end; gap: 8px; margin-bottom: 8px;">
+        <button class="tt-btn ${visibleCount === 10 ? 'active' : ''}" style="padding: 4px 10px; font-size: 12px; cursor: pointer; border-radius: 4px; border: 1px solid #30363d; background: ${visibleCount === 10 ? '#e10600' : '#161b22'}; color: #fff; font-weight: bold;" onclick="this.dispatchEvent(new CustomEvent('tt-set-limit', {bubbles: true, detail: 10}))">Top 10</button>
+        <button class="tt-btn ${visibleCount === 0 ? 'active' : ''}" style="padding: 4px 10px; font-size: 12px; cursor: pointer; border-radius: 4px; border: 1px solid #30363d; background: ${visibleCount === 0 ? '#e10600' : '#161b22'}; color: #fff; font-weight: bold;" onclick="this.dispatchEvent(new CustomEvent('tt-set-limit', {bubbles: true, detail: 0}))">All</button>
+      </div>
+    `;
+  }
+
+  function setLimit(limit) {
+    visibleCount = limit;
+    if (currentRawRows.length > 0) {
+      renderRows(currentRawRows);
+    }
+  }
+
   function renderRows(rows) {
+    currentRawRows = rows;
     const root = document.getElementById(ids.list);
     if (!root) return;
     if (!rows || rows.length === 0) {
       renderStatus("No timing data available for this session.");
       return;
     }
+
+    // Attach event listener for the control buttons once if not attached
+    if (!root.dataset.hasLimitListener) {
+      root.addEventListener('tt-set-limit', (e) => {
+        setLimit(e.detail);
+      });
+      root.dataset.hasLimitListener = "true";
+    }
+
     const prevMap = {};
     previousRows.forEach((r) => { prevMap[r.driver_code] = r; });
-    root.innerHTML = tableHeaderHtml() + rows.map((row) => {
+
+    // Slice to top N drivers if visibleCount is set > 0
+    const displayedRows = visibleCount > 0 ? rows.slice(0, visibleCount) : rows;
+
+    root.innerHTML = renderControls() + tableHeaderHtml() + displayedRows.map((row) => {
       const bestLapDisplay = trackBestLap(row.driver_code, row.last_lap);
       return rowHtml(row, prevMap[row.driver_code], bestLapDisplay);
     }).join("");
+
     previousRows = rows;
     root.querySelectorAll(".tt-flash").forEach((el) => {
       el.addEventListener("animationend", () => el.classList.remove("tt-flash"), { once: true });
@@ -294,6 +327,8 @@ function createTimingTower(ids) {
       renderRows(data.rows);
       renderLeaderGauge(data.rows);
       renderStatsFooter(data.rows);
+      renderBattleStrip(ids, data.rows);
+      renderGapLadder(ids, data.rows);
       if (ids.showSessionHeader) {
         renderSessionHeader(data.meta || {}, sessionType, !!data.is_live, year);
       }
@@ -345,7 +380,7 @@ function createTimingTower(ids) {
     }
   }
 
-  return { load, autoLoadLatest };
+  return { load, autoLoadLatest, setLimit };
 }
 
 /**
@@ -407,7 +442,7 @@ function createRaceControl(ids) {
 const TimingTower = createTimingTower({
   list: "liveTimingList",
   leader: "raceLeaderGauge",
-  stats: "raceStatsFooter",
+
 });
 const RaceControl = createRaceControl({ list: "raceControlList" });
 
@@ -416,6 +451,8 @@ const TelemetryTimingTower = createTimingTower({
   list: "telLiveTimingList",
   leader: "telRaceLeaderGauge",
   stats: "telRaceStatsFooter",
+  battle: "telBattleStrip",
+  ladder: "telGapLadder",
   showSessionHeader: true,
 });
 const TelemetryRaceControl = createRaceControl({ list: "telRaceControlList" });
@@ -435,19 +472,9 @@ document.addEventListener("DOMContentLoaded", async function () {
 
   if (document.getElementById("telLiveTimingList")) {
     const featured = await TelemetryTimingTower.autoLoadLatest();
-    // renderSessionHeader now called automatically inside load() itself,
-    // using the real API response — this placeholder call is redundant.
     if (featured && document.getElementById("telRaceControlList")) {
       TelemetryRaceControl.load(featured.year, featured.round, "R");
     }
-    // Retired: the standalone minisector panel expected the old flat
-    // "segments" shape. Phase 2 merged this same data (now split per
-    // sector) directly into each row via injectMinisectorBreakdown()
-    // above, so this panel is now redundant rather than needing a
-    // second parser for the new shape.
-    // if (featured && document.getElementById("telMinisectors")) {
-    //   TelemetryMinisectors.load(featured.year, featured.round, "R");
-    // }
     if (featured && document.getElementById("telTyreStrategy")) {
       TelemetryTyreStrategy.load(featured.year, featured.round, "R");
     }
@@ -520,10 +547,7 @@ const TelemetryMinisectors = createMinisectors({ container: "telMinisectors" });
 
 /**
  * Tyre Stint Analysis — horizontal bar per driver showing which compound
- * they ran across which lap ranges. Reads from your existing /api/strategy
- * endpoint. Field names are guessed defensively since I haven't seen
- * f1_data.py's exact response shape — if bars render empty, open the
- * console: it'll print the raw response so we can see the real field names.
+ * they ran across which lap ranges.
  */
 function createTyreStrategy(ids) {
   const TYRE_BAR_CLASS = {
@@ -607,7 +631,6 @@ function createTyreStrategy(ids) {
 
 const TelemetryTyreStrategy = createTyreStrategy({ container: "telTyreStrategy" });
 
-
 // --- Lightweight custom tooltip (replaces native title attr) ---
 (function initCustomTooltip() {
   const tip = document.createElement("div");
@@ -633,12 +656,7 @@ const TelemetryTyreStrategy = createTyreStrategy({ container: "telTyreStrategy" 
   });
 })();
 
-
-// --- Phase 2: Minisector & Times expansion block, inserted below each
-// driver's row in the Telemetry tab. Purely additive — reads /api/minisectors
-// and injects sibling <div class="mst-block"> elements after matching
-// .tt-row elements by data-driver-code. Never modifies rowHtml/renderRows.
-
+// --- Phase 2: Minisector & Times expansion block ---
 function _mstDashClass(seg) {
   if (seg.is_best) return "mst-dash mst-purple";
   if (seg.speed != null) return "mst-dash mst-yellow";
@@ -682,12 +700,11 @@ async function injectMinisectorBreakdown(containerId, year, round, sessionType) 
     const data = await res.json();
     if (!res.ok) throw new Error(data.detail || "Failed to load minisectors");
 
-    // Remove any previously-injected blocks before re-inserting fresh ones
     container.querySelectorAll(".mst-block").forEach((el) => el.remove());
 
     (data.drivers || []).forEach((driverData) => {
       const row = container.querySelector(`.tt-row[data-driver-code="${driverData.driver_code}"]`);
-      if (!row) return; // driver not in top N computed, or row not yet rendered
+      if (!row) return;
       row.insertAdjacentHTML("afterend", _mstBlockHtml(driverData));
     });
   } catch (err) {
@@ -695,12 +712,7 @@ async function injectMinisectorBreakdown(containerId, year, round, sessionType) 
   }
 }
 
-
-// --- Session header bar: event name + session type + Live/Replay badge.
-// Injected above the Telemetry tab's live-timing section. Purely
-// additive — reads data already present in the /api/timing-tower
-// response (meta, is_live), no new endpoint needed.
-
+// --- Session header bar ---
 const SESSION_TYPE_LABEL = {
   FP1: "Practice 1", FP2: "Practice 2", FP3: "Practice 3",
   Q: "Qualifying", SQ: "Sprint Qualifying", S: "Sprint", R: "Race",
@@ -739,13 +751,11 @@ function renderSessionHeader(meta, sessionType, isLive, year) {
   }
 }
 
-
-// --- Country flag + "Next session" countdown, added to the session header.
-
+// --- Country flag + "Next session" countdown ---
 const COUNTRY_FLAG = {
   Australia: "🇦🇺", China: "🇨🇳", Japan: "🇯🇵", "United States": "🇺🇸",
-  Canada: "🇨🇦", Monaco: "🇲🇨", Spain: "��🇸", Austria: "🇦🇹",
-  "United Kingdom": "🇬🇧", Belgium: "🇧🇪", Hungary: "🇭🇺", Netherlands: "��🇱",
+  Canada: "🇨🇦", Monaco: "🇲🇨", Spain: "🇪🇸", Austria: "🇦🇹",
+  "United Kingdom": "🇬🇧", Belgium: "🇧🇪", Hungary: "🇭🇺", Netherlands: "🇳🇱",
   Italy: "🇮🇹", Azerbaijan: "🇦🇿", Singapore: "🇸🇬", Mexico: "🇲🇽",
   Brazil: "🇧🇷", "United Arab Emirates": "🇦🇪", "Saudi Arabia": "🇸🇦", Qatar: "🇶🇦",
 };
@@ -783,7 +793,6 @@ async function _renderNextEventBadge(year) {
     `;
     el.appendChild(badge);
 
-    // Prepend flag to the existing event title, if not already added
     const titleEl = el.querySelector(".tsh-event");
     if (titleEl && flag && !titleEl.dataset.flagged) {
       titleEl.dataset.flagged = "true";
@@ -791,4 +800,66 @@ async function _renderNextEventBadge(year) {
   } catch (err) {
     console.error("Next-event badge failed", err);
   }
+}
+
+// --- Battle Cards + Gap Ladder ---
+function _gapSeconds(gapStr) {
+  if (!gapStr) return null;
+  if (/^leader$/i.test(String(gapStr).trim())) return 0;
+  const n = parseFloat(String(gapStr).replace(/[^0-9.\-]/g, ""));
+  return isNaN(n) ? null : n;
+}
+
+function battleCardHtml(row) {
+  const isLeader = row.position === 1;
+  const team = TEAM_NAME[row.driver_code] || "";
+  return `
+    <div class="tw-battle-card" style="--card-color:${row.team_color || "#888"}">
+      <div class="tw-battle-who">
+        <span class="tw-battle-pos">P${row.position}</span>
+        <div>
+          <div class="tw-battle-code">${row.driver_code || "-"}</div>
+          <div class="tw-battle-team">${team}</div>
+        </div>
+      </div>
+      <div class="tw-battle-gap ${isLeader ? "tw-leader" : ""}">${isLeader ? "Leader" : (row.gap || "-")}</div>
+    </div>`;
+}
+
+function renderBattleStrip(ids, rows) {
+  if (!ids.battle) return;
+  const el = document.getElementById(ids.battle);
+  if (!el) return;
+  el.innerHTML = (!rows || rows.length === 0) ? "" : rows.slice(0, 3).map(battleCardHtml).join("");
+}
+
+function renderGapLadder(ids, rows) {
+  if (!ids.ladder) return;
+  const el = document.getElementById(ids.ladder);
+  if (!el) return;
+
+  const list = (rows || [])
+    .map((r) => ({ r, g: _gapSeconds(r.gap) }))
+    .filter((x) => x.g !== null)
+    .slice(0, 16);
+
+  if (list.length === 0) { el.innerHTML = ""; return; }
+
+  const H = 320;
+  const maxG = Math.log(1 + Math.max(...list.map((x) => x.g)));
+
+  const items = list.map(({ r, g }) => {
+    const t = maxG === 0 ? 0 : Math.log(1 + g) / maxG;
+    const y = 6 + t * (H - 24);
+    const isLeader = g === 0;
+    return `
+      <div class="ladder-item ${isLeader ? "tw-leader" : ""}" style="top:${y}px;">
+        <div class="ladder-gap">${isLeader ? "" : "+" + g.toFixed(1)}</div>
+        <div class="ladder-dot" style="--dot-color:${r.team_color || "#888"}"></div>
+        <div class="ladder-code">${r.driver_code || "-"}</div>
+      </div>`;
+  }).join("");
+
+  el.style.minHeight = H + "px";
+  el.innerHTML = `<div class="ladder-axis"></div>` + items;
 }

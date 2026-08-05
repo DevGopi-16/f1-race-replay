@@ -640,24 +640,9 @@
   opacity: 1;
 }
 
-/* --- Target ONLY Homepage Live Timing Sidebar (`#liveTimingList`) --- */
-
-/* #liveTimingList .tt-row {
-  font-size: 10px !important;
-  padding: 3px 2px !important;
-} */
-
-/* --- Limit Homepage Live Timing to 10 Drivers --- */
-
-/* Hide any driver row after the 10th driver (+1 to account for the header row) */
-#liveTimingList .tt-row:nth-child(n+14) {
-  display: none !important;
-}
-
-/* Optional: Prevent vertical scrolling if overflow is fixed */
-#liveTimingList {
-  overflow-y: hidden;
-}
+/* --- Homepage Live Timing sizing (row cap now handled in JS via
+   createTimingTower's maxRows option — see timing-tower.js — so no
+   nth-child hiding or overflow:hidden hack is needed here anymore) --- */
 
 #liveTimingList .tt-header {
   font-size: 8px !important;
@@ -750,6 +735,7 @@
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.4);
   white-space: nowrap;
 }
+
 /* --- Phase 1: two-line driver cell (code + team name), stacked lap times --- */
 .tt-driver-text {
   display: flex;
@@ -1036,3 +1022,96 @@
   color: #f2f2f2;
   letter-spacing: 0.03em;
 }
+
+/* --- Top-3 podium highlight: P1 keeps the stronger .
+/* =========================================================
+   TELEMETRY TAB — dark/amber replay theme + Battle Cards + Gap Ladder
+   Scoped to #telemetryPanel — Home page tower is untouched.
+   ========================================================= */
+
+#telemetryPanel {
+  --tw-bg: #0A0B0D;
+  --tw-panel: #131519;
+  --tw-border: #23262C;
+  --tw-text: #EBE9E4;
+  --tw-text-dim: #8E9198;
+  --tw-text-faint: #54575E;
+  --tw-amber: #FFB020;
+}
+
+#telemetryPanel .hp-panel {
+  background: var(--tw-panel);
+  border: 1px solid var(--tw-border);
+  border-radius: 10px;
+}
+
+#telemetryPanel .hp-panel-title {
+  color: var(--tw-text-dim);
+  letter-spacing: 0.8px;
+}
+
+/* --- Battle cards (top 3) --- */
+#telBattleStrip {
+  display: flex;
+  gap: 10px;
+}
+
+.tw-battle-card {
+  flex: 1;
+  background: var(--tw-panel);
+  border: 1px solid var(--tw-border);
+  border-left: 3px solid var(--card-color, var(--tw-text-faint));
+  border-radius: 8px;
+  padding: 12px 16px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.tw-battle-who { display: flex; align-items: center; gap: 10px; }
+.tw-battle-pos { font-size: 12px; color: var(--tw-text-faint); font-weight: 700; width: 16px; }
+.tw-battle-code { font-weight: 700; font-size: 14px; color: var(--tw-text); letter-spacing: 0.5px; }
+.tw-battle-team { font-size: 10px; color: var(--tw-text-dim); text-transform: uppercase; letter-spacing: 0.6px; }
+.tw-battle-gap { font-family: 'JetBrains Mono', monospace; font-size: 15px; font-weight: 700; color: var(--tw-text); }
+.tw-battle-gap.tw-leader { color: var(--tw-amber); }
+
+#telBattleStripPanel {
+  grid-column: 1 / -1 !important;
+  order: 0 !important;
+}
+
+/* --- Gap-to-leader ladder --- */
+#telGapLadderPanel {
+  order: 6 !important;
+}
+
+#telGapLadderPanel .ladder-wrap {
+  position: relative;
+  padding-left: 52px;
+  min-height: 320px;
+}
+
+.ladder-axis {
+  position: absolute; left: 44px; top: 0; bottom: 0; width: 1px; background: var(--tw-border);
+}
+
+.ladder-item {
+  position: absolute; left: 0; right: 0;
+  display: flex; align-items: center; gap: 8px; height: 20px;
+}
+
+.ladder-gap {
+  position: absolute; left: 0; width: 44px; text-align: right;
+  font-family: 'JetBrains Mono', monospace; font-size: 9.5px; color: var(--tw-text-faint); padding-right: 8px;
+}
+
+.ladder-dot {
+  width: 8px; height: 8px; border-radius: 50%;
+  background: var(--dot-color, var(--tw-text-faint)); flex: none; z-index: 1;
+}
+
+.ladder-code {
+  font-family: 'JetBrains Mono', monospace; font-size: 11px; font-weight: 700; color: var(--tw-text);
+}
+
+.ladder-item.tw-leader .ladder-code { color: var(--tw-amber); }

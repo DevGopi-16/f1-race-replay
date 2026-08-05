@@ -25,9 +25,9 @@ from signalrcore.messages.completion_message import CompletionMessage
 from src.live.parse_timing import TimingFeedParser
 from src.live.state import live_state
 
-RELEVANT_TOPICS = ["DriverList", "TimingData", "TimingAppData", "SessionInfo"]
+#RELEVANT_TOPICS = ["DriverList", "TimingData", "TimingAppData", "SessionInfo"]
 
-
+RELEVANT_TOPICS = ["DriverList", "TimingData", "TimingAppData", "SessionInfo", "Position.z", "CarData.z"]
 class LiveCapture(SignalRClient):
     def __init__(self, year: int, round_: int, session_type: str, meta: dict):
         recordings_dir = Path(__file__).resolve().parent / "recordings"
@@ -72,7 +72,25 @@ class LiveCapture(SignalRClient):
 
         live_state.update_rows(self._parser.build_rows())
 
+    # def _apply(self, topic: str, data):
+    #     if not isinstance(data, dict):
+    #         return
+    #     if topic == "DriverList":
+    #         self._parser.apply_driver_list(data)
+    #     elif topic == "TimingData":
+    #         self._parser.apply_timing_data(data)
+    #     elif topic == "TimingAppData":
+    #         self._parser.apply_timing_app_data(data)
+
     def _apply(self, topic: str, data):
+        if topic in ("Position.z", "CarData.z"):
+            print(f"[debug] {topic} -> type={type(data)}")
+            if isinstance(data, str):
+                print(f"[debug] {topic} sample (first 100 chars): {data[:100]}")
+            elif isinstance(data, dict):
+                print(f"[debug] {topic} keys: {list(data.keys())[:5]}")
+            return  # bail early, don't try to parse yet
+
         if not isinstance(data, dict):
             return
         if topic == "DriverList":

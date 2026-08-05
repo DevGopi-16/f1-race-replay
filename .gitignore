@@ -68,3 +68,7 @@ dist/
 build/
 *.egg
 EOF
+
+
+backend/src/live/recordings
+test_telemetry_debug.py.save
