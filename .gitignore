@@ -11,3 +11,64 @@ backend/src/__pycache__
 F1-Race-Replay/.DS_Store
 
 backend/computed_data/
+
+
+cat > .gitignore << 'EOF'
+# --- Secrets (never commit these) ---
+.env
+.env.local
+.env.*.local
+*.pem
+*.key
+
+# --- Python ---
+venv/
+env/
+ENV/
+__pycache__/
+*.py[cod]
+*$py.class
+*.egg-info/
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+
+# --- This project's generated/cache data ---
+backend/.fastf1-cache/
+backend/computed_data/
+*.pkl
+*.cache
+
+# --- Node (only relevant if you add any JS tooling later) ---
+node_modules/
+npm-debug.log*
+
+# --- OS junk ---
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+Thumbs.db
+desktop.ini
+
+# --- Editor / IDE ---
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# --- Logs ---
+*.log
+logs/
+
+# --- Build / dist artifacts (if you ever add a build step) ---
+dist/
+build/
+*.egg
+EOF
+
+
+backend/src/live/recordings
+test_telemetry_debug.py.save

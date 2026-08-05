@@ -1342,3 +1342,188 @@ body::after{
     background:rgba(255,255,255,.12);
     transform:translateY(-1px);
 }
+
+
+
+/* --- Weather Conditions Card Styling --- */
+
+.weather-card {
+  background: #151922;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 12px;
+  padding: 16px 18px;
+  display: flex;
+  flex-direction: column;
+}
+
+/* Card Header & Live Badge */
+.weather-card-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 12px;
+}
+
+.weather-card-header .card-title {
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 1px;
+  color: #8b92a5;
+  text-transform: uppercase;
+}
+
+.live-pill {
+  background: rgba(230, 0, 0, 0.2);
+  color: #ff3b30;
+  border: 1px solid rgba(255, 59, 48, 0.4);
+  font-size: 10px;
+  font-weight: 700;
+  padding: 2px 6px;
+  border-radius: 4px;
+}
+
+/* Hero Section (Main Temp & Thermometer Icon) */
+.weather-hero {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding-bottom: 12px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+  margin-bottom: 12px;
+}
+
+.hero-temp {
+  font-size: 32px;
+  font-weight: 800;
+  color: #ffffff;
+  line-height: 1;
+}
+
+.hero-subtext {
+  display: block;
+  font-size: 12px;
+  color: #9aa1ad;
+  margin-top: 4px;
+}
+
+.hero-weather-icon {
+  width: 36px;
+  height: 36px;
+  object-fit: contain;
+}
+
+/* Metric Items Grid */
+.weather-metrics-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px 12px;
+  margin-bottom: 14px;
+}
+
+.metric-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  background: rgba(255, 255, 255, 0.03);
+  border-radius: 6px;
+  padding: 8px 10px;
+}
+
+.metric-label {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 10px;
+  font-weight: 600;
+  color: #8b92a5;
+}
+
+.metric-icon {
+  width: 15px;
+  height: 15px;
+  object-fit: contain;
+}
+
+.metric-value {
+  font-size: 12px;
+  font-weight: 700;
+  color: #ffffff;
+}
+
+.metric-value small {
+  font-size: 9px;
+  color: #8b92a5;
+}
+
+/* Link Row Button at Bottom */
+.weather-card .hp-link-row {
+  border-top: 1px solid rgba(255, 255, 255, 0.08);
+  padding-top: 10px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  color: #8b92a5;
+  font-size: 11px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: color 0.2s ease;
+}
+
+.weather-card .hp-link-row:hover {
+  color: #ffffff;
+}
+
+
+
+
+
+
+
+
+
+/* Base Container Layout */
+.dashboard-grid {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+  width: 100%;
+  max-width: 1060px; /* Fits 3 x 340px cards + 2 x 20px gaps */
+  margin: 0 auto;
+}
+
+/* Shared Card Styling (Hero & Bottom Cards) */
+.hero-card,
+.info-card {
+  background-color: #0f172a; /* Deep dark blue/slate matching your Hero */
+  border: 1px solid #1e293b;   /* Subtle border matching your Hero */
+  border-radius: 16px;         /* Rounded corners */
+  box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.3);
+  color: #ffffff;
+  padding: 24px;
+  box-sizing: border-box;
+}
+
+/* Hero Specific Dimensions */
+.hero-card {
+  width: 100%;
+  height: 380px; /* Fixed height matching wireframe */
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+}
+
+/* Bottom 3-Card Row Grid */
+.cards-row {
+  display: grid;
+  grid-template-columns: repeat(3, 340px);
+  gap: 20px;
+  justify-content: center;
+}
+
+/* Bottom Cards Dimensions */
+.info-card {
+  width: 340px;
+  min-height: 320px; /* Equal height matching the top section's card style */
+  display: flex;
+  flex-direction: column;
+}
