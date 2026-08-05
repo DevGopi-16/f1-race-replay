@@ -172,13 +172,6 @@ F1-RACE-REPLAY-WEB/
 │   │   │   ├── settings.py
 │   │   │   ├── time.py
 │   │   │   └── tyres.py
-<<<<<<< HEAD
-│   │   ├── driver_panel.py         # Driver roster & profile API
-│   │   ├── f1_data.py              # FastF1 data loading & processing
-│   │   ├── serialize.py            # Telemetry serialization for frontend
-│   │   └── track_geometry.py       # Track map & coordinate generation
-│   ├── main.py                     # FastAPI application entry point
-=======
 │   │   │
 │   │   ├── driver_panel.py
 │   │   ├── f1_data.py
@@ -189,29 +182,10 @@ F1-RACE-REPLAY-WEB/
 │   │   └── track_geometry.py
 │   │
 │   ├── main.py
->>>>>>> newhome
 │   └── requirements.txt
 │
 ├── frontend/
 │   ├── index.html
-<<<<<<< HEAD
-│   ├── static/
-│   │   ├── images/
-│   │   │   ├── banners/
-│   │   │   ├── controls/
-│   │   │   ├── drivers/
-│   │   │   ├── teams/
-│   │   │   ├── tyres/
-│   │   │   └── weather/
-│   │   ├── app.js                  # Playback engine & UI logic
-│   │   ├── driver-panel.css        # Driver panel styling
-│   │   ├── driver-panel.js         # Driver panel interactions
-│   │   ├── replay.css              # Race replay UI styling
-│   │   ├── session-panel.js        # Session selection panel & filters
-│   │   ├── track-map.css           # Interactive track map styling
-│   │   ├── track-map.js            # Track map rendering & driver positions
-│   │   └── style.css
-=======
 │   │
 │   └── static/
 │       ├── images/
@@ -236,7 +210,6 @@ F1-RACE-REPLAY-WEB/
 │       ├── timing-tower.js
 │       ├── track-map.css
 │       └── track-map.js
->>>>>>> newhome
 │
 ├── .gitignore
 ├── README.md
