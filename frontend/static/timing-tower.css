@@ -1115,3 +1115,69 @@
 }
 
 .ladder-item.tw-leader .ladder-code { color: var(--tw-amber); }
+
+/* --- Retired / stopped / knocked-out / lapped rows: dimmed treatment --- */
+.tt-row[data-status="out"],
+.tt-row[data-status="lapped"] {
+  opacity: 0.4;
+}
+
+.tt-row[data-status="out"] .tt-pos,
+.tt-row[data-status="out"] .tt-code,
+.tt-row[data-status="out"] .tt-team-name,
+.tt-row[data-status="out"] .tt-gap,
+.tt-row[data-status="out"] .tt-interval,
+.tt-row[data-status="out"] .tt-lastlap-current,
+.tt-row[data-status="out"] .tt-drs-badge,
+.tt-row[data-status="out"] .tt-speed-value,
+.tt-row[data-status="out"] .tt-pit-count,
+.tt-row[data-status="out"] .tt-pos-change,
+.tt-row[data-status="lapped"] .tt-pos,
+.tt-row[data-status="lapped"] .tt-code,
+.tt-row[data-status="lapped"] .tt-team-name,
+.tt-row[data-status="lapped"] .tt-gap,
+.tt-row[data-status="lapped"] .tt-interval,
+.tt-row[data-status="lapped"] .tt-lastlap-current,
+.tt-row[data-status="lapped"] .tt-drs-badge,
+.tt-row[data-status="lapped"] .tt-speed-value,
+.tt-row[data-status="lapped"] .tt-pit-count,
+.tt-row[data-status="lapped"] .tt-pos-change {
+  color: #6b7280 !important;
+}
+
+.tt-row[data-status="out"] .tt-tyre-chip,
+.tt-row[data-status="lapped"] .tt-tyre-chip {
+  background: transparent !important;
+  border-color: #4b5563 !important;
+  color: #6b7280 !important;
+}
+
+.tt-row[data-status="out"] .tt-stint-icon,
+.tt-row[data-status="lapped"] .tt-stint-icon {
+  background: transparent !important;
+  border: 1px solid #4b5563 !important;
+  color: #6b7280 !important;
+}
+
+.tt-row[data-status="out"] .tt-avatar,
+.tt-row[data-status="lapped"] .tt-avatar {
+  filter: grayscale(1);
+  opacity: 0.6;
+}
+
+.tt-row[data-status="out"] + .mst-block,
+.tt-row[data-status="lapped"] + .mst-block {
+  opacity: 0.4;
+}
+
+.tt-row[data-status="out"] + .mst-block .mst-time,
+.tt-row[data-status="out"] + .mst-block .mst-delta,
+.tt-row[data-status="lapped"] + .mst-block .mst-time,
+.tt-row[data-status="lapped"] + .mst-block .mst-delta {
+  color: #6b7280 !important;
+}
+
+.tt-row[data-status="out"] + .mst-block .mst-dash,
+.tt-row[data-status="lapped"] + .mst-block .mst-dash {
+  background: #2a2e38 !important;
+}

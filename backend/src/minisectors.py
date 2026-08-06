@@ -20,16 +20,15 @@ import pandas as pd
 SEGMENTS_PER_SECTOR = 7
 
 
-def build_minisectors(season: int, round_: int, session_type: str = "R", top_n: int = 10) -> dict:
+def build_minisectors(season: int, round_: int, session_type: str = "R", top_n: int | None = None) -> dict:
     session = fastf1.get_session(season, round_, session_type)
     session.load(laps=True, telemetry=True, weather=False, messages=False)
 
     if session.results is None or len(session.results) == 0:
         raise ValueError("No results available for this session yet")
 
-    top_codes = (
-        session.results.sort_values("Position")["Abbreviation"].dropna().head(top_n).tolist()
-    )
+    ranked = session.results.sort_values("Position")["Abbreviation"].dropna()
+    top_codes = ranked.tolist() if top_n is None else ranked.head(top_n).tolist()
 
     computed = {}  # driver_code -> {sector_segments, sector_times, team_color, lap_time}
 
