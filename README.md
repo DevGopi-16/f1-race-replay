@@ -139,9 +139,8 @@ Telemetry is fetched once per session via FastF1, cached locally, downsampled an
 
 ```text
 F1-RACE-REPLAY-WEB/
-│
 ├── assets/
-│   ├── banners.md
+│   ├── banners/
 │   ├── dividers/
 │   ├── file_headers/
 │   ├── headers/
@@ -151,54 +150,32 @@ F1-RACE-REPLAY-WEB/
 │   └── visuals/
 │
 ├── backend/
-│   ├── .env
-│   ├── .env.example
-│   ├── .fastf1-cache/
-│   ├── computed_data/
+│   ├── auth/
 │   ├── data/
 │   │   └── drivers.json
-│   │
 │   ├── src/
 │   │   ├── auth/
-│   │   │   ├── __init__.py
-│   │   │   ├── database.py
-│   │   │   ├── models.py
-│   │   │   ├── schemas.py
-│   │   │   ├── security.py
-│   │   │   ├── dependencies.py
-│   │   │   └── routes.py
-│   │   │
 │   │   ├── lib/
-│   │   │   ├── settings.py
-│   │   │   ├── time.py
-│   │   │   └── tyres.py
-│   │   │
+│   │   ├── live/
 │   │   ├── driver_panel.py
 │   │   ├── f1_data.py
 │   │   ├── minisectors.py
+│   │   ├── next_session.py
 │   │   ├── race_control.py
-│   │   ├── timing_tower.py
 │   │   ├── serialize.py
+│   │   ├── timing_tower.py
 │   │   └── track_geometry.py
-│   │
 │   ├── main.py
-│   └── requirements.txt
+│   ├── requirements.txt
+│   └── test_telemetry_debug.py
 │
 ├── frontend/
 │   ├── index.html
-│   │
 │   └── static/
 │       ├── images/
-│       │   ├── banners/
-│       │   ├── controls/
-│       │   ├── drivers/
-│       │   ├── teams/
-│       │   ├── tyres/
-│       │   └── weather/
-│       │
+│       ├── app.js
 │       ├── auth.css
 │       ├── auth.js
-│       ├── app.js
 │       ├── driver-panel.css
 │       ├── driver-panel.js
 │       ├── home-dashboard.css
@@ -211,7 +188,6 @@ F1-RACE-REPLAY-WEB/
 │       ├── track-map.css
 │       └── track-map.js
 │
-├── .gitignore
 ├── README.md
 └── requirements.txt
 ```

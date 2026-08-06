@@ -81,32 +81,30 @@ def _upcoming_races(season: int, count: int = 4) -> list[dict]:
         })
     return races
 
-def _race_results(season: int, round_: int):
+def _race_session_data(season: int, round_: int):
+    """
+    Loads the race session ONCE (with laps=True) and returns both the
+    results table and the fastest-lap driver code from it. Replaces the
+    old pattern of loading the same race session twice.
+    """
     session = fastf1.get_session(season, round_, "R")
-    session.load(laps=False, telemetry=False, weather=False, messages=False)
-    return session.results
+    session.load(laps=True, telemetry=False, weather=False, messages=False)
+
+    results = session.results
+
+    fastest_code = None
+    laps = session.laps
+    if not laps.empty:
+        fastest = laps.pick_fastest()
+        fastest_code = fastest["Driver"] if fastest is not None else None
+
+    return results, fastest_code
 
 
 def _qualifying_results(season: int, round_: int):
     session = fastf1.get_session(season, round_, "Q")
     session.load(laps=False, telemetry=False, weather=False, messages=False)
     return session.results
-
-def _fastest_lap_driver_code(season: int, round_: int) -> str | None:
-    """
-    Determines the fastest-lap driver for a round. Needs full lap timing
-    (unlike results/qualifying above), so it's kept separate and allowed
-    to fail independently — a very recent race with incomplete lap data
-    just won't count toward fastest-lap totals yet, without blocking the
-    rest of the season's stats.
-    """
-    session = fastf1.get_session(season, round_, "R")
-    session.load(laps=True, telemetry=False, weather=False, messages=False)
-    laps = session.laps
-    if laps.empty:
-        return None
-    fastest = laps.pick_fastest()
-    return fastest["Driver"] if fastest is not None else None
 
 
 """
@@ -128,7 +126,7 @@ def _compute_season_stats(season: int) -> dict[str, dict]:
 
     for round_ in sorted(_completed_rounds(season)):
         try:
-            race = _race_results(season, round_)
+            race, fl_code = _race_session_data(season, round_)
             for _, row in race.iterrows():
                 code = row.get("Abbreviation")
                 if not code:
@@ -157,6 +155,13 @@ def _compute_season_stats(season: int) -> dict[str, dict]:
                     "position": pos,
                     "points": points,
                 })
+
+            if fl_code:
+                fl_entry = stats.setdefault(fl_code, {
+                    "podiums": 0, "poles": 0, "fastest_laps": 0,
+                    "finishes": [], "history": [],
+                })
+                fl_entry["fastest_laps"] += 1
         except Exception as e:
             print(f"[driver_panel] skipping race round {round_} ({season}): {e}")
 
@@ -178,23 +183,10 @@ def _compute_season_stats(season: int) -> dict[str, dict]:
                     if qpos == 1:
                         entry["poles"] += 1
 
-                # NEW: record every driver's quali position for this round,
-                # not just whether they got pole.
                 if qpos is not None:
                     quali_positions.setdefault(code, {})[round_] = qpos
         except Exception as e:
             print(f"[driver_panel] skipping qualifying round {round_} ({season}): {e}")
-
-        try:
-            fl_code = _fastest_lap_driver_code(season, round_)
-            if fl_code:
-                entry = stats.setdefault(fl_code, {
-                    "podiums": 0, "poles": 0, "fastest_laps": 0,
-                    "finishes": [], "history": [],
-                })
-                entry["fastest_laps"] += 1
-        except Exception as e:
-            print(f"[driver_panel] skipping fastest-lap calc for round {round_} ({season}): {e}")
 
     for code, entry in stats.items():
         # Sort by round, then compute a running cumulative-points total,
@@ -212,6 +204,23 @@ def _compute_season_stats(season: int) -> dict[str, dict]:
         entry["avg_finish"] = round(sum(finishes) / len(finishes), 1) if finishes else None
 
     return stats
+
+
+def _current_event_name(season: int) -> str | None:
+    """
+    Returns the event name of the most recently completed round of the
+    season — used so the frontend track map shows the actual current
+    race instead of a hardcoded fallback.
+    """
+    schedule = fastf1.get_event_schedule(season, include_testing=False)
+    completed = _completed_rounds(season)
+    if not completed:
+        return None
+    last_round = max(completed)
+    match = schedule[schedule["RoundNumber"] == last_round]
+    if match.empty:
+        return None
+    return match.iloc[0]["EventName"]
 
 
 def _disk_cache_path(season: int) -> str:
@@ -284,6 +293,7 @@ def build_driver_panel(season: int, static_drivers: list, round_: int | None = N
     season_stats = get_season_stats_cached(season) or {}
     static_by_key = _static_lookup(static_drivers)
     upcoming_races = _upcoming_races(season, count=4)
+    current_event_name = _current_event_name(season)
 
     merged = []
     for entry in standings:
@@ -309,6 +319,7 @@ def build_driver_panel(season: int, static_drivers: list, round_: int | None = N
             "color": static_entry.get("teamColor", "#888888"),
             "history": extra.get("history", []),
             "next_races": upcoming_races,
+            "current_event_name": current_event_name,
             "age":  _compute_age(static_entry.get("born")), 
         })
 

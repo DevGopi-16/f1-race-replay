@@ -19,17 +19,35 @@ import pandas as pd
 
 SEGMENTS_PER_SECTOR = 7
 
+# In-memory cache of loaded FastF1 sessions, keyed by (season, round, session_type).
+# Without this, build_minisectors() was calling session.load(telemetry=True) from
+# scratch on every single call — including every 5-second poll from the frontend,
+# not just the first page load. FastF1's own disk cache avoids re-downloading, but
+# the DataFrame construction/processing on load() still repeated every time. This
+# cache reuses the already-processed session object across calls within this
+# process's lifetime. Unbounded by design — a handful of sessions in memory during
+# a dev/demo run is fine; add an eviction policy if this ever needs to run for
+# many different sessions over a long-lived process.
+_session_cache: dict[tuple[int, int, str], "fastf1.core.Session"] = {}
 
-def build_minisectors(season: int, round_: int, session_type: str = "R", top_n: int = 10) -> dict:
-    session = fastf1.get_session(season, round_, session_type)
-    session.load(laps=True, telemetry=True, weather=False, messages=False)
+
+def _get_cached_session(season: int, round_: int, session_type: str):
+    key = (season, round_, session_type)
+    if key not in _session_cache:
+        session = fastf1.get_session(season, round_, session_type)
+        session.load(laps=True, telemetry=True, weather=False, messages=False)
+        _session_cache[key] = session
+    return _session_cache[key]
+
+
+def build_minisectors(season: int, round_: int, session_type: str = "R", top_n: int | None = None) -> dict:
+    session = _get_cached_session(season, round_, session_type)
 
     if session.results is None or len(session.results) == 0:
         raise ValueError("No results available for this session yet")
 
-    top_codes = (
-        session.results.sort_values("Position")["Abbreviation"].dropna().head(top_n).tolist()
-    )
+    ranked = session.results.sort_values("Position")["Abbreviation"].dropna()
+    top_codes = ranked.tolist() if top_n is None else ranked.head(top_n).tolist()
 
     computed = {}  # driver_code -> {sector_segments, sector_times, team_color, lap_time}
 

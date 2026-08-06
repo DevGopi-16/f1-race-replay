@@ -19,7 +19,10 @@ incoming message into it — same pattern the TS version used with its
 `existing` merge, just without React state.
 """
 
+import re
 from typing import Optional
+
+_LAPPED_GAP_RE = re.compile(r"^\d+\s*L$", re.IGNORECASE)
 
 
 class TimingFeedParser:
@@ -147,6 +150,7 @@ class TimingFeedParser:
                 "retired": timing.get("retired", False),
                 "stopped": timing.get("stopped", False),
                 "knocked_out": False,
+                "lapped": bool(_LAPPED_GAP_RE.match(str(timing.get("gap", "")).strip())),
             })
 
         rows.sort(key=lambda r: (r["position"] is None, r["position"]))

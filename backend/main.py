@@ -13,7 +13,7 @@ SETUP: this backend expects your original `src/f1_data.py` (and the
 present alongside the new src/track_geometry.py and src/serialize.py files
 in this project's src/ directory. Copy them over before running.
 
-Run with: uvicorn main:app --reload --port 8000 
+ 
 """
 
 
@@ -536,6 +536,7 @@ def minisectors(
 
 # Serve the frontend 
 FRONTEND_DIR = Path(__file__).resolve().parent.parent / "frontend"
+
 
 @app.get("/")
 def index():

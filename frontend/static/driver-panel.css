@@ -299,30 +299,16 @@
   z-index: 1;
 }
 
-/* Home panel banner: text sabse aage
+/* Home panel hero: keep text and driver image above the banner image */
 #dp-hero-trigger .dp-hero-scrim-content {
-  z-index: 10;
-  position: absolute;
-} */
-
-/* Home panel banner: text ko right side shift karo */
-#dp-hero-trigger .dp-hero-scrim-content {
-  padding-left: 70px; 
+  padding-left: 70px;
+  z-index: 20;
 }
-
 #dp-hero-trigger .dp-hero-banner-frame::before {
   z-index: 1;
 }
-
-/* Home panel hero: text ko hamesha aage rakho */
-#dp-hero-trigger .dp-hero-scrim-content {
-  z-index: 20 !important;
-}
-#dp-hero-trigger .dp-hero-banner-frame::before {
-  z-index: 1 !important;
-}
 #dp-hero-trigger .dp-hero-driverimg {
-  z-index: 2 !important;
+  z-index: 2;
 }
 
 
@@ -888,9 +874,6 @@
 }
 
 /* Let the name/team text settle in just after the wipe clears it */
-/* .dp-hero-scrim-content {
-  animation: dp-fade-up .5s ease .5s both;
-} */
 .dp-hero-scrim-content {
   animation: dp-fade-up .5s ease .5s both;
 }
@@ -918,26 +901,6 @@
 }
 
 
-
-.dp-profile-grid {
-  display: grid;
-  grid-template-columns: 1fr;
-  gap: 16px;
-  align-items: start;
-}
-@media (min-width: 900px) {
-  .dp-profile-grid { grid-template-columns: minmax(280px, 380px) 1fr; }
-}
-.dp-profile-col-left,
-.dp-profile-col-right {
-  display: flex;
-  flex-direction: column;
-  gap: 16px;
-  min-width: 0;
-}
-.dp-profile-col-right .dp-charts-row {
-  margin-top: 0;
-}
 
 
 
@@ -1122,25 +1085,6 @@
 }
 .dp-social-row { display: flex; gap: 10px; }
 
-/* .dp-social-icon {
-  width: 32px; height: 32px;
-  border-radius: 50%;
-  background: rgba(255, 255, 255, 0.06);
-  border: 1px solid rgba(255, 255, 255, 0.1);
-  display: flex; align-items: center; justify-content: center;
-  color: #ccc;
-  font-size: 12px;
-  font-weight: 700;
-  cursor: pointer;
-  text-decoration: none;
-  transition: background .2s, color .2s, border-color .2s;
-}
-.dp-social-icon:hover {
-  background: rgba(255, 255, 255, 0.14);
-  color: #fff;
-  border-color: rgba(255, 255, 255, 0.25);
-} */
-
 .dp-social-icon {
   --social-color: #ccc;
   width: 34px; height: 34px;
@@ -1239,4 +1183,82 @@
   align-items: center;
   gap: 12px;
   padding: 10px 0;
+}
+/* --- Driver panel: fetch error state --- */
+.dp-error {
+  text-align: center;
+  color: #ccc;
+  padding: 48px 0;
+}
+.dp-error p {
+  font-size: 14px;
+  color: #aaa;
+  margin: 0 0 16px;
+}
+
+/* ===== Driver Panel — Animation upgrades ===== */
+
+/* --- View transition (list <-> profile, driver switch) --- */
+.dp-view-out {
+  opacity: 0;
+  transform: translateY(10px) scale(0.99);
+  transition: opacity .18s ease, transform .18s ease;
+}
+.dp-view-in {
+  animation: dp-view-enter .42s cubic-bezier(.2,.8,.2,1) both;
+}
+@keyframes dp-view-enter {
+  from { opacity: 0; transform: translateY(14px) scale(0.985); }
+  to   { opacity: 1; transform: translateY(0) scale(1); }
+}
+
+/* --- Chart entrance --- */
+.dp-chart-canvas-wrap {
+  animation: dp-chart-enter .6s cubic-bezier(.2,.8,.2,1) .2s both;
+}
+@keyframes dp-chart-enter {
+  from { opacity: 0; transform: scale(0.96); }
+  to   { opacity: 1; transform: scale(1); }
+}
+
+/* --- Skeleton loading state --- */
+.dp-skeleton-wrap {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+  padding: 8px;
+}
+.dp-skeleton {
+  border-radius: 16px;
+  background: linear-gradient(
+    90deg,
+    rgba(255,255,255,0.04) 25%,
+    rgba(255,255,255,0.11) 37%,
+    rgba(255,255,255,0.04) 63%
+  );
+  background-size: 400% 100%;
+  animation: dp-skeleton-shimmer 1.4s ease infinite;
+}
+@keyframes dp-skeleton-shimmer {
+  0%   { background-position: 100% 50%; }
+  100% { background-position: 0 50%; }
+}
+.dp-skeleton-hero {
+  height: 320px;
+  border-radius: 20px;
+}
+.dp-skeleton-row {
+  display: flex;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+.dp-skeleton-card {
+  flex: 1;
+  min-width: 140px;
+  height: 160px;
+}
+.dp-skeleton-row-card {
+  flex: 1;
+  min-width: 200px;
+  height: 90px;
 }
