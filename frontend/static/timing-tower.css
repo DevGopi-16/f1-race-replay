@@ -1115,3 +1115,292 @@
 }
 
 .ladder-item.tw-leader .ladder-code { color: var(--tw-amber); }
+
+/* --- Retired / stopped / knocked-out / lapped rows: dimmed treatment --- */
+.tt-row[data-status="out"],
+.tt-row[data-status="lapped"] {
+  opacity: 0.4;
+}
+
+.tt-row[data-status="out"] .tt-pos,
+.tt-row[data-status="out"] .tt-code,
+.tt-row[data-status="out"] .tt-team-name,
+.tt-row[data-status="out"] .tt-gap,
+.tt-row[data-status="out"] .tt-interval,
+.tt-row[data-status="out"] .tt-lastlap-current,
+.tt-row[data-status="out"] .tt-drs-badge,
+.tt-row[data-status="out"] .tt-speed-value,
+.tt-row[data-status="out"] .tt-pit-count,
+.tt-row[data-status="out"] .tt-pos-change,
+.tt-row[data-status="lapped"] .tt-pos,
+.tt-row[data-status="lapped"] .tt-code,
+.tt-row[data-status="lapped"] .tt-team-name,
+.tt-row[data-status="lapped"] .tt-gap,
+.tt-row[data-status="lapped"] .tt-interval,
+.tt-row[data-status="lapped"] .tt-lastlap-current,
+.tt-row[data-status="lapped"] .tt-drs-badge,
+.tt-row[data-status="lapped"] .tt-speed-value,
+.tt-row[data-status="lapped"] .tt-pit-count,
+.tt-row[data-status="lapped"] .tt-pos-change {
+  color: #6b7280 !important;
+}
+
+.tt-row[data-status="out"] .tt-tyre-chip,
+.tt-row[data-status="lapped"] .tt-tyre-chip {
+  background: transparent !important;
+  border-color: #4b5563 !important;
+  color: #6b7280 !important;
+}
+
+.tt-row[data-status="out"] .tt-stint-icon,
+.tt-row[data-status="lapped"] .tt-stint-icon {
+  background: transparent !important;
+  border: 1px solid #4b5563 !important;
+  color: #6b7280 !important;
+}
+
+.tt-row[data-status="out"] .tt-avatar,
+.tt-row[data-status="lapped"] .tt-avatar {
+  filter: grayscale(1);
+  opacity: 0.6;
+}
+
+.tt-row[data-status="out"] + .mst-block,
+.tt-row[data-status="lapped"] + .mst-block {
+  opacity: 0.4;
+}
+
+.tt-row[data-status="out"] + .mst-block .mst-time,
+.tt-row[data-status="out"] + .mst-block .mst-delta,
+.tt-row[data-status="lapped"] + .mst-block .mst-time,
+.tt-row[data-status="lapped"] + .mst-block .mst-delta {
+  color: #6b7280 !important;
+}
+
+.tt-row[data-status="out"] + .mst-block .mst-dash,
+.tt-row[data-status="lapped"] + .mst-block .mst-dash {
+  background: #2a2e38 !important;
+}
+
+/* --- Loading skeleton rows (first load only, before real data arrives) --- */
+.tt-skeleton-row {
+  gap: 8px;
+}
+
+.tt-skeleton-bar {
+  height: 10px;
+  border-radius: 4px;
+  background: linear-gradient(90deg, #1b1e26 25%, #262b36 37%, #1b1e26 63%);
+  background-size: 400% 100%;
+  animation: tt-skeleton-shimmer 1.4s ease infinite;
+}
+
+@keyframes tt-skeleton-shimmer {
+  0% { background-position: 100% 50%; }
+  100% { background-position: 0% 50%; }
+}
+
+/* --- Tyre Stint Analysis: more compact layout for the Telemetry tab --- */
+#telTyreStrategy .ts-row {
+  gap: 6px;
+  padding: 3px 2px;
+}
+
+#telTyreStrategy .ts-code {
+  width: 28px;
+  font-size: 9px;
+}
+
+#telTyreStrategy .ts-bar {
+  height: 10px;
+  border-radius: 3px;
+}
+
+#telTyreStrategy .ts-segment {
+  border-right: 1px solid rgba(0, 0, 0, 0.3);
+}
+
+/* --- Tyre Stint Analysis: summary line + segment labels + pit count --- */
+.ts-summary {
+  display: flex;
+  gap: 20px;
+  padding: 4px 2px 10px;
+  margin-bottom: 6px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.ts-summary-item {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.ts-summary-value {
+  font-size: 15px;
+  font-weight: 800;
+  color: #f2f2f2;
+  font-variant-numeric: tabular-nums;
+}
+
+.ts-summary-label {
+  font-size: 8.5px;
+  letter-spacing: 0.03em;
+  text-transform: uppercase;
+  color: #6b7280;
+}
+
+.ts-segment {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.ts-segment-label {
+  font-size: 8px;
+  font-weight: 800;
+  color: rgba(0, 0, 0, 0.55);
+}
+
+.ts-soft .ts-segment-label,
+.ts-inter .ts-segment-label,
+.ts-wet .ts-segment-label {
+  color: rgba(255, 255, 255, 0.85);
+}
+
+.ts-pit-count {
+  flex-shrink: 0;
+  width: 44px;
+  text-align: right;
+  font-size: 9px;
+  font-weight: 700;
+  color: #9099a8;
+  white-space: nowrap;
+}
+
+/* --- Race Leader gauge: trend indicator + P2/P3 mini-podium --- */
+.rl-trend {
+  margin-top: 4px;
+  font-size: 8.5px;
+  font-weight: 800;
+  letter-spacing: 0.03em;
+  padding: 2px 6px;
+  border-radius: 4px;
+}
+
+.rl-trend-closing {
+  color: #e10600;
+  background: rgba(225, 6, 0, 0.14);
+}
+
+.rl-trend-opening {
+  color: #3ddc84;
+  background: rgba(61, 220, 132, 0.14);
+}
+
+.rl-trend-steady {
+  color: #6b7280;
+  background: rgba(255, 255, 255, 0.05);
+}
+
+.rl-podium {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  margin-top: 10px;
+  padding-top: 10px;
+  border-top: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.rl-podium-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 11px;
+}
+
+.rl-podium-code {
+  font-weight: 700;
+  color: #f2f2f2;
+  flex: 1;
+}
+
+.rl-podium-gap {
+  font-family: ui-monospace, monospace;
+  color: #9099a8;
+  font-size: 10px;
+}
+
+.rl-sparkline {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 3px;
+  margin-top: 10px;
+}
+
+.rl-sparkline-label {
+  font-size: 7.5px;
+  letter-spacing: 0.04em;
+  color: #6b7280;
+  text-transform: uppercase;
+}
+
+.tsh-next-countdown {
+  font-family: ui-monospace, monospace;
+  font-variant-numeric: tabular-nums;
+}
+
+/* --- Session header: Orbitron display font, matching the racing-HUD style --- */
+.tsh-event,
+.tsh-next-label,
+.tsh-next-countdown {
+  font-family: 'Orbitron', 'JetBrains Mono', monospace;
+}
+
+.tsh-event {
+  font-weight: 700;
+  letter-spacing: 0.02em;
+}
+
+.tsh-next-countdown {
+  font-weight: 800;
+  letter-spacing: 0.03em;
+}
+
+/* --- Gap Ladder: rank numbers, avatars, reference gridlines --- */
+.ladder-rank {
+  width: 14px;
+  text-align: center;
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 8.5px;
+  color: #54575E;
+  flex: none;
+}
+
+.ladder-avatar {
+  width: 16px;
+  height: 16px;
+  border-radius: 50%;
+  object-fit: cover;
+  object-position: top center;
+  flex: none;
+  border: 1px solid #23262C;
+}
+
+.ladder-gridline {
+  position: absolute;
+  left: 52px;
+  right: 0;
+  height: 1px;
+  background: rgba(255, 255, 255, 0.05);
+}
+
+.ladder-gridlabel {
+  position: absolute;
+  right: 0;
+  transform: translateY(-50%);
+  font-size: 8px;
+  color: #54575E;
+  font-family: 'JetBrains Mono', monospace;
+}

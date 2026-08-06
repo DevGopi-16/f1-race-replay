@@ -11,6 +11,8 @@
   <link rel="stylesheet" href="/static/home-dashboard.css">
   <link rel="stylesheet" href="/static/auth.css">
   <link rel="stylesheet" href="/static/timing-tower.css">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@500;700;800&display=swap" rel="stylesheet">
 </head>
 <body>
 
@@ -271,7 +273,6 @@
                 <span></span>
               </div>
             </div>
-            <div id="raceStatsFooter"></div>
             <button class="hp-panel-footer-btn" id="viewFullLeaderboardBtn">📊 VIEW FULL LEADERBOARD</button>
           </div>
 
@@ -282,7 +283,7 @@
             <div id="raceLeaderGauge"></div>
           </div> -->
 
-          <div class="hp-panel" id="trackMapMiniPanel">
+          <!-- <div class="hp-panel" id="trackMapMiniPanel">
             <div class="hp-panel-header">
               <span class="hp-panel-title">Track Map</span>
               <span class="live-badge-pill">LIVE</span>
@@ -294,7 +295,7 @@
               </svg>
             </div>
             <button class="hp-panel-footer-btn" id="viewTrackDetailsBtn">📐 VIEW TRACK DETAILS</button>
-          </div>
+          </div> -->
 
           <div class="hp-panel" id="upcomingSessionsPanel">
             <div class="hp-panel-header"><span class="hp-panel-title">Upcoming Sessions</span></div>
@@ -533,12 +534,6 @@
           <div id="telLiveTimingList"></div>
         </div>
 
-        <div class="hp-panel" id="telRaceLeaderPanel">
-          <div class="hp-panel-header">
-            <span class="hp-panel-title">🏁 Race Leader</span>
-          </div>
-          <div id="telRaceLeaderGauge"></div>
-        </div>
 
         <div class="hp-panel" id="telRaceControlPanel">
           <div class="hp-panel-header">
@@ -549,7 +544,7 @@
 
         <div class="hp-panel" id="telMinisectionsPanel">
           <div class="hp-panel-header">
-            <span class="hp-panel-title">⏱️ Minisectors — Fastest Lap (Top 10)</span>
+            <span class="hp-panel-title">⏱️ Minisectors — Fastest Lap</span>
           </div>
           <div id="telMinisectors"></div>
         </div>
@@ -569,12 +564,12 @@
         </div>
       </div>
 
-      <div class="hp-panel" id="telRaceStatsPanel" style="margin-top:16px">
+      <!-- <div class="hp-panel" id="telRaceStatsPanel" style="margin-top:16px">
         <div class="hp-panel-header">
           <span class="hp-panel-title">📊 Race Statistics</span>
         </div>
         <div id="telRaceStatsFooter"></div>
-      </div>
+      </div> -->
 
     </div>
   </div>

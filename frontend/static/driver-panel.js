@@ -6,6 +6,8 @@
   let _resizeHandler = null;
   let _resultsExpanded = false;
   let _roundsFilter = "all";
+  let _currentYear = null;
+  let _currentEventName = null;
 
   async function loadDriverPanel(containerId, { year, round = null }) {
     _container = document.getElementById(containerId);
@@ -14,7 +16,9 @@
       return;
     }
 
-    _container.innerHTML = `<p class="dp-loading">Loading drivers…</p>`;
+    _currentYear = year;
+
+    _container.innerHTML = skeletonHTML();
 
     const params = new URLSearchParams({ year });
     if (round) params.set("round", round);
@@ -24,11 +28,21 @@
       if (!res.ok) throw new Error(`HTTP ${res.status}`);
       _drivers = await res.json();
       _selectedCode = _drivers[0]?.code || null;
+      _currentEventName = _drivers[0]?.current_event_name || null;
       render();
       setupResizeHandler();
     } catch (err) {
       console.error("[driver-panel] failed to load:", err);
-      throw err;
+      _container.innerHTML = `
+        <div class="dp-error">
+          <p>Couldn't load driver data. Please try again.</p>
+          <button id="dp-retry-btn" class="dp-profile-back">Retry</button>
+        </div>
+      `;
+      const retryBtn = _container.querySelector("#dp-retry-btn");
+      if (retryBtn) {
+        retryBtn.addEventListener("click", () => loadDriverPanel(containerId, { year, round }));
+      }
     }
   }
 
@@ -198,7 +212,7 @@
         _viewMode = "list";
         _resultsExpanded = false;
         _roundsFilter = "all";
-        render();
+        renderWithTransition();
         _container.scrollIntoView({ behavior: "smooth", block: "start" });
       });
     });
@@ -207,7 +221,7 @@
     if (heroTrigger) {
       heroTrigger.addEventListener("click", () => {
         _viewMode = "profile";
-        render();
+        renderWithTransition();
         _container.scrollIntoView({ behavior: "smooth", block: "start" });
       });
     }
@@ -216,7 +230,7 @@
     if (backBtn) {
       backBtn.addEventListener("click", () => {
         _viewMode = "list";
-        render();
+        renderWithTransition();
       });
     }
 
@@ -227,7 +241,7 @@
       teammateSwitch.addEventListener("click", () => {
         _selectedCode = teammateSwitch.dataset.teammateCode;
         _resultsExpanded = false;
-        render();
+        renderWithTransition();
         _container.scrollIntoView({ behavior: "smooth", block: "start" });
       });
     }
@@ -240,7 +254,6 @@
       });
     }
 
-
     const carousel = _container.querySelector("#dp-carousel");
     const leftBtn = _container.querySelector("#dp-scroll-left");
     const rightBtn = _container.querySelector("#dp-scroll-right");
@@ -249,13 +262,15 @@
       rightBtn.addEventListener("click", () => carousel.scrollBy({ left: 280, behavior: "smooth" }));
     }
 
+    animateStatCounters(_container);
+    animateH2HBars(_container);
+
     if (_viewMode === "profile") {
       const selected = _drivers.find(d => d.code === _selectedCode) || _drivers[0];
       if (selected) {
         drawCharts(selected);
-        console.log("selected driver object:", selected);
-        if (typeof loadTrackMap === "function") {
-          loadTrackMap(2026, "British Grand Prix", "R", selected.code, "track-map-container");
+        if (typeof loadTrackMap === "function" && _currentYear) {
+          loadTrackMap(_currentYear, _currentEventName || "British Grand Prix", "R", selected.code, "track-map-container");
         }
       }
     }
@@ -272,9 +287,8 @@
         // if (selected) drawCharts(selected);
         if (selected) {
           drawCharts(selected);
-          console.log("selected driver object:", selected);
-          if (typeof loadTrackMap === "function") {
-            loadTrackMap(2026, "British Grand Prix", "R", selected.code, "track-map-container");
+          if (typeof loadTrackMap === "function" && _currentYear) {
+            loadTrackMap(_currentYear, _currentEventName || "British Grand Prix", "R", selected.code, "track-map-container");
           }
         }
       });
@@ -416,49 +430,6 @@
     `;
   }
 
-  function raceResultsTableHTML(d) {
-    const history = [...(d.history || [])].sort((a, b) => b.round - a.round);
-    if (!history.length) return "";
-    const color = d.color || "#888";
-    return `
-      <div class="dp-desc-box" style="margin-top:16px;">
-        <div class="dp-desc-header">
-          <div class="dp-desc-bar" style="background:${color};"></div>
-          <h2>Race Results</h2>
-        </div>
-        <div class="dp-table-wrap">
-          <table class="dp-results-table">
-            <thead>
-              <tr>
-                <th>Rnd</th>
-                <th>Race</th>
-                <th>Grid</th>
-                <th>Finish</th>
-                <th>Pts</th>
-                <th>Total</th>
-              </tr>
-            </thead>
-            <tbody>
-              ${history.map(h => {
-                const tier = formTierFor(h);
-                return `
-                  <tr class="dp-results-row dp-results-row-${tier.tier}">
-                    <td class="dp-results-round">${h.round}</td>
-                    <td class="dp-results-race">${h.event_name || `Round ${h.round}`}</td>
-                    <td class="dp-results-grid">${h.quali_position != null ? `P${h.quali_position}` : "-"}</td>
-                    <td class="dp-results-finish" style="color:${tier.color};">${tier.label}</td>
-                    <td class="dp-results-pts">${h.points ?? 0}</td>
-                    <td class="dp-results-total" style="color:${color};">${h.cumulative_points ?? "-"}</td>
-                  </tr>
-                `;
-              }).join("")}
-            </tbody>
-          </table>
-        </div>
-      </div>
-    `;
-  }
-
   function findTeammate(d) {
     if (!d.team) return null;
     return _drivers.find(x => x.code !== d.code && x.team === d.team) || null;
@@ -508,11 +479,11 @@
             <div class="dp-h2h-row">
               <span class="dp-h2h-value dp-h2h-value-left ${aBetter ? "dp-h2h-value-lead" : ""}" style="color:${aBetter ? color : "#aaa"};">${r.a}</span>
               <div class="dp-h2h-bartrack dp-h2h-bartrack-left">
-                <div class="dp-h2h-bar" style="width:${aPct}%; background:${color};"></div>
+                <div class="dp-h2h-bar" style="width:0%; background:${color};" data-target-width="${aPct}"></div>
               </div>
               <span class="dp-h2h-label">${r.label}</span>
               <div class="dp-h2h-bartrack dp-h2h-bartrack-right">
-                <div class="dp-h2h-bar" style="width:${bPct}%; background:${tColor};"></div>
+                <div class="dp-h2h-bar" style="width:0%; background:${tColor};" data-target-width="${bPct}"></div>
               </div>
               <span class="dp-h2h-value dp-h2h-value-right ${bBetter ? "dp-h2h-value-lead" : ""}" style="color:${bBetter ? tColor : "#aaa"};">${r.b}</span>
             </div>
@@ -752,14 +723,44 @@
     const avgFinish = d.avg_finish;
     const wins = d.wins || 0;
     const points = d.points || 0;
+    const history = d.history || [];
+    const racesEntered = history.length;
 
-    if (poles >= 3) strengths.push("Strong Qualifier");
-    if (podiums >= 5) strengths.push("Consistent Podium Finisher");
-    if (fastestLaps >= 3) strengths.push("Race Pace Specialist");
-    if (avgFinish != null && avgFinish <= 5) strengths.push("Reliable Top Finisher");
-    if (wins >= 3) strengths.push("Race Winner");
-    if (points >= 150) strengths.push("Championship Contender");
     if (poles >= 5 && wins >= 5) strengths.push("Dominant Performer");
+    if (wins >= 2) strengths.push("Race Winner");
+    if (points >= 100) strengths.push("Championship Contender");
+    if (podiums >= 3) strengths.push("Consistent Podium Finisher");
+    if (poles >= 2) strengths.push("Strong Qualifier");
+    if (fastestLaps >= 2) strengths.push("Race Pace Specialist");
+    if (avgFinish != null && avgFinish <= 6) strengths.push("Reliable Top Finisher");
+
+    if (points >= 20) strengths.push("Points Scorer");
+    else if (points >= 5) strengths.push("Occasional Points Scorer");
+
+    if (poles >= 1 || podiums >= 1 || fastestLaps >= 1) strengths.push("Occasional Frontrunner");
+
+    if (avgFinish != null && avgFinish <= 10) strengths.push("Consistent Racer");
+
+    const dnfCount = history.filter(h => h.position == null).length;
+    if (racesEntered >= 5 && dnfCount === 0) strengths.push("Finishes Every Race");
+
+    const gapSamples = history
+      .filter(h => h.position != null && h.quali_position != null)
+      .map(h => h.quali_position - h.position);
+    if (gapSamples.length >= 3) {
+      const avgGap = gapSamples.reduce((a, b) => a + b, 0) / gapSamples.length;
+      if (avgGap >= 1.5) strengths.push("Race Day Gains");
+    }
+
+    if (racesEntered >= 6) {
+      const recent = history.slice(-3);
+      const recentAvg = recent.reduce((sum, h) => sum + (h.points || 0), 0) / recent.length;
+      const seasonAvg = points / racesEntered;
+      if (recentAvg > 0 && recentAvg > seasonAvg * 1.5) strengths.push("Improving Form");
+    }
+
+    if (strengths.length === 0 && points > 0) strengths.push("Building Momentum");
+    if (strengths.length === 0 && racesEntered > 0) strengths.push("Developing Talent");
 
     return strengths;
   }
@@ -956,9 +957,10 @@
   }
 
   function statCardHTML(label, value, color, large = false) {
+    const isNumeric = typeof value === "number" && !Number.isNaN(value);
     return `
       <div class="dp-stat-card" style="border-color:${color}20; background:${color}08;">
-        <p class="dp-stat-value ${large ? "dp-stat-large" : ""}" style="color:${color};">${value}</p>
+        <p class="dp-stat-value ${large ? "dp-stat-large" : ""}" style="color:${color};" ${isNumeric ? `data-count-target="${value}"` : ""}>${isNumeric ? 0 : value}</p>
         <p class="dp-stat-label">${label}</p>
       </div>
     `;
@@ -1230,6 +1232,77 @@
       seriesA: { key: "position", label: "Race" },
       seriesB: { key: "quali_position", label: "Quali" },
     });
+  }
+
+  // ---------- Animation helpers ----------
+
+  function renderWithTransition(filterText = "") {
+    if (!_container) { render(filterText); return; }
+    _container.classList.add("dp-view-out");
+    window.setTimeout(() => {
+      render(filterText);
+      _container.classList.remove("dp-view-out");
+      _container.classList.add("dp-view-in");
+      window.setTimeout(() => {
+        _container.classList.remove("dp-view-in");
+      }, 420);
+    }, 180);
+  }
+
+  function animateStatCounters(root) {
+    const els = root.querySelectorAll(".dp-stat-value[data-count-target]");
+    els.forEach(el => {
+      const target = parseFloat(el.dataset.countTarget);
+      if (Number.isNaN(target)) return;
+      const isDecimal = String(el.dataset.countTarget).includes(".");
+      const duration = 900;
+      const startTime = performance.now();
+      function tick(now) {
+        const progress = Math.min((now - startTime) / duration, 1);
+        const eased = 1 - Math.pow(1 - progress, 3);
+        const value = target * eased;
+        el.textContent = isDecimal ? value.toFixed(1) : Math.round(value);
+        if (progress < 1) {
+          requestAnimationFrame(tick);
+        } else {
+          el.textContent = isDecimal ? target.toFixed(1) : target;
+        }
+      }
+      requestAnimationFrame(tick);
+    });
+  }
+
+  function animateH2HBars(root) {
+    const bars = root.querySelectorAll(".dp-h2h-bar[data-target-width]");
+    bars.forEach(bar => {
+      const target = bar.dataset.targetWidth;
+      bar.style.width = "0%";
+      requestAnimationFrame(() => {
+        requestAnimationFrame(() => {
+          bar.style.width = target + "%";
+        });
+      });
+    });
+  }
+
+  function skeletonHTML() {
+    return `
+      <div class="dp-skeleton-wrap">
+        <div class="dp-skeleton dp-skeleton-hero"></div>
+        <div class="dp-skeleton-row">
+          <div class="dp-skeleton dp-skeleton-card"></div>
+          <div class="dp-skeleton dp-skeleton-card"></div>
+          <div class="dp-skeleton dp-skeleton-card"></div>
+          <div class="dp-skeleton dp-skeleton-card"></div>
+          <div class="dp-skeleton dp-skeleton-card"></div>
+        </div>
+        <div class="dp-skeleton-row">
+          <div class="dp-skeleton dp-skeleton-row-card"></div>
+          <div class="dp-skeleton dp-skeleton-row-card"></div>
+          <div class="dp-skeleton dp-skeleton-row-card"></div>
+        </div>
+      </div>
+    `;
   }
 
   // Expose globally — app.js calls window.loadDriverPanel(...)

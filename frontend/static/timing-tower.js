@@ -80,6 +80,8 @@ function rowHtml(row, prevRow, bestLapDisplay) {
   const dotColor = row.team_color || "#888";
   const isLeader = row.position === 1;
   const isOut = row.retired || row.stopped || row.knocked_out;
+  const isLapped = !isOut && !!row.lapped;
+  const statusAttr = isOut ? "out" : isLapped ? "lapped" : "active";
   const changed = prevRow && (prevRow.position !== row.position || prevRow.last_lap !== row.last_lap);
 
   const tyreHtml = row.pit_status
@@ -89,7 +91,7 @@ function rowHtml(row, prevRow, bestLapDisplay) {
   return `
     <div class="tt-row ${isLeader ? "tt-leader" : ""} ${changed ? "tt-flash" : ""}"
          data-driver-code="${row.driver_code}"
-         data-status="${isOut ? "out" : "active"}"
+         data-status="${statusAttr}"
          data-favorite="${row.is_favorite ? "true" : "false"}"
          style="--row-team-color:${dotColor}; background: linear-gradient(90deg, transparent 85%, ${dotColor}22 100%);"
          ondblclick="window.dispatchEvent(new CustomEvent('driver-pin', {detail:'${row.driver_code}'}))">
@@ -175,8 +177,38 @@ function average(arr) {
  * more than once on the page (e.g. home page + Telemetry tab) without
  * ID collisions.
  */
+// --- Minisector cache: lets renderRows() re-insert blocks synchronously
+// right after a table rebuild, instead of waiting for the next
+// injectMinisectorBreakdown() poll — closes the "come/go" flicker gap.
+const _minisectorCache = {}; // containerId -> driverMap
+
+function _reinsertMinisectorBlocks(containerId) {
+  const container = document.getElementById(containerId);
+  if (!container) return;
+  // Empty object (not undefined) when nothing has been fetched yet, so
+  // every driver falls through to the placeholder branch below instead
+  // of the block being skipped entirely on first load.
+  const driverMap = _minisectorCache[containerId] || {};
+
+  const rows = container.querySelectorAll(".tt-row[data-driver-code]");
+  rows.forEach((row) => {
+    const code = row.getAttribute("data-driver-code");
+    const driverData = driverMap[code];
+    const html = driverData ? _mstBlockHtml(driverData) : _mstBlockPlaceholderHtml(code);
+
+    const existing = container.querySelector(`.mst-block[data-mst-for="${code}"]`);
+    if (existing) {
+      existing.outerHTML = html;
+    } else {
+      row.insertAdjacentHTML("afterend", html);
+    }
+  });
+}
+
 function createTimingTower(ids) {
   let previousRows = [];
+  let lastLeaderGap = null; // tracks P2's gap-to-leader across polls, for the trend indicator
+  let gapHistory = []; // last N gap-to-leader values, for the sparkline
   let currentRawRows = [];
   let bestLaps = {}; // driver_code -> { seconds, display }
   let visibleCount = 10; // Default to top 10 drivers only
@@ -194,6 +226,13 @@ function createTimingTower(ids) {
   function renderStatus(message) {
     const root = document.getElementById(ids.list);
     if (!root) return;
+    // First load specifically: show skeleton rows instead of just text,
+    // so the panel has visible structure instead of looking blank.
+    if (/^Loading/i.test(message)) {
+      const skeletonRows = Array.from({ length: 8 }).map(() => `<div class="tt-row tt-skeleton-row"><span class="tt-skeleton-bar" style="width:16px"></span><span class="tt-skeleton-bar" style="width:70%"></span><span class="tt-skeleton-bar" style="width:24px"></span><span class="tt-skeleton-bar" style="width:40px"></span><span class="tt-skeleton-bar" style="width:36px"></span><span class="tt-skeleton-bar" style="width:44px"></span><span class="tt-skeleton-bar" style="width:44px"></span><span class="tt-skeleton-bar" style="width:44px"></span><span class="tt-skeleton-bar" style="width:20px"></span><span class="tt-skeleton-bar" style="width:20px"></span><span class="tt-skeleton-bar" style="width:20px"></span></div>`).join("");
+      root.innerHTML = tableHeaderHtml() + skeletonRows;
+      return;
+    }
     root.innerHTML = `<div class="tt-status-msg">${message}</div>`;
   }
 
@@ -245,6 +284,9 @@ function createTimingTower(ids) {
     root.querySelectorAll(".tt-flash").forEach((el) => {
       el.addEventListener("animationend", () => el.classList.remove("tt-flash"), { once: true });
     });
+    if (ids.showSessionHeader) {
+      _reinsertMinisectorBlocks(ids.list); // Telemetry tab only — Home page never fetches minisectors
+    }
   }
 
   function renderLeaderGauge(rows) {
@@ -255,13 +297,45 @@ function createTimingTower(ids) {
       el.innerHTML = "";
       return;
     }
+
     const p1 = rows[0];
     const p2 = rows[1];
+    const p3 = rows[2];
 
     const gapSeconds = p2 && p2.gap ? parseFloat(String(p2.gap).replace(/[^0-9.]/g, "")) : null;
     const pct = gapSeconds != null && !isNaN(gapSeconds) ? Math.max(0.03, Math.min(gapSeconds / 30, 1)) : 0.03;
     const arcColor = pct < 0.15 ? "#e10600" : pct < 0.5 ? "#ffb020" : "#3ddc84";
     const degrees = Math.round(pct * 360);
+
+    let trendHtml = "";
+    if (gapSeconds != null && !isNaN(gapSeconds)) {
+      if (lastLeaderGap != null) {
+        const delta = gapSeconds - lastLeaderGap;
+        if (Math.abs(delta) >= 0.05) {
+          const closing = delta < 0;
+          trendHtml = `<span class="rl-trend ${closing ? "rl-trend-closing" : "rl-trend-opening"}">${closing ? "\u25b2 CLOSING" : "\u25bc PULLING AWAY"}</span>`;
+        } else {
+          trendHtml = `<span class="rl-trend rl-trend-steady">STEADY</span>`;
+        }
+      }
+      lastLeaderGap = gapSeconds;
+
+      gapHistory.push(gapSeconds);
+      if (gapHistory.length > 10) gapHistory.shift();
+    }
+
+    const sparklineHtml = _gapSparklineHtml(gapHistory);
+
+    function podiumRowHtml(row, posLabel) {
+      if (!row) return "";
+      return `
+        <div class="rl-podium-row">
+          <span class="rl-pos-tag" style="color:${row.team_color || "#888"}">${posLabel}</span>
+          <span class="rl-podium-code">${row.driver_code || "-"}</span>
+          <span class="rl-podium-gap">${posLabel === "P1" ? (row.last_lap || "-") : (row.gap || "")}</span>
+        </div>
+      `;
+    }
 
     el.innerHTML = `
       <div class="rl-gauge">
@@ -272,15 +346,13 @@ function createTimingTower(ids) {
             <span class="rl-pos-tag" style="color:${p1.team_color || "#e10600"}">P1</span> ${p1.driver_code || "-"}
           </div>
           <div class="rl-time">${p1.last_lap || "-"}</div>
-          ${
-            p2
-              ? `<div class="rl-p2">
-                   <span class="rl-pos-tag rl-pos-tag--p2" style="color:${p2.team_color || "#888"}">P2</span> ${p2.driver_code || "-"}
-                   <span class="rl-gap">${p2.gap || ""}</span>
-                 </div>`
-              : ""
-          }
+          ${trendHtml}
         </div>
+      </div>
+      ${sparklineHtml}
+      <div class="rl-podium">
+        ${podiumRowHtml(p2, "P2")}
+        ${podiumRowHtml(p3, "P3")}
       </div>
     `;
   }
@@ -317,9 +389,16 @@ function createTimingTower(ids) {
     `;
   }
 
-  async function load(year, round, sessionType) {
+  async function load(year, round, sessionType, opts) {
     sessionType = sessionType || "R";
-    renderStatus("Loading timing tower…");
+    opts = opts || {};
+    // Only show the loading state on the very first load, when the
+    // table is genuinely empty. Background polls pass {silent: true}
+    // and swap data in place with no flash.
+    const isFirstLoad = previousRows.length === 0;
+    if (!opts.silent && isFirstLoad) {
+      renderStatus("Loading timing tower…");
+    }
     try {
       const res = await fetch(`/api/timing-tower?year=${year}&round=${round}&session_type=${sessionType}`);
       const data = await res.json();
@@ -334,7 +413,11 @@ function createTimingTower(ids) {
       }
       return data;
     } catch (err) {
-      renderStatus(`Couldn't load timing tower: ${err.message}`);
+      // Keep showing the last good snapshot if a background poll fails —
+      // only blank the table if we never had data in the first place.
+      if (previousRows.length === 0) {
+        renderStatus(`Couldn't load timing tower: ${err.message}`);
+      }
       console.error("TimingTower.load failed", err);
     }
   }
@@ -466,7 +549,7 @@ document.addEventListener("DOMContentLoaded", async function () {
       RaceControl.load(featured.year, featured.round, "R");
     }
     if (featured) {
-      setInterval(() => TimingTower.load(featured.year, featured.round, "R"), AUTO_REFRESH_MS);
+      setInterval(() => TimingTower.load(featured.year, featured.round, "R", { silent: true }), AUTO_REFRESH_MS);
     }
   }
 
@@ -480,7 +563,7 @@ document.addEventListener("DOMContentLoaded", async function () {
     }
     if (featured) {
       await injectMinisectorBreakdown("telLiveTimingList", featured.year, featured.round, "R");
-      setInterval(() => TelemetryTimingTower.load(featured.year, featured.round, "R"), AUTO_REFRESH_MS);
+      setInterval(() => TelemetryTimingTower.load(featured.year, featured.round, "R", { silent: true }), AUTO_REFRESH_MS);
       setInterval(() => TelemetryRaceControl.load(featured.year, featured.round, "R"), AUTO_REFRESH_MS);
       setInterval(() => injectMinisectorBreakdown("telLiveTimingList", featured.year, featured.round, "R"), AUTO_REFRESH_MS);
     }
@@ -575,9 +658,23 @@ function createTyreStrategy(ids) {
     return undefined;
   }
 
+  function summaryHtml(totalLaps, totalPitStops, driverCount) {
+    const avgStops = driverCount ? (totalPitStops / driverCount).toFixed(1) : "-";
+    return `
+      <div class="ts-summary">
+        <span class="ts-summary-item"><span class="ts-summary-value">${totalLaps}</span><span class="ts-summary-label">Total Laps</span></span>
+        <span class="ts-summary-item"><span class="ts-summary-value">${totalPitStops}</span><span class="ts-summary-label">Total Pit Stops</span></span>
+        <span class="ts-summary-item"><span class="ts-summary-value">${avgStops}</span><span class="ts-summary-label">Avg / Driver</span></span>
+      </div>
+    `;
+  }
+
   function rowHtml(driver, totalLaps) {
     const code = pick(driver, ["driver_code", "code", "Driver", "abbreviation", "driver"]) || "?";
     const stints = pick(driver, ["stints", "Stints", "tyre_stints"]) || [];
+    // Backend doesn't expose a pit_count field on this endpoint directly —
+    // number of stops = number of stints minus 1 (one fewer stop than stints).
+    const pitCount = stints.length > 0 ? stints.length - 1 : 0;
 
     const segments = stints
       .map((s) => {
@@ -585,9 +682,14 @@ function createTyreStrategy(ids) {
         const start = pick(s, ["start_lap", "StartLap", "start", "from"]);
         const end = pick(s, ["end_lap", "EndLap", "end", "to"]);
         if (start == null || end == null || !totalLaps) return "";
-        const widthPct = (Math.max(end - start, 1) / totalLaps) * 100;
+        const lapCount = Math.max(end - start, 1);
+        const widthPct = (lapCount / totalLaps) * 100;
         const cls = TYRE_BAR_CLASS[compound] || "ts-hard";
-        return `<div class="ts-segment ${cls}" style="width:${widthPct}%" data-tooltip="${compound} \u00b7 Laps ${start}-${end}"></div>`;
+        const letter = TYRE_LETTER[compound] || "?";
+        // Only show the letter label if the segment is wide enough to fit it
+        // legibly — short stints (a couple of laps) just show color.
+        const showLabel = widthPct >= 6;
+        return `<div class="ts-segment ${cls}" style="width:${widthPct}%" data-tooltip="${compound} · Laps ${start}-${end} (${lapCount}L)">${showLabel ? `<span class="ts-segment-label">${letter}</span>` : ""}</div>`;
       })
       .join("");
 
@@ -595,6 +697,7 @@ function createTyreStrategy(ids) {
       <div class="ts-row">
         <span class="ts-code">${code}</span>
         <div class="ts-bar">${segments || '<div class="ts-segment ts-empty" style="width:100%"></div>'}</div>
+        <span class="ts-pit-count">${pitCount} PIT${pitCount === 1 ? "" : "S"}</span>
       </div>
     `;
   }
@@ -609,17 +712,16 @@ function createTyreStrategy(ids) {
       const data = await res.json();
       if (!res.ok) throw new Error(data.detail || "Failed to load tyre strategy");
 
-      console.log("Tyre strategy raw response:", data);
-
       const drivers = pick(data, ["drivers", "Drivers"]) || [];
       const totalLaps = pick(data, ["total_laps", "TotalLaps"]);
+      const totalPitStops = pick(data, ["total_pit_stops", "TotalPitStops"]) ?? 0;
 
       if (!drivers.length || !totalLaps) {
-        renderStatus("No tyre strategy data — check console for the raw response shape.");
+        renderStatus("No tyre strategy data available for this session.");
         return;
       }
 
-      root.innerHTML = drivers.map((d) => rowHtml(d, totalLaps)).join("");
+      root.innerHTML = summaryHtml(totalLaps, totalPitStops, drivers.length) + drivers.map((d) => rowHtml(d, totalLaps)).join("");
     } catch (err) {
       renderStatus(`Couldn't load tyre strategy: ${err.message}`);
       console.error("TyreStrategy.load failed", err);
@@ -700,16 +802,38 @@ async function injectMinisectorBreakdown(containerId, year, round, sessionType) 
     const data = await res.json();
     if (!res.ok) throw new Error(data.detail || "Failed to load minisectors");
 
-    container.querySelectorAll(".mst-block").forEach((el) => el.remove());
-
-    (data.drivers || []).forEach((driverData) => {
-      const row = container.querySelector(`.tt-row[data-driver-code="${driverData.driver_code}"]`);
-      if (!row) return;
-      row.insertAdjacentHTML("afterend", _mstBlockHtml(driverData));
-    });
+    const driverMap = {};
+    (data.drivers || []).forEach((d) => { driverMap[d.driver_code] = d; });
+    _minisectorCache[containerId] = driverMap;
   } catch (err) {
     console.error("injectMinisectorBreakdown failed", err);
+    // Keep whatever was cached before — don't wipe out working data on a failed poll.
   }
+
+  _reinsertMinisectorBlocks(containerId);
+}
+
+// Dashed placeholder for a row with no computed minisector data yet
+// (or a driver the backend silently skipped — e.g. missing sector splits),
+// so every row keeps the same layout instead of some rows lacking the block.
+const MST_PLACEHOLDER_SEGMENTS = 7; // matches backend SEGMENTS_PER_SECTOR
+
+function _mstBlockPlaceholderHtml(code) {
+  const dashes = Array.from({ length: MST_PLACEHOLDER_SEGMENTS })
+    .map(() => `<span class="mst-dash mst-empty"></span>`)
+    .join("");
+  const line = `
+    <div class="mst-line">
+      <span class="mst-dashes">${dashes}</span>
+      <span class="mst-time">-</span>
+      <span class="mst-time mst-best">-</span>
+      <span class="mst-delta">-</span>
+    </div>`;
+  return `
+    <div class="mst-block" data-mst-for="${code}">
+      ${line}${line}${line}
+    </div>
+  `;
 }
 
 // --- Session header bar ---
@@ -773,7 +897,73 @@ function _daysUntil(dateStr, now) {
   return Math.max(0, Math.ceil(diffMs / (1000 * 60 * 60 * 24)));
 }
 
+function _startCountdownTicker(el, targetDate) {
+  if (el._countdownInterval) clearInterval(el._countdownInterval);
+
+  function tick() {
+    const diffMs = targetDate - new Date();
+    if (diffMs <= 0) {
+      el.textContent = "LIVE NOW";
+      clearInterval(el._countdownInterval);
+      return;
+    }
+    const totalMinutes = Math.floor(diffMs / 60000);
+    const days = Math.floor(totalMinutes / 1440);
+    const hours = Math.floor((totalMinutes % 1440) / 60);
+    const minutes = totalMinutes % 60;
+
+    const parts = [];
+    if (days > 0) parts.push(`${days} DAY${days === 1 ? "" : "S"}`);
+    parts.push(`${hours}H`);
+    parts.push(`${minutes}M`);
+    el.textContent = parts.join(" ");
+  }
+
+  tick();
+  // Display precision is minutes, so a per-minute tick is enough — no
+  // need to re-render every second for a value that only changes each minute.
+  el._countdownInterval = setInterval(tick, 60000);
+}
+
 async function _renderNextEventBadge(year) {
+  const el = document.getElementById("telSessionHeader");
+  if (!el) return;
+
+  function pick(obj, keys) {
+    for (const k of keys) {
+      if (obj[k] !== undefined && obj[k] !== null) return obj[k];
+    }
+    return undefined;
+  }
+
+  try {
+    const res = await fetch(`/api/next-session?year=${year}`);
+    const data = await res.json();
+    console.log("Next-session raw response:", data);
+
+    const dateRaw = pick(data, ["datetime_utc", "date_utc", "utc_date", "start_utc", "start_time", "DateUtc", "Date", "date"]);
+    const eventName = pick(data, ["event_name", "EventName"]) || pick(data, ["country", "Country"]) || "";
+    const sessionName = pick(data, ["session_name", "SessionName", "session_type", "SessionType"]) || "";
+
+    if (!dateRaw) throw new Error("No usable date field in /api/next-session response");
+    const targetDate = new Date(dateRaw);
+    if (isNaN(targetDate)) throw new Error("Unparseable date in /api/next-session response: " + dateRaw);
+
+    const badge = document.createElement("div");
+    badge.className = "tsh-next";
+    badge.innerHTML = `
+      <div class="tsh-next-label">Next: ${eventName}${sessionName ? " - " + sessionName : ""}</div>
+      <div class="tsh-next-countdown" id="telNextCountdown">--</div>
+    `;
+    el.appendChild(badge);
+    _startCountdownTicker(badge.querySelector("#telNextCountdown"), targetDate);
+  } catch (err) {
+    console.error("Live countdown failed, falling back to day-count:", err);
+    _renderNextEventBadgeFallback(year);
+  }
+}
+
+async function _renderNextEventBadgeFallback(year) {
   const el = document.getElementById("telSessionHeader");
   if (!el) return;
   try {
@@ -784,7 +974,6 @@ async function _renderNextEventBadge(year) {
     if (!next) return;
 
     const days = _daysUntil(next.date, now);
-    const flag = COUNTRY_FLAG[next.country] || "";
     const badge = document.createElement("div");
     badge.className = "tsh-next";
     badge.innerHTML = `
@@ -792,20 +981,19 @@ async function _renderNextEventBadge(year) {
       <div class="tsh-next-countdown">${days} DAY${days === 1 ? "" : "S"}</div>
     `;
     el.appendChild(badge);
-
-    const titleEl = el.querySelector(".tsh-event");
-    if (titleEl && flag && !titleEl.dataset.flagged) {
-      titleEl.dataset.flagged = "true";
-    }
   } catch (err) {
-    console.error("Next-event badge failed", err);
+    console.error("Next-event badge fallback failed", err);
   }
 }
 
 // --- Battle Cards + Gap Ladder ---
-function _gapSeconds(gapStr) {
+function _gapSeconds(row) {
+  // Key off position, not gap text — replay rows use the literal
+  // string "Leader" but the live SignalR feed sends an empty string
+  // for GapToLeader on the P1 row, which would otherwise get dropped.
+  if (row.position === 1) return 0;
+  const gapStr = row.gap;
   if (!gapStr) return null;
-  if (/^leader$/i.test(String(gapStr).trim())) return 0;
   const n = parseFloat(String(gapStr).replace(/[^0-9.\-]/g, ""));
   return isNaN(n) ? null : n;
 }
@@ -839,27 +1027,70 @@ function renderGapLadder(ids, rows) {
   if (!el) return;
 
   const list = (rows || [])
-    .map((r) => ({ r, g: _gapSeconds(r.gap) }))
+    .map((r) => ({ r, g: _gapSeconds(r) }))
     .filter((x) => x.g !== null)
     .slice(0, 16);
 
   if (list.length === 0) { el.innerHTML = ""; return; }
 
-  const H = 320;
+  const H = 340;
   const maxG = Math.log(1 + Math.max(...list.map((x) => x.g)));
 
-  const items = list.map(({ r, g }) => {
+  // Reference gridlines at round gap values, scaled with the same log
+  // curve as the dots, so you can actually judge distance instead of
+  // just relative ordering.
+  const gridValues = [0, 5, 10, 20, 30, 45, 60].filter((v) => v <= Math.max(...list.map((x) => x.g)) + 1 || v === 0);
+  const gridHtml = gridValues.map((v) => {
+    const t = maxG === 0 ? 0 : Math.log(1 + v) / maxG;
+    const y = 6 + t * (H - 24);
+    return `
+      <div class="ladder-gridline" style="top:${y}px;"></div>
+      <div class="ladder-gridlabel" style="top:${y}px;">${v === 0 ? "" : "+" + v + "s"}</div>
+    `;
+  }).join("");
+
+  const items = list.map(({ r, g }, i) => {
     const t = maxG === 0 ? 0 : Math.log(1 + g) / maxG;
     const y = 6 + t * (H - 24);
     const isLeader = g === 0;
+    const avatarSrc = DRIVER_IMAGE[r.driver_code] ? `/static/images/drivers/${DRIVER_IMAGE[r.driver_code]}` : null;
     return `
       <div class="ladder-item ${isLeader ? "tw-leader" : ""}" style="top:${y}px;">
         <div class="ladder-gap">${isLeader ? "" : "+" + g.toFixed(1)}</div>
+        <span class="ladder-rank">${i + 1}</span>
+        ${avatarSrc ? `<img class="ladder-avatar" src="${avatarSrc}" alt="" onerror="this.style.display='none'">` : ""}
         <div class="ladder-dot" style="--dot-color:${r.team_color || "#888"}"></div>
         <div class="ladder-code">${r.driver_code || "-"}</div>
       </div>`;
   }).join("");
 
   el.style.minHeight = H + "px";
-  el.innerHTML = `<div class="ladder-axis"></div>` + items;
+  el.innerHTML = `<div class="ladder-axis"></div>${gridHtml}${items}`;
+}
+
+// Small inline SVG sparkline showing the last N gap-to-leader values —
+// gives a quick visual read on whether the battle for the lead is
+// tightening or stretching out over time, not just the current instant.
+function _gapSparklineHtml(history) {
+  if (!history || history.length < 2) return "";
+
+  const W = 140, H = 28, PAD = 3;
+  const max = Math.max(...history);
+  const min = Math.min(...history);
+  const range = max - min || 1;
+
+  const points = history.map((v, i) => {
+    const x = PAD + (i / (history.length - 1)) * (W - PAD * 2);
+    const y = H - PAD - ((v - min) / range) * (H - PAD * 2);
+    return `${x.toFixed(1)},${y.toFixed(1)}`;
+  }).join(" ");
+
+  return `
+    <div class="rl-sparkline">
+      <svg viewBox="0 0 ${W} ${H}" width="${W}" height="${H}">
+        <polyline points="${points}" fill="none" stroke="#ffb020" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" />
+      </svg>
+      <span class="rl-sparkline-label">GAP TREND (last ${history.length})</span>
+    </div>
+  `;
 }

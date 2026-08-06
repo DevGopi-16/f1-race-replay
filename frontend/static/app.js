@@ -775,12 +775,9 @@ function tick(nowMs) {
         );
 
         if (state.playheadT >= totalT) {
-
             state.playing = false;
-
             playPauseIcon.src =
                 "/static/images/controls/play.png";
-
             playPauseIcon.alt = "Play";
         }
     }
