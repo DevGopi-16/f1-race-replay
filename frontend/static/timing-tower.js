@@ -80,6 +80,8 @@ function rowHtml(row, prevRow, bestLapDisplay) {
   const dotColor = row.team_color || "#888";
   const isLeader = row.position === 1;
   const isOut = row.retired || row.stopped || row.knocked_out;
+  const isLapped = !isOut && !!row.lapped;
+  const statusAttr = isOut ? "out" : isLapped ? "lapped" : "active";
   const changed = prevRow && (prevRow.position !== row.position || prevRow.last_lap !== row.last_lap);
 
   const tyreHtml = row.pit_status
@@ -89,7 +91,7 @@ function rowHtml(row, prevRow, bestLapDisplay) {
   return `
     <div class="tt-row ${isLeader ? "tt-leader" : ""} ${changed ? "tt-flash" : ""}"
          data-driver-code="${row.driver_code}"
-         data-status="${isOut ? "out" : "active"}"
+         data-status="${statusAttr}"
          data-favorite="${row.is_favorite ? "true" : "false"}"
          style="--row-team-color:${dotColor}; background: linear-gradient(90deg, transparent 85%, ${dotColor}22 100%);"
          ondblclick="window.dispatchEvent(new CustomEvent('driver-pin', {detail:'${row.driver_code}'}))">
@@ -175,6 +177,34 @@ function average(arr) {
  * more than once on the page (e.g. home page + Telemetry tab) without
  * ID collisions.
  */
+// --- Minisector cache: lets renderRows() re-insert blocks synchronously
+// right after a table rebuild, instead of waiting for the next
+// injectMinisectorBreakdown() poll — closes the "come/go" flicker gap.
+const _minisectorCache = {}; // containerId -> driverMap
+
+function _reinsertMinisectorBlocks(containerId) {
+  const container = document.getElementById(containerId);
+  if (!container) return;
+  // Empty object (not undefined) when nothing has been fetched yet, so
+  // every driver falls through to the placeholder branch below instead
+  // of the block being skipped entirely on first load.
+  const driverMap = _minisectorCache[containerId] || {};
+
+  const rows = container.querySelectorAll(".tt-row[data-driver-code]");
+  rows.forEach((row) => {
+    const code = row.getAttribute("data-driver-code");
+    const driverData = driverMap[code];
+    const html = driverData ? _mstBlockHtml(driverData) : _mstBlockPlaceholderHtml(code);
+
+    const existing = container.querySelector(`.mst-block[data-mst-for="${code}"]`);
+    if (existing) {
+      existing.outerHTML = html;
+    } else {
+      row.insertAdjacentHTML("afterend", html);
+    }
+  });
+}
+
 function createTimingTower(ids) {
   let previousRows = [];
   let currentRawRows = [];
@@ -245,6 +275,9 @@ function createTimingTower(ids) {
     root.querySelectorAll(".tt-flash").forEach((el) => {
       el.addEventListener("animationend", () => el.classList.remove("tt-flash"), { once: true });
     });
+    if (ids.showSessionHeader) {
+      _reinsertMinisectorBlocks(ids.list); // Telemetry tab only — Home page never fetches minisectors
+    }
   }
 
   function renderLeaderGauge(rows) {
@@ -317,9 +350,16 @@ function createTimingTower(ids) {
     `;
   }
 
-  async function load(year, round, sessionType) {
+  async function load(year, round, sessionType, opts) {
     sessionType = sessionType || "R";
-    renderStatus("Loading timing tower…");
+    opts = opts || {};
+    // Only show the loading state on the very first load, when the
+    // table is genuinely empty. Background polls pass {silent: true}
+    // and swap data in place with no flash.
+    const isFirstLoad = previousRows.length === 0;
+    if (!opts.silent && isFirstLoad) {
+      renderStatus("Loading timing tower…");
+    }
     try {
       const res = await fetch(`/api/timing-tower?year=${year}&round=${round}&session_type=${sessionType}`);
       const data = await res.json();
@@ -334,7 +374,11 @@ function createTimingTower(ids) {
       }
       return data;
     } catch (err) {
-      renderStatus(`Couldn't load timing tower: ${err.message}`);
+      // Keep showing the last good snapshot if a background poll fails —
+      // only blank the table if we never had data in the first place.
+      if (previousRows.length === 0) {
+        renderStatus(`Couldn't load timing tower: ${err.message}`);
+      }
       console.error("TimingTower.load failed", err);
     }
   }
@@ -466,7 +510,7 @@ document.addEventListener("DOMContentLoaded", async function () {
       RaceControl.load(featured.year, featured.round, "R");
     }
     if (featured) {
-      setInterval(() => TimingTower.load(featured.year, featured.round, "R"), AUTO_REFRESH_MS);
+      setInterval(() => TimingTower.load(featured.year, featured.round, "R", { silent: true }), AUTO_REFRESH_MS);
     }
   }
 
@@ -480,7 +524,7 @@ document.addEventListener("DOMContentLoaded", async function () {
     }
     if (featured) {
       await injectMinisectorBreakdown("telLiveTimingList", featured.year, featured.round, "R");
-      setInterval(() => TelemetryTimingTower.load(featured.year, featured.round, "R"), AUTO_REFRESH_MS);
+      setInterval(() => TelemetryTimingTower.load(featured.year, featured.round, "R", { silent: true }), AUTO_REFRESH_MS);
       setInterval(() => TelemetryRaceControl.load(featured.year, featured.round, "R"), AUTO_REFRESH_MS);
       setInterval(() => injectMinisectorBreakdown("telLiveTimingList", featured.year, featured.round, "R"), AUTO_REFRESH_MS);
     }
@@ -700,16 +744,38 @@ async function injectMinisectorBreakdown(containerId, year, round, sessionType) 
     const data = await res.json();
     if (!res.ok) throw new Error(data.detail || "Failed to load minisectors");
 
-    container.querySelectorAll(".mst-block").forEach((el) => el.remove());
-
-    (data.drivers || []).forEach((driverData) => {
-      const row = container.querySelector(`.tt-row[data-driver-code="${driverData.driver_code}"]`);
-      if (!row) return;
-      row.insertAdjacentHTML("afterend", _mstBlockHtml(driverData));
-    });
+    const driverMap = {};
+    (data.drivers || []).forEach((d) => { driverMap[d.driver_code] = d; });
+    _minisectorCache[containerId] = driverMap;
   } catch (err) {
     console.error("injectMinisectorBreakdown failed", err);
+    // Keep whatever was cached before — don't wipe out working data on a failed poll.
   }
+
+  _reinsertMinisectorBlocks(containerId);
+}
+
+// Dashed placeholder for a row with no computed minisector data yet
+// (or a driver the backend silently skipped — e.g. missing sector splits),
+// so every row keeps the same layout instead of some rows lacking the block.
+const MST_PLACEHOLDER_SEGMENTS = 7; // matches backend SEGMENTS_PER_SECTOR
+
+function _mstBlockPlaceholderHtml(code) {
+  const dashes = Array.from({ length: MST_PLACEHOLDER_SEGMENTS })
+    .map(() => `<span class="mst-dash mst-empty"></span>`)
+    .join("");
+  const line = `
+    <div class="mst-line">
+      <span class="mst-dashes">${dashes}</span>
+      <span class="mst-time">-</span>
+      <span class="mst-time mst-best">-</span>
+      <span class="mst-delta">-</span>
+    </div>`;
+  return `
+    <div class="mst-block" data-mst-for="${code}">
+      ${line}${line}${line}
+    </div>
+  `;
 }
 
 // --- Session header bar ---
@@ -803,9 +869,13 @@ async function _renderNextEventBadge(year) {
 }
 
 // --- Battle Cards + Gap Ladder ---
-function _gapSeconds(gapStr) {
+function _gapSeconds(row) {
+  // Key off position, not gap text — replay rows use the literal
+  // string "Leader" but the live SignalR feed sends an empty string
+  // for GapToLeader on the P1 row, which would otherwise get dropped.
+  if (row.position === 1) return 0;
+  const gapStr = row.gap;
   if (!gapStr) return null;
-  if (/^leader$/i.test(String(gapStr).trim())) return 0;
   const n = parseFloat(String(gapStr).replace(/[^0-9.\-]/g, ""));
   return isNaN(n) ? null : n;
 }
@@ -839,7 +909,7 @@ function renderGapLadder(ids, rows) {
   if (!el) return;
 
   const list = (rows || [])
-    .map((r) => ({ r, g: _gapSeconds(r.gap) }))
+    .map((r) => ({ r, g: _gapSeconds(r) }))
     .filter((x) => x.g !== null)
     .slice(0, 16);
 

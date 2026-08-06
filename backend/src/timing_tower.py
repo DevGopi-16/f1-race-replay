@@ -7,8 +7,19 @@ cached FastF1 data) — not a real-time feed.
 """
 
 import math
+import re
 
 import pandas as pd
+
+_LAPPED_RE = re.compile(r"\+\s*\d+\s*Laps?", re.IGNORECASE)
+
+
+def _is_lapped(status):
+    """True for classified-but-a-lap-down drivers (FastF1 Status like
+    "+1 Lap" / "+2 Laps"), distinct from retired/stopped/DNF."""
+    if not status or (isinstance(status, float) and pd.isna(status)):
+        return False
+    return bool(_LAPPED_RE.search(str(status)))
 
 
 def _fmt_gap(td):
@@ -89,6 +100,19 @@ def _position_change(grid_position, current_position):
         return int(grid_position) - int(current_position)
     except (TypeError, ValueError):
         return None
+
+
+def _out_flags(status):
+    """Derive the boolean out-flags the frontend's rowHtml() checks
+    (row.retired / row.stopped / row.knocked_out) from FastF1's raw
+    Status string, e.g. "Finished", "Retired", "+1 Lap", "DNF", "Did not start"."""
+    if not status or (isinstance(status, float) and pd.isna(status)):
+        return {"retired": False, "stopped": False, "knocked_out": False}
+    s = str(status).strip().lower()
+    retired = "retired" in s or "dnf" in s or "did not" in s
+    stopped = "stopped" in s
+    knocked_out = "not classified" in s or "excluded" in s or "disqualified" in s
+    return {"retired": retired, "stopped": stopped, "knocked_out": knocked_out}
 
 
 def build_timing_tower(session):
@@ -190,6 +214,8 @@ def build_timing_tower(session):
                 "stint_history": _stint_history(driver_laps),
                 "pit_status": pit_status,
                 "status": res.get("Status"),
+                **_out_flags(res.get("Status")),
+                "lapped": _is_lapped(res.get("Status")),
             }
         )
 
