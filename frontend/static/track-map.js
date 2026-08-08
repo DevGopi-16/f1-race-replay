@@ -1,5 +1,5 @@
-/* track-map.js — 3D animated track map, powered by Three.js
-   Loaded dynamically from a CDN at runtime; no build step required. */
+/* track-map.js — minimal 3D animated track map, sector-colored, powered by
+   Three.js. Loaded dynamically from a CDN at runtime; no build step needed. */
 
 let _threeLoadPromise = null;
 function loadThree() {
@@ -15,9 +15,6 @@ function loadThree() {
   return _threeLoadPromise;
 }
 
-// One active render loop per container — switching drivers/views cancels
-// the previous loop and disposes its WebGL context instead of stacking
-// multiple contexts (browsers cap how many can exist at once).
 const _activeLoops = new Map();
 
 function disposeObject3D(obj) {
@@ -27,7 +24,6 @@ function disposeObject3D(obj) {
       const mats = Array.isArray(node.material) ? node.material : [node.material];
       mats.forEach((m) => {
         if (m.map) m.map.dispose();
-        if (m.emissiveMap) m.emissiveMap.dispose();
         m.dispose();
       });
     }
@@ -79,43 +75,51 @@ async function loadTrackMap(year, gp, sessionType, driverCode, containerId) {
     return;
   }
 
-  // Container may have been swapped out (user navigated away) while
-  // three.js was loading over the network — bail out if so.
   if (!document.getElementById(containerId)) return;
 
   renderTrackMap3D(THREE, data, container, containerId);
 }
 
-function speedToColor(speed, min, max) {
-  const t = Math.max(0, Math.min(1, (speed - min) / (max - min || 1)));
-  const r = Math.round(30 + t * 20);
-  const g = Math.round(60 + t * 180);
-  const b = Math.round(120 + t * 60);
-  return { r, g, b };
+// Fixed-resolution resample so geometry complexity — and therefore frame
+// smoothness — never depends on how many raw telemetry points the lap has.
+function resamplePoints(THREE, rawPoints, count) {
+  const verts = rawPoints.map((p) => new THREE.Vector3(p.x - 500, 0, p.y - 500));
+  const curve = new THREE.CatmullRomCurve3(verts, true, "catmullrom", 0.2);
+  const spaced = curve.getSpacedPoints(count);
+  return { curve, spacedPoints: spaced };
 }
 
-function buildSpeedTexture(THREE, points, minSpeed, maxSpeed) {
-  const width = Math.max(points.length, 2);
+// Solid three-band texture (red / blue / yellow) mapped along the tube's
+// length via its U coordinate — gives clean sector-colored bands with no
+// text, no gradient blending between sectors.
+const SECTOR_COLORS = ["#ff3b3b", "#3b82ff", "#ffd23b"];
+
+function buildSectorTexture(THREE, resolution) {
+  const width = Math.max(resolution, 3);
   const canvas = document.createElement("canvas");
   canvas.width = width;
   canvas.height = 1;
   const ctx = canvas.getContext("2d");
-  for (let i = 0; i < width; i++) {
-    const p = points[Math.min(i, points.length - 1)];
-    const c = speedToColor(p.speed, minSpeed, maxSpeed);
-    ctx.fillStyle = `rgb(${c.r}, ${c.g}, ${c.b})`;
-    ctx.fillRect(i, 0, 1, 1);
-  }
+  const third = width / 3;
+  ctx.fillStyle = SECTOR_COLORS[0];
+  ctx.fillRect(0, 0, Math.ceil(third), 1);
+  ctx.fillStyle = SECTOR_COLORS[1];
+  ctx.fillRect(Math.floor(third), 0, Math.ceil(third), 1);
+  ctx.fillStyle = SECTOR_COLORS[2];
+  ctx.fillRect(Math.floor(third * 2), 0, width - Math.floor(third * 2), 1);
+
   const texture = new THREE.CanvasTexture(canvas);
   texture.wrapS = THREE.ClampToEdgeWrapping;
-  texture.wrapT = THREE.ClampToEdgeWrapping;
-  texture.minFilter = THREE.LinearFilter;
+  texture.wrapT = THREE.RepeatWrapping;
+  texture.minFilter = THREE.NearestFilter;
+  texture.magFilter = THREE.NearestFilter;
   texture.needsUpdate = true;
   return texture;
 }
 
 function renderTrackMap3D(THREE, data, container, containerId) {
-  const { points, max_speed, min_speed, lap_time } = data;
+  const { lap_time } = data;
+  const points = data.points;
 
   container.innerHTML = `
     <div class="track-map-header">
@@ -124,9 +128,9 @@ function renderTrackMap3D(THREE, data, container, containerId) {
     </div>
     <div class="track-map-canvas-wrap"></div>
     <div class="track-map-legend">
-      <span>${min_speed} km/h</span>
-      <div class="track-map-gradient"></div>
-      <span>${max_speed} km/h</span>
+      <span class="track-map-sector-dot" style="background:${SECTOR_COLORS[0]};"></span>
+      <span class="track-map-sector-dot" style="background:${SECTOR_COLORS[1]};"></span>
+      <span class="track-map-sector-dot" style="background:${SECTOR_COLORS[2]};"></span>
     </div>
   `;
 
@@ -135,77 +139,77 @@ function renderTrackMap3D(THREE, data, container, containerId) {
   const height = canvasWrap.clientHeight || 220;
 
   const scene = new THREE.Scene();
+
   const camera = new THREE.PerspectiveCamera(45, width / height, 0.1, 3000);
   const renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
   renderer.setSize(width, height);
   renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, 2));
   canvasWrap.appendChild(renderer.domElement);
 
-  // Map flat (x, y) telemetry points onto the XZ ground plane.
-  const vertices = points.map((p) => new THREE.Vector3(p.x - 500, 0, p.y - 500));
-  const curve = new THREE.CatmullRomCurve3(vertices, true, "catmullrom", 0.2);
+  const SAMPLE_COUNT = 220;
+  const { curve, spacedPoints } = resamplePoints(THREE, points, SAMPLE_COUNT);
 
-  const tubeSegments = Math.max(points.length * 2, 200);
-  const tubeGeometry = new THREE.TubeGeometry(curve, tubeSegments, 6, 8, true);
-
-  const speedTexture = buildSpeedTexture(THREE, points, min_speed, max_speed);
-  const tubeMaterial = new THREE.MeshStandardMaterial({
-    map: speedTexture,
-    emissiveMap: speedTexture,
-    emissive: new THREE.Color(0xffffff),
-    emissiveIntensity: 0.35,
-    roughness: 0.35,
-    metalness: 0.1,
-  });
-  const trackMesh = new THREE.Mesh(tubeGeometry, tubeMaterial);
-  scene.add(trackMesh);
-
-  const grid = new THREE.GridHelper(1400, 28, 0x2a3f3c, 0x162220);
-  grid.position.y = -8;
-  scene.add(grid);
-
-  scene.add(new THREE.AmbientLight(0x445555, 0.9));
-  const dirLight = new THREE.DirectionalLight(0xffffff, 0.8);
-  dirLight.position.set(200, 300, 150);
-  scene.add(dirLight);
-
-  const carGeo = new THREE.SphereGeometry(9, 16, 16);
-  const carMat = new THREE.MeshStandardMaterial({
-    color: 0x50f0b4,
-    emissive: 0x50f0b4,
-    emissiveIntensity: 1.2,
-  });
-  const carMesh = new THREE.Mesh(carGeo, carMat);
-  scene.add(carMesh);
-
-  const glowGeo = new THREE.SphereGeometry(16, 16, 16);
-  const glowMat = new THREE.MeshBasicMaterial({
-    color: 0x50f0b4,
-    transparent: true,
-    opacity: 0.25,
-  });
-  carMesh.add(new THREE.Mesh(glowGeo, glowMat));
-
-  const box = new THREE.Box3().setFromObject(trackMesh);
+  const box = new THREE.Box3();
+  spacedPoints.forEach((p) => box.expandByPoint(p));
   const boxCenter = box.getCenter(new THREE.Vector3());
   const boxSize = box.getSize(new THREE.Vector3());
   const maxDim = Math.max(boxSize.x, boxSize.z);
-  const camDistance = maxDim * 0.9;
 
-  let angle = 0;
-  const orbitSpeed = 0.0018;
+  const tubeRadius = Math.max(maxDim * 0.006, 4);
+  const sectorTexture = buildSectorTexture(THREE, SAMPLE_COUNT);
 
-  function positionCamera() {
-    camera.position.set(
-      boxCenter.x + camDistance * Math.cos(angle),
-      camDistance * 0.55,
-      boxCenter.z + camDistance * Math.sin(angle)
-    );
-    camera.lookAt(boxCenter.x, 0, boxCenter.z);
+  const tubeGeometry = new THREE.TubeGeometry(curve, SAMPLE_COUNT, tubeRadius, 8, true);
+  const tubeMaterial = new THREE.MeshBasicMaterial({ map: sectorTexture });
+  const trackMesh = new THREE.Mesh(tubeGeometry, tubeMaterial);
+  scene.add(trackMesh);
+
+  // Soft outer glow — a slightly larger, low-opacity duplicate tube, same
+  // sector colors.
+  const glowGeometry = new THREE.TubeGeometry(curve, SAMPLE_COUNT, tubeRadius * 2.6, 8, true);
+  const glowMaterial = new THREE.MeshBasicMaterial({
+    map: sectorTexture,
+    transparent: true,
+    opacity: 0.25,
+    depthWrite: false,
+  });
+  const glowMesh = new THREE.Mesh(glowGeometry, glowMaterial);
+  scene.add(glowMesh);
+
+  scene.add(new THREE.AmbientLight(0x445555, 1.0));
+
+  const carGeo = new THREE.SphereGeometry(tubeRadius * 1.8, 16, 16);
+  const carMat = new THREE.MeshBasicMaterial({ color: 0xffffff });
+  const carMesh = new THREE.Mesh(carGeo, carMat);
+  scene.add(carMesh);
+
+  const TRAIL_LEN = 9;
+  const trailMeshes = [];
+  for (let i = 0; i < TRAIL_LEN; i++) {
+    const t = i / TRAIL_LEN;
+    const trailMat = new THREE.MeshBasicMaterial({
+      color: 0xffffff,
+      transparent: true,
+      opacity: 0.35 * (1 - t),
+    });
+    const trailMesh = new THREE.Mesh(new THREE.SphereGeometry(tubeRadius * 1.4 * (1 - t * 0.6), 8, 8), trailMat);
+    scene.add(trailMesh);
+    trailMeshes.push(trailMesh);
   }
-  positionCamera();
+  const carHistory = [];
 
-  const lapDurationMs = 12000;
+  const camDistance = maxDim * 0.85;
+  let angle = 0;
+  const orbitSpeed = 0.0016;
+  const camPos = new THREE.Vector3(
+    boxCenter.x + camDistance * Math.cos(angle),
+    camDistance * 0.5,
+    boxCenter.z + camDistance * Math.sin(angle)
+  );
+  const camTarget = new THREE.Vector3(boxCenter.x, 0, boxCenter.z);
+  camera.position.copy(camPos);
+  camera.lookAt(camTarget);
+
+  const lapDurationMs = 11000;
   const startTime = performance.now();
 
   function onResize() {
@@ -230,11 +234,26 @@ function renderTrackMap3D(THREE, data, container, containerId) {
     _activeLoops.set(containerId, { rafId, renderer, scene, onResize });
 
     angle += orbitSpeed;
-    positionCamera();
+    const targetPos = new THREE.Vector3(
+      boxCenter.x + camDistance * Math.cos(angle),
+      camDistance * 0.5,
+      boxCenter.z + camDistance * Math.sin(angle)
+    );
+    camPos.lerp(targetPos, 0.06);
+    camera.position.copy(camPos);
+    camera.lookAt(camTarget);
 
     const elapsed = (now - startTime) % lapDurationMs;
     const progress = elapsed / lapDurationMs;
-    carMesh.position.copy(curve.getPointAt(progress));
+    const carPos = curve.getPointAt(progress);
+    carMesh.position.copy(carPos);
+
+    carHistory.unshift(carPos.clone());
+    if (carHistory.length > TRAIL_LEN) carHistory.pop();
+    trailMeshes.forEach((mesh, i) => {
+      const p = carHistory[i];
+      if (p) mesh.position.copy(p);
+    });
 
     renderer.render(scene, camera);
   }

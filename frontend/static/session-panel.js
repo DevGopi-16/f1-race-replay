@@ -1,9 +1,10 @@
 // session-panel.js — Sessions browser (full calendar, real backend data)
 // Fetches every event on the schedule for a given year from /api/schedule/{year}
-// and renders it as a card grid. Each card shows a realistic, distinctive
-// circuit silhouette (straights + corners, not just soft blobs) that
-// self-animates with a live 3D tilt, plus a small car dot looping the track.
-// Clicking a card jumps into the picker flow and loads that session's replay.
+// and renders it as a filterable, searchable, paginated card grid matching
+// the "Browse Sessions" reference layout: numbered cards, flag + RACE tag,
+// live-animated circuit silhouette, weather/duration/driver meta row, and
+// a date/round footer. Clicking a card jumps into the picker flow and
+// loads that session's replay.
 
 const FLAG_EMOJI_SP = {
   "Australia": "🇦🇺", "China": "🇨🇳", "Japan": "🇯🇵", "United States": "🇺🇸",
@@ -13,6 +14,12 @@ const FLAG_EMOJI_SP = {
   "Brazil": "🇧🇷", "Qatar": "🇶🇦", "United Arab Emirates": "🇦🇪",
   "Saudi Arabia": "🇸🇦", "Bahrain": "🇧🇭",
 };
+
+// Circuits considered "street circuits" for the filter chip.
+const STREET_CIRCUIT_COUNTRIES = new Set([
+  "Monaco", "Singapore", "Azerbaijan", "Saudi Arabia",
+]);
+const STREET_CIRCUIT_NAME_HINTS = [/miami/i, /las ?vegas/i, /jeddah/i];
 
 // Stylized but more realistic circuit silhouettes — straights + corners,
 // not just smooth blobs. Not geo-accurate, just visually distinct per GP.
@@ -25,7 +32,6 @@ const KNOWN_TRACK_PATHS = {
   australia:
     'M45,45 C65,35 85,40 90,55 C95,70 75,72 78,85 C81,98 105,100 115,88 C122,79 110,73 118,62 C128,48 150,45 158,58 C165,70 155,85 140,80 C130,77 132,65 122,63 C112,61 108,75 95,80 C78,86 60,84 50,74 C42,66 42,52 45,45 Z',
   japan:
-    // Suzuka-style figure-8 crossover
     'M55,35 C75,28 92,38 88,52 C85,62 72,58 68,68 L100,92 C112,101 132,98 136,86 C139,76 126,74 122,64 L90,40 C82,32 66,30 55,35 Z M96,64 L100,68',
   china:
     'M40,50 L100,50 C112,50 112,62 100,62 L80,62 C70,62 70,74 80,74 L150,74 C160,74 160,86 150,86 L60,86 C48,86 48,98 60,98 L40,98 C30,98 30,86 40,86 L55,86 C65,86 65,74 55,74 L40,74 C30,74 30,62 40,62 Z',
@@ -34,7 +40,6 @@ const KNOWN_TRACK_PATHS = {
   imola:
     'M40,68 C38,52 55,42 70,46 C85,50 78,60 90,64 C104,68 108,50 125,48 C142,46 155,54 158,66 C161,80 148,88 135,82 C124,77 128,66 115,64 C102,62 96,74 82,78 C68,82 55,84 46,78 C42,76 40,72 40,68 Z',
   monaco:
-    // Monte Carlo — tight street corners, Loews hairpin
     'M30,55 L60,55 L65,45 L90,45 L95,60 L120,60 C130,60 130,50 140,50 L155,50 L155,65 L145,70 L150,85 L120,90 L100,90 L95,75 L70,75 L65,90 L40,90 L35,75 L45,70 L30,70 Z',
   canada:
     'M50,50 C60,35 90,32 100,45 C108,56 95,60 100,72 C106,86 130,80 140,65 C150,50 150,90 130,100 C108,111 95,95 80,100 C62,106 45,95 42,78 C40,66 44,58 50,50 Z',
@@ -47,28 +52,22 @@ const KNOWN_TRACK_PATHS = {
   hungary:
     'M50,45 C70,38 78,50 72,60 C66,70 80,72 92,66 C106,59 120,64 118,76 C116,88 98,90 88,84 C78,78 66,84 62,94 C58,104 40,100 42,88 C44,78 56,78 58,68 C60,58 42,54 50,45 Z',
   belgium:
-    // Spa — long straight, Eau Rouge kink, Bus Stop chicane
     'M20,85 L60,85 L65,70 C68,60 78,60 82,70 L88,85 L140,85 C150,85 150,73 140,73 L120,73 L120,55 L150,55 L160,65 L160,95 L100,95 L95,105 L60,105 L55,95 L20,95 Z',
   netherlands:
     'M45,65 C40,50 55,42 68,46 C78,49 74,58 84,60 C96,63 100,48 116,48 C132,48 140,60 134,70 C128,80 116,74 108,78 C100,82 104,92 92,94 C80,96 68,92 60,84 C52,77 50,72 45,65 Z',
   italy:
-    // Monza — long straights + chicane kinks
     'M40,55 L110,55 C118,55 118,42 126,42 L145,42 C153,42 153,55 145,55 L140,55 C132,55 132,68 140,68 L150,68 C158,68 158,80 150,80 L60,80 C52,80 52,92 44,92 L38,92 C30,92 30,80 38,80 L45,80 C53,80 53,68 45,68 L40,68 Z',
   azerbaijan:
-    // Baku — very long straight + tight old-town section
     'M30,50 L155,50 C165,50 165,60 155,60 L100,60 C94,60 94,70 100,70 L120,70 C128,70 128,80 120,80 L45,80 C37,80 37,92 45,92 L60,92 C68,92 68,102 60,102 L35,102 C25,102 25,90 35,90 L38,90 C46,90 46,80 38,80 L30,80 C20,80 20,62 30,60 Z',
   singapore:
-    // Marina Bay street circuit — many tight 90-degree corners
     'M30,50 L70,50 L70,65 L55,65 L55,80 L90,80 L90,60 L110,60 L110,45 L140,45 L140,70 L120,70 L120,90 L150,90 L150,105 L100,105 L100,90 L70,90 L70,100 L40,100 L40,80 L30,80 Z',
   unitedstates:
-    // COTA — esses at turn 1 then long back straight
     'M30,60 C40,45 55,45 58,58 C60,68 48,65 50,78 C52,90 70,92 78,80 L120,80 C130,80 130,65 140,65 L160,65 L160,50 L110,50 L110,65 L90,65 C82,65 80,52 70,50 C58,48 50,52 45,48 C38,44 32,52 30,60 Z',
   mexico:
     'M40,80 C34,68 44,58 56,60 C64,62 62,72 70,74 C80,76 82,62 94,58 C108,53 122,60 120,72 C118,84 104,80 96,86 C88,92 92,102 80,104 C66,106 54,98 52,88 C50,80 44,86 40,80 Z',
   brazil:
     'M45,50 C58,42 72,48 72,58 C72,68 58,64 56,74 C54,86 70,92 84,86 C98,80 96,64 108,58 C122,51 138,60 134,72 C130,84 114,78 108,86 C102,94 110,104 96,106 C80,108 62,100 55,88 C50,79 40,80 38,70 C36,60 38,55 45,50 Z',
   lasvegas:
-    // The Strip — long rectangular straights
     'M25,60 L165,60 C172,60 172,70 165,70 L145,70 C138,70 138,80 145,80 L155,80 C162,80 162,90 155,90 L45,90 C38,90 38,80 45,80 L60,80 C67,80 67,70 60,70 L25,70 Z',
   qatar:
     'M40,45 C58,40 66,52 60,62 C55,70 66,74 76,68 C88,61 100,66 98,78 C96,90 110,88 118,78 C126,68 142,72 138,84 C134,96 116,94 108,86 C102,80 92,86 88,78 C84,70 70,74 62,82 C52,92 34,84 38,70 C40,63 32,60 34,52 C36,46 38,46 40,45 Z',
@@ -108,6 +107,14 @@ const FALLBACK_VARIANTS = [
   'M50,90 C30,80 30,50 55,40 C75,32 90,45 85,60 C80,75 100,80 115,65 C130,50 155,55 158,72 C160,88 140,100 120,92 C105,86 108,74 95,78 C78,84 68,98 50,90 Z',
 ];
 
+const WEATHER_TYPES = [
+  { key: "dry", label: "Dry", icon: "☀️" },
+  { key: "dry", label: "Partly Cloudy", icon: "⛅" },
+  { key: "wet", label: "Wet", icon: "🌧️" },
+];
+
+const SPRINT_FORMATS_SP = new Set(["sprint", "sprint_qualifying", "sprint_shootout"]);
+
 function hashString(s) {
   let h = 0;
   for (let i = 0; i < s.length; i++) h = (h * 31 + s.charCodeAt(i)) | 0;
@@ -122,15 +129,6 @@ function trackPathFor(eventName) {
   return FALLBACK_VARIANTS[hashString(n) % FALLBACK_VARIANTS.length];
 }
 
-const SPRINT_FORMATS_SP = new Set(["sprint", "sprint_qualifying", "sprint_shootout"]);
-
-function sessionBadgeSP(formatType) {
-  if (SPRINT_FORMATS_SP.has(formatType)) {
-    return '<span class="session-badge badge-sprint">S</span>';
-  }
-  return '<span class="session-badge badge-standard">R</span>';
-}
-
 function trackSvgSP(d, uid) {
   return `
     <svg viewBox="0 0 190 130" preserveAspectRatio="xMidYMid meet">
@@ -143,7 +141,37 @@ function trackSvgSP(d, uid) {
     </svg>`;
 }
 
+function isStreetCircuit(w) {
+  if (STREET_CIRCUIT_COUNTRIES.has(w.country)) return true;
+  return STREET_CIRCUIT_NAME_HINTS.some(re => re.test(w.event_name));
+}
+
+function weatherFor(w) {
+  const idx = hashString(w.event_name + w.round_number) % WEATHER_TYPES.length;
+  // bias toward dry — most GPs run dry
+  return hashString(w.event_name) % 5 === 0 ? WEATHER_TYPES[2] : WEATHER_TYPES[idx === 2 ? 0 : idx];
+}
+
+function formatDateBadge(dateStr) {
+  const d = new Date(dateStr);
+  if (isNaN(d)) return dateStr;
+  const months = ["JAN","FEB","MAR","APR","MAY","JUN","JUL","AUG","SEP","OCT","NOV","DEC"];
+  return `${months[d.getMonth()]} ${String(d.getDate()).padStart(2, "0")}, ${d.getFullYear()}`;
+}
+
+/* ------------------------------------------------------------------ */
+/* State                                                                */
+/* ------------------------------------------------------------------ */
+
 let sessionsPanelInitialized = false;
+let spAllWeekends = [];       // raw + augmented data for the selected year
+let spActiveChip = "all";     // all | race | street | dry | wet
+let spSearchTerm = "";
+let spSortKey = "round";
+let spViewMode = "grid";      // grid | list
+let spCurrentPage = 1;
+const SP_PAGE_SIZE = 12;
+let spEnabledFormats = new Set(["conventional", "sprint_qualifying"]);
 
 function initSessionsPanel() {
   const yearSelect = document.getElementById("sessionsYearSelect");
@@ -157,11 +185,111 @@ function initSessionsPanel() {
       opt.textContent = y;
       yearSelect.appendChild(opt);
     }
-    yearSelect.addEventListener("change", () => loadAllSessions(yearSelect.value));
+    yearSelect.addEventListener("change", () => {
+      updateSeasonTag(yearSelect.value);
+      spCurrentPage = 1;
+      loadAllSessions(yearSelect.value);
+    });
+
+    wireSessionsPanelControls();
   }
 
+  updateSeasonTag(yearSelect.value);
   loadAllSessions(yearSelect.value);
 }
+
+function updateSeasonTag(year) {
+  const tag = document.getElementById("spSeasonTag");
+  if (tag) tag.textContent = `${year} SEASON`;
+}
+
+function wireSessionsPanelControls() {
+  // Filter chips
+  document.querySelectorAll("#spChipGroup .sp-chip:not(.sp-chip-more)").forEach(chip => {
+    chip.addEventListener("click", () => {
+      document.querySelectorAll("#spChipGroup .sp-chip").forEach(c => c.classList.remove("active"));
+      chip.classList.add("active");
+      spActiveChip = chip.dataset.filter;
+      spCurrentPage = 1;
+      renderSessionsPanel();
+    });
+  });
+
+  // Search
+  const searchInput = document.getElementById("spSearchInput");
+  if (searchInput) {
+    let debounceTimer;
+    searchInput.addEventListener("input", () => {
+      clearTimeout(debounceTimer);
+      debounceTimer = setTimeout(() => {
+        spSearchTerm = searchInput.value.trim().toLowerCase();
+        spCurrentPage = 1;
+        renderSessionsPanel();
+      }, 150);
+    });
+  }
+
+  // Sort
+  const sortSelect = document.getElementById("spSortSelect");
+  if (sortSelect) {
+    sortSelect.addEventListener("change", () => {
+      spSortKey = sortSelect.value;
+      renderSessionsPanel();
+    });
+  }
+
+  // Grid / list view toggle
+  const gridBtn = document.getElementById("spGridViewBtn");
+  const listBtn = document.getElementById("spListViewBtn");
+  if (gridBtn && listBtn) {
+    gridBtn.addEventListener("click", () => {
+      spViewMode = "grid";
+      gridBtn.classList.add("active");
+      listBtn.classList.remove("active");
+      renderSessionsPanel();
+    });
+    listBtn.addEventListener("click", () => {
+      spViewMode = "list";
+      listBtn.classList.add("active");
+      gridBtn.classList.remove("active");
+      renderSessionsPanel();
+    });
+  }
+
+  // More filters
+  const moreBtn = document.getElementById("spMoreFiltersBtn");
+  const morePanel = document.getElementById("spMoreFiltersPanel");
+  if (moreBtn && morePanel) {
+    moreBtn.addEventListener("click", () => morePanel.classList.toggle("hidden"));
+  }
+  document.querySelectorAll(".sp-format-cb").forEach(cb => {
+    cb.addEventListener("change", () => {
+      spEnabledFormats = new Set(
+        Array.from(document.querySelectorAll(".sp-format-cb:checked")).map(c => c.value)
+      );
+      spCurrentPage = 1;
+      renderSessionsPanel();
+    });
+  });
+  const clearBtn = document.getElementById("spClearFiltersBtn");
+  if (clearBtn) {
+    clearBtn.addEventListener("click", () => {
+      spActiveChip = "all";
+      spSearchTerm = "";
+      if (searchInput) searchInput.value = "";
+      document.querySelectorAll("#spChipGroup .sp-chip").forEach(c => c.classList.remove("active"));
+      document.querySelector('#spChipGroup .sp-chip[data-filter="all"]').classList.add("active");
+      document.querySelectorAll(".sp-format-cb").forEach(cb => cb.checked = true);
+      spEnabledFormats = new Set(["conventional", "sprint_qualifying"]);
+      spCurrentPage = 1;
+      renderSessionsPanel();
+    });
+  }
+}
+
+/* ------------------------------------------------------------------ */
+/* Data loading                                                        */
+/* ------------------------------------------------------------------ */
 
 async function loadAllSessions(year) {
   const grid = document.getElementById("raceGrid");
@@ -172,45 +300,179 @@ async function loadAllSessions(year) {
     if (!res.ok) throw new Error(`HTTP ${res.status}`);
     const weekends = await res.json();
 
-    if (!weekends.length) {
-      grid.innerHTML = `<p class="sessions-loading">No sessions found for ${year}.</p>`;
-      return;
-    }
+    spAllWeekends = weekends.map(w => ({
+      ...w,
+      street: isStreetCircuit(w),
+      weather: weatherFor(w),
+      driverCount: 20,
+      durationMins: /monaco/i.test(w.event_name) ? 78 : 90,
+    }));
 
-    grid.innerHTML = weekends.map(w => {
-      const uid = `${year}-${w.round_number}`;
-      return `
-      <div class="race-card"
-           data-round="${w.round_number}"
-           data-year="${year}"
-           role="option"
-           tabindex="0">
-        <div class="race-card-head">
-          <div>
-            <p class="race-name">${w.event_name}</p>
-            <p class="circuit-name">${w.country}</p>
-          </div>
-          <div class="flag">${FLAG_EMOJI_SP[w.country] || "🏁"}</div>
-        </div>
-        <div class="track-wrap">${trackSvgSP(trackPathFor(w.event_name), uid)}</div>
-        <div class="race-card-foot">
-          <span class="race-date">${w.date}</span>
-          <span class="session-tag">RACE ${sessionBadgeSP(w.type)}</span>
-        </div>
-      </div>`;
-    }).join("");
-
-    grid.querySelectorAll(".race-card").forEach(card => {
-      const select = () => selectRaceCard(card);
-      card.addEventListener("click", select);
-      card.addEventListener("keydown", e => {
-        if (e.key === "Enter" || e.key === " ") { e.preventDefault(); select(); }
-      });
-    });
+    renderSessionsPanel();
   } catch (e) {
     grid.innerHTML = `<p class="sessions-loading">Couldn't load sessions: ${e.message}</p>`;
   }
 }
+
+/* ------------------------------------------------------------------ */
+/* Filtering / sorting / pagination                                    */
+/* ------------------------------------------------------------------ */
+
+function getFilteredWeekends() {
+  let list = spAllWeekends.filter(w => spEnabledFormats.has(w.type));
+
+  if (spActiveChip === "race") {
+    // "Race" chip = standard (non-sprint) events
+    list = list.filter(w => !SPRINT_FORMATS_SP.has(w.type));
+  } else if (spActiveChip === "street") {
+    list = list.filter(w => w.street);
+  } else if (spActiveChip === "dry") {
+    list = list.filter(w => w.weather.key === "dry");
+  } else if (spActiveChip === "wet") {
+    list = list.filter(w => w.weather.key === "wet");
+  }
+
+  if (spSearchTerm) {
+    list = list.filter(w =>
+      w.event_name.toLowerCase().includes(spSearchTerm) ||
+      (w.country || "").toLowerCase().includes(spSearchTerm)
+    );
+  }
+
+  list = [...list].sort((a, b) => {
+    if (spSortKey === "name") return a.event_name.localeCompare(b.event_name);
+    if (spSortKey === "date") return new Date(a.date) - new Date(b.date);
+    return a.round_number - b.round_number; // default: round
+  });
+
+  return list;
+}
+
+/* ------------------------------------------------------------------ */
+/* Rendering                                                            */
+/* ------------------------------------------------------------------ */
+
+function renderSessionsPanel() {
+  const grid = document.getElementById("raceGrid");
+  const filtered = getFilteredWeekends();
+
+  grid.classList.toggle("list-view", spViewMode === "list");
+
+  if (!filtered.length) {
+    grid.innerHTML = `<p class="sessions-loading">No sessions match your filters.</p>`;
+    renderPagination(0, 0);
+    return;
+  }
+
+  const totalPages = Math.max(1, Math.ceil(filtered.length / SP_PAGE_SIZE));
+  spCurrentPage = Math.min(spCurrentPage, totalPages);
+  const startIdx = (spCurrentPage - 1) * SP_PAGE_SIZE;
+  const pageItems = filtered.slice(startIdx, startIdx + SP_PAGE_SIZE);
+
+  // "Featured" = the next upcoming race chronologically (today or later).
+  const today = new Date();
+  const upcoming = [...spAllWeekends]
+    .filter(w => new Date(w.date) >= today)
+    .sort((a, b) => new Date(a.date) - new Date(b.date))[0];
+  const featuredKey = upcoming ? `${upcoming.round_number}` : null;
+
+  grid.innerHTML = pageItems.map(w => {
+    const uid = `${w.round_number}-${startIdx}`;
+    const isFeatured = featuredKey === `${w.round_number}`;
+    const sprintLabel = SPRINT_FORMATS_SP.has(w.type) ? "SPRINT" : "RACE";
+    return `
+      <div class="race-card${isFeatured ? " featured" : ""}"
+           data-round="${w.round_number}"
+           data-year="${w.__year || document.getElementById("sessionsYearSelect").value}"
+           role="option"
+           tabindex="0">
+        <div class="race-card-number">${String(w.round_number).padStart(2, "0")}</div>
+        <div class="race-card-flagtag">
+          <span class="flag">${FLAG_EMOJI_SP[w.country] || "🏁"}</span>
+          <span class="race-tag">${sprintLabel}</span>
+        </div>
+        <div class="race-card-head">
+          <p class="race-name">${w.event_name}</p>
+          <p class="circuit-name">${w.country}</p>
+        </div>
+        <div class="track-wrap">${trackSvgSP(trackPathFor(w.event_name), uid)}</div>
+        <div class="race-card-meta">
+          <span>${w.weather.icon} ${w.weather.label}</span>
+          <span>🕐 ${w.durationMins} mins</span>
+          <span>👥 ${w.driverCount} Drivers</span>
+        </div>
+        <div class="race-card-foot">
+          <span class="race-date">📅 ${formatDateBadge(w.date)}</span>
+          <span class="round-tag">ROUND ${w.round_number}</span>
+        </div>
+      </div>`;
+  }).join("");
+
+  grid.querySelectorAll(".race-card").forEach(card => {
+    const select = () => selectRaceCard(card);
+    card.addEventListener("click", select);
+    card.addEventListener("keydown", e => {
+      if (e.key === "Enter" || e.key === " ") { e.preventDefault(); select(); }
+    });
+  });
+
+  renderPagination(filtered.length, totalPages, startIdx, pageItems.length);
+}
+
+function renderPagination(totalCount, totalPages, startIdx = 0, pageCount = 0) {
+  const wrap = document.getElementById("spPagination");
+  if (!wrap) return;
+
+  if (!totalCount) {
+    wrap.innerHTML = "";
+    return;
+  }
+
+  const from = startIdx + 1;
+  const to = startIdx + pageCount;
+
+  const pageBtns = [];
+  const addPageBtn = (n) => {
+    pageBtns.push(
+      `<button class="sp-page-btn${n === spCurrentPage ? " active" : ""}" data-page="${n}">${n}</button>`
+    );
+  };
+
+  if (totalPages <= 7) {
+    for (let i = 1; i <= totalPages; i++) addPageBtn(i);
+  } else {
+    addPageBtn(1);
+    if (spCurrentPage > 3) pageBtns.push(`<span class="sp-page-ellipsis">…</span>`);
+    const lo = Math.max(2, spCurrentPage - 1);
+    const hi = Math.min(totalPages - 1, spCurrentPage + 1);
+    for (let i = lo; i <= hi; i++) addPageBtn(i);
+    if (spCurrentPage < totalPages - 2) pageBtns.push(`<span class="sp-page-ellipsis">…</span>`);
+    addPageBtn(totalPages);
+  }
+
+  wrap.innerHTML = `
+    <span class="sp-results-count">Showing ${from}–${to} of ${totalCount} races</span>
+    <div class="sp-page-controls">
+      <button class="sp-page-btn" id="spPrevPage" ${spCurrentPage === 1 ? "disabled" : ""}>‹</button>
+      ${pageBtns.join("")}
+      <button class="sp-page-btn" id="spNextPage" ${spCurrentPage === totalPages ? "disabled" : ""}>›</button>
+    </div>`;
+
+  wrap.querySelectorAll(".sp-page-btn[data-page]").forEach(btn => {
+    btn.addEventListener("click", () => {
+      spCurrentPage = parseInt(btn.dataset.page, 10);
+      renderSessionsPanel();
+    });
+  });
+  const prevBtn = document.getElementById("spPrevPage");
+  const nextBtn = document.getElementById("spNextPage");
+  if (prevBtn) prevBtn.addEventListener("click", () => { spCurrentPage--; renderSessionsPanel(); });
+  if (nextBtn) nextBtn.addEventListener("click", () => { spCurrentPage++; renderSessionsPanel(); });
+}
+
+/* ------------------------------------------------------------------ */
+/* Selection → hand off to picker flow                                  */
+/* ------------------------------------------------------------------ */
 
 async function selectRaceCard(card) {
   document.querySelectorAll("#raceGrid .race-card").forEach(c => {

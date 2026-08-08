@@ -338,21 +338,64 @@
   </div>
 
   <!-- Sessions browser (race grid) -->
-  <div id="sessionsPanel" class="strategy-panel hidden">
-    <button id="sessionsBackBtn" class="back-btn">← Back</button>
-    <div class="strategy-content sessions-panel-content">
-      <div class="section-header">
+<div id="sessionsPanel" class="strategy-panel hidden">
+  <button id="sessionsBackBtn" class="back-btn">← Back</button>
+  <div class="strategy-content sessions-panel-content">
+    <div class="sp-topbar">
+      <div class="sp-heading">
+        <span class="sp-season-tag" id="spSeasonTag">SEASON</span>
         <h2 class="sessions-panel-title">Browse Sessions</h2>
-        <label class="section-year-picker">
-          Year
+        <p class="sp-subtitle">Select a Grand Prix to replay, analyze and experience every moment.</p>
+      </div>
+      <div class="sp-search-season">
+        <div class="sp-search-box">
+          <span class="sp-search-icon">🔍</span>
+          <input type="text" id="spSearchInput" placeholder="Search Grand Prix…">
+        </div>
+        <label class="sp-season-select">
+          <span class="sp-season-label">SEASON</span>
           <select id="sessionsYearSelect"></select>
         </label>
       </div>
-      <div id="raceGrid" class="race-grid" role="listbox">
-        <p class="sessions-loading">Loading sessions…</p>
+    </div>
+    <div class="sp-filters-row">
+      <div class="sp-chip-group" id="spChipGroup">
+        <button class="sp-chip active" data-filter="all">🏁 All Races</button>
+        <button class="sp-chip" data-filter="race">🏆 Race</button>
+        <button class="sp-chip" data-filter="street">🏙️ Street Circuit</button>
+        <button class="sp-chip" data-filter="dry">☀️ Dry</button>
+        <button class="sp-chip" data-filter="wet">🌧️ Wet</button>
+        <button class="sp-chip sp-chip-more" id="spMoreFiltersBtn">⚙ More Filters ▾</button>
+      </div>
+      <div class="sp-view-controls">
+        <label class="sp-sort">
+          Sort by:
+          <select id="spSortSelect">
+            <option value="round">Round</option>
+            <option value="name">Name</option>
+            <option value="date">Date</option>
+          </select>
+        </label>
+        <div class="sp-view-toggle">
+          <button id="spGridViewBtn" class="sp-view-btn active" title="Grid view">▦</button>
+          <button id="spListViewBtn" class="sp-view-btn" title="List view">☰</button>
+        </div>
       </div>
     </div>
+    <div id="spMoreFiltersPanel" class="sp-more-filters hidden">
+      <div class="sp-more-filters-group">
+        <span class="sp-more-filters-label">Format</span>
+        <label><input type="checkbox" class="sp-format-cb" value="conventional" checked> Conventional</label>
+        <label><input type="checkbox" class="sp-format-cb" value="sprint_qualifying" checked> Sprint</label>
+      </div>
+      <button id="spClearFiltersBtn" class="sp-clear-filters-btn">Clear all</button>
+    </div>
+    <div id="raceGrid" class="race-grid" role="listbox">
+      <p class="sessions-loading">Loading sessions…</p>
+    </div>
+    <div class="sp-pagination" id="spPagination"></div>
   </div>
+</div>
 
   <!-- Session picker -->
   <div id="picker" class="picker-page hidden">

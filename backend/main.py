@@ -13,7 +13,7 @@ SETUP: this backend expects your original `src/f1_data.py` (and the
 present alongside the new src/track_geometry.py and src/serialize.py files
 in this project's src/ directory. Copy them over before running.
 
- 
+uvicorn main:app --reload --port 8000
 """
 
 
@@ -99,6 +99,40 @@ async def warm_driver_stats_cache():
     # of FastF1 session loads before Uvicorn even accepts a connection.
     loop = asyncio.get_event_loop()
     loop.run_in_executor(None, _compute)
+
+
+STATS_REFRESH_CHECK_INTERVAL = 60 * 60  # re-check every hour whether the driver-stats cache needs refreshing
+
+
+async def _periodic_stats_refresh_loop():
+    """
+    Runs for the lifetime of the server, re-checking the driver-stats cache
+    on an interval. warm_season_stats() only actually recomputes once its
+    internal 24h TTL has expired, so calling it here every hour is cheap —
+    it's a fast freshness check on the hours it's still valid, and a real
+    recompute only on the day it's actually stale. This is what makes the
+    TTL inside driver_panel.py mean something while the server stays up,
+    instead of only ever being checked once at startup.
+    """
+    loop = asyncio.get_event_loop()
+    while True:
+        await asyncio.sleep(STATS_REFRESH_CHECK_INTERVAL)
+        current_year = datetime.date.today().year
+
+        def _compute():
+            try:
+                print(f"[stats-refresh] Checking driver stats cache for {current_year}...")
+                warm_season_stats(current_year)
+                print("[stats-refresh] Driver stats cache check complete.")
+            except Exception as e:
+                print(f"[stats-refresh] Failed to refresh driver stats cache: {e}")
+
+        loop.run_in_executor(None, _compute)
+
+
+@app.on_event("startup")
+async def start_stats_refresh_loop():
+    asyncio.create_task(_periodic_stats_refresh_loop())
 
 
 @app.on_event("startup")
