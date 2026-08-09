@@ -1,74 +1,86 @@
-backend/.fastf1-cache
-venv
-backend/__pycache__
-backend/computed_data
- ../.DS_Store
-
-backend/src/lib/__pycache__
-backend/src/__pycache__
-
-.DS_Store
-F1-Race-Replay/.DS_Store
-
-backend/computed_data/
-
-
-cat > .gitignore << 'EOF'
-# --- Secrets (never commit these) ---
+# Secrets
 .env
 .env.local
 .env.*.local
 *.pem
 *.key
 
-# --- Python ---
+
+# Python
 venv/
 env/
 ENV/
+
 __pycache__/
+**/__pycache__/
+
 *.py[cod]
 *$py.class
 *.egg-info/
+
 .pytest_cache/
 .mypy_cache/
 .ruff_cache/
 
-# --- This project's generated/cache data ---
+
+# FastF1 / Generated Data
 backend/.fastf1-cache/
+.fastf1-cache/
+
 backend/computed_data/
+computed_data/
+
 *.pkl
 *.cache
 
-# --- Node (only relevant if you add any JS tooling later) ---
+
+# Live / Recording Data
+backend/src/live/recordings/
+
+
+# Node.js
 node_modules/
 npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
 
-# --- OS junk ---
+
+# macOS
 .DS_Store
 .DS_Store?
 ._*
 .Spotlight-V100
 .Trashes
+
+
+# Windows
 Thumbs.db
 desktop.ini
 
-# --- Editor / IDE ---
+
+# Editors / IDE
 .vscode/
 .idea/
+
 *.swp
 *.swo
 *~
 
-# --- Logs ---
+
+# Logs
 *.log
 logs/
 
-# --- Build / dist artifacts (if you ever add a build step) ---
+
+# Build / Distribution
 dist/
 build/
 *.egg
-EOF
 
 
-backend/src/live/recordings
-test_telemetry_debug.py.save
+
+# Temporary / Backup Files
+*.save
+*.bak
+*.tmp
