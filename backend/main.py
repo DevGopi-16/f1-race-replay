@@ -46,8 +46,9 @@ from typing import Optional
 from src.next_session import get_next_session
 # from src.driver_panel import get_season_stats_cached
 from src.driver_panel import build_driver_panel, get_season_stats_cached, warm_season_stats
+from src.constructors_panel import build_constructors_panel, warm_constructor_history
 
-from src.track_geometry import build_track_geometry, extract_race_events, point_at_distance
+from src.track_geometry import build_track_geometry, extract_race_events, point_at_distance, get_track_outline, get_cached_track_outline
 from src.serialize import serialize_frames, serialize_driver_colors
 
 # --- Auth (Racer PRO signup/login) ---
@@ -100,6 +101,31 @@ async def warm_driver_stats_cache():
     loop = asyncio.get_event_loop()
     loop.run_in_executor(None, _compute)
 
+@app.on_event("startup")
+async def warm_track_outline_cache():
+    """Pre-computes track outlines for the current season in the
+    background so /api/schedule can serve them immediately instead of
+    the frontend having to fetch each card's shape one by one after
+    the page loads."""
+    current_year = datetime.date.today().year
+
+    def _compute():
+        print(f"[startup] Warming track-outline cache for {current_year} (background)...")
+        try:
+            weekends = get_race_weekends_by_year(current_year)
+        except Exception as e:
+            print(f"[startup] Could not load schedule for outline warm-up: {e}")
+            return
+        for w in weekends:
+            try:
+                get_track_outline(current_year, w["round_number"])
+            except Exception as e:
+                print(f"[startup] Track outline warm-up failed for round {w['round_number']}: {e}")
+        print("[startup] Track outline cache warm-up complete.")
+
+    loop = asyncio.get_event_loop()
+    loop.run_in_executor(None, _compute)
+
 
 STATS_REFRESH_CHECK_INTERVAL = 60 * 60  # re-check every hour whether the driver-stats cache needs refreshing
 
@@ -126,8 +152,27 @@ async def _periodic_stats_refresh_loop():
                 print("[stats-refresh] Driver stats cache check complete.")
             except Exception as e:
                 print(f"[stats-refresh] Failed to refresh driver stats cache: {e}")
+            try:
+                print(f"[stats-refresh] Checking constructor history cache for {current_year}...")
+                warm_constructor_history(current_year)
+                print("[stats-refresh] Constructor history cache check complete.")
+            except Exception as e:
+                print(f"[stats-refresh] Failed to refresh constructor history cache: {e}")
 
         loop.run_in_executor(None, _compute)
+
+
+@app.on_event("startup")
+async def warm_constructor_history_cache():
+    current_year = datetime.date.today().year
+
+    def _compute():
+        print(f"[startup] Warming constructor history cache for {current_year} (background)...")
+        warm_constructor_history(current_year)
+        print("[startup] Constructor history cache ready.")
+
+    loop = asyncio.get_event_loop()
+    loop.run_in_executor(None, _compute)
 
 
 @app.on_event("startup")
@@ -163,11 +208,23 @@ def next_session(year: int = Query(...)):
 
 @app.get("/api/schedule/{year}")
 def schedule(year: int):
-    """Race weekends for a season — powers the frontend's race picker."""
+    """
+    Race weekends for a season — powers the frontend's race picker.
+    Each weekend includes `track_outline` when it's already cached
+    (see get_cached_track_outline) so the frontend can render real
+    circuit shapes immediately, with no per-card fetch/placeholder
+    swap. Rounds not yet warmed simply omit it (null) and the
+    frontend falls back to fetching just those individually.
+    """
     try:
-        return get_race_weekends_by_year(year)
+        weekends = get_race_weekends_by_year(year)
     except Exception as e:
         raise HTTPException(status_code=502, detail=f"Couldn't load {year} schedule: {e}")
+
+    for w in weekends:
+        w["track_outline"] = get_cached_track_outline(year, w["round_number"])
+
+    return weekends
 
 
 def _get_example_lap(year: int, round_number: int, race_session):
@@ -493,6 +550,30 @@ def drivers_panel(
         raise HTTPException(status_code=502, detail=f"Jolpica API error: {e}")
     except requests.RequestException as e:
         raise HTTPException(status_code=502, detail=f"Couldn't reach Jolpica API: {e}")
+
+
+@app.get(
+    "/api/constructors/panel",
+    summary="Constructors Panel",
+    description="""
+Full Constructors Championship: live standings from the Jolpica F1 API,
+merged with round-by-round points history and team-level stats (podiums,
+poles, fastest laps) aggregated from each team's two drivers. Powers the
+Constructors tab.
+""",
+)
+def constructors_panel(
+    year: int = Query(...),
+    round: int | None = Query(None, alias="round"),
+):
+    try:
+        driver_data = build_driver_panel(year, DRIVERS, round_=round)
+        return build_constructors_panel(year, driver_data, round_=round)
+    except requests.HTTPError as e:
+        raise HTTPException(status_code=502, detail=f"Jolpica API error: {e}")
+    except requests.RequestException as e:
+        raise HTTPException(status_code=502, detail=f"Couldn't reach Jolpica API: {e}")
+
     
 @app.get(
     "/api/telemetry/compare",
@@ -579,6 +660,18 @@ def index():
 
 app.mount("/static", StaticFiles(directory=FRONTEND_DIR / "static"), name="static")
 
+
+
+@app.get(
+    "/api/track-outline/{year}/{round}",
+    summary="Track Outline",
+    description="Lightweight real circuit outline (centerline points + start/finish), normalized for small preview cards. Cached to disk after the first load.",
+)
+def track_outline(year: int, round: int):
+    try:
+        return get_track_outline(year, round)
+    except Exception as e:
+        raise HTTPException(status_code=502, detail=f"Failed to build track outline: {e}")
 
 
 @app.get("/api/track-map/{year}/{gp}/{session_type}/{driver_code}")

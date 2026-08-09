@@ -5,6 +5,7 @@
   <title>F1 Race Replay</title>
   <link rel="stylesheet" href="/static/style.css">
   <link rel="stylesheet" href="/static/driver-panel.css">
+  <link rel="stylesheet" href="/static/constructors-panel.css">
   <link rel="stylesheet" href="/static/replay.css">
   <link rel="stylesheet" href="/static/track-map.css">
   <link rel="stylesheet" href="/static/session-panel.css">
@@ -25,6 +26,7 @@
         <button class="nav-item" data-nav="replay">▶<span>Replay</span></button>
         <button class="nav-item" data-nav="sessions">🗓️<span>Sessions</span></button>
         <button class="nav-item" data-nav="drivers">👤<span>Drivers</span></button>
+        <button class="nav-item" data-nav="constructors">🏎️<span>Constructors</span></button>
         <button class="nav-item" data-nav="telemetry">📈<span>Telemetry</span></button>
         <button class="nav-item" data-nav="results">📋<span>Results</span></button>
         <button class="nav-item" data-nav="compare">⚖️<span>Compare</span></button>
@@ -625,7 +627,16 @@
     </div>
   </div>
 
+  <!-- CONSTRUCTORS PANEL -->
+  <div id="constructorsPanel" class="strategy-panel hidden">
+    <button id="constructorsBackBtn" class="back-btn">← Back</button>
+    <div class="strategy-content telemetry-content-wide">
+      <div id="constructors-panel"></div>
+    </div>
+  </div>
+
   <script src="/static/driver-panel.js"></script>
+  <script src="/static/constructors-panel.js"></script>
   <script src="/static/track-map.js"></script>
   <script src="/static/session-panel.js"></script>
   <script src="/static/app.js"></script>

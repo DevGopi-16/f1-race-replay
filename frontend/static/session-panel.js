@@ -129,16 +129,110 @@ function trackPathFor(eventName) {
   return FALLBACK_VARIANTS[hashString(n) % FALLBACK_VARIANTS.length];
 }
 
-function trackSvgSP(d, uid) {
+// Placeholder SVG shown instantly (stylized silhouette) while the real
+// backend outline is being fetched — avoids a blank card on first paint.
+function trackSvgPlaceholder(d, uid) {
   return `
     <svg viewBox="0 0 190 130" preserveAspectRatio="xMidYMid meet">
-      <path id="tp-${uid}" class="track-outline" d="${d}"/>
+      <path id="tp-${uid}" class="track-outline track-outline-placeholder" d="${d}"/>
       <circle class="track-car" r="4">
         <animateMotion dur="4s" repeatCount="indefinite" rotate="auto">
           <mpath href="#tp-${uid}"></mpath>
         </animateMotion>
       </circle>
     </svg>`;
+}
+
+// Real circuit outline, built from actual telemetry via
+// /api/track-outline/{year}/{round} (see backend/src/track_geometry.py).
+// `points` is a flat [[x,y], ...] list already normalized to the
+// 190x130 viewBox by the backend. `sectorSegments` (3 colored pieces)
+// and `drsZones` (start markers only, kept light) are optional — older
+// cached responses without them just render the plain outline.
+function trackSvgReal(points, startFinish, viewbox, uid, sectorSegments, drsZones) {
+  if (!points || !points.length) return "";
+  const vb = viewbox || { w: 190, h: 130 };
+  const sf = startFinish || points[0];
+
+  // Hidden full-loop path — exists only so <mpath> has a continuous
+  // geometry for the car dot to follow; not painted (no stroke) so it
+  // doesn't compete visually with the colored sector segments below.
+  const fullD = "M " + points.map(p => `${p[0]},${p[1]}`).join(" L ") + " Z";
+
+  let segmentsSvg;
+  if (sectorSegments && sectorSegments.length) {
+    segmentsSvg = sectorSegments.map(seg => {
+      const segD = "M " + seg.points.map(p => `${p[0]},${p[1]}`).join(" L ");
+      return `<path class="track-outline track-outline-real sector-${seg.id}" d="${segD}" style="stroke:${seg.color};color:${seg.color}"/>`;
+    }).join("");
+  } else {
+    // Fallback for cached data from before sector coloring existed.
+    segmentsSvg = `<path class="track-outline track-outline-real" d="${fullD}"/>`;
+  }
+
+  let drsSvg = "";
+  if (drsZones && drsZones.length) {
+    drsSvg = drsZones.map(z => `<circle class="drs-marker" cx="${z.start[0]}" cy="${z.start[1]}" r="2.2"/>`).join("");
+  }
+
+  return `
+    <svg viewBox="0 0 ${vb.w} ${vb.h}" preserveAspectRatio="xMidYMid meet">
+      <path id="tp-${uid}" class="track-outline-hidden" d="${fullD}"/>
+      ${segmentsSvg}
+      ${drsSvg}
+      <g class="start-finish-flag" transform="translate(${sf.x},${sf.y})">
+        <line x1="0" y1="-9" x2="0" y2="7" class="flag-pole"/>
+        <rect x="0" y="-9" width="10" height="7" class="flag-bg"/>
+        <rect x="0"   y="-9"   width="2.5" height="1.75" class="flag-sq"/>
+        <rect x="5"   y="-9"   width="2.5" height="1.75" class="flag-sq"/>
+        <rect x="2.5" y="-7.25" width="2.5" height="1.75" class="flag-sq"/>
+        <rect x="7.5" y="-7.25" width="2.5" height="1.75" class="flag-sq"/>
+        <rect x="0"   y="-5.5" width="2.5" height="1.75" class="flag-sq"/>
+        <rect x="5"   y="-5.5" width="2.5" height="1.75" class="flag-sq"/>
+        <rect x="2.5" y="-3.75" width="2.5" height="1.75" class="flag-sq"/>
+        <rect x="7.5" y="-3.75" width="2.5" height="1.75" class="flag-sq"/>
+      </g>
+      <circle class="track-car" r="4">
+        <animateMotion dur="4s" repeatCount="indefinite" rotate="auto">
+          <mpath href="#tp-${uid}"></mpath>
+        </animateMotion>
+      </circle>
+    </svg>`;
+}
+
+// Cache of already-fetched real outlines, keyed by "year-round", so
+// switching filters/pages/years doesn't refetch a shape we already have.
+const spOutlineCache = new Map();
+
+async function fetchAndRenderTrackOutline(year, round, cardEl, uid) {
+  const cacheKey = `${year}-${round}`;
+  const wrap = cardEl.querySelector(".track-wrap");
+  if (!wrap) return;
+
+  if (spOutlineCache.has(cacheKey)) {
+    const cached = spOutlineCache.get(cacheKey);
+    if (cached) {
+      wrap.innerHTML = trackSvgReal(cached.points, cached.start_finish, cached.viewbox, uid, cached.sector_segments, cached.drs_zones);
+    }
+    return;
+  }
+
+  try {
+    const res = await fetch(`/api/track-outline/${year}/${round}`);
+    if (!res.ok) throw new Error(`HTTP ${res.status}`);
+    const data = await res.json();
+    spOutlineCache.set(cacheKey, data);
+
+
+    // Card may have been re-rendered (filter/page change) by the time
+    // this resolves — only swap if it's still in the DOM.
+    if (document.body.contains(wrap)) {
+      wrap.innerHTML = trackSvgReal(data.points, data.start_finish, data.viewbox, uid, data.sector_segments, data.drs_zones);
+    }
+  } catch (e) {
+    spOutlineCache.set(cacheKey, null); // avoid hammering a failing round
+    console.warn(`Track outline unavailable for ${year} round ${round}:`, e.message);
+  }
 }
 
 function isStreetCircuit(w) {
@@ -395,7 +489,7 @@ function renderSessionsPanel() {
           <p class="race-name">${w.event_name}</p>
           <p class="circuit-name">${w.country}</p>
         </div>
-        <div class="track-wrap">${trackSvgSP(trackPathFor(w.event_name), uid)}</div>
+        <div class="track-wrap">${trackSvgPlaceholder(trackPathFor(w.event_name), uid)}</div>
         <div class="race-card-meta">
           <span>${w.weather.icon} ${w.weather.label}</span>
           <span>🕐 ${w.durationMins} mins</span>
@@ -416,7 +510,35 @@ function renderSessionsPanel() {
     });
   });
 
+  // Kick off real-outline fetches for the cards on this page, but only a
+  // couple at a time — firing all 12 at once floods FastF1 with
+  // simultaneous session loads (each is a real, heavy network fetch) and
+  // causes it to error/retry under load. A small queue keeps things
+  // responsive without hammering the backend.
+  const cardsOnPage = Array.from(grid.querySelectorAll(".race-card"));
+  runWithConcurrencyLimit(cardsOnPage, 2, (card) => {
+    const y = card.dataset.year;
+    const r = card.dataset.round;
+    const uid = `${r}-${startIdx}`;
+    return fetchAndRenderTrackOutline(y, r, card, uid);
+  });
+
   renderPagination(filtered.length, totalPages, startIdx, pageItems.length);
+}
+
+// Runs `worker` over `items`, at most `limit` in flight at once. Used to
+// throttle the per-card track-outline fetches so we don't fire a burst
+// of heavy FastF1 session loads simultaneously.
+async function runWithConcurrencyLimit(items, limit, worker) {
+  let idx = 0;
+  async function next() {
+    const current = idx++;
+    if (current >= items.length) return;
+    await worker(items[current]);
+    await next();
+  }
+  const runners = Array.from({ length: Math.min(limit, items.length) }, () => next());
+  await Promise.all(runners);
 }
 
 function renderPagination(totalCount, totalPages, startIdx = 0, pageCount = 0) {

@@ -1,9 +1,9 @@
 <div align="center">
 
-<img src="https://capsule-render.vercel.app/api?type=waving&color=0:E10600,100:15151E&height=220&section=header&text=F1%20Race%20Replay%20Web&fontSize=42&fontColor=ffffff&animation=fadeIn&fontAlignY=38&desc=Lap-by-lap%20Formula%201%20telemetry%2C%20reconstructed%20from%20real%20session%20data&descAlignY=58&descSize=16" width="100%"/>
+<img src="https://capsule-render.vercel.app/api?type=waving&color=0:E10600,100:15151E&height=220&section=header&text=F1%20Race%20Replay%20Web&fontSize=42&fontColor=ffffff&animation=fadeIn&fontAlignY=38&desc=Lap-by-lap%20Formula%201%20telemetry%2C%20live%20timing%2C%20and%20driver%20stats%20-%20reconstructed%20from%20real%20session%20data&descAlignY=58&descSize=15" width="100%"/>
 
 <a href="https://github.com/DevGopi-16/f1-race-replay">
-  <img src="https://readme-typing-svg.demolab.com/?lines=Replay+any+F1+session+lap-by-lap+in+your+browser;Live+telemetry+%E2%80%A2+Tyre+strategy+%E2%80%A2+DRS+zones;Built+with+FastAPI+%2B+FastF1+%2B+HTML5+Canvas&font=Fira+Code&center=true&width=650&height=40&color=E10600&vCenter=true&size=20&pause=1500&duration=3000" alt="Typing SVG" />
+  <img src="https://readme-typing-svg.demolab.com/?lines=Replay+any+F1+session+lap-by-lap+in+your+browser;Live+timing+%E2%80%A2+3D+track+map+%E2%80%A2+driver+profiles;Built+with+FastAPI+%2B+FastF1+%2B+Three.js" alt="Typing SVG" />
 </a>
 
 <br/>
@@ -11,9 +11,9 @@
 <img src="https://img.shields.io/badge/FastAPI-Backend-009688?logo=fastapi&logoColor=white&style=for-the-badge" />
 <img src="https://img.shields.io/badge/FastF1-Telemetry-E10600?style=for-the-badge" />
 <img src="https://img.shields.io/badge/JavaScript-Frontend-F7DF1E?logo=javascript&logoColor=black&style=for-the-badge" />
-<img src="https://img.shields.io/badge/Canvas-Rendering-FF6B00?style=for-the-badge" />
+<img src="https://img.shields.io/badge/Three.js-3D%20Track%20Map-000000?logo=three.js&logoColor=white&style=for-the-badge" />
 <img src="https://img.shields.io/badge/License-MIT-4CAF50?style=for-the-badge" />
-<img src="https://img.shields.io/badge/Status-Complete-brightgreen?style=for-the-badge" />
+<img src="https://img.shields.io/badge/Status-Active-brightgreen?style=for-the-badge" />
 
 <br/><br/>
 
@@ -26,6 +26,7 @@
 <a href="#-getting-started"><img src="https://img.shields.io/badge/🚀_Quick_Start-15151E?style=for-the-badge"/></a>
 <a href="#-features"><img src="https://img.shields.io/badge/✨_Features-15151E?style=for-the-badge"/></a>
 <a href="#-architecture"><img src="https://img.shields.io/badge/🏗_Architecture-15151E?style=for-the-badge"/></a>
+<a href="#-project-structure"><img src="https://img.shields.io/badge/📂_Structure-15151E?style=for-the-badge"/></a>
 <a href="#-contributing"><img src="https://img.shields.io/badge/🤝_Contribute-15151E?style=for-the-badge"/></a>
 
 </div>
@@ -36,9 +37,9 @@
 
 > F1 broadcasts show you *what* is happening. FastF1 gives you the raw telemetry that explains *why*.
 
-This project bridges the two — turning session-level timing and telemetry data into an interactive, replayable visualization anyone can explore in a browser, with zero Python or notebooks required on the viewer's end.
+This project bridges the two — turning session-level timing and telemetry data into an interactive, replayable dashboard anyone can explore in a browser, with zero Python or notebooks required on the viewer's end.
 
-It's also a real engineering exercise in its own right: large time-series datasets, client-side interpolation for smooth animation, payload optimization for the browser, and a full rendering pipeline built from scratch on HTML5 Canvas.
+It's also a real engineering exercise in its own right: large time-series datasets, client-side interpolation for smooth animation, a live-session watcher that auto-detects and captures ongoing races, a 3D WebGL track visualization, and a full rendering pipeline built from scratch on HTML5 Canvas and Three.js.
 
 [![divider](https://raw.githubusercontent.com/HiradEmami/readme-ux-kit/master/assets/dividers/animated/bars/divider_circuit_pulse_bar.svg)](https://github.com/DevGopi-16)
 
@@ -54,32 +55,35 @@ It's also a real engineering exercise in its own right: large time-series datase
 - Seekable timeline with incident markers (🟡 Yellow / 🔴 Red / 🚨 SC / VSC)
 - Variable playback speed (0.5x – 4x)
 
-### 📊 Live Telemetry
+### 📊 Live Telemetry & Timing
 - Speed, gear, throttle %, brake %, DRS status per driver
-- Tyre compound & remaining stint life
-- Live gap ahead/behind, in metres
+- Live timing tower — position, gaps, sector times, tyre compound & pit status
+- Auto-detects and captures **live sessions** in real time (no replay lag)
+- Race control feed — penalties, flags, deleted laps, investigations
 
 </td>
 <td width="50%" valign="top">
 
-### 🛞 Tyre Strategy
-- Current compound (Soft / Medium / Hard) & stint age
-- Per-driver tyre indicator on the leaderboard
+### 🧑‍✈️ Driver Panel
+- Full season standings with live points/position from the Jolpica F1 API
+- Rich driver profile pages — bio, points progression chart, race-by-race results
+- Auto-computed "Key Strengths" badges based on real season stats
+- Head-to-head teammate comparison with animated stat bars
+- Minimal **3D animated track map** (Three.js) — sector-colored, glowing car trail
 
-### 🌦 Weather
+### 🛞 Tyre Strategy & Weather
+- Current compound (Soft / Medium / Hard) & stint age per driver
 - Track/air temperature, humidity, wind speed, rain status
-
-### 🏆 Leaderboard
-- Full running order with live time gaps
-- Team-coloured driver tags + DRS indicators
-- Highlighted focus driver with quick stat panel
 
 </td>
 </tr>
 </table>
 
 ### 🔬 Multi-Driver Comparison
-Shift+click to select multiple drivers → overlaid speed / throttle / brake traces, with a live delta readout between any two selected drivers.
+Overlaid speed / throttle / brake traces for any two drivers on a shared distance grid, with a live delta readout between them.
+
+### 🔐 Accounts
+Sign-up/login (Racer PRO) with hashed credentials, so personalized features can be added going forward.
 
 <br/>
 
@@ -99,21 +103,23 @@ Shift+click to select multiple drivers → overlaid speed / throttle / brake tra
 
 [![divider](https://raw.githubusercontent.com/HiradEmami/readme-ux-kit/master/assets/dividers/animated/unique_effects/divider_cyber_cycle_mirrored.svg)](https://github.com/DevGopi-16)
 
-## 🏗 Architecture
+## �� Architecture
 
 ```mermaid
 flowchart LR
-    A[("🏎️ FastF1<br/>Session Data")] -->|fetch & cache| B["⚙️ FastAPI Backend<br/>process · downsample · serialize"]
-    B -->|JSON over HTTP| C["🖥️ Browser Frontend<br/>Canvas rendering · interpolation · playback engine"]
-    C -->|render loop| D[("🎬 Animated Replay")]
+    A[("🏎️ FastF1 + Jolpica API<br/>Session & Standings Data")] -->|fetch & cache| B["⚙️ FastAPI Backend<br/>process · downsample · serialize"]
+    B -->|JSON over HTTP| C["🖥️ Browser Frontend<br/>Canvas · Three.js · interpolation"]
+    L[("📡 Live Session Watcher<br/>background thread")] -.->|auto-capture| B
+    C -->|render loop| D[("🎬 Replay / Live Dashboard")]
 
     style A fill:#E10600,stroke:#15151E,color:#fff
     style B fill:#009688,stroke:#15151E,color:#fff
     style C fill:#F7DF1E,stroke:#15151E,color:#000
     style D fill:#15151E,stroke:#E10600,color:#fff
+    style L fill:#3fa9ff,stroke:#15151E,color:#fff
 ```
 
-Telemetry is fetched once per session via FastF1, cached locally, downsampled and serialized on the backend, then streamed to the browser — where it's interpolated frame-by-frame for smooth playback without shipping every raw data point over the wire.
+Telemetry is fetched once per session via FastF1 (with standings/points pulled live from the Jolpica API), cached locally, downsampled and serialized on the backend, then streamed to the browser — where it's interpolated frame-by-frame for smooth playback without shipping every raw data point over the wire. A background watcher thread auto-detects live sessions and captures them in parallel, so the same endpoints serve both historical replays and live races.
 
 [![divider](https://raw.githubusercontent.com/HiradEmami/readme-ux-kit/master/assets/dividers/animated/bars/divider_dual_energy_tracks.svg)](https://github.com/DevGopi-16)
 
@@ -123,10 +129,10 @@ Telemetry is fetched once per session via FastF1, cached locally, downsampled an
 
 | Layer | Technology |
 |:---|:---|
-| **Backend** | ![FastAPI](https://img.shields.io/badge/-FastAPI-009688?logo=fastapi&logoColor=white) Python |
-| **Data Source** | ![FastF1](https://img.shields.io/badge/-FastF1-E10600) |
+| **Backend** | ![FastAPI](https://img.shields.io/badge/-FastAPI-009688?logo=fastapi&logoColor=white) Python, SQLAlchemy (auth) |
+| **Data Sources** | ![FastF1](https://img.shields.io/badge/-FastF1-E10600) Jolpica F1 API (standings) |
 | **Frontend** | ![HTML5](https://img.shields.io/badge/-HTML5-E34F26?logo=html5&logoColor=white) ![CSS3](https://img.shields.io/badge/-CSS3-1572B6?logo=css3&logoColor=white) ![JavaScript](https://img.shields.io/badge/-JavaScript-F7DF1E?logo=javascript&logoColor=black) |
-| **Rendering** | HTML5 Canvas / SVG overlays |
+| **Rendering** | HTML5 Canvas · SVG overlays · Three.js (3D track map) |
 
 </div>
 
@@ -150,15 +156,16 @@ F1-RACE-REPLAY-WEB/
 │   └── visuals/
 │
 ├── backend/
-│   ├── auth/
+│   ├── .env.example
 │   ├── data/
 │   │   └── drivers.json
+│   ├── computed_data/          # cached season stats snapshots
 │   ├── src/
-│   │   ├── auth/
-│   │   ├── lib/
-│   │   ├── live/
-│   │   ├── driver_panel.py
-│   │   ├── f1_data.py
+│   │   ├── auth/                # signup/login (Racer PRO)
+│   │   ├── lib/                 # settings, time, tyre helpers
+│   │   ├── live/                # live-session watcher + shared state
+│   │   ├── driver_panel.py      # standings, season stats, driver profiles
+│   │   ├── f1_data.py           # core FastF1 replay pipeline
 │   │   ├── minisectors.py
 │   │   ├── next_session.py
 │   │   ├── race_control.py
@@ -166,27 +173,22 @@ F1-RACE-REPLAY-WEB/
 │   │   ├── timing_tower.py
 │   │   └── track_geometry.py
 │   ├── main.py
-│   ├── requirements.txt
-│   └── test_telemetry_debug.py
+│   └── requirements.txt
 │
 ├── frontend/
 │   ├── index.html
 │   └── static/
 │       ├── images/
 │       ├── app.js
-│       ├── auth.css
-│       ├── auth.js
-│       ├── driver-panel.css
-│       ├── driver-panel.js
+│       ├── auth.css / auth.js
+│       ├── constructors-panel.css / constructors-panel.js
+│       ├── driver-panel.css / driver-panel.js
 │       ├── home-dashboard.css
 │       ├── replay.css
-│       ├── session-panel.css
-│       ├── session-panel.js
+│       ├── session-panel.css / session-panel.js
 │       ├── style.css
-│       ├── timing-tower.css
-│       ├── timing-tower.js
-│       ├── track-map.css
-│       └── track-map.js
+│       ├── timing-tower.css / timing-tower.js
+│       └── track-map.css / track-map.js      # 3D Three.js track view
 │
 ├── README.md
 └── requirements.txt
@@ -202,7 +204,7 @@ F1-RACE-REPLAY-WEB/
 
 ![Python](https://img.shields.io/badge/Python-3.10+-3776AB?logo=python&logoColor=white)
 ![pip](https://img.shields.io/badge/pip-required-blue)
-![Internet](https://img.shields.io/badge/Internet-first%20run%20only-lightgrey)
+![Internet](https://img.shields.io/badge/Internet-required-lightgrey)
 
 ### Installation & Run
 
@@ -214,6 +216,8 @@ python -m venv venv
 source venv/bin/activate      # Windows: venv\Scripts\activate
 
 pip install -r requirements.txt
+cp .env.example .env          # fill in any required secrets (auth, etc.)
+
 uvicorn main:app --reload --port 8000
 ```
 
@@ -223,13 +227,13 @@ uvicorn main:app --reload --port 8000
 
 </div>
 
-> ℹ️ First load per race takes longer — FastF1 downloads and caches session data locally.
+> ℹ️ First load per race takes longer — FastF1 downloads and caches session data locally. Live-timing and 3D track map features need an internet connection at runtime (Three.js is loaded from a CDN).
 
 <br/>
 
 ## ⚡ Performance
 
-Telemetry is **downsampled server-side** before transmission, then **interpolated client-side** for smooth animation — keeping payloads small without sacrificing playback quality.
+Telemetry is **downsampled server-side** before transmission, then **interpolated client-side** for smooth animation — keeping payloads small without sacrificing playback quality. Driver season stats (podiums, poles, fastest laps) are cached to disk and refreshed on a rolling basis, so they don't re-trigger a full FastF1 recompute on every request.
 
 [![divider](https://raw.githubusercontent.com/HiradEmami/readme-ux-kit/master/assets/dividers/animated/bars/divider_circuit_pulse_bar.svg)](https://github.com/DevGopi-16)
 
@@ -237,9 +241,9 @@ Telemetry is **downsampled server-side** before transmission, then **interpolate
 
 - [ ] Track dominance map (fastest driver per mini-sector)
 - [ ] Pit stop strategy timeline
-- [ ] 3D track view (Three.js)
 - [ ] Exportable replay clips (GIF/MP4)
-- [ ] Live session mode via WebSockets
+- [ ] Full live session mode via WebSockets (currently polling-based)
+- [ ] Historical head-to-head across multiple seasons
 
 <br/>
 

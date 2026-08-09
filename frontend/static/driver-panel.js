@@ -1305,6 +1305,24 @@
     `;
   }
 
+  // Jumps straight to a specific driver's profile view. Safe to call
+  // even before the panel has finished its first load — it just no-ops
+  // if _drivers isn't populated yet (caller should await loadDriverPanel
+  // first in that case).
+  function openDriverProfile(code) {
+    if (!_drivers.length) return false;
+    const match = _drivers.find(d => d.code === code);
+    if (!match) return false;
+    _selectedCode = code;
+    _viewMode = "profile";
+    _resultsExpanded = false;
+    _roundsFilter = "all";
+    render();
+    if (_container) _container.scrollIntoView({ behavior: "smooth", block: "start" });
+    return true;
+  }
+
   // Expose globally — app.js calls window.loadDriverPanel(...)
   window.loadDriverPanel = loadDriverPanel;
+  window.openDriverProfile = openDriverProfile;
 })();

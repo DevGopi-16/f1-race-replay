@@ -115,6 +115,7 @@ document.getElementById("viewFullLeaderboardBtn").addEventListener("click", () =
 const NAV_LABELS = {
   sessions: "Sessions",
   drivers: "Drivers",
+  constructors: "Constructors",
   telemetry: "Telemetry",
   results: "Results",
   compare: "Compare",
@@ -150,6 +151,12 @@ document.querySelectorAll(".nav-item").forEach(btn => {
       initDriversPanel();
       return;
     }
+    if (target === "constructors") {
+      document.getElementById("homePage").classList.add("hidden");
+      document.getElementById("constructorsPanel").classList.remove("hidden");
+      initConstructorsPanel();
+      return;
+    }
     const label = NAV_LABELS[target] || target;
     showToast(`${label} isn't built yet — coming soon.`);
   });
@@ -162,6 +169,10 @@ document.getElementById("telemetryBackBtn").addEventListener("click", () => {
 
 document.getElementById("driversBackBtn").addEventListener("click", () => {
   document.getElementById("driversPanel").classList.add("hidden");
+  document.getElementById("homePage").classList.remove("hidden");
+});
+document.getElementById("constructorsBackBtn").addEventListener("click", () => {
+  document.getElementById("constructorsPanel").classList.add("hidden");
   document.getElementById("homePage").classList.remove("hidden");
 });
 
@@ -1647,6 +1658,40 @@ async function initDriversPanel() {
   } catch (e) {
     document.getElementById("drivers-panel").innerHTML =
       `<p class="dp-empty">Couldn't load driver data.</p>`;
+  }
+
+// Called from the Constructors page when a driver mini-card is clicked —
+// switches over to the Drivers panel and opens straight to that driver's
+// full profile instead of landing on the list view.
+async function goToDriverProfile(code) {
+  document.getElementById("constructorsPanel").classList.add("hidden");
+  document.getElementById("driversPanel").classList.remove("hidden");
+
+  if (!driversInitialized) {
+    await initDriversPanel();
+  }
+
+  const opened = window.openDriverProfile ? window.openDriverProfile(code) : false;
+  if (!opened) {
+    console.warn(`[app] couldn't open driver profile for code "${code}" — driver not found in current season data`);
+  }
+}
+window.goToDriverProfile = goToDriverProfile;
+}
+
+let constructorsInitialized = false;
+
+async function initConstructorsPanel() {
+  if (constructorsInitialized) return;
+  constructorsInitialized = true;
+
+  const thisYear = new Date().getFullYear();
+
+  try {
+    await window.loadConstructorsPanel("constructors-panel", { year: thisYear });
+  } catch (e) {
+    document.getElementById("constructors-panel").innerHTML =
+      `<p class="cp-empty">Couldn't load constructors data.</p>`;
   }
 }
 

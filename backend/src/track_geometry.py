@@ -8,6 +8,8 @@
 
 
 
+import os
+import pickle
 import fastf1
 import numpy as np
 
@@ -512,3 +514,239 @@ def extract_race_events(
     )
 
     return events
+
+
+# --- Lightweight circuit outline (for Sessions-grid preview cards) --------
+# Unlike build_track_geometry() (which needs a full session already
+# loaded, e.g. for the replay), this loads just ONE fastest lap's
+# telemetry on its own, normalizes it to a small SVG-ready point list,
+# and caches the result to disk — so the Sessions grid doesn't have to
+# pay the full replay-loading cost just to draw a preview shape.
+
+import pathlib
+
+_CACHE_DIR = pathlib.Path(__file__).resolve().parent.parent / "computed_data"
+
+
+def _outline_cache_path(year: int, round_number: int) -> str:
+    # Absolute path anchored to backend/computed_data/ regardless of the
+    # working directory a script or server was launched from — avoids
+    # cache files silently splitting across two different locations.
+    return str(_CACHE_DIR / f"track_outline_{year}_{round_number}.pkl")
+
+
+import datetime as _dt
+
+
+def _event_is_in_future(year: int, round_number: int) -> bool:
+    """True if this event's date is after today — used to skip pointless
+    current-season fetch attempts for rounds that haven't been raced."""
+    try:
+        event = fastf1.get_event(year, round_number)
+        event_date = event.get("EventDate")
+        if event_date is None:
+            return False
+        # EventDate may be a pandas Timestamp or datetime — normalize to date.
+        event_date = getattr(event_date, "date", lambda: event_date)()
+        return event_date > _dt.date.today()
+    except Exception:
+        return False
+
+
+def _resolve_fallback_round(year: int, round_number: int):
+    """
+    Find the same circuit run in a previous season — used when `year`'s
+    edition hasn't happened yet (a future round has no telemetry at
+    all). Track layouts don't change year to year, so a prior season's
+    shape is still a valid preview. Matches by country/location, since
+    round numbers don't line up exactly across seasons.
+    """
+    try:
+        event = fastf1.get_event(year, round_number)
+        target_country = str(event.get("Country", ""))
+        target_location = str(event.get("Location", ""))
+    except Exception:
+        return None
+
+    for back_year in range(year - 1, year - 4, -1):
+        try:
+            schedule = fastf1.get_event_schedule(back_year)
+        except Exception:
+            continue
+        # Exclude pre-season testing (RoundNumber == 0) — testing
+        # events have no qualifying/race telemetry, so matching one
+        # as a "fallback" just produces another failure.
+        match = schedule[
+            (
+                (schedule["Country"] == target_country) |
+                (schedule["Location"] == target_location)
+            )
+            & (schedule["RoundNumber"] > 0)
+        ]
+        if not match.empty:
+            return back_year, int(match.iloc[0]["RoundNumber"])
+    return None
+
+
+def _load_fastest_lap(year: int, round_number: int):
+    """Tries Quali then Race for (year, round_number), with one retry
+    each on transient failures (e.g. a network hiccup fetching live
+    timing data). Returns None if neither has usable telemetry (e.g.
+    the event hasn't happened yet). Logs the real exception so failures
+    are diagnosable instead of silently swallowed."""
+    for session_type in ("Q", "R"):
+        for attempt in (1, 2):
+            try:
+                session = fastf1.get_session(year, round_number, session_type)
+                session.load(laps=True, telemetry=True, weather=False)
+                lap = session.laps.pick_fastest()
+                if lap is not None:
+                    return lap
+                print(f"[track-outline] {year} R{round_number} {session_type}: no fastest lap in results")
+            except Exception as e:
+                print(f"[track-outline] {year} R{round_number} {session_type} attempt {attempt} failed: {e}")
+    return None
+
+
+def get_track_outline(year: int, round_number: int, session_type: str = "Q") -> dict:
+    """
+    Real circuit outline (centerline points + start/finish point),
+    normalized into a compact 190x130 box matching the existing card
+    SVG viewBox. Cached to disk after first computation.
+
+    If the requested (year, round_number) has no telemetry yet — e.g. a
+    future round on the calendar that hasn't been raced — falls back to
+    the same circuit's most recent previous season, since the physical
+    track layout is unchanged.
+    """
+    cache_path = _outline_cache_path(year, round_number)
+    if os.path.exists(cache_path):
+        with open(cache_path, "rb") as f:
+            return pickle.load(f)
+
+    used_year, used_round = year, round_number
+    lap = None
+
+    # Skip straight to the previous-season fallback for rounds that
+    # clearly haven't happened yet — avoids wasting 4+ real network
+    # attempts (Q + R, 2 retries each) on a session that provably
+    # has no data, which is what made warm-up crawl on future rounds.
+    if not _event_is_in_future(year, round_number):
+        lap = _load_fastest_lap(year, round_number)
+
+    if lap is None:
+        fallback = _resolve_fallback_round(year, round_number)
+        if fallback:
+            used_year, used_round = fallback
+            lap = _load_fastest_lap(used_year, used_round)
+
+    if lap is None:
+        raise ValueError(
+            f"No lap data available for {year} round {round_number} "
+            f"(and no usable previous-season fallback found)"
+        )
+
+    tel = lap.get_telemetry()
+    x = tel["X"].to_numpy()
+    y = tel["Y"].to_numpy()
+    distances = tel["Distance"].to_numpy() if "Distance" in tel.columns else None
+    drs_raw = tel["DRS"].to_numpy() if "DRS" in tel.columns else None
+
+    # Downsample to a fixed point budget BEFORE normalizing — same
+    # telemetry already loaded above, just fewer points to draw/ship,
+    # so this adds no extra fetch cost, only a lighter payload.
+    TARGET_POINTS = 160
+    n_raw = len(x)
+    if n_raw > TARGET_POINTS:
+        idxs = np.linspace(0, n_raw - 1, TARGET_POINTS).astype(int)
+        x, y = x[idxs], y[idxs]
+        if distances is not None:
+            distances = distances[idxs]
+        if drs_raw is not None:
+            drs_raw = drs_raw[idxs]
+
+    x_min, x_max = float(x.min()), float(x.max())
+    y_min, y_max = float(y.min()), float(y.max())
+    width = (x_max - x_min) or 1.0
+    height = (y_max - y_min) or 1.0
+
+    target_w, target_h = 190.0, 130.0
+    pad = 12.0
+    scale = min((target_w - pad * 2) / width, (target_h - pad * 2) / height)
+
+    x_norm = (x - x_min) * scale + pad
+    # Flip Y — SVG grows downward, track telemetry Y axis typically doesn't.
+    y_norm = target_h - ((y - y_min) * scale + pad)
+
+    points = [
+        [round(float(px), 1), round(float(py), 1)]
+        for px, py in zip(x_norm.tolist(), y_norm.tolist())
+    ]
+    n = len(points)
+
+    # Sector-colored segments (color only, no labels) — split by
+    # distance into thirds, +1 index overlap at each cut so segments
+    # visually connect with no gap between them.
+    if distances is not None and len(distances) == n:
+        total_distance = float(distances.max())
+        idx1 = int(np.abs(distances - total_distance / 3).argmin())
+        idx2 = int(np.abs(distances - total_distance * 2 / 3).argmin())
+    else:
+        idx1 = n // 3
+        idx2 = n * 2 // 3
+
+    sector_segments = [
+        {"id": 1, "color": "#e2001a", "points": points[0:idx1 + 1]},
+        {"id": 2, "color": "#00aeef", "points": points[idx1:idx2 + 1]},
+        {"id": 3, "color": "#ffd400", "points": points[idx2:]},
+    ]
+
+    # DRS zone start points only (kept light — no full-zone overlay).
+    drs_zones = []
+    if drs_raw is not None:
+        active = np.isin(drs_raw, [10, 12, 14])
+        zone_start = None
+        for i, is_active in enumerate(active):
+            if is_active and zone_start is None:
+                zone_start = i
+            elif not is_active and zone_start is not None:
+                drs_zones.append({"start": points[zone_start], "end": points[i - 1]})
+                zone_start = None
+        if zone_start is not None:
+            drs_zones.append({"start": points[zone_start], "end": points[n - 1]})
+
+    result = {
+        "year": year,
+        "round": round_number,
+        "source_year": used_year,
+        "source_round": used_round,
+        "points": points,
+        "start_finish": {"x": points[0][0], "y": points[0][1]},
+        "viewbox": {"w": target_w, "h": target_h},
+        "sector_segments": sector_segments,
+        "drs_zones": drs_zones,
+    }
+
+    os.makedirs(_CACHE_DIR, exist_ok=True)
+    with open(cache_path, "wb") as f:
+        pickle.dump(result, f, protocol=pickle.HIGHEST_PROTOCOL)
+
+    return result
+
+
+def get_cached_track_outline(year: int, round_number: int):
+    """
+    Returns the cached outline if it already exists on disk — NEVER
+    triggers a live FastF1 fetch. Used by the /api/schedule endpoint so
+    it stays fast even for rounds that haven't been pre-warmed yet;
+    those simply come back without outline data and the frontend falls
+    back to a lazy per-card fetch only for those specific rounds.
+    """
+    cache_path = _outline_cache_path(year, round_number)
+    if os.path.exists(cache_path):
+        try:
+            with open(cache_path, "rb") as f:
+                return pickle.load(f)
+        except Exception:
+            return None
+    return None
