@@ -73,6 +73,7 @@ const pickerStatus = document.getElementById("pickerStatus");
 
 function showToast(message) {
   const toast = document.getElementById("homeToast");
+  if (!toast) return;
   toast.textContent = message;
   toast.classList.remove("hidden");
   clearTimeout(showToast._t);
@@ -93,24 +94,25 @@ function goToHomeScreen() {
 document.getElementById("heroStartBtn").addEventListener("click", goToPickerScreen);
 document.getElementById("pickerHomeBtn").addEventListener("click", goToHomeScreen);
 
-// document.getElementById("viewFullLeaderboardBtn").addEventListener("click", () => {
-//   goToPickerScreen();
-//   showToast("Load a session to see the full live leaderboard");
-// })
+// PATCH: this button belonged to the old sidebar dashboard's live-timing
+// panel and doesn't exist in the new landing page — guard it instead of
+// letting a null .addEventListener() throw and kill the rest of the script.
+const viewFullLeaderboardBtn = document.getElementById("viewFullLeaderboardBtn");
+if (viewFullLeaderboardBtn) {
+  viewFullLeaderboardBtn.addEventListener("click", () => {
+    // Hide current homepage view and show the Telemetry panel
+    document.getElementById("homePage").classList.add("hidden");
+    document.getElementById("telemetryPanel").classList.remove("hidden");
 
-document.getElementById("viewFullLeaderboardBtn").addEventListener("click", () => {
-  // Hide current homepage view and show the Telemetry panel
-  document.getElementById("homePage").classList.add("hidden");
-  document.getElementById("telemetryPanel").classList.remove("hidden");
-  
-  // Highlight the active navigation item on the left sidebar
-  document.querySelectorAll(".nav-item").forEach(item => {
-    item.classList.toggle("active", item.dataset.nav === "telemetry");
+    // Highlight the active navigation item on the left sidebar
+    document.querySelectorAll(".nav-item").forEach(item => {
+      item.classList.toggle("active", item.dataset.nav === "telemetry");
+    });
+
+    // Initialize the telemetry panel scripts & content
+    initTelemetryPanel();
   });
-
-  // Initialize the telemetry panel scripts & content
-  initTelemetryPanel();
-});
+}
 
 const NAV_LABELS = {
   sessions: "Sessions",
@@ -128,11 +130,6 @@ document.querySelectorAll(".nav-item").forEach(btn => {
     const target = btn.dataset.nav;
     if (target === "home") return;
     if (target === "replay") { goToPickerScreen(); return; }
-    // if (target === "sessions") {
-    //   document.getElementById("homePage").classList.add("hidden");
-    //   document.getElementById("sessionsPanel").classList.remove("hidden");
-    //   return;
-    // }
     if (target === "sessions") {
       document.getElementById("homePage").classList.add("hidden");
       document.getElementById("sessionsPanel").classList.remove("hidden");
@@ -191,6 +188,11 @@ const FLAG_EMOJI = {
 
 async function loadRecentSessions(year) {
   const grid = document.getElementById("recentSessionsGrid");
+  // PATCH: the new landing page doesn't have a "Recent Sessions" grid —
+  // that browsing now happens behind "Browse Sessions" (#sessionsPanel).
+  // Bail out quietly instead of throwing on grid.innerHTML.
+  if (!grid) return;
+
   grid.innerHTML = `<p class="sessions-loading">Loading recent sessions…</p>`;
 
   try {
@@ -300,21 +302,28 @@ async function fetchLiveWeather(lat, lon) {
 }
 
 function initHomePage() {
+  // PATCH: homeYearSelect and the recent-sessions wiring were part of the
+  // old dashboard's "Recent Sessions" section, which the new landing page
+  // doesn't have. Guarded so this skips cleanly instead of throwing.
   const homeYearSelect = document.getElementById("homeYearSelect");
   const thisYear = new Date().getFullYear();
-  for (let y = thisYear; y >= 2018; y--) {
-    const opt = document.createElement("option");
-    opt.value = y;
-    opt.textContent = y;
-    homeYearSelect.appendChild(opt);
+  if (homeYearSelect) {
+    for (let y = thisYear; y >= 2018; y--) {
+      const opt = document.createElement("option");
+      opt.value = y;
+      opt.textContent = y;
+      homeYearSelect.appendChild(opt);
+    }
+    homeYearSelect.addEventListener("change", () => loadRecentSessions(homeYearSelect.value));
+    loadRecentSessions(thisYear);
   }
-  homeYearSelect.addEventListener("change", () => loadRecentSessions(homeYearSelect.value));
-  loadRecentSessions(thisYear);
 
   const updateClocks = () => {
     const t = new Date().toLocaleTimeString();
-    document.getElementById("homeTopClock").textContent = t;
-    document.getElementById("homeLocalTime").textContent = t;
+    const topClock = document.getElementById("homeTopClock");
+    const localClock = document.getElementById("homeLocalTime");
+    if (topClock) topClock.textContent = t;
+    if (localClock) localClock.textContent = t;
   };
   updateClocks();
   setInterval(updateClocks, 1000);
@@ -648,7 +657,7 @@ function drawTrack() {
     drs_zones.forEach(zone => {
       const [x1, y1] = toCanvas([zone.start_offset.x, zone.start_offset.y]);
       const [x2, y2] = toCanvas([zone.end_offset.x, zone.end_offset.y]);
-      
+
 
       ctx.beginPath();
       ctx.moveTo(x1, y1);
@@ -1621,7 +1630,46 @@ function renderTelemetryCompare(data) {
   const speedMax = Math.max(...a.speed, ...b.speed) * 1.05;
   drawTelemetryLine("teleSpeedCanvas", a.speed, b.speed, colorA, colorB, 0, speedMax);
   drawTelemetryLine("teleThrottleCanvas", a.throttle, b.throttle, colorA, colorB, 0, 100);
-  
+
+  drawTelemetryLine("teleBrakeCanvas", a.brake, b.brake, colorA, colorB, 0, 100);
+
+  const sectorRows = ["sector1", "sector2", "sector3"].map((key, i) => {
+    const ta = a.sector_times[key], tb = b.sector_times[key];
+    const delta = (ta != null && tb != null) ? (ta - tb) : null;
+    const deltaText = delta == null ? "-" : `${delta >= 0 ? "+" : ""}${delta.toFixed(3)}s`;
+    const deltaColor = delta == null ? "#999" : delta < 0 ? "#2ecc40" : "#ff4444";
+    return `<div class="telemetry-sector-row">
+      <span>Sector ${i + 1}</span>
+      <span style="color:${colorA}">${ta != null ? ta.toFixed(3) + "s" : "-"}</span>
+      <span style="color:${colorB}">${tb != null ? tb.toFixed(3) + "s" : "-"}</span>
+      <span style="color:${deltaColor}">${deltaText}</span>
+    </div>`;
+  }).join("");
+
+  document.getElementById("teleSectorTable").innerHTML = `
+    <div class="telemetry-sector-row" style="font-weight:700; color:#9aa1ad;">
+      <span>Sector</span><span>${a.driver}</span><span>${b.driver}</span><span>Delta (A − B)</span>
+    </div>
+    ${sectorRows}`;
+}
+
+
+function renderTelemetryCompare(data) {
+  const a = data.driver_a, b = data.driver_b;
+  const colorA = state.raceData?.driver_colors?.[a.driver] || "#00aeef";
+  const colorB = state.raceData?.driver_colors?.[b.driver] || "#ff3333";
+
+  document.getElementById("teleAInfo").innerHTML =
+    `<b style="color:${colorA}">${a.driver}</b> · Lap ${a.lap_number} · ${fmtLapTime(a.lap_time)} · ${a.compound}`;
+  document.getElementById("teleBInfo").innerHTML =
+    `<b style="color:${colorB}">${b.driver}</b> · Lap ${b.lap_number} · ${fmtLapTime(b.lap_time)} · ${b.compound}`;
+
+  document.getElementById("telemetryResults").classList.remove("hidden");
+
+  const speedMax = Math.max(...a.speed, ...b.speed) * 1.05;
+  drawTelemetryLine("teleSpeedCanvas", a.speed, b.speed, colorA, colorB, 0, speedMax);
+  drawTelemetryLine("teleThrottleCanvas", a.throttle, b.throttle, colorA, colorB, 0, 100);
+
   drawTelemetryLine("teleBrakeCanvas", a.brake, b.brake, colorA, colorB, 0, 100);
 
   const sectorRows = ["sector1", "sector2", "sector3"].map((key, i) => {
@@ -1659,6 +1707,39 @@ async function initDriversPanel() {
     document.getElementById("drivers-panel").innerHTML =
       `<p class="dp-empty">Couldn't load driver data.</p>`;
   }
+}
+
+// Global bridge function — accessible everywhere (including constructors-panel.js)
+async function goToDriverProfile(code) {
+  // 1. Hide all active panel views and show the Drivers Panel
+  document.getElementById("constructorsPanel")?.classList.add("hidden");
+  document.getElementById("homePage")?.classList.add("hidden");
+  document.getElementById("telemetryPanel")?.classList.add("hidden");
+  document.getElementById("sessionsPanel")?.classList.add("hidden");
+  document.getElementById("driversPanel")?.classList.remove("hidden");
+
+  // 2. Highlight 'Drivers' in the left sidebar navigation
+  document.querySelectorAll(".nav-item").forEach(item => {
+    item.classList.toggle("active", item.dataset.nav === "drivers");
+  });
+
+  // 3. Ensure the drivers panel is initialized
+  if (!driversInitialized) {
+    await initDriversPanel();
+  }
+
+  // 4. Open the requested driver's full profile
+  const opened = window.openDriverProfile ? window.openDriverProfile(code) : false;
+  if (!opened) {
+    console.warn(`[app] couldn't open driver profile for code "${code}" — driver not found in current season data`);
+  }
+}
+
+
+
+initPicker();
+setSpeedIndex(state.speedIndex);
+
 
 // Called from the Constructors page when a driver mini-card is clicked —
 // switches over to the Drivers panel and opens straight to that driver's
@@ -1677,7 +1758,7 @@ async function goToDriverProfile(code) {
   }
 }
 window.goToDriverProfile = goToDriverProfile;
-}
+
 
 let constructorsInitialized = false;
 
