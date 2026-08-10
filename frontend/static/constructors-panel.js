@@ -130,9 +130,10 @@
     const color = t.color || "#888";
     const pct = maxPoints > 0 ? Math.max((t.points / maxPoints) * 100, t.points > 0 ? 2 : 0) : 0;
     
-    // Build clickable driver tags for team drivers
+    
+    // Plain text driver names (unclickable)
     const driversHTML = (t.drivers || []).map(d => `
-      <span class="cp-row-driver-chip" data-driver-code="${escapeAttr(d.code || '')}" title="View ${d.name}'s Profile">
+      <span class="cp-row-driver-name">
         ${d.name}
       </span>
     `).join(" &middot; ");
@@ -191,14 +192,6 @@
   }
 
   function wireListEvents() {
-    // Driver chip clicks inside team standings list
-    _container.querySelectorAll(".cp-row-driver-chip").forEach(chip => {
-      chip.addEventListener("click", (e) => {
-        e.stopPropagation(); // Stop parent row click from triggering
-        const code = chip.dataset.driverCode;
-        triggerDriverProfile(code);
-      });
-    });
 
     // Entire row click opens Constructor profile
     _container.querySelectorAll("[data-team-id]").forEach(el => {
@@ -219,9 +212,14 @@
 
   function driverCardHTML(d, color) {
     const imgSrc = d.image ? assetPath(d.image) : null;
+    const initial = (d.name || "?")[0];
+    const fallbackHTML = `<div class="cp-driver-card-fallback" style="background:${color}18; color:${color};">${initial}</div>`;
+    const imgHTML = imgSrc
+      ? `<img class="cp-driver-card-img" src="${imgSrc}" alt="${escapeAttr(d.name || '')}" data-fallback="${escapeAttr(fallbackHTML)}" onerror="this.outerHTML=this.dataset.fallback">`
+      : fallbackHTML;
     return `
       <div class="cp-driver-card" data-driver-code="${escapeAttr(d.code || '')}">
-        ${imgSrc ? `<img class="cp-driver-card-img" src="${imgSrc}" alt="${d.name}" onerror="this.remove()">` : `<div class="cp-driver-card-fallback" style="background:${color}18; color:${color};">${(d.name || "?")[0]}</div>`}
+        ${imgHTML}
         <div class="cp-driver-card-body">
           <p class="cp-driver-card-num" style="color:${color};">#${d.number ?? "-"}</p>
           <p class="cp-driver-card-name">${d.name || ""}</p>
@@ -284,16 +282,27 @@
 
   function teamStatsListHTML(t) {
     const s = t.team_stats || {};
+    const starts = s.starts ?? (t.history || []).length;
+    const dnfs = s.dnfs ?? 0;
+    const reliabilityRate = starts > 0 ? (((starts - dnfs) / starts) * 100).toFixed(1) : "-";
+
+    const racesCompleted = (t.history || []).length;
+    const projected = racesCompleted > 0 && _meta.total_rounds
+      ? Math.round((t.points / racesCompleted) * _meta.total_rounds)
+      : null;
+
     const rows = [
       ["Wins", t.wins ?? 0],
       ["Podiums", t.podiums ?? 0],
       ["Poles", t.poles ?? 0],
       ["Fastest Laps", t.fastest_laps ?? 0],
       ["Points Finishes", s.points_finishes ?? 0],
-      ["DNFs", s.dnfs ?? 0],
-      ["Average Start", s.avg_start != null ? `P${s.avg_start}` : "-"],
-      ["Average Finish", s.avg_finish != null ? `P${s.avg_finish}` : "-"],
+      ["DNFs", dnfs],
+      ["Reliability Rate", `${reliabilityRate}%`],
+      ["Average Qualifying", s.avg_start != null ? `P${s.avg_start}` : "-"],
+      ["Average Race Finish", s.avg_finish != null ? `P${s.avg_finish}` : "-"],
       ["Best Finish", s.best_finish != null ? `P${s.best_finish}` : "-"],
+      ["Projected Final Points", projected != null ? projected : "-"],
     ];
     return `
       <div class="cp-stat-list">
@@ -778,4 +787,4 @@
   }
 
   window.loadConstructorsPanel = loadConstructorsPanel;
-})();d
+})();

@@ -1,3 +1,9 @@
+/* Pull constructors panel view to top of container */
+#constructors-panel {
+  padding-top: 0 !important;
+  margin-top: 0 !important;
+}
+
 /* ===== Constructors Panel — full standings layout ===== */
 
 @import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@600;700;800;900&display=swap');
@@ -46,7 +52,8 @@
   cursor: pointer;
   padding: 7px 16px;
   transition: background .2s, color .2s, border-color .2s;
-  margin-bottom: 20px;
+  margin-top: 0 !important;
+  margin-bottom: 12px !important;
 }
 .cp-back-btn:hover {
   background: rgba(255, 255, 255, 0.12);
@@ -69,7 +76,8 @@
   grid-template-columns: minmax(200px, 260px) 1fr;
   gap: 24px;
   padding: 0 8px;
-  margin-bottom: 24px;
+  margin-top: 0;
+  margin-bottom: 16px;
   align-items: start;
 }
 @media (max-width: 900px) {
@@ -81,14 +89,14 @@
   font-weight: 800;
   letter-spacing: 0.08em;
   color: #e74c3c;
-  margin: 0 0 8px;
+  margin: 0 0 4px;
 }
 .cp-page-title {
   font-family: 'Orbitron', 'Barlow Condensed', sans-serif;
   font-size: 26px;
   font-weight: 800;
   line-height: 1.1;
-  margin: 0 0 10px;
+  margin: 0 0 8px;
   color: #fff;
   letter-spacing: 0.01em;
 }
@@ -305,16 +313,6 @@
   font-size: 12px; color: #999; margin: 2px 0 0; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
 }
 
-/* Clickable driver chips in the list view */
-.cp-row-driver-chip {
-  cursor: pointer;
-  transition: color .2s, text-decoration .2s;
-}
-.cp-row-driver-chip:hover {
-  color: #fff;
-  text-decoration: underline;
-}
-
 .cp-row-bar-track {
   height: 5px; border-radius: 999px; background: rgba(255,255,255,0.06); overflow: hidden;
 }
@@ -382,18 +380,8 @@
 }
 @media (min-width: 768px) { .cp-team-hero-name { font-size: 38px; } }
 
-.cp-team-hero-drivers { font-size: 13px; color: #bbb; margin: 0; }
+.cp-team-hero-drivers { font-size: 13px; color: #bbb; margin: 0; cursor: default; }
 .cp-team-hero-drivers span { color: #777; font-size: 11px; }
-
-/* Clickable driver text links inside hero header */
-.cp-hero-driver-link {
-  cursor: pointer;
-  transition: color .2s;
-}
-.cp-hero-driver-link:hover {
-  color: #fff;
-  text-decoration: underline;
-}
 
 .cp-team-hero-right { display: flex; align-items: center; gap: 14px; flex-wrap: wrap; }
 .cp-team-hero-pos { font-size: 22px; font-weight: 900; }
@@ -568,8 +556,6 @@
 .cp-mini-pts { color: #fff; font-weight: 800; text-align: right; }
 .cp-mini-pts small { font-size: 9px; color: #888; font-weight: 700; }
 
-
-
 /* --- View Full Driver Profile link styling --- */
 .cp-driver-card-view-link {
   display: inline-block;
@@ -585,3 +571,919 @@
   opacity: 1;
   transform: translateX(4px);
 }
+
+/* ===== MOVE CONSTRUCTORS PAGE UP ===== */
+
+#constructors-panel {
+  margin-top: -70px !important;
+  padding-top: 0 !important;
+}
+
+/* Remove spacing from the wrapper around constructors */
+#constructors-panel,
+#constructors-panel > * {
+  box-sizing: border-box;
+}
+
+/* Keep the top content tight */
+#constructors-panel .cp-top-row {
+  margin-top: 0 !important;
+  padding-top: 0 !important;
+}
+
+
+/* ===== TEAM DETAIL - MOVE CONTENT UP ===== */
+
+.team-detail-page,
+.constructor-detail-page,
+.team-page {
+    margin-top: -55px !important;
+    padding-top: 0 !important;
+}
+
+
+
+/* ============================================================
+   CONSTRUCTOR PROFILE — PREMIUM F1 DASHBOARD LAYOUT
+   Paste this at the VERY BOTTOM of constructor.css
+   ============================================================ */
+
+
+/* ============================================================
+   1. MAIN PROFILE WIDTH
+   ============================================================ */
+
+#constructors-panel {
+    width: 100%;
+    max-width: none !important;
+    margin: 0 auto !important;
+    padding-top: 0 !important;
+}
+
+#constructors-panel .cp-full-profile {
+    width: min(1500px, calc(100vw - 80px));
+    max-width: 1500px;
+    margin: 0 auto;
+    padding: 0;
+}
+
+
+/* ============================================================
+   2. BACK BUTTON
+   ============================================================ */
+
+#constructors-panel .cp-back-btn {
+    margin-top: 0 !important;
+    margin-bottom: 14px !important;
+
+    padding: 7px 16px;
+
+    border-radius: 999px;
+
+    background: rgba(255, 255, 255, 0.045);
+    border: 1px solid rgba(255, 255, 255, 0.10);
+
+    color: #bdbdbd;
+
+    transition:
+        background .2s ease,
+        border-color .2s ease,
+        color .2s ease,
+        transform .2s ease;
+}
+
+#constructors-panel .cp-back-btn:hover {
+    background: rgba(255, 255, 255, 0.09);
+    border-color: rgba(255, 255, 255, 0.20);
+    color: #fff;
+    transform: translateX(-2px);
+}
+
+
+/* ============================================================
+   3. TEAM HERO
+   ============================================================ */
+
+#constructors-panel .cp-team-hero {
+    width: 100%;
+
+    min-height: 215px;
+
+    padding: 24px 30px 0 !important;
+
+    margin-bottom: 16px !important;
+
+    border-radius: 20px;
+
+    border: 1px solid rgba(255, 255, 255, 0.10);
+
+    overflow: hidden;
+
+    box-shadow:
+        0 18px 50px rgba(0, 0, 0, 0.35),
+        inset 0 1px 0 rgba(255, 255, 255, 0.035);
+}
+
+
+/* ============================================================
+   4. HERO HEADER
+   ============================================================ */
+
+#constructors-panel .cp-team-hero-top {
+    display: grid !important;
+
+    grid-template-columns: 1fr auto;
+
+    align-items: center;
+
+    gap: 30px;
+
+    padding-bottom: 18px !important;
+}
+
+
+/* Left side */
+
+#constructors-panel .cp-team-hero-left {
+    display: flex;
+
+    align-items: center;
+
+    gap: 18px;
+
+    min-width: 0;
+}
+
+
+/* Mercedes / team logo */
+
+#constructors-panel .cp-team-hero-logo,
+#constructors-panel .cp-team-hero-logo-fallback {
+    width: 62px;
+    height: 62px;
+
+    border-radius: 14px;
+
+    flex-shrink: 0;
+}
+
+
+/* Team name */
+
+#constructors-panel .cp-team-hero-name {
+    margin: 0 0 5px;
+
+    font-size: 38px !important;
+
+    line-height: 1;
+
+    font-weight: 900;
+
+    letter-spacing: -0.025em;
+}
+
+
+/* Driver names */
+
+#constructors-panel .cp-team-hero-drivers {
+    margin: 0;
+
+    font-size: 12px;
+
+    color: #8e8e8e;
+
+    letter-spacing: 0.01em;
+}
+
+
+/* ============================================================
+   5. HERO RIGHT SIDE
+   ============================================================ */
+
+#constructors-panel .cp-team-hero-right {
+    display: flex;
+
+    align-items: center;
+
+    justify-content: flex-end;
+
+    gap: 16px;
+
+    white-space: nowrap;
+}
+
+#constructors-panel .cp-team-hero-pos {
+    font-size: 25px;
+
+    font-weight: 900;
+}
+
+#constructors-panel .cp-team-hero-pts {
+    font-size: 27px;
+
+    font-weight: 900;
+
+    color: #fff;
+}
+
+#constructors-panel .cp-team-hero-pts small {
+    font-size: 10px;
+
+    color: #777;
+
+    letter-spacing: 0.08em;
+}
+
+#constructors-panel .cp-team-hero-wins {
+    padding: 7px 13px;
+
+    border-radius: 999px;
+
+    background: rgba(255, 255, 255, 0.045);
+
+    font-size: 11px;
+
+    font-weight: 900;
+
+    letter-spacing: 0.04em;
+}
+
+
+/* ============================================================
+   6. STATS STRIP
+   ============================================================ */
+
+#constructors-panel .cp-stats-row {
+    display: grid !important;
+
+    grid-template-columns: repeat(5, 1fr);
+
+    gap: 0;
+
+    padding: 16px 0 15px !important;
+
+    border-top: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+
+/* Individual stats */
+
+#constructors-panel .cp-stat-card {
+    min-width: 0 !important;
+
+    padding: 5px 24px !important;
+
+    border: 0 !important;
+
+    border-right: 1px solid rgba(255, 255, 255, 0.08) !important;
+
+    border-radius: 0 !important;
+
+    background: transparent !important;
+
+    backdrop-filter: none;
+}
+
+#constructors-panel .cp-stat-card:last-child {
+    border-right: 0 !important;
+}
+
+
+/* Stat numbers */
+
+#constructors-panel .cp-stat-value {
+    margin: 0;
+
+    font-size: 25px;
+
+    line-height: 1.1;
+
+    font-weight: 900;
+}
+
+
+/* Stat labels */
+
+#constructors-panel .cp-stat-label {
+    margin-top: 5px;
+
+    font-size: 9px;
+
+    color: #777;
+
+    letter-spacing: 0.11em;
+
+    font-weight: 700;
+}
+
+
+/* ============================================================
+   7. ALL LOWER CONTENT
+   ============================================================ */
+
+#constructors-panel .cp-full-profile {
+    display: block;
+}
+
+
+/* ============================================================
+   8. DRIVERS + CHAMPIONSHIP PROGRESSION
+   ============================================================ */
+
+#constructors-panel .cp-profile-grid {
+    display: grid;
+
+    grid-template-columns: 1.12fr 0.88fr;
+
+    gap: 16px;
+
+    align-items: stretch;
+}
+
+
+/* ============================================================
+   9. RACE + STATS + POINTS
+   ============================================================ */
+
+#constructors-panel .cp-profile-grid-3 {
+    display: grid;
+
+    grid-template-columns: 1.45fr 0.90fr 0.90fr;
+
+    gap: 16px;
+
+    margin-top: 16px !important;
+
+    align-items: stretch;
+}
+
+
+/* ============================================================
+   10. CHAMPIONSHIP BATTLE + GAP + FORM
+   ============================================================ */
+
+#constructors-panel .cp-profile-grid-3b {
+    display: grid;
+
+    grid-template-columns: 1.45fr 0.90fr 0.90fr;
+
+    gap: 16px;
+
+    margin-top: 16px !important;
+
+    align-items: stretch;
+}
+
+
+/* ============================================================
+   11. NEXT RACE + CONSTRUCTOR CHAMPIONSHIP
+   ============================================================ */
+
+#constructors-panel .cp-profile-grid-2 {
+    display: grid;
+
+    grid-template-columns: 0.75fr 1.25fr;
+
+    gap: 16px;
+
+    margin-top: 16px !important;
+
+    align-items: stretch;
+}
+
+
+/* ============================================================
+   12. UNIVERSAL CARD STYLE
+   ============================================================ */
+
+#constructors-panel .cp-desc-box {
+    position: relative;
+
+    min-width: 0;
+
+    padding: 18px;
+
+    border-radius: 16px;
+
+    background:
+        linear-gradient(
+            145deg,
+            rgba(255,255,255,0.055),
+            rgba(255,255,255,0.025)
+        );
+
+    border: 1px solid rgba(255,255,255,0.075);
+
+    box-shadow:
+        0 10px 30px rgba(0,0,0,0.18);
+
+    backdrop-filter: blur(14px);
+    -webkit-backdrop-filter: blur(14px);
+
+    transition:
+        border-color .2s ease,
+        transform .2s ease,
+        background .2s ease;
+}
+
+
+/* Very subtle hover */
+
+#constructors-panel .cp-desc-box:hover {
+    border-color: rgba(255,255,255,0.12);
+
+    background:
+        linear-gradient(
+            145deg,
+            rgba(255,255,255,0.065),
+            rgba(255,255,255,0.028)
+        );
+}
+
+
+/* ============================================================
+   13. SECTION HEADERS
+   ============================================================ */
+
+#constructors-panel .cp-desc-header {
+    display: flex;
+
+    align-items: center;
+
+    gap: 9px;
+
+    margin-bottom: 14px;
+}
+
+#constructors-panel .cp-desc-bar {
+    width: 3px;
+
+    height: 14px;
+
+    border-radius: 999px;
+
+    box-shadow: 0 0 8px currentColor;
+}
+
+#constructors-panel .cp-desc-header h2 {
+    margin: 0;
+
+    color: #a7a7a7;
+
+    font-size: 10px;
+
+    font-weight: 800;
+
+    letter-spacing: 0.12em;
+
+    text-transform: uppercase;
+}
+
+
+/* ============================================================
+   14. DRIVERS
+   ============================================================ */
+
+#constructors-panel .cp-drivers-grid {
+    display: flex;
+
+    flex-direction: column;
+
+    gap: 9px;
+}
+
+
+/* Driver cards */
+
+#constructors-panel .cp-driver-card {
+    min-height: 94px;
+
+    padding: 11px 13px;
+
+    border-radius: 11px;
+
+    background: rgba(255,255,255,0.035);
+
+    border: 1px solid rgba(255,255,255,0.055);
+
+    transition:
+        background .2s ease,
+        border-color .2s ease,
+        transform .2s ease;
+}
+
+#constructors-panel .cp-driver-card:hover {
+    background: rgba(255,255,255,0.055);
+
+    border-color: rgba(255,255,255,0.12);
+
+    transform: translateX(3px);
+}
+
+
+/* ============================================================
+   15. PROGRESSION CHART
+   ============================================================ */
+
+#constructors-panel .cp-chart-canvas-wrap {
+    position: relative;
+
+    height: 235px;
+}
+
+#constructors-panel #cp-progression-canvas {
+    width: 100% !important;
+
+    height: 100% !important;
+}
+
+
+/* Chart header */
+
+#constructors-panel .cp-box-header-row {
+    display: flex;
+
+    justify-content: space-between;
+
+    align-items: center;
+
+    gap: 12px;
+
+    margin-bottom: 3px;
+}
+
+
+/* Chart tabs */
+
+#constructors-panel .cp-chart-tabs {
+    display: flex;
+
+    gap: 2px;
+
+    padding: 3px;
+
+    border-radius: 999px;
+
+    background: rgba(255,255,255,0.035);
+}
+
+#constructors-panel .cp-chart-tab {
+    padding: 5px 9px;
+
+    border-radius: 999px;
+
+    border: 0;
+
+    background: transparent;
+
+    color: #777;
+
+    font-size: 9px;
+
+    font-weight: 800;
+
+    cursor: pointer;
+}
+
+#constructors-panel .cp-chart-tab.active {
+    background: rgba(255,255,255,0.10);
+
+    color: #fff;
+}
+
+
+/* ============================================================
+   16. RACE TABLE
+   ============================================================ */
+
+#constructors-panel .cp-profile-grid-3 > .cp-desc-box:first-child {
+    overflow: hidden;
+}
+
+
+/* ============================================================
+   17. TEAM STATISTICS
+   ============================================================ */
+
+#constructors-panel .cp-profile-grid-3 > .cp-desc-box:nth-child(2) {
+    min-width: 0;
+}
+
+
+/* ============================================================
+   18. POINTS PER ROUND
+   ============================================================ */
+
+#constructors-panel .cp-profile-grid-3 > .cp-desc-box:nth-child(3) {
+    min-width: 0;
+}
+
+#constructors-panel #cp-perround-canvas {
+    width: 100% !important;
+
+    height: 100% !important;
+}
+
+
+/* ============================================================
+   19. CHAMPIONSHIP BATTLE
+   ============================================================ */
+
+#constructors-panel .cp-profile-grid-3b > .cp-desc-box:first-child {
+    min-width: 0;
+}
+
+
+/* ============================================================
+   20. GAP TO LEADER
+   ============================================================ */
+
+#constructors-panel .cp-profile-grid-3b > .cp-desc-box:nth-child(2) {
+    display: flex;
+
+    flex-direction: column;
+}
+
+
+/* ============================================================
+   21. RECENT FORM
+   ============================================================ */
+
+#constructors-panel .cp-profile-grid-3b > .cp-desc-box:nth-child(3) {
+    min-width: 0;
+}
+
+#constructors-panel .cp-form-strip {
+    display: flex;
+
+    align-items: center;
+
+    gap: 7px;
+
+    flex-wrap: wrap;
+}
+
+#constructors-panel .cp-form-badge {
+    width: 40px;
+    height: 40px;
+
+    border-radius: 10px;
+}
+
+
+/* ============================================================
+   22. NEXT RACE
+   ============================================================ */
+
+#constructors-panel .cp-profile-grid-2 > .cp-desc-box:first-child {
+    min-height: 145px;
+}
+
+#constructors-panel .cp-nextrace-row {
+    display: flex;
+
+    align-items: center;
+
+    gap: 14px;
+
+    min-height: 75px;
+}
+
+#constructors-panel .cp-nextrace-icon {
+    font-size: 27px;
+}
+
+#constructors-panel .cp-nextrace-name {
+    font-size: 15px;
+
+    font-weight: 900;
+
+    color: #fff;
+
+    margin: 0;
+}
+
+#constructors-panel .cp-nextrace-date {
+    margin: 3px 0 0;
+
+    color: #777;
+
+    font-size: 11px;
+}
+
+
+/* ============================================================
+   23. CONSTRUCTOR CHAMPIONSHIP
+   ============================================================ */
+
+#constructors-panel .cp-mini-standings {
+    display: flex;
+
+    flex-direction: column;
+
+    gap: 4px;
+}
+
+#constructors-panel .cp-mini-row {
+    display: grid;
+
+    grid-template-columns: 25px 1fr auto;
+
+    align-items: center;
+
+    gap: 10px;
+
+    min-height: 31px;
+
+    padding: 5px 8px;
+
+    border-radius: 8px;
+
+    font-size: 11px;
+}
+
+#constructors-panel .cp-mini-row-self {
+    background: color-mix(
+        in srgb,
+        var(--team-color) 12%,
+        transparent
+    );
+
+    border-color: color-mix(
+        in srgb,
+        var(--team-color) 35%,
+        transparent
+    );
+}
+
+
+/* ============================================================
+   24. DESKTOP — LARGE SCREENS
+   ============================================================ */
+
+@media (min-width: 1600px) {
+
+    #constructors-panel .cp-full-profile {
+        width: min(1550px, calc(100vw - 100px));
+    }
+
+    #constructors-panel .cp-team-hero-name {
+        font-size: 42px !important;
+    }
+
+    #constructors-panel .cp-chart-canvas-wrap {
+        height: 250px;
+    }
+}
+
+
+/* ============================================================
+   25. LAPTOP
+   ============================================================ */
+
+@media (max-width: 1200px) {
+
+    #constructors-panel .cp-full-profile {
+        width: calc(100vw - 50px);
+    }
+
+    #constructors-panel .cp-profile-grid {
+        grid-template-columns: 1fr 0.9fr;
+    }
+
+    #constructors-panel .cp-profile-grid-3 {
+        grid-template-columns: 1.25fr 0.9fr 0.9fr;
+    }
+
+    #constructors-panel .cp-profile-grid-3b {
+        grid-template-columns: 1.25fr 0.9fr 0.9fr;
+    }
+}
+
+
+/* ============================================================
+   26. TABLET
+   ============================================================ */
+
+@media (max-width: 900px) {
+
+    #constructors-panel .cp-full-profile {
+        width: calc(100vw - 32px);
+    }
+
+    #constructors-panel .cp-team-hero {
+        padding: 22px 22px 0 !important;
+    }
+
+    #constructors-panel .cp-team-hero-top {
+        grid-template-columns: 1fr;
+        gap: 18px;
+    }
+
+    #constructors-panel .cp-team-hero-right {
+        justify-content: flex-start;
+    }
+
+    #constructors-panel .cp-profile-grid,
+    #constructors-panel .cp-profile-grid-3,
+    #constructors-panel .cp-profile-grid-3b {
+        grid-template-columns: 1fr;
+    }
+
+    #constructors-panel .cp-profile-grid-2 {
+        grid-template-columns: 1fr;
+    }
+}
+
+
+/* ============================================================
+   27. MOBILE
+   ============================================================ */
+
+@media (max-width: 600px) {
+
+    #constructors-panel .cp-full-profile {
+        width: calc(100vw - 20px);
+    }
+
+    #constructors-panel .cp-team-hero {
+        border-radius: 15px;
+
+        padding: 18px 16px 0 !important;
+    }
+
+    #constructors-panel .cp-team-hero-left {
+        gap: 12px;
+    }
+
+    #constructors-panel .cp-team-hero-logo,
+    #constructors-panel .cp-team-hero-logo-fallback {
+        width: 48px;
+        height: 48px;
+    }
+
+    #constructors-panel .cp-team-hero-name {
+        font-size: 27px !important;
+    }
+
+    #constructors-panel .cp-team-hero-right {
+        gap: 10px;
+    }
+
+    #constructors-panel .cp-team-hero-pos {
+        font-size: 20px;
+    }
+
+    #constructors-panel .cp-team-hero-pts {
+        font-size: 22px;
+    }
+
+    #constructors-panel .cp-stats-row {
+        grid-template-columns: repeat(2, 1fr);
+
+        gap: 8px;
+
+        padding: 14px 0 !important;
+    }
+
+    #constructors-panel .cp-stat-card {
+        border-right: 0 !important;
+
+        padding: 9px 10px !important;
+
+        border-radius: 10px !important;
+
+        background: rgba(255,255,255,0.025) !important;
+    }
+
+    #constructors-panel .cp-stat-value {
+        font-size: 21px;
+    }
+
+    #constructors-panel .cp-desc-box {
+        padding: 14px;
+
+        border-radius: 13px;
+    }
+
+    #constructors-panel .cp-chart-canvas-wrap {
+        height: 200px;
+    }
+
+    #constructors-panel .cp-chart-tabs {
+        width: 100%;
+
+        overflow-x: auto;
+    }
+
+    #constructors-panel .cp-chart-tab {
+        white-space: nowrap;
+    }
+
+    /* FINAL TOP POSITION */
+    #constructors-panel {
+      margin-top: -45px !important;
+      padding-top: 0 !important;
+    }
+}
+
