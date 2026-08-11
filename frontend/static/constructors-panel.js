@@ -74,21 +74,6 @@
     return COUNTRY_FLAGS[country] || "🏁";
   }
 
-  // ---------- Helper for Driver Navigation ----------
-
-  function triggerDriverProfile(driverCode) {
-    if (!driverCode) return;
-    // Prefer global openDriverProfile from driver-panel.js
-    if (typeof window.openDriverProfile === "function") {
-      const opened = window.openDriverProfile(driverCode);
-      if (opened) return;
-    }
-    // Fallback to custom navigation handler if defined
-    if (typeof window.goToDriverProfile === "function") {
-      window.goToDriverProfile(driverCode);
-    }
-  }
-
   // ---------- List view ----------
 
   function summaryCardHTML(accentClass, accentColor, label, valueHTML, sub) {
@@ -129,22 +114,13 @@
   function standingsRowHTML(t, maxPoints) {
     const color = t.color || "#888";
     const pct = maxPoints > 0 ? Math.max((t.points / maxPoints) * 100, t.points > 0 ? 2 : 0) : 0;
-    
-    
-    // Plain text driver names (unclickable)
-    const driversHTML = (t.drivers || []).map(d => `
-      <span class="cp-row-driver-name">
-        ${d.name}
-      </span>
-    `).join(" &middot; ");
-
     return `
       <div class="cp-row" data-team-id="${escapeAttr(t.id)}" style="--team-color:${color};">
         <div class="cp-row-pos" style="color:${color}; border-color:${color};">${String(t.position ?? "-").padStart(2, "0")}</div>
         ${t.teamLogo ? `<img class="cp-row-logo" src="${assetPath(t.teamLogo)}" alt="" onerror="this.remove()">` : `<div class="cp-row-logo-fallback" style="background:${color}22; color:${color};">${(t.name || "?")[0]}</div>`}
         <div class="cp-row-info">
           <p class="cp-row-name">${t.name}</p>
-          <div class="cp-row-drivers">${driversHTML}</div>
+          <p class="cp-row-drivers">${(t.drivers || []).map(d => d.name).join(" &middot; ") || ""}</p>
         </div>
         <div class="cp-row-bar-track">
           <div class="cp-row-bar-fill" style="width:0%; background:${color};" data-target-width="${pct}"></div>
@@ -192,8 +168,6 @@
   }
 
   function wireListEvents() {
-
-    // Entire row click opens Constructor profile
     _container.querySelectorAll("[data-team-id]").forEach(el => {
       el.addEventListener("click", () => {
         _selectedId = el.dataset.teamId;
@@ -203,7 +177,6 @@
         _container.scrollIntoView({ behavior: "smooth", block: "start" });
       });
     });
-
     animateBars();
     animateCounters();
   }
@@ -212,14 +185,9 @@
 
   function driverCardHTML(d, color) {
     const imgSrc = d.image ? assetPath(d.image) : null;
-    const initial = (d.name || "?")[0];
-    const fallbackHTML = `<div class="cp-driver-card-fallback" style="background:${color}18; color:${color};">${initial}</div>`;
-    const imgHTML = imgSrc
-      ? `<img class="cp-driver-card-img" src="${imgSrc}" alt="${escapeAttr(d.name || '')}" data-fallback="${escapeAttr(fallbackHTML)}" onerror="this.outerHTML=this.dataset.fallback">`
-      : fallbackHTML;
     return `
       <div class="cp-driver-card" data-driver-code="${escapeAttr(d.code || '')}">
-        ${imgHTML}
+        ${imgSrc ? `<img class="cp-driver-card-img" src="${imgSrc}" alt="${d.name}" onerror="this.remove()">` : `<div class="cp-driver-card-fallback" style="background:${color}18; color:${color};">${(d.name || "?")[0]}</div>`}
         <div class="cp-driver-card-body">
           <p class="cp-driver-card-num" style="color:${color};">#${d.number ?? "-"}</p>
           <p class="cp-driver-card-name">${d.name || ""}</p>
@@ -231,12 +199,11 @@
             <div><span>${d.fastest_laps ?? 0}</span>F.LAPS</div>
           </div>
           <p class="cp-driver-card-pos-label">Championship Position: P${d.position ?? "-"}</p>
-          <span class="cp-driver-card-view-link" style="color:${color};">View Full Driver Profile &rarr;</span>
         </div>
       </div>
     `;
   }
-  
+
   function raceByRaceTableHTML(t) {
     const rounds = [...(t.history || [])].sort((a, b) => a.round - b.round);
     if (!rounds.length) return `<p class="cp-empty">No round-by-round data available yet.</p>`;
@@ -254,8 +221,8 @@
           <thead>
             <tr>
               <th>Rnd</th><th>Grand Prix</th>
-              <th>${d1 ? `<span class="cp-table-driver-link" data-driver-code="${escapeAttr(d1.code || '')}">${d1.code || d1.name}</span>` : "D1"}</th>
-              <th>${d2 ? `<span class="cp-table-driver-link" data-driver-code="${escapeAttr(d2.code || '')}">${d2.code || d2.name}</span>` : "D2"}</th>
+              <th>${d1 ? d1.code || d1.name : "D1"}</th>
+              <th>${d2 ? d2.code || d2.name : "D2"}</th>
               <th>Team Pts</th>
             </tr>
           </thead>
@@ -282,27 +249,16 @@
 
   function teamStatsListHTML(t) {
     const s = t.team_stats || {};
-    const starts = s.starts ?? (t.history || []).length;
-    const dnfs = s.dnfs ?? 0;
-    const reliabilityRate = starts > 0 ? (((starts - dnfs) / starts) * 100).toFixed(1) : "-";
-
-    const racesCompleted = (t.history || []).length;
-    const projected = racesCompleted > 0 && _meta.total_rounds
-      ? Math.round((t.points / racesCompleted) * _meta.total_rounds)
-      : null;
-
     const rows = [
       ["Wins", t.wins ?? 0],
       ["Podiums", t.podiums ?? 0],
       ["Poles", t.poles ?? 0],
       ["Fastest Laps", t.fastest_laps ?? 0],
       ["Points Finishes", s.points_finishes ?? 0],
-      ["DNFs", dnfs],
-      ["Reliability Rate", `${reliabilityRate}%`],
-      ["Average Qualifying", s.avg_start != null ? `P${s.avg_start}` : "-"],
-      ["Average Race Finish", s.avg_finish != null ? `P${s.avg_finish}` : "-"],
+      ["DNFs", s.dnfs ?? 0],
+      ["Average Start", s.avg_start != null ? `P${s.avg_start}` : "-"],
+      ["Average Finish", s.avg_finish != null ? `P${s.avg_finish}` : "-"],
       ["Best Finish", s.best_finish != null ? `P${s.best_finish}` : "-"],
-      ["Projected Final Points", projected != null ? projected : "-"],
     ];
     return `
       <div class="cp-stat-list">
@@ -341,6 +297,7 @@
     const leader = _teams[0];
     const isLeader = leader && leader.id === t.id;
     const gap = isLeader ? 0 : Math.round((t.points - (leader?.points || 0)) * 10) / 10;
+    const maxGap = Math.max(Math.abs(gap), (leader?.points || 1)) || 1;
     const pct = isLeader ? 100 : Math.max(100 - (Math.abs(gap) / (leader?.points || 1)) * 100, 4);
     const color = isLeader ? "#2ecc71" : "#ff6b63";
     return `
@@ -379,6 +336,29 @@
             <div class="cp-form-badge" style="--badge-color:${tierColor};" title="${rh1?.event_name || rh2?.event_name || `Round ${r.round}`}">
               <span class="cp-form-flag">${flagFor(r.country)}</span>
               <span>${label}</span>
+            </div>
+          `;
+        }).join("")}
+      </div>
+    `;
+  }
+
+  function circuitPaceHTML(t) {
+    const p = t.pace_by_circuit_type || {};
+    const labels = { high_speed: "High speed", technical: "Technical", street: "Street" };
+    const maxV = Math.max(...Object.values(p).filter(v => v != null), 1);
+    return `
+      <div class="cp-competitor-list">
+        ${Object.entries(labels).map(([key, label]) => {
+          const val = p[key];
+          const pct = val != null ? Math.max((val / maxV) * 100, val > 0 ? 4 : 0) : 0;
+          return `
+            <div class="cp-competitor-row">
+              <span class="cp-competitor-name">${label}</span>
+              <div class="cp-competitor-bar-track">
+                <div class="cp-competitor-bar-fill" style="width:0%; background:${t.color};" data-target-width="${pct}"></div>
+              </div>
+              <span class="cp-competitor-pts">${val != null ? val : "-"}</span>
             </div>
           `;
         }).join("")}
@@ -428,9 +408,7 @@
             ${t.teamLogo ? `<img class="cp-team-hero-logo" src="${assetPath(t.teamLogo)}" alt="" onerror="this.remove()">` : `<div class="cp-team-hero-logo-fallback" style="background:${color}22; color:${color};">${(t.name || "?")[0]}</div>`}
             <div>
               <h1 class="cp-team-hero-name" style="color:${color};">${t.name}</h1>
-              <p class="cp-team-hero-drivers">
-                ${(t.drivers || []).map(d => `<span class="cp-hero-driver-link" data-driver-code="${escapeAttr(d.code || '')}">${d.name} <span>#${d.number ?? "-"}</span></span>`).join(" &middot; ")}
-              </p>
+              <p class="cp-team-hero-drivers">${(t.drivers || []).map(d => `${d.name} <span>#${d.number ?? "-"}</span>`).join(" &middot; ")}</p>
             </div>
           </div>
           <div class="cp-team-hero-right">
@@ -510,7 +488,10 @@
             ${recentFormHTML(t)}
           </div>
         </div>
-
+        <div class="cp-desc-box cp-pace-box" style="margin-top:18px;">
+          <div class="cp-desc-header"><div class="cp-desc-bar" style="background:${color};"></div><h2>Pace by Circuit Type</h2></div>
+          ${circuitPaceHTML(t)}
+        </div>
         <div class="cp-profile-grid-2" style="margin-top:18px;">
           <div class="cp-desc-box">
             <div class="cp-desc-header"><div class="cp-desc-bar" style="background:${color};"></div><h2>Next Race</h2></div>
@@ -560,13 +541,14 @@
       });
     }
 
-    // Attach click listeners to all driver profile triggers in the team view
+
     _container.querySelectorAll("[data-driver-code]").forEach(el => {
       const code = el.dataset.driverCode;
       if (!code) return;
-      el.addEventListener("click", (e) => {
-        e.stopPropagation();
-        triggerDriverProfile(code);
+      el.addEventListener("click", () => {
+        if (typeof window.goToDriverProfile === "function") {
+          window.goToDriverProfile(code);
+        }
       });
     });
 

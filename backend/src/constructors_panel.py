@@ -37,6 +37,29 @@ TEAM_COLORS = {
     "Haas": "#B6BABD", "Cadillac": "#003057",
 }
 
+CIRCUIT_TYPE_BY_COUNTRY = {
+    "Monaco": "street", "Azerbaijan": "street", "Singapore": "street", "Saudi Arabia": "street",
+    "Italy": "high_speed", "Belgium": "high_speed", "United Kingdom": "high_speed",
+    "Netherlands": "technical", "Hungary": "technical", "Spain": "technical",
+    "Japan": "technical", "Australia": "technical", "Austria": "high_speed",
+    "Canada": "technical", "Mexico": "technical", "Brazil": "technical",
+    "Qatar": "high_speed", "United Arab Emirates": "high_speed", "Bahrain": "technical",
+    "United States": "high_speed",
+}
+
+
+def _pace_by_circuit_type(team_history: list[dict]) -> dict:
+    buckets: dict[str, list[float]] = {"high_speed": [], "technical": [], "street": []}
+    for h in team_history:
+        ctype = CIRCUIT_TYPE_BY_COUNTRY.get(h.get("country", ""))
+        if ctype not in buckets:
+            continue
+        buckets[ctype].append(h.get("points", 0) or 0)
+    return {
+        ctype: (round(sum(vals) / len(vals), 1) if vals else None)
+        for ctype, vals in buckets.items()
+    }
+
 
 def fetch_constructor_standings(season: int, round_: int | None = None) -> list[dict]:
     if round_:
@@ -241,6 +264,7 @@ def build_constructors_panel(
             "fastest_laps": fastest_laps,
             "history": team_history,
             "team_stats": _team_race_stats(team_drivers),
+            "pace_by_circuit_type": _pace_by_circuit_type(team_history),
             "drivers": [
                 {
                     "code": d.get("code"),
