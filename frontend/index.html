@@ -40,7 +40,10 @@
 
     <div class="home-main">
       <header class="home-topbar">
-        <div class="topbar-search">🔍 <input placeholder="Search sessions, drivers, tracks…" disabled></div>
+        <div class="topbar-search">
+          🔍 <input type="text" id="topbarSearchInput" placeholder="Search sessions, drivers, tracks…" autocomplete="off">
+          <div id="topbarSearchResults" class="topbar-search-results hidden"></div>
+        </div>
         <div class="topbar-right">
           <span class="topbar-clock" id="homeTopClock">--:--:--</span>
           <button class="topbar-icon-btn" title="Notifications">🔔<span class="dot-badge"></span></button>
@@ -50,7 +53,7 @@
       </header>
 
       <div class="home-content-grid">
-        <!-- ================= MAIN COLUMN ================= -->
+        <!--  MAIN COLUMN  -->
         <div class="home-col-main">
 
           <section class="home-hero" id="homeHero">
@@ -71,7 +74,6 @@
             </div>
           </section>
 
-          <!-- Track / Weather / Tyres / Fastest lap -->
           <!-- Track / Weather / Strategy (Tyres & Fastest Lap) -->
           <section class="home-info-row" id="homeInfoRow">
 
@@ -151,6 +153,7 @@
             </div>
 
             <!-- 3. Combined Strategy & Fastest Lap Card -->
+            <!-- 3. Combined Strategy & Fastest Lap Card -->
             <div class="hp-panel strategy-card" id="strategyCard">
               <div class="hp-panel-header">
                 <span class="hp-panel-title">STRATEGY & FASTEST LAP</span>
@@ -172,22 +175,22 @@
                 <div class="section-sub-title">TYRE SETS AVAILABLE</div>
                 <div class="tyre-pills-grid">
                   <div class="tyre-pill soft">
-                    <span class="compound-dot red">●</span>
+                    <span class="compound-dot red"></span>
                     <span class="compound-name">SOFT</span>
                     <span class="compound-usage" id="tyreSoftSets">2 SETS</span>
                   </div>
                   <div class="tyre-pill medium">
-                    <span class="compound-dot yellow">●</span>
+                    <span class="compound-dot yellow"></span>
                     <span class="compound-name">MEDIUM</span>
                     <span class="compound-usage" id="tyreMediumSets">3 SETS</span>
                   </div>
                   <div class="tyre-pill hard">
-                    <span class="compound-dot white">●</span>
+                    <span class="compound-dot white"></span>
                     <span class="compound-name">HARD</span>
                     <span class="compound-usage" id="tyreHardSets">1 SET</span>
                   </div>
                   <div class="tyre-pill wet">
-                    <span class="compound-dot green">●</span>
+                    <span class="compound-dot green"></span>
                     <span class="compound-name">INTER</span>
                     <span class="compound-usage" id="tyreInterSets">2 SETS</span>
                   </div>
@@ -199,7 +202,6 @@
                 <span>›</span>
               </div>
             </div>
-
           </section>
 
 
@@ -220,7 +222,7 @@
 
         </div>
 
-        <!-- ================= RIGHT RAIL ================= -->
+        <!--  RIGHT RAIL  -->
         <div class="home-col-side">
 
           <div class="hp-panel" id="liveTimingPanel">

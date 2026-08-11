@@ -1,1489 +1,296 @@
-/* Pull constructors panel view to top of container */
+/* ===== Constructors Panel — Glassmorphism Edition ===== */
+/* Mirrors driver-panel.css conventions: dark theme, --team-color accents,
+   frosted-glass surfaces, same animation vocabulary (fade-up, pulse-glow,
+   view-enter, skeleton shimmer) under a cp- namespace. */
+
 #constructors-panel {
-  padding-top: 0 !important;
-  margin-top: 0 !important;
+  color: #fff;
+  max-width: 1200px;
+  margin: 0 auto;
+  position: relative;
 }
 
-/* ===== Constructors Panel — full standings layout ===== */
-
-@import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@600;700;800;900&display=swap');
-
-@keyframes cp-fade-up {
-  from { opacity: 0; transform: translateY(14px); }
-  to   { opacity: 1; transform: translateY(0); }
+.cp-header-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 16px;
+  padding: 0 8px;
 }
-@keyframes cp-skeleton-shimmer {
-  0%   { background-position: 100% 50%; }
-  100% { background-position: 0 50%; }
+.cp-page-title { font-size: 24px; font-weight: 900; margin: 0; }
+
+.cp-section-header {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 16px;
+  padding: 0 8px;
+  animation: dp-fade-up .5s ease both;
+}
+.cp-section-header h2 { font-size: 18px; font-weight: 700; color: #fff; margin: 0; }
+.cp-rule {
+  height: 1px;
+  flex: 1;
+  background: linear-gradient(90deg, rgba(255,255,255,0.1), rgba(255,255,255,0.02));
+}
+.cp-count { font-size: 12px; color: #888; }
+
+/* --- List: constructor row cards --- */
+.cp-grid {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  padding: 0 8px;
 }
 
-/* --- Transitions --- */
+.cp-card {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  border-radius: 16px;
+  overflow: hidden;
+  background: rgba(255, 255, 255, 0.05);
+  backdrop-filter: blur(14px) saturate(160%);
+  -webkit-backdrop-filter: blur(14px) saturate(160%);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  cursor: pointer;
+  padding: 14px 16px;
+  transition: border-color .25s, box-shadow .25s, background .25s, transform .35s cubic-bezier(.2,.8,.2,1);
+  box-shadow: inset 3px 0 0 var(--team-color), 0 4px 16px rgba(0, 0, 0, 0.25);
+  animation: dp-fade-up .5s ease both;
+}
+.cp-card:hover {
+  border-color: rgba(255, 255, 255, 0.2);
+  background: rgba(255, 255, 255, 0.08);
+  box-shadow: inset 3px 0 0 var(--team-color), 0 16px 34px rgba(0, 0, 0, 0.45);
+  transform: translateY(-3px);
+}
+.cp-card-selected {
+  border-color: var(--team-color);
+  animation: dp-pulse-glow 2.4s ease-in-out infinite;
+}
+.cp-grid .cp-card:nth-child(1) { animation-delay: .02s; }
+.cp-grid .cp-card:nth-child(2) { animation-delay: .06s; }
+.cp-grid .cp-card:nth-child(3) { animation-delay: .10s; }
+.cp-grid .cp-card:nth-child(4) { animation-delay: .14s; }
+.cp-grid .cp-card:nth-child(n+5) { animation-delay: .18s; }
+
+.cp-card-info { flex: 1; min-width: 0; }
+.cp-card-toprow { display: flex; align-items: center; gap: 8px; }
+.cp-card-pos { font-size: 12px; font-weight: 900; color: #aaa; }
+.cp-card-name { font-size: 15px; font-weight: 700; color: #fff; }
+.cp-card-drivers { font-size: 12px; font-weight: 500; margin: 4px 0 0; }
+.cp-card-right { flex-shrink: 0; }
+.cp-card-pointswrap { text-align: right; }
+.cp-points-num { font-size: 22px; font-weight: 900; color: #fff; }
+.cp-points-label { margin-left: 4px; font-size: 11px; color: #888; text-transform: uppercase; }
+
+.cp-empty { text-align: center; color: #888; padding: 48px 0; font-size: 14px; }
+
+/* --- Profile: team header --- */
+.cp-profile-back {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  background: rgba(255, 255, 255, 0.05);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 999px;
+  color: #ccc;
+  font-size: 14px;
+  cursor: pointer;
+  margin-bottom: 20px;
+  padding: 6px 14px;
+  transition: color .2s, background .2s, border-color .2s;
+}
+.cp-profile-back:hover {
+  color: #fff;
+  background: rgba(255, 255, 255, 0.1);
+  border-color: rgba(255, 255, 255, 0.18);
+}
+
+.cp-team-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  border-radius: 16px;
+  padding: 18px 22px;
+  margin-bottom: 16px;
+  background: rgba(255, 255, 255, 0.05);
+  backdrop-filter: blur(14px) saturate(160%);
+  -webkit-backdrop-filter: blur(14px) saturate(160%);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  box-shadow: inset 3px 0 0 var(--team-color), 0 12px 40px rgba(0, 0, 0, 0.35);
+  animation: dp-hero-in .6s cubic-bezier(.2,.8,.2,1) both;
+}
+.cp-team-header-left { display: flex; align-items: center; gap: 14px; }
+.cp-team-swatch { width: 6px; height: 40px; border-radius: 3px; }
+.cp-team-name { font-size: 20px; font-weight: 900; letter-spacing: 0.5px; }
+.cp-team-drivers-line { font-size: 12px; color: #888; margin-top: 2px; }
+.cp-team-header-right { text-align: right; }
+.cp-team-standing-label { font-size: 12px; color: #888; }
+.cp-team-standing-points { font-size: 28px; font-weight: 900; color: var(--team-color); }
+
+/* --- Stats row --- */
+.cp-stats-row {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 10px;
+  margin-bottom: 16px;
+}
+@media (max-width: 640px) {
+  .cp-stats-row { grid-template-columns: repeat(2, 1fr); }
+}
+
+.cp-stat-card {
+  border-radius: 14px;
+  border: 1px solid;
+  padding: 12px 16px;
+  background: rgba(255, 255, 255, 0.05);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  transition: transform .3s cubic-bezier(.2,.8,.2,1), background .2s;
+  animation: dp-fade-up .5s ease both;
+}
+.cp-stat-card:hover { transform: translateY(-3px) scale(1.02); background: rgba(255, 255, 255, 0.09); }
+.cp-stat-label { font-size: 10px; text-transform: uppercase; letter-spacing: 0.1em; color: #888; margin: 2px 0 0; }
+.cp-stat-value { font-size: 22px; font-weight: 900; margin: 0; }
+
+/* --- Driver contribution cards --- */
+.cp-driver-cards-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px;
+  margin-bottom: 16px;
+}
+@media (max-width: 640px) {
+  .cp-driver-cards-row { grid-template-columns: 1fr; }
+}
+.cp-driver-card {
+  cursor: pointer;
+  background: rgba(255, 255, 255, 0.05);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 14px;
+  padding: 14px 16px;
+  transition: transform .3s cubic-bezier(.2,.8,.2,1), border-color .25s;
+}
+.cp-driver-card:hover {
+  transform: translateY(-3px);
+  border-color: rgba(255, 255, 255, 0.25);
+}
+.cp-driver-card-toprow { display: flex; justify-content: space-between; align-items: baseline; }
+.cp-driver-card-num { font-size: 13px; color: #ccc; }
+.cp-driver-card-badge { font-size: 11px; padding: 2px 8px; border-radius: 8px; }
+.cp-driver-card-pts { font-size: 24px; font-weight: 900; margin-top: 8px; }
+.cp-driver-card-pts span { font-size: 12px; color: #888; font-weight: 400; margin-left: 4px; }
+.cp-driver-card-podiums { font-size: 12px; color: #888; margin-top: 2px; }
+
+/* --- Generic content box (reuses dp-desc-box visual language) --- */
+.cp-desc-box {
+  border-radius: 14px;
+  background: rgba(255, 255, 255, 0.05);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  padding: 16px 20px;
+  margin-bottom: 16px;
+  transition: transform .35s cubic-bezier(.2,.8,.2,1), box-shadow .35s;
+}
+.cp-desc-box:hover { transform: translateY(-2px); box-shadow: 0 14px 30px rgba(0,0,0,0.3); }
+.cp-desc-header { margin-bottom: 10px; }
+.cp-desc-header h2 { font-size: 12px; text-transform: uppercase; letter-spacing: 0.1em; font-weight: 700; color: #aaa; margin: 0; }
+
+/* --- Split / contribution bar --- */
+.cp-split-bar {
+  display: flex;
+  height: 14px;
+  border-radius: 7px;
+  overflow: hidden;
+  background: rgba(255, 255, 255, 0.06);
+}
+.cp-split-fill { transition: width .5s cubic-bezier(.2,.8,.2,1); }
+.cp-split-fill-remainder { background: rgba(255, 255, 255, 0.14); }
+.cp-split-labels { display: flex; justify-content: space-between; font-size: 12px; margin-top: 6px; }
+.cp-split-label-secondary { color: #888; }
+
+/* --- Qualifying H2H --- */
+.cp-h2h-row-simple { display: flex; align-items: center; gap: 10px; font-size: 13px; }
+.cp-h2h-name { width: 80px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.cp-h2h-name-right { text-align: right; }
+.cp-h2h-track {
+  flex: 1;
+  display: flex;
+  height: 10px;
+  border-radius: 5px;
+  overflow: hidden;
+  background: rgba(255, 255, 255, 0.06);
+}
+.cp-h2h-fill { transition: width .5s cubic-bezier(.2,.8,.2,1); }
+.cp-h2h-fill-remainder { background: rgba(255, 255, 255, 0.14); }
+.cp-h2h-sessions { display: flex; justify-content: space-between; font-size: 12px; color: #888; margin-top: 4px; }
+
+/* --- Reliability / Strategy tables --- */
+.cp-two-col {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+  margin-bottom: 16px;
+}
+@media (max-width: 640px) {
+  .cp-two-col { grid-template-columns: 1fr; }
+}
+.cp-two-col .cp-desc-box { margin-bottom: 0; }
+.cp-stat-table { width: 100%; font-size: 13px; border-collapse: collapse; }
+.cp-stat-table td { padding: 4px 0; }
+.cp-stat-table td:first-child { color: #888; }
+.cp-stat-table td:last-child { text-align: right; font-weight: 700; }
+
+/* --- Pace trend chart --- */
+.cp-chart-canvas-wrap { position: relative; }
+.cp-chart-canvas-wrap canvas { width: 100%; height: 100%; display: block; cursor: crosshair; }
+.cp-chart-tooltip {
+  display: none;
+  position: absolute;
+  background: rgba(30, 30, 30, 0.75);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  border-radius: 10px;
+  padding: 8px 12px;
+  pointer-events: none;
+  z-index: 5;
+  white-space: nowrap;
+}
+.cp-tooltip-title { font-size: 12px; font-weight: 700; color: #fff; margin-bottom: 2px; }
+.cp-tooltip-value { font-size: 12px; color: #aaa; }
+.cp-tooltip-value b { color: #fff; }
+
+/* --- View transitions / skeleton (shared keyframes from driver-panel.css) --- */
 .cp-view-out {
   opacity: 0;
   transform: translateY(10px) scale(0.99);
   transition: opacity .18s ease, transform .18s ease;
 }
 .cp-view-in {
-  animation: cp-view-enter .42s cubic-bezier(.2,.8,.2,1) both;
-}
-@keyframes cp-view-enter {
-  from { opacity: 0; transform: translateY(14px) scale(0.985); }
-  to   { opacity: 1; transform: translateY(0) scale(1); }
+  animation: dp-view-enter .42s cubic-bezier(.2,.8,.2,1) both;
 }
 
-.cp-loading, .cp-empty {
-  text-align: center;
-  color: #888;
-  padding: 48px 0;
-  font-size: 14px;
-}
-.cp-error { text-align: center; color: #ccc; padding: 48px 0; }
-.cp-error p { font-size: 14px; color: #aaa; margin: 0 0 16px; }
-
-.cp-back-btn {
-  display: inline-flex;
-  align-items: center;
-  gap: 6px;
-  background: rgba(255, 255, 255, 0.05);
-  border: 1px solid rgba(255, 255, 255, 0.08);
-  border-radius: 999px;
-  color: #ccc;
-  font-size: 14px;
-  cursor: pointer;
-  padding: 7px 16px;
-  transition: background .2s, color .2s, border-color .2s;
-  margin-top: 0 !important;
-  margin-bottom: 12px !important;
-}
-.cp-back-btn:hover {
-  background: rgba(255, 255, 255, 0.12);
-  color: #fff;
-  border-color: rgba(255, 255, 255, 0.2);
-}
-
-/* --- Skeleton --- */
-.cp-skeleton-wrap { display: flex; flex-direction: column; gap: 12px; padding: 8px; }
+.cp-skeleton-wrap { display: flex; flex-direction: column; gap: 20px; padding: 8px; }
 .cp-skeleton {
-  border-radius: 14px;
+  border-radius: 16px;
   background: linear-gradient(90deg, rgba(255,255,255,0.04) 25%, rgba(255,255,255,0.11) 37%, rgba(255,255,255,0.04) 63%);
   background-size: 400% 100%;
-  animation: cp-skeleton-shimmer 1.4s ease infinite;
+  animation: dp-skeleton-shimmer 1.4s ease infinite;
 }
+.cp-skeleton-hero { height: 120px; border-radius: 16px; }
+.cp-skeleton-row { display: flex; gap: 12px; flex-wrap: wrap; }
+.cp-skeleton-card { flex: 1; min-width: 140px; height: 90px; }
 
-/* --- Top row: title + summary cards --- */
-.cp-top-row {
-  display: grid;
-  grid-template-columns: minmax(200px, 260px) 1fr;
-  gap: 24px;
-  padding: 0 8px;
-  margin-top: 0;
-  margin-bottom: 16px;
-  align-items: start;
-}
-@media (max-width: 900px) {
-  .cp-top-row { grid-template-columns: 1fr; }
-}
-
-.cp-season-tag {
-  font-size: 11px;
-  font-weight: 800;
-  letter-spacing: 0.08em;
-  color: #e74c3c;
-  margin: 0 0 4px;
-}
-.cp-page-title {
-  font-family: 'Orbitron', 'Barlow Condensed', sans-serif;
-  font-size: 26px;
-  font-weight: 800;
-  line-height: 1.1;
-  margin: 0 0 8px;
-  color: #fff;
-  letter-spacing: 0.01em;
-}
-.cp-page-desc {
-  font-size: 13px;
-  color: #999;
-  line-height: 1.5;
-  margin: 0;
-}
-
-.cp-summary-grid {
-  display: grid;
-  grid-template-columns: 1.6fr 1fr 1fr 1fr;
-  gap: 12px;
-}
-@media (max-width: 900px) {
-  .cp-summary-grid { grid-template-columns: 1fr 1fr; }
-}
-
-.cp-summary-card {
-  position: relative;
-  overflow: hidden;
-  border-radius: 14px;
-  background: rgba(255, 255, 255, 0.04);
-  border: 1px solid rgba(255, 255, 255, 0.08);
-  border-left: 3px solid var(--accent-color, transparent);
-  padding: 16px 18px;
-  animation: cp-fade-up .5s ease both;
-  transition: transform .3s cubic-bezier(.2,.8,.2,1), background .2s, border-left-color .2s, box-shadow .2s;
-}
-.cp-summary-card::before {
-  content: "";
-  position: absolute;
-  inset: 0;
-  background: radial-gradient(120% 100% at 0% 0%, var(--accent-color, transparent) 0%, transparent 60%);
-  opacity: 0.08;
-  pointer-events: none;
-  transition: opacity .3s;
-}
-.cp-summary-card:hover::before { opacity: 0.16; }
-.cp-summary-card:hover {
-  transform: translateY(-3px);
-  background: rgba(255, 255, 255, 0.07);
-  box-shadow: 0 0 24px -10px var(--accent-color, transparent);
-}
-
-.cp-summary-label {
-  font-size: 10px;
-  font-weight: 700;
-  letter-spacing: 0.08em;
-  color: #888;
-  text-transform: uppercase;
-  margin: 0 0 8px;
-}
-.cp-summary-value {
-  font-family: 'Orbitron', 'Barlow Condensed', sans-serif;
-  font-size: 24px;
-  font-weight: 900;
-  color: #fff;
-  margin: 0;
-  font-variant-numeric: tabular-nums;
-  letter-spacing: 0.01em;
-}
-.cp-summary-slash { color: #555; font-weight: 400; margin: 0 4px; }
-.cp-summary-sub { font-size: 11.5px; color: #888; margin: 4px 0 0; }
-
-.cp-summary-points .cp-summary-value,
-.cp-summary-races .cp-summary-value {
-  color: var(--accent-color);
-}
-.cp-summary-next .cp-summary-value {
-  font-size: 19px;
-  color: #fff;
-}
-.cp-summary-next .cp-summary-label,
-.cp-summary-races .cp-summary-label,
-.cp-summary-points .cp-summary-label {
-  color: var(--accent-color);
-}
-
-/* --- Leader card --- */
-@keyframes cp-leader-pulse {
-  0%, 100% { box-shadow: 0 0 0 1px var(--team-color, #27F4D2)40, 0 0 24px -8px var(--team-color, #27F4D2); }
-  50%      { box-shadow: 0 0 0 1px var(--team-color, #27F4D2)70, 0 0 40px -6px var(--team-color, #27F4D2); }
-}
-
-.cp-leader-card {
-  background: linear-gradient(120deg, color-mix(in srgb, var(--team-color, #27F4D2) 16%, transparent), rgba(255,255,255,0.04));
-  border-color: color-mix(in srgb, var(--team-color, #27F4D2) 55%, transparent);
-  position: relative;
-  overflow: hidden;
-  transition: transform .3s cubic-bezier(.2,.8,.2,1);
-  animation: cp-fade-up .5s ease both, cp-leader-pulse 3s ease-in-out infinite .6s;
-}
-.cp-leader-card:hover { transform: translateY(-3px); }
-.cp-leader-label { color: var(--team-color, #27F4D2); margin-bottom: 12px; }
-.cp-leader-row { display: flex; align-items: center; gap: 12px; }
-.cp-leader-logo, .cp-leader-logo-fallback {
-  width: 40px; height: 40px; border-radius: 10px; object-fit: contain; flex-shrink: 0;
-}
-.cp-leader-logo-fallback {
-  display: flex; align-items: center; justify-content: center; font-weight: 900; font-size: 18px;
-}
-.cp-leader-info { flex: 1; min-width: 0; }
-.cp-leader-name {
-  font-family: 'Orbitron', 'Barlow Condensed', sans-serif;
-  font-size: 18px; font-weight: 800; color: #fff; margin: 0; text-transform: uppercase;
-}
-.cp-leader-team { font-size: 11px; font-weight: 700; margin: 2px 0 0; text-transform: uppercase; letter-spacing: 0.04em; }
-.cp-leader-pts { text-align: right; flex-shrink: 0; }
-.cp-leader-pts-num { font-size: 28px; font-weight: 900; color: #fff; font-variant-numeric: tabular-nums; }
-.cp-leader-pts-label { display: block; font-size: 10px; color: #999; font-weight: 700; letter-spacing: 0.05em; }
-.cp-leader-wins { font-size: 12px; font-weight: 800; margin: 10px 0 12px; }
-.cp-leader-bar-track { height: 5px; border-radius: 999px; background: rgba(255,255,255,0.08); overflow: hidden; }
-.cp-leader-bar-fill { height: 100%; border-radius: 999px; }
-
-/* --- Standings header --- */
-.cp-standings-header {
-  display: flex; align-items: center; justify-content: space-between; padding: 0 8px; margin-bottom: 14px;
-}
-.cp-standings-header h2 {
-  font-family: 'Orbitron', 'Barlow Condensed', sans-serif;
-  font-size: 13px; font-weight: 700; letter-spacing: 0.06em; color: #ccc; text-transform: uppercase; margin: 0;
-}
-
-/* --- Standings list --- */
-.cp-list { display: flex; flex-direction: column; gap: 3px; padding: 0 8px; }
-
-@keyframes cp-row-glow-in {
-  0%   { box-shadow: 0 0 0 0 var(--team-color, transparent); }
-  50%  { box-shadow: 0 0 20px -4px var(--team-color, transparent); }
-  100% { box-shadow: 0 0 0 0 var(--team-color, transparent); }
-}
-
-.cp-row {
-  display: grid;
-  grid-template-columns: 44px 34px 1fr minmax(120px, 240px) 90px 130px;
-  align-items: center;
-  gap: 16px;
-  padding: 16px 18px;
-  border-radius: 12px;
-  background: rgba(255, 255, 255, 0.03);
-  border: 1px solid transparent;
-  cursor: pointer;
-  transition: background .25s, border-color .25s, transform .25s cubic-bezier(.2,.8,.2,1), box-shadow .25s;
-  animation: cp-fade-up .4s ease both;
-}
-.cp-list .cp-row:nth-child(1) {
-  animation-delay: .02s;
-  border-color: var(--team-color);
-  background: color-mix(in srgb, var(--team-color) 10%, rgba(255,255,255,0.03));
-}
-.cp-list .cp-row:first-child {
-  animation: cp-fade-up .4s ease both, cp-row-glow-in 2.2s ease-out .3s;
-}
-.cp-list .cp-row:nth-child(2) { animation-delay: .04s; }
-.cp-list .cp-row:nth-child(3) { animation-delay: .06s; }
-.cp-list .cp-row:nth-child(4) { animation-delay: .08s; }
-.cp-list .cp-row:nth-child(5) { animation-delay: .10s; }
-.cp-list .cp-row:nth-child(n+6) { animation-delay: .12s; }
-
-.cp-row:hover {
-  transform: translateX(4px);
-  background: color-mix(in srgb, var(--team-color) 8%, rgba(255,255,255,0.05));
-  border-color: color-mix(in srgb, var(--team-color) 40%, transparent);
-}
-
-@media (max-width: 900px) {
-  .cp-row {
-    grid-template-columns: 40px 30px 1fr auto;
-    grid-template-areas:
-      "pos logo info pts"
-      "bar bar bar bar"
-      "wins wins wins wins";
-    row-gap: 8px;
-  }
-  .cp-row-bar-track { grid-area: bar; }
-  .cp-row-wins { grid-area: wins; }
-}
-
-.cp-row-pos {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  width: 34px;
-  height: 34px;
-  border-radius: 10px;
-  border: 1.5px solid;
-  font-size: 15px;
-  font-weight: 900;
-  font-variant-numeric: tabular-nums;
-  transition: transform .25s cubic-bezier(.2,.8,.2,1);
-}
-.cp-row:hover .cp-row-pos { transform: scale(1.08); }
-
-.cp-row-logo, .cp-row-logo-fallback {
-  width: 30px; height: 30px; object-fit: contain; border-radius: 8px; flex-shrink: 0;
-  transition: transform .3s cubic-bezier(.2,.8,.2,1), filter .3s;
-}
-.cp-row-logo-fallback {
-  display: flex; align-items: center; justify-content: center; font-weight: 900; font-size: 13px; color: #888;
-}
-.cp-row:hover .cp-row-logo {
-  transform: scale(1.1);
-  filter: drop-shadow(0 0 8px var(--team-color));
-}
-
-.cp-row-info { min-width: 0; }
-.cp-row-name {
-  font-family: 'Orbitron', 'Barlow Condensed', sans-serif;
-  font-size: 15px; font-weight: 700; color: #fff; margin: 0; text-transform: uppercase; letter-spacing: 0.01em;
-}
-.cp-row-drivers {
-  font-size: 12px; color: #999; margin: 2px 0 0; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
-}
-
-.cp-row-bar-track {
-  height: 5px; border-radius: 999px; background: rgba(255,255,255,0.06); overflow: hidden;
-}
-.cp-row-bar-fill,
-.cp-leader-bar-fill {
-  height: 100%;
-  border-radius: 999px;
-  transition: width .8s cubic-bezier(.16,.84,.24,1);
-  box-shadow: 0 0 10px -2px currentColor;
-}
-
-.cp-row-pts { text-align: right; }
-.cp-row-pts-num {
-  font-size: 17px; font-weight: 900; color: #fff; font-variant-numeric: tabular-nums; transition: color .2s;
-}
-.cp-row:hover .cp-row-pts-num { color: var(--team-color); }
-.cp-row-pts-label { display: block; font-size: 10px; color: #888; font-weight: 700; letter-spacing: 0.04em; }
-
-.cp-row-wins { font-size: 11px; font-weight: 800; text-align: right; white-space: nowrap; }
-
-.cp-footer-note { text-align: center; font-size: 11.5px; color: #666; margin: 20px 0 0; }
-
-/* ===== Constructors Panel — Team Profile Page ===== */
-
-.cp-full-profile {
-  padding: 26px;
-  background: rgba(255, 255, 255, 0.04);
-  backdrop-filter: blur(16px) saturate(160%);
-  -webkit-backdrop-filter: blur(16px) saturate(160%);
-  border-radius: 22px;
-  border: 1px solid rgba(255, 255, 255, 0.08);
-}
-
-.cp-team-hero {
-  position: relative;
-  border-radius: 22px;
-  padding: 32px 32px 0;
-  overflow: hidden;
-  border: 1px solid rgba(255, 255, 255, 0.1);
-  margin-bottom: 24px;
-  box-shadow: 0 16px 44px rgba(0, 0, 0, 0.4);
-}
-.cp-team-hero::after {
-  content: ""; position: absolute; inset: 0;
-  background: radial-gradient(140% 100% at 0% 100%, transparent 50%, rgba(0,0,0,0.5) 100%); pointer-events: none;
-}
-.cp-team-hero::before {
-  content: ""; position: absolute; inset: 0;
-  background: radial-gradient(120% 100% at 100% 0%, var(--team-color) 0%, transparent 55%);
-  opacity: 0.16; pointer-events: none;
-}
-.cp-team-hero-top {
-  position: relative; display: flex; justify-content: space-between; align-items: flex-start; flex-wrap: wrap; gap: 16px; padding-bottom: 20px;
-}
-.cp-team-hero-left { display: flex; align-items: center; gap: 16px; }
-.cp-team-hero-logo, .cp-team-hero-logo-fallback {
-  width: 56px; height: 56px; border-radius: 14px; object-fit: contain; flex-shrink: 0;
-}
-.cp-team-hero-logo-fallback {
-  display: flex; align-items: center; justify-content: center; font-weight: 900; font-size: 24px;
-}
-.cp-team-hero-name {
-  font-family: 'Orbitron', 'Barlow Condensed', sans-serif;
-  font-size: 30px; font-weight: 900; margin: 0 0 4px; text-transform: uppercase; letter-spacing: -0.01em;
-}
-@media (min-width: 768px) { .cp-team-hero-name { font-size: 38px; } }
-
-.cp-team-hero-drivers { font-size: 13px; color: #bbb; margin: 0; cursor: default; }
-.cp-team-hero-drivers span { color: #777; font-size: 11px; }
-
-.cp-team-hero-right { display: flex; align-items: center; gap: 14px; flex-wrap: wrap; }
-.cp-team-hero-pos { font-size: 22px; font-weight: 900; }
-.cp-team-hero-pts { font-size: 22px; font-weight: 900; color: #fff; }
-.cp-team-hero-pts small { font-size: 11px; color: #888; font-weight: 700; }
-.cp-team-hero-wins { font-size: 12px; font-weight: 800; padding: 6px 12px; border-radius: 999px; background: rgba(255,255,255,0.06); }
-
-.cp-stats-row {
-  position: relative; display: flex; flex-wrap: wrap; gap: 10px; padding: 22px 0; border-top: 1px solid rgba(255,255,255,0.08);
-}
-.cp-stat-card {
-  border-radius: 14px; border: 1px solid; padding: 13px 18px; min-width: 88px; background: rgba(255, 255, 255, 0.05);
-  backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px);
-}
-.cp-stat-value { font-size: 22px; font-weight: 900; margin: 0; font-variant-numeric: tabular-nums; }
-.cp-stat-label { font-size: 10px; text-transform: uppercase; letter-spacing: 0.1em; color: #888; margin: 3px 0 0; }
-
-/* Grid layouts */
-.cp-profile-grid { display: grid; grid-template-columns: 1fr; gap: 18px; align-items: start; }
-@media (min-width: 900px) { .cp-profile-grid { grid-template-columns: 1.4fr 1fr; } }
-
-.cp-profile-grid-3 { display: grid; grid-template-columns: 1fr; gap: 16px; }
-@media (min-width: 1000px) { .cp-profile-grid-3 { grid-template-columns: 1.3fr 1fr 1fr; } }
-
-.cp-profile-grid-3b { display: grid; grid-template-columns: 1fr; gap: 16px; }
-@media (min-width: 1000px) { .cp-profile-grid-3b { grid-template-columns: 1fr 0.8fr 1fr; } }
-
-.cp-profile-grid-2 { display: grid; grid-template-columns: 1fr; gap: 16px; }
-@media (min-width: 800px) { .cp-profile-grid-2 { grid-template-columns: 1fr 1fr; } }
-
-.cp-desc-box {
-  border-radius: 16px; background: rgba(255, 255, 255, 0.05); backdrop-filter: blur(12px);
-  -webkit-backdrop-filter: blur(12px); border: 1px solid rgba(255, 255, 255, 0.08); padding: 22px;
-}
-.cp-desc-header { display: flex; align-items: center; gap: 9px; margin-bottom: 16px; }
-.cp-desc-bar { height: 16px; width: 4px; border-radius: 999px; }
-.cp-desc-header h2 { font-size: 12px; text-transform: uppercase; letter-spacing: 0.1em; font-weight: 700; color: #aaa; margin: 0; }
-
-.cp-box-header-row { display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 10px; margin-bottom: 4px; }
-
-/* Chart tabs */
-.cp-chart-tabs { display: flex; gap: 4px; background: rgba(255,255,255,0.04); border-radius: 999px; padding: 3px; }
-.cp-chart-tab {
-  background: transparent; border: none; color: #999; font-size: 11px; font-weight: 700; padding: 6px 12px; border-radius: 999px;
-  cursor: pointer; transition: background .2s, color .2s;
-}
-.cp-chart-tab.active { background: rgba(255,255,255,0.12); color: #fff; }
-.cp-chart-tab:hover:not(.active) { color: #ccc; }
-
-.cp-chart-canvas-wrap { position: relative; height: 230px; }
-.cp-chart-canvas-wrap canvas { width: 100%; height: 100%; display: block; cursor: crosshair; }
-
-.cp-chart-tooltip {
-  display: none; position: absolute; background: rgba(20, 20, 20, 0.85); backdrop-filter: blur(10px);
-  -webkit-backdrop-filter: blur(10px); border: 1px solid rgba(255, 255, 255, 0.14); border-radius: 10px;
-  padding: 10px 14px; pointer-events: none; z-index: 5; white-space: nowrap; box-shadow: 0 8px 20px rgba(0,0,0,0.4);
-}
-.cp-tooltip-title { font-size: 13px; font-weight: 700; color: #fff; margin-bottom: 4px; }
-.cp-tooltip-value { font-size: 13px; color: #aaa; }
-.cp-tooltip-value b { color: #fff; }
-
-/* Driver Cards in Constructor Profile */
-.cp-drivers-grid { display: flex; flex-direction: column; gap: 14px; }
-
-.cp-driver-card {
-  display: flex; gap: 14px; padding: 14px; border-radius: 14px; background: rgba(255,255,255,0.03);
-  border: 1px solid rgba(255,255,255,0.07); cursor: pointer;
-  transition: transform .25s cubic-bezier(.2,.8,.2,1), background .2s, border-color .2s;
-}
-.cp-driver-card:hover {
-  transform: translateY(-3px);
-  background: rgba(255,255,255,0.06);
-  border-color: rgba(255,255,255,0.15);
-}
-
-.cp-driver-card-img, .cp-driver-card-fallback {
-  width: 64px; height: 64px; border-radius: 12px; object-fit: cover; object-position: top; flex-shrink: 0;
-}
-.cp-driver-card-fallback {
-  display: flex; align-items: center; justify-content: center; font-weight: 900; font-size: 22px;
-}
-.cp-driver-card-body { flex: 1; min-width: 0; }
-.cp-driver-card-num { font-size: 11px; font-weight: 800; margin: 0; }
-.cp-driver-card-name { font-size: 15px; font-weight: 800; color: #fff; margin: 2px 0 4px; }
-.cp-driver-card-pts { font-size: 16px; font-weight: 900; margin: 0 0 8px; }
-.cp-driver-card-pts span { font-size: 10px; color: #888; font-weight: 700; }
-.cp-driver-card-stats { display: grid; grid-template-columns: repeat(4, 1fr); gap: 6px; margin-bottom: 6px; }
-.cp-driver-card-stats div { text-align: center; font-size: 9px; color: #888; text-transform: uppercase; letter-spacing: 0.03em; }
-.cp-driver-card-stats span { display: block; font-size: 14px; font-weight: 800; color: #fff; }
-.cp-driver-card-pos-label { font-size: 11px; color: #999; margin: 0; }
-
-/* Race Results Table */
-.cp-table-wrap { margin-top: 4px; overflow-x: auto; border-radius: 14px; border: 1px solid rgba(255, 255, 255, 0.08); }
-.cp-results-table { width: 100%; border-collapse: collapse; font-size: 13px; min-width: 340px; }
-.cp-results-table thead th {
-  text-align: left; font-size: 10px; text-transform: uppercase; letter-spacing: 0.08em; color: #888; font-weight: 700;
-  padding: 11px 14px; background: rgba(255, 255, 255, 0.05); white-space: nowrap;
-}
-.cp-results-table td {
-  padding: 11px 14px; border-top: 1px solid rgba(255, 255, 255, 0.06); color: #ddd; font-variant-numeric: tabular-nums; white-space: nowrap;
-}
-.cp-results-table tbody tr:hover { background: rgba(255, 255, 255, 0.04); }
-.cp-results-round { color: #888; font-weight: 600; }
-.cp-results-flag { margin-right: 6px; }
-
-/* Driver links in table headers */
-.cp-table-driver-link {
-  cursor: pointer;
-  transition: color .2s;
-}
-.cp-table-driver-link:hover {
-  color: #fff;
-  text-decoration: underline;
-}
-
-/* Team Stats */
-.cp-stat-list { display: flex; flex-direction: column; gap: 2px; }
-.cp-stat-list-row { display: flex; justify-content: space-between; padding: 9px 4px; border-bottom: 1px solid rgba(255,255,255,0.05); font-size: 12.5px; }
-.cp-stat-list-row:last-child { border-bottom: none; }
-.cp-stat-list-label { color: #999; }
-.cp-stat-list-value { color: #fff; font-weight: 700; }
-
-/* Competitor Bars */
-.cp-competitor-list { display: flex; flex-direction: column; gap: 10px; }
-.cp-competitor-row { display: grid; grid-template-columns: 90px 1fr 40px; align-items: center; gap: 10px; }
-.cp-competitor-self { background: rgba(255,255,255,0.04); border-radius: 8px; padding: 4px 6px; margin: -4px -6px; }
-.cp-competitor-name { font-size: 11.5px; font-weight: 700; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-.cp-competitor-bar-track { height: 6px; border-radius: 999px; background: rgba(255,255,255,0.06); overflow: hidden; }
-.cp-competitor-bar-fill { height: 100%; border-radius: 999px; transition: width .8s cubic-bezier(.16,.84,.24,1); }
-.cp-competitor-pts { font-size: 12px; font-weight: 800; color: #fff; text-align: right; }
-
-/* Gauge */
-.cp-gauge-wrap { display: flex; flex-direction: column; align-items: center; padding: 8px 0; }
-.cp-gauge-ring {
-  width: 120px; height: 120px; border-radius: 50%;
-  background: conic-gradient(var(--gauge-color) calc(var(--gauge-pct) * 1%), rgba(255,255,255,0.08) 0);
-  display: flex; align-items: center; justify-content: center; transition: background 1s ease;
-}
-.cp-gauge-inner {
-  width: 92px; height: 92px; border-radius: 50%; background: #0d0d10;
-  display: flex; flex-direction: column; align-items: center; justify-content: center;
-}
-.cp-gauge-value { font-size: 16px; font-weight: 900; }
-.cp-gauge-label { font-size: 10px; color: #888; font-weight: 700; }
-.cp-gauge-caption { font-size: 12px; color: #999; margin: 12px 0 0; text-align: center; }
-
-/* Recent Form */
-.cp-form-strip { display: flex; gap: 8px; flex-wrap: wrap; }
-.cp-form-badge {
-  width: 42px; height: 42px; border-radius: 10px; display: flex; flex-direction: column;
-  align-items: center; justify-content: center; gap: 2px; font-size: 12px; font-weight: 800;
-  color: var(--badge-color); background: color-mix(in srgb, var(--badge-color) 15%, transparent);
-  border: 1px solid color-mix(in srgb, var(--badge-color) 40%, transparent);
-}
-.cp-form-flag { font-size: 13px; line-height: 1; }
-
-/* Next Race */
-.cp-nextrace-row { display: flex; align-items: center; gap: 14px; padding: 10px 4px; }
-.cp-nextrace-icon { font-size: 28px; }
-.cp-nextrace-name { font-size: 15px; font-weight: 800; color: #fff; margin: 0; }
-.cp-nextrace-date { font-size: 12px; color: #999; margin: 2px 0 0; }
-
-/* Mini Standings */
-.cp-mini-standings { display: flex; flex-direction: column; gap: 4px; }
-.cp-mini-row { display: grid; grid-template-columns: 24px 1fr auto; align-items: center; gap: 10px; padding: 7px 8px; border-radius: 8px; font-size: 12.5px; }
-.cp-mini-row-self {
-  background: color-mix(in srgb, var(--team-color) 12%, transparent);
-  border: 1px solid color-mix(in srgb, var(--team-color) 30%, transparent);
-}
-.cp-mini-pos { color: #888; font-weight: 700; font-variant-numeric: tabular-nums; }
-.cp-mini-name { color: #ddd; font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-.cp-mini-pts { color: #fff; font-weight: 800; text-align: right; }
-.cp-mini-pts small { font-size: 9px; color: #888; font-weight: 700; }
-
-/* --- View Full Driver Profile link styling --- */
-.cp-driver-card-view-link {
-  display: inline-block;
-  font-size: 11px;
-  font-weight: 700;
-  letter-spacing: 0.03em;
-  margin-top: 8px;
-  transition: transform 0.2s ease, opacity 0.2s ease;
-  opacity: 0.85;
-}
-
-.cp-driver-card:hover .cp-driver-card-view-link {
-  opacity: 1;
-  transform: translateX(4px);
-}
-
-/* ===== MOVE CONSTRUCTORS PAGE UP ===== */
-
-#constructors-panel {
-  margin-top: -70px !important;
-  padding-top: 0 !important;
-}
-
-/* Remove spacing from the wrapper around constructors */
-#constructors-panel,
-#constructors-panel > * {
-  box-sizing: border-box;
-}
-
-/* Keep the top content tight */
-#constructors-panel .cp-top-row {
-  margin-top: 0 !important;
-  padding-top: 0 !important;
-}
-
-
-/* ===== TEAM DETAIL - MOVE CONTENT UP ===== */
-
-.team-detail-page,
-.constructor-detail-page,
-.team-page {
-    margin-top: -55px !important;
-    padding-top: 0 !important;
-}
-
-
-
-/* ============================================================
-   CONSTRUCTOR PROFILE — PREMIUM F1 DASHBOARD LAYOUT
-   Paste this at the VERY BOTTOM of constructor.css
-   ============================================================ */
-
-
-/* ============================================================
-   1. MAIN PROFILE WIDTH
-   ============================================================ */
-
-#constructors-panel {
-    width: 100%;
-    max-width: none !important;
-    margin: 0 auto !important;
-    padding-top: 0 !important;
-}
-
-#constructors-panel .cp-full-profile {
-    width: min(1500px, calc(100vw - 80px));
-    max-width: 1500px;
-    margin: 0 auto;
-    padding: 0;
-}
-
-
-/* ============================================================
-   2. BACK BUTTON
-   ============================================================ */
-
-#constructors-panel .cp-back-btn {
-    margin-top: 0 !important;
-    margin-bottom: 14px !important;
-
-    padding: 7px 16px;
-
-    border-radius: 999px;
-
-    background: rgba(255, 255, 255, 0.045);
-    border: 1px solid rgba(255, 255, 255, 0.10);
-
-    color: #bdbdbd;
-
-    transition:
-        background .2s ease,
-        border-color .2s ease,
-        color .2s ease,
-        transform .2s ease;
-}
-
-#constructors-panel .cp-back-btn:hover {
-    background: rgba(255, 255, 255, 0.09);
-    border-color: rgba(255, 255, 255, 0.20);
-    color: #fff;
-    transform: translateX(-2px);
-}
-
-
-/* ============================================================
-   3. TEAM HERO
-   ============================================================ */
-
-#constructors-panel .cp-team-hero {
-    width: 100%;
-
-    min-height: 215px;
-
-    padding: 24px 30px 0 !important;
-
-    margin-bottom: 16px !important;
-
-    border-radius: 20px;
-
-    border: 1px solid rgba(255, 255, 255, 0.10);
-
-    overflow: hidden;
-
-    box-shadow:
-        0 18px 50px rgba(0, 0, 0, 0.35),
-        inset 0 1px 0 rgba(255, 255, 255, 0.035);
-}
-
-
-/* ============================================================
-   4. HERO HEADER
-   ============================================================ */
-
-#constructors-panel .cp-team-hero-top {
-    display: grid !important;
-
-    grid-template-columns: 1fr auto;
-
-    align-items: center;
-
-    gap: 30px;
-
-    padding-bottom: 18px !important;
-}
-
-
-/* Left side */
-
-#constructors-panel .cp-team-hero-left {
-    display: flex;
-
-    align-items: center;
-
-    gap: 18px;
-
-    min-width: 0;
-}
-
-
-/* Mercedes / team logo */
-
-#constructors-panel .cp-team-hero-logo,
-#constructors-panel .cp-team-hero-logo-fallback {
-    width: 62px;
-    height: 62px;
-
-    border-radius: 14px;
-
-    flex-shrink: 0;
-}
-
-
-/* Team name */
-
-#constructors-panel .cp-team-hero-name {
-    margin: 0 0 5px;
-
-    font-size: 38px !important;
-
-    line-height: 1;
-
-    font-weight: 900;
-
-    letter-spacing: -0.025em;
-}
-
-
-/* Driver names */
-
-#constructors-panel .cp-team-hero-drivers {
-    margin: 0;
-
-    font-size: 12px;
-
-    color: #8e8e8e;
-
-    letter-spacing: 0.01em;
-}
-
-
-/* ============================================================
-   5. HERO RIGHT SIDE
-   ============================================================ */
-
-#constructors-panel .cp-team-hero-right {
-    display: flex;
-
-    align-items: center;
-
-    justify-content: flex-end;
-
-    gap: 16px;
-
-    white-space: nowrap;
-}
-
-#constructors-panel .cp-team-hero-pos {
-    font-size: 25px;
-
-    font-weight: 900;
-}
-
-#constructors-panel .cp-team-hero-pts {
-    font-size: 27px;
-
-    font-weight: 900;
-
-    color: #fff;
-}
-
-#constructors-panel .cp-team-hero-pts small {
-    font-size: 10px;
-
-    color: #777;
-
-    letter-spacing: 0.08em;
-}
-
-#constructors-panel .cp-team-hero-wins {
-    padding: 7px 13px;
-
-    border-radius: 999px;
-
-    background: rgba(255, 255, 255, 0.045);
-
-    font-size: 11px;
-
-    font-weight: 900;
-
-    letter-spacing: 0.04em;
-}
-
-
-/* ============================================================
-   6. STATS STRIP
-   ============================================================ */
-
-#constructors-panel .cp-stats-row {
-    display: grid !important;
-
-    grid-template-columns: repeat(5, 1fr);
-
-    gap: 0;
-
-    padding: 16px 0 15px !important;
-
-    border-top: 1px solid rgba(255, 255, 255, 0.08);
-}
-
-
-/* Individual stats */
-
-#constructors-panel .cp-stat-card {
-    min-width: 0 !important;
-
-    padding: 5px 24px !important;
-
-    border: 0 !important;
-
-    border-right: 1px solid rgba(255, 255, 255, 0.08) !important;
-
-    border-radius: 0 !important;
-
-    background: transparent !important;
-
-    backdrop-filter: none;
-}
-
-#constructors-panel .cp-stat-card:last-child {
-    border-right: 0 !important;
-}
-
-
-/* Stat numbers */
-
-#constructors-panel .cp-stat-value {
-    margin: 0;
-
-    font-size: 25px;
-
-    line-height: 1.1;
-
-    font-weight: 900;
-}
-
-
-/* Stat labels */
-
-#constructors-panel .cp-stat-label {
-    margin-top: 5px;
-
-    font-size: 9px;
-
-    color: #777;
-
-    letter-spacing: 0.11em;
-
-    font-weight: 700;
-}
-
-
-/* ============================================================
-   7. ALL LOWER CONTENT
-   ============================================================ */
-
-#constructors-panel .cp-full-profile {
-    display: block;
-}
-
-
-/* ============================================================
-   8. DRIVERS + CHAMPIONSHIP PROGRESSION
-   ============================================================ */
-
-#constructors-panel .cp-profile-grid {
-    display: grid;
-
-    grid-template-columns: 1.12fr 0.88fr;
-
-    gap: 16px;
-
-    align-items: stretch;
-}
-
-
-/* ============================================================
-   9. RACE + STATS + POINTS
-   ============================================================ */
-
-#constructors-panel .cp-profile-grid-3 {
-    display: grid;
-
-    grid-template-columns: 1.45fr 0.90fr 0.90fr;
-
-    gap: 16px;
-
-    margin-top: 16px !important;
-
-    align-items: stretch;
-}
-
-
-/* ============================================================
-   10. CHAMPIONSHIP BATTLE + GAP + FORM
-   ============================================================ */
-
-#constructors-panel .cp-profile-grid-3b {
-    display: grid;
-
-    grid-template-columns: 1.45fr 0.90fr 0.90fr;
-
-    gap: 16px;
-
-    margin-top: 16px !important;
-
-    align-items: stretch;
-}
-
-
-/* ============================================================
-   11. NEXT RACE + CONSTRUCTOR CHAMPIONSHIP
-   ============================================================ */
-
-#constructors-panel .cp-profile-grid-2 {
-    display: grid;
-
-    grid-template-columns: 0.75fr 1.25fr;
-
-    gap: 16px;
-
-    margin-top: 16px !important;
-
-    align-items: stretch;
-}
-
-
-/* ============================================================
-   12. UNIVERSAL CARD STYLE
-   ============================================================ */
-
-#constructors-panel .cp-desc-box {
-    position: relative;
-
-    min-width: 0;
-
-    padding: 18px;
-
-    border-radius: 16px;
-
-    background:
-        linear-gradient(
-            145deg,
-            rgba(255,255,255,0.055),
-            rgba(255,255,255,0.025)
-        );
-
-    border: 1px solid rgba(255,255,255,0.075);
-
-    box-shadow:
-        0 10px 30px rgba(0,0,0,0.18);
-
-    backdrop-filter: blur(14px);
-    -webkit-backdrop-filter: blur(14px);
-
-    transition:
-        border-color .2s ease,
-        transform .2s ease,
-        background .2s ease;
-}
-
-
-/* Very subtle hover */
-
-#constructors-panel .cp-desc-box:hover {
-    border-color: rgba(255,255,255,0.12);
-
-    background:
-        linear-gradient(
-            145deg,
-            rgba(255,255,255,0.065),
-            rgba(255,255,255,0.028)
-        );
-}
-
-
-/* ============================================================
-   13. SECTION HEADERS
-   ============================================================ */
-
-#constructors-panel .cp-desc-header {
-    display: flex;
-
-    align-items: center;
-
-    gap: 9px;
-
-    margin-bottom: 14px;
-}
-
-#constructors-panel .cp-desc-bar {
-    width: 3px;
-
-    height: 14px;
-
-    border-radius: 999px;
-
-    box-shadow: 0 0 8px currentColor;
-}
-
-#constructors-panel .cp-desc-header h2 {
-    margin: 0;
-
-    color: #a7a7a7;
-
-    font-size: 10px;
-
-    font-weight: 800;
-
-    letter-spacing: 0.12em;
-
-    text-transform: uppercase;
-}
-
-
-/* ============================================================
-   14. DRIVERS
-   ============================================================ */
-
-#constructors-panel .cp-drivers-grid {
-    display: flex;
-
-    flex-direction: column;
-
-    gap: 9px;
-}
-
-
-/* Driver cards */
-
-#constructors-panel .cp-driver-card {
-    min-height: 94px;
-
-    padding: 11px 13px;
-
-    border-radius: 11px;
-
-    background: rgba(255,255,255,0.035);
-
-    border: 1px solid rgba(255,255,255,0.055);
-
-    transition:
-        background .2s ease,
-        border-color .2s ease,
-        transform .2s ease;
-}
-
-#constructors-panel .cp-driver-card:hover {
-    background: rgba(255,255,255,0.055);
-
-    border-color: rgba(255,255,255,0.12);
-
-    transform: translateX(3px);
-}
-
-
-/* ============================================================
-   15. PROGRESSION CHART
-   ============================================================ */
-
-#constructors-panel .cp-chart-canvas-wrap {
-    position: relative;
-
-    height: 235px;
-}
-
-#constructors-panel #cp-progression-canvas {
-    width: 100% !important;
-
-    height: 100% !important;
-}
-
-
-/* Chart header */
-
-#constructors-panel .cp-box-header-row {
-    display: flex;
-
-    justify-content: space-between;
-
-    align-items: center;
-
-    gap: 12px;
-
-    margin-bottom: 3px;
-}
-
-
-/* Chart tabs */
-
-#constructors-panel .cp-chart-tabs {
-    display: flex;
-
-    gap: 2px;
-
-    padding: 3px;
-
-    border-radius: 999px;
-
-    background: rgba(255,255,255,0.035);
-}
-
-#constructors-panel .cp-chart-tab {
-    padding: 5px 9px;
-
-    border-radius: 999px;
-
-    border: 0;
-
-    background: transparent;
-
-    color: #777;
-
-    font-size: 9px;
-
-    font-weight: 800;
-
-    cursor: pointer;
-}
-
-#constructors-panel .cp-chart-tab.active {
-    background: rgba(255,255,255,0.10);
-
-    color: #fff;
-}
-
-
-/* ============================================================
-   16. RACE TABLE
-   ============================================================ */
-
-#constructors-panel .cp-profile-grid-3 > .cp-desc-box:first-child {
-    overflow: hidden;
-}
-
-
-/* ============================================================
-   17. TEAM STATISTICS
-   ============================================================ */
-
-#constructors-panel .cp-profile-grid-3 > .cp-desc-box:nth-child(2) {
-    min-width: 0;
-}
-
-
-/* ============================================================
-   18. POINTS PER ROUND
-   ============================================================ */
-
-#constructors-panel .cp-profile-grid-3 > .cp-desc-box:nth-child(3) {
-    min-width: 0;
-}
-
-#constructors-panel #cp-perround-canvas {
-    width: 100% !important;
-
-    height: 100% !important;
-}
-
-
-/* ============================================================
-   19. CHAMPIONSHIP BATTLE
-   ============================================================ */
-
-#constructors-panel .cp-profile-grid-3b > .cp-desc-box:first-child {
-    min-width: 0;
-}
-
-
-/* ============================================================
-   20. GAP TO LEADER
-   ============================================================ */
-
-#constructors-panel .cp-profile-grid-3b > .cp-desc-box:nth-child(2) {
-    display: flex;
-
-    flex-direction: column;
-}
-
-
-/* ============================================================
-   21. RECENT FORM
-   ============================================================ */
-
-#constructors-panel .cp-profile-grid-3b > .cp-desc-box:nth-child(3) {
-    min-width: 0;
-}
-
-#constructors-panel .cp-form-strip {
-    display: flex;
-
-    align-items: center;
-
-    gap: 7px;
-
-    flex-wrap: wrap;
-}
-
-#constructors-panel .cp-form-badge {
-    width: 40px;
-    height: 40px;
-
-    border-radius: 10px;
-}
-
-
-/* ============================================================
-   22. NEXT RACE
-   ============================================================ */
-
-#constructors-panel .cp-profile-grid-2 > .cp-desc-box:first-child {
-    min-height: 145px;
-}
-
-#constructors-panel .cp-nextrace-row {
-    display: flex;
-
-    align-items: center;
-
-    gap: 14px;
-
-    min-height: 75px;
-}
-
-#constructors-panel .cp-nextrace-icon {
-    font-size: 27px;
-}
-
-#constructors-panel .cp-nextrace-name {
-    font-size: 15px;
-
-    font-weight: 900;
-
-    color: #fff;
-
-    margin: 0;
-}
-
-#constructors-panel .cp-nextrace-date {
-    margin: 3px 0 0;
-
-    color: #777;
-
-    font-size: 11px;
-}
-
-
-/* ============================================================
-   23. CONSTRUCTOR CHAMPIONSHIP
-   ============================================================ */
-
-#constructors-panel .cp-mini-standings {
-    display: flex;
-
-    flex-direction: column;
-
-    gap: 4px;
-}
-
-#constructors-panel .cp-mini-row {
-    display: grid;
-
-    grid-template-columns: 25px 1fr auto;
-
-    align-items: center;
-
-    gap: 10px;
-
-    min-height: 31px;
-
-    padding: 5px 8px;
-
-    border-radius: 8px;
-
-    font-size: 11px;
-}
-
-#constructors-panel .cp-mini-row-self {
-    background: color-mix(
-        in srgb,
-        var(--team-color) 12%,
-        transparent
-    );
-
-    border-color: color-mix(
-        in srgb,
-        var(--team-color) 35%,
-        transparent
-    );
-}
-
-
-/* ============================================================
-   24. DESKTOP — LARGE SCREENS
-   ============================================================ */
-
-@media (min-width: 1600px) {
-
-    #constructors-panel .cp-full-profile {
-        width: min(1550px, calc(100vw - 100px));
-    }
-
-    #constructors-panel .cp-team-hero-name {
-        font-size: 42px !important;
-    }
-
-    #constructors-panel .cp-chart-canvas-wrap {
-        height: 250px;
-    }
-}
-
-
-/* ============================================================
-   25. LAPTOP
-   ============================================================ */
-
-@media (max-width: 1200px) {
-
-    #constructors-panel .cp-full-profile {
-        width: calc(100vw - 50px);
-    }
-
-    #constructors-panel .cp-profile-grid {
-        grid-template-columns: 1fr 0.9fr;
-    }
-
-    #constructors-panel .cp-profile-grid-3 {
-        grid-template-columns: 1.25fr 0.9fr 0.9fr;
-    }
-
-    #constructors-panel .cp-profile-grid-3b {
-        grid-template-columns: 1.25fr 0.9fr 0.9fr;
-    }
-}
-
-
-/* ============================================================
-   26. TABLET
-   ============================================================ */
-
-@media (max-width: 900px) {
-
-    #constructors-panel .cp-full-profile {
-        width: calc(100vw - 32px);
-    }
-
-    #constructors-panel .cp-team-hero {
-        padding: 22px 22px 0 !important;
-    }
-
-    #constructors-panel .cp-team-hero-top {
-        grid-template-columns: 1fr;
-        gap: 18px;
-    }
-
-    #constructors-panel .cp-team-hero-right {
-        justify-content: flex-start;
-    }
-
-    #constructors-panel .cp-profile-grid,
-    #constructors-panel .cp-profile-grid-3,
-    #constructors-panel .cp-profile-grid-3b {
-        grid-template-columns: 1fr;
-    }
-
-    #constructors-panel .cp-profile-grid-2 {
-        grid-template-columns: 1fr;
-    }
-}
-
-
-/* ============================================================
-   27. MOBILE
-   ============================================================ */
-
-@media (max-width: 600px) {
-
-    #constructors-panel .cp-full-profile {
-        width: calc(100vw - 20px);
-    }
-
-    #constructors-panel .cp-team-hero {
-        border-radius: 15px;
-
-        padding: 18px 16px 0 !important;
-    }
-
-    #constructors-panel .cp-team-hero-left {
-        gap: 12px;
-    }
-
-    #constructors-panel .cp-team-hero-logo,
-    #constructors-panel .cp-team-hero-logo-fallback {
-        width: 48px;
-        height: 48px;
-    }
-
-    #constructors-panel .cp-team-hero-name {
-        font-size: 27px !important;
-    }
-
-    #constructors-panel .cp-team-hero-right {
-        gap: 10px;
-    }
-
-    #constructors-panel .cp-team-hero-pos {
-        font-size: 20px;
-    }
-
-    #constructors-panel .cp-team-hero-pts {
-        font-size: 22px;
-    }
-
-    #constructors-panel .cp-stats-row {
-        grid-template-columns: repeat(2, 1fr);
-
-        gap: 8px;
-
-        padding: 14px 0 !important;
-    }
-
-    #constructors-panel .cp-stat-card {
-        border-right: 0 !important;
-
-        padding: 9px 10px !important;
-
-        border-radius: 10px !important;
-
-        background: rgba(255,255,255,0.025) !important;
-    }
-
-    #constructors-panel .cp-stat-value {
-        font-size: 21px;
-    }
-
-    #constructors-panel .cp-desc-box {
-        padding: 14px;
-
-        border-radius: 13px;
-    }
-
-    #constructors-panel .cp-chart-canvas-wrap {
-        height: 200px;
-    }
-
-    #constructors-panel .cp-chart-tabs {
-        width: 100%;
-
-        overflow-x: auto;
-    }
-
-    #constructors-panel .cp-chart-tab {
-        white-space: nowrap;
-    }
-
-    /* FINAL TOP POSITION */
-    #constructors-panel {
-      margin-top: -45px !important;
-      padding-top: 0 !important;
-    }
-}
-
+.cp-error { text-align: center; color: #ccc; padding: 48px 0; }
+.cp-error p { font-size: 14px; color: #aaa; margin: 0 0 16px; }

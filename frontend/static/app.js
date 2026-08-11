@@ -1775,6 +1775,211 @@ async function initConstructorsPanel() {
       `<p class="cp-empty">Couldn't load constructors data.</p>`;
   }
 }
+// ADVANCED LIVE SEARCH MODULE — Dynamically Fetched Data & Local Images
+
+// Map driver codes to local image files in /static/images/drivers/
+const LOCAL_DRIVER_IMAGES = {
+  LEC: "leclerc.png",
+  HAM: "hamilton.png",
+  VER: "verstappen.png",
+  NOR: "norris.png",
+  PIA: "piastri.png",
+  RUS: "russell.png",
+  ALO: "alonso.png",
+  SAI: "sainz.png",
+  GAS: "gasly.png",
+  OCO: "ocon.png",
+  TSU: "tsunoda.png",
+  ALB: "albon.png",
+  BOT: "bottas.png",
+  PER: "perez.png",
+  HUL: "hulkenberg.png",
+  STR: "stroll.png",
+  BEA: "bearman.png",
+  ANT: "antonelli.png",
+  LAW: "lawson.png",
+  COL: "colapinto.png",
+  BOR: "bortoleto.png",
+  HAD: "hadjar.png"
+};
+
+// SVG Fallback avatar if a driver photo is missing
+const SVG_FALLBACK_AVATAR = `data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="%238a93a6"><path d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z"/></svg>`;
+
+// Helper to resolve driver headshot from local directory or API URL
+function getDriverImage(driver) {
+  if (!driver) return SVG_FALLBACK_AVATAR;
+  const code = (driver.code || "").toUpperCase();
+
+  // 1. Try local code mapping
+  if (LOCAL_DRIVER_IMAGES[code]) {
+    return `/static/images/drivers/${LOCAL_DRIVER_IMAGES[code]}`;
+  }
+
+  // 2. Try driver last name match from full name
+  if (driver.name) {
+    const surname = driver.name.trim().split(" ").pop().toLowerCase();
+    return `/static/images/drivers/${surname}.png`;
+  }
+
+  // 3. Fallback to API headshot URL if provided
+  if (driver.headshot_url) {
+    return driver.headshot_url;
+  }
+
+  // 4. Default fallback code path
+  return `/static/images/drivers/${code.toLowerCase()}.png`;
+}
+
+// Global caches for quick search responses
+let searchScheduleCache = [];
+let searchDriversCache = [];
+
+// Pre-load current season schedule and drivers for instant searching
+async function preloadSearchData() {
+  const currentYear = new Date().getFullYear();
+  try {
+    // 1. Fetch Schedule
+    const schedRes = await fetch(`/api/schedule/${currentYear}`);
+    if (schedRes.ok) {
+      searchScheduleCache = await schedRes.json();
+    }
+
+    // 2. Fetch Drivers for current year
+    const drvRes = await fetch(`/api/drivers?year=${currentYear}&round=1&session_type=R`);
+    if (drvRes.ok) {
+      searchDriversCache = await drvRes.json();
+    }
+  } catch (err) {
+    console.warn("[Search] Could not pre-fetch live search index:", err);
+  }
+}
+
+function initTopbarSearch() {
+  const input = document.getElementById("topbarSearchInput");
+  const resultsContainer = document.getElementById("topbarSearchResults");
+
+  if (!input || !resultsContainer) return;
+
+  // Trigger pre-fetch on initialization
+  preloadSearchData();
+
+  input.addEventListener("input", async (e) => {
+    const query = e.target.value.trim().toLowerCase();
+
+    if (query.length < 2) {
+      resultsContainer.classList.add("hidden");
+      resultsContainer.innerHTML = "";
+      return;
+    }
+
+    const matches = [];
+
+    // --- 1. SEARCH DRIVERS ---
+    searchDriversCache.forEach(d => {
+      const nameMatch = (d.name || "").toLowerCase().includes(query);
+      const codeMatch = (d.code || "").toLowerCase().includes(query);
+      const teamMatch = (d.team || "").toLowerCase().includes(query);
+
+      if (nameMatch || codeMatch || teamMatch) {
+        matches.push({
+          type: "driver",
+          badge: "DRIVER",
+          code: d.code,
+          title: `${d.name || d.code} <span class="search-driver-code">(${d.code})</span>`,
+          sub: d.team || "Formula 1",
+          color: d.color || "#e10600",
+          num: d.number || d.code,
+          img: getDriverImage(d),
+          action: () => goToDriverProfile(d.code)
+        });
+      }
+    });
+
+    // --- 2. SEARCH SCHEDULE / TRACKS / GRAND PRIX ---
+    searchScheduleCache.forEach(w => {
+      const eventMatch = (w.event_name || "").toLowerCase().includes(query);
+      const countryMatch = (w.country || "").toLowerCase().includes(query);
+      const locationMatch = (w.location?.name || "").toLowerCase().includes(query);
+
+      if (eventMatch || countryMatch || locationMatch) {
+        matches.push({
+          type: "track",
+          badge: "TRACK / GP",
+          title: w.event_name,
+          sub: `🏁 Round ${w.round_number} · ${w.country}`,
+          round: w.round_number,
+          action: async () => {
+            goToPickerScreen();
+            if (typeof yearSelect !== "undefined") yearSelect.value = new Date().getFullYear();
+            if (typeof loadSchedule === "function") await loadSchedule();
+            if (typeof roundSelect !== "undefined") roundSelect.value = w.round_number;
+            if (typeof updateSessionOptions === "function") updateSessionOptions();
+          }
+        });
+      }
+    });
+
+    // --- RENDER MATCHES ---
+    if (matches.length === 0) {
+      resultsContainer.innerHTML = `<div class="search-no-results">No matching drivers, tracks, or sessions found.</div>`;
+    } else {
+      resultsContainer.innerHTML = matches.map((m, idx) => {
+        if (m.type === "driver") {
+          return `
+            <div class="search-item search-driver-item" data-idx="${idx}">
+              <div class="search-item-left">
+                <div class="search-avatar-wrapper" style="border-color:${m.color}">
+                  <img src="${m.img}" class="search-driver-img" alt="${m.code}" onerror="this.onerror=null; this.src='${SVG_FALLBACK_AVATAR}';">
+                  <span class="search-driver-num" style="background:${m.color}">${m.num}</span>
+                </div>
+                <div>
+                  <div class="search-item-title">${m.title}</div>
+                  <div class="search-item-sub"><span class="team-dot" style="background:${m.color}"></span>${m.sub}</div>
+                </div>
+              </div>
+              <span class="search-item-type search-badge-driver">DRIVER</span>
+            </div>`;
+        } else {
+          return `
+            <div class="search-item search-track-item" data-idx="${idx}">
+              <div class="search-item-left">
+                <div class="search-circuit-wrapper">
+                  <span style="font-size: 18px;">📍</span>
+                </div>
+                <div>
+                  <div class="search-item-title">${m.title}</div>
+                  <div class="search-item-sub">${m.sub}</div>
+                </div>
+              </div>
+              <span class="search-item-type search-badge-track">TRACK / GP</span>
+            </div>`;
+        }
+      }).join("");
+
+      resultsContainer.querySelectorAll(".search-item").forEach(item => {
+        item.addEventListener("click", () => {
+          const idx = parseInt(item.dataset.idx, 10);
+          matches[idx].action();
+          resultsContainer.classList.add("hidden");
+          input.value = "";
+        });
+      });
+    }
+
+    resultsContainer.classList.remove("hidden");
+  });
+
+  // Hide dropdown on outside click
+  document.addEventListener("click", (e) => {
+    if (!input.contains(e.target) && !resultsContainer.contains(e.target)) {
+      resultsContainer.classList.add("hidden");
+    }
+  });
+}
+
+document.addEventListener("DOMContentLoaded", initTopbarSearch);
+initTopbarSearch();
 
 initPicker();
 setSpeedIndex(state.speedIndex);

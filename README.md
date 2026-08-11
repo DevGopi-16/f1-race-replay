@@ -159,36 +159,56 @@ F1-RACE-REPLAY-WEB/
 │   ├── .env.example
 │   ├── data/
 │   │   └── drivers.json
-│   ├── computed_data/          # cached season stats snapshots
+│   ├── computed_data/              # cached season stats snapshots
+│   │
 │   ├── src/
-│   │   ├── auth/                # signup/login (Racer PRO)
-│   │   ├── lib/                 # settings, time, tyre helpers
-│   │   ├── live/                # live-session watcher + shared state
-│   │   ├── driver_panel.py      # standings, season stats, driver profiles
-│   │   ├── f1_data.py           # core FastF1 replay pipeline
+│   │   ├── auth/                   # signup/login (Racer PRO)
+│   │   ├── lib/                    # settings, time, tyre helpers
+│   │   ├── live/                   # live-session watcher + shared state
+│   │   │
+│   │   ├── driver_panel.py         # standings, season stats, driver profiles
+│   │   ├── constructors_panel.py   # constructor standings, team stats, profiles
+│   │   ├── f1_data.py              # core FastF1 replay pipeline
 │   │   ├── minisectors.py
 │   │   ├── next_session.py
 │   │   ├── race_control.py
 │   │   ├── serialize.py
 │   │   ├── timing_tower.py
 │   │   └── track_geometry.py
+│   │
+│   ├── test_telemetry_debug.py     # telemetry debugging/testing
 │   ├── main.py
 │   └── requirements.txt
 │
 ├── frontend/
 │   ├── index.html
+│   │
 │   └── static/
 │       ├── images/
+│       │
 │       ├── app.js
-│       ├── auth.css / auth.js
-│       ├── constructors-panel.css / constructors-panel.js
-│       ├── driver-panel.css / driver-panel.js
+│       ├── auth.css
+│       ├── auth.js
+│       │
+│       ├── constructors-panel.css
+│       ├── constructors-panel.js
+│       │
+│       ├── driver-panel.css
+│       ├── driver-panel.js
+│       │
 │       ├── home-dashboard.css
 │       ├── replay.css
-│       ├── session-panel.css / session-panel.js
+│       │
+│       ├── session-panel.css
+│       ├── session-panel.js
+│       │
 │       ├── style.css
-│       ├── timing-tower.css / timing-tower.js
-│       └── track-map.css / track-map.js      # 3D Three.js track view
+│       │
+│       ├── timing-tower.css
+│       ├── timing-tower.js
+│       │
+│       └── track-map.css
+│       └── track-map.js             # 3D Three.js track view
 │
 ├── README.md
 └── requirements.txt

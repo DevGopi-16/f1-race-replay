@@ -24,11 +24,15 @@ import time
 import requests
 import datetime
 import asyncio
+import os
+from urllib.parse import urlencode
 
+from fastapi import HTTPException
+from fastapi.responses import RedirectResponse
 from fastapi import FastAPI, HTTPException, Query
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.staticfiles import StaticFiles
-from fastapi.responses import FileResponse, JSONResponse
+from fastapi.responses import FileResponse, JSONResponse, RedirectResponse
 from src.track_geometry import get_track_map_with_telemetry
 
 from src.f1_data import (
@@ -76,6 +80,77 @@ Base.metadata.create_all(bind=engine)
 
 app.include_router(auth_router)
 
+
+@app.get("/auth/discord", summary="Discord OAuth Login")
+def login_discord():
+    """Redirect the user to Discord OAuth2."""
+
+    client_id = os.getenv("DISCORD_CLIENT_ID")
+
+    if not client_id:
+        raise HTTPException(
+            status_code=500,
+            detail="DISCORD_CLIENT_ID is not configured."
+        )
+
+    redirect_uri = os.getenv(
+        "DISCORD_REDIRECT_URI",
+        "http://127.0.0.1:8000/auth/discord/callback"
+    )
+
+    params = {
+        "client_id": client_id,
+        "redirect_uri": redirect_uri,
+        "response_type": "code",
+        "scope": "identify email",
+    }
+
+    discord_url = (
+        "https://discord.com/api/oauth2/authorize?"
+        + urlencode(params)
+    )
+
+    return RedirectResponse(url=discord_url)
+
+
+
+@app.get("/auth/x", summary="X (Twitter) OAuth Login")
+def login_x():
+    """Redirects the user to X's OAuth2 authorization portal."""
+
+    client_id = os.getenv("X_CLIENT_ID", "")
+    redirect_uri = os.getenv("X_REDIRECT_URI", "")
+
+    if not client_id:
+        raise HTTPException(
+            status_code=500,
+            detail="X_CLIENT_ID not configured in environment variables."
+        )
+
+    if not redirect_uri:
+        raise HTTPException(
+            status_code=500,
+            detail="X_REDIRECT_URI not configured in environment variables."
+        )
+
+    from urllib.parse import urlencode
+
+    params = {
+        "client_id": client_id,
+        "redirect_uri": redirect_uri,
+        "response_type": "code",
+        "scope": "tweet.read users.read",
+        "state": "f1_replay_secure_state",
+        "code_challenge": "challenge",
+        "code_challenge_method": "plain",
+    }
+
+    x_url = (
+        "https://twitter.com/i/oauth2/authorize?"
+        + urlencode(params)
+    )
+
+    return RedirectResponse(url=x_url)
 
 SOURCE_FPS = 25  # must match DT = 1/FPS in f1_data.py
 
@@ -736,4 +811,3 @@ def timing_tower(
         "rows": rows,
         "is_live": False,
     }
-
