@@ -88,28 +88,22 @@ function goToPickerScreen() {
 function goToHomeScreen() {
   document.getElementById("picker").classList.add("hidden");
   document.getElementById("homePage").classList.remove("hidden");
-  pickerStatus.textContent = "";
+  if (pickerStatus) pickerStatus.textContent = "";
 }
 
-document.getElementById("heroStartBtn").addEventListener("click", goToPickerScreen);
-document.getElementById("pickerHomeBtn").addEventListener("click", goToHomeScreen);
+document.getElementById("heroStartBtn")?.addEventListener("click", goToPickerScreen);
+document.getElementById("pickerHomeBtn")?.addEventListener("click", goToHomeScreen);
 
-// PATCH: this button belonged to the old sidebar dashboard's live-timing
-// panel and doesn't exist in the new landing page — guard it instead of
-// letting a null .addEventListener() throw and kill the rest of the script.
 const viewFullLeaderboardBtn = document.getElementById("viewFullLeaderboardBtn");
 if (viewFullLeaderboardBtn) {
   viewFullLeaderboardBtn.addEventListener("click", () => {
-    // Hide current homepage view and show the Telemetry panel
     document.getElementById("homePage").classList.add("hidden");
     document.getElementById("telemetryPanel").classList.remove("hidden");
 
-    // Highlight the active navigation item on the left sidebar
     document.querySelectorAll(".nav-item").forEach(item => {
       item.classList.toggle("active", item.dataset.nav === "telemetry");
     });
 
-    // Initialize the telemetry panel scripts & content
     initTelemetryPanel();
   });
 }
@@ -159,21 +153,22 @@ document.querySelectorAll(".nav-item").forEach(btn => {
   });
 });
 
-document.getElementById("telemetryBackBtn").addEventListener("click", () => {
+document.getElementById("telemetryBackBtn")?.addEventListener("click", () => {
   document.getElementById("telemetryPanel").classList.add("hidden");
   document.getElementById("homePage").classList.remove("hidden");
 });
 
-document.getElementById("driversBackBtn").addEventListener("click", () => {
+document.getElementById("driversBackBtn")?.addEventListener("click", () => {
   document.getElementById("driversPanel").classList.add("hidden");
   document.getElementById("homePage").classList.remove("hidden");
 });
-document.getElementById("constructorsBackBtn").addEventListener("click", () => {
+
+document.getElementById("constructorsBackBtn")?.addEventListener("click", () => {
   document.getElementById("constructorsPanel").classList.add("hidden");
   document.getElementById("homePage").classList.remove("hidden");
 });
 
-document.getElementById("sessionsBackBtn").addEventListener("click", () => {
+document.getElementById("sessionsBackBtn")?.addEventListener("click", () => {
   document.getElementById("sessionsPanel").classList.add("hidden");
   document.getElementById("homePage").classList.remove("hidden");
 });
@@ -188,9 +183,6 @@ const FLAG_EMOJI = {
 
 async function loadRecentSessions(year) {
   const grid = document.getElementById("recentSessionsGrid");
-  // PATCH: the new landing page doesn't have a "Recent Sessions" grid —
-  // that browsing now happens behind "Browse Sessions" (#sessionsPanel).
-  // Bail out quietly instead of throwing on grid.innerHTML.
   if (!grid) return;
 
   grid.innerHTML = `<p class="sessions-loading">Loading recent sessions…</p>`;
@@ -241,7 +233,6 @@ async function loadRecentSessions(year) {
   }
 }
 
-
 // --- LIVE WEATHER & WEEKEND FETCHERS ---
 async function updateHomepageLiveWeekend() {
   const currentYear = new Date().getFullYear();
@@ -253,15 +244,13 @@ async function updateHomepageLiveWeekend() {
 
     const today = new Date();
 
-    // Find current or next upcoming round
     let currentRound = schedule.find(w => new Date(w.date) >= today);
     if (!currentRound && schedule.length > 0) {
-      currentRound = schedule[schedule.length - 1]; // Fallback to last race
+      currentRound = schedule[schedule.length - 1];
     }
 
     if (!currentRound) return;
 
-    // Fetch live weather via Open-Meteo API using circuit coordinates
     const lat = currentRound.location?.lat || 52.0786;
     const lon = currentRound.location?.long || -1.0169;
     fetchLiveWeather(lat, lon);
@@ -282,19 +271,21 @@ async function fetchLiveWeather(lat, lon) {
     const isRaining = current.weather_code >= 51;
     const weatherText = isRaining ? "Rain / Wet Track" : "Clear / Dry";
 
-    // Update elements by ID
     const heroTemp = document.getElementById("weatherHeroTemp");
     const heroSub = document.getElementById("weatherHeroSubtext");
     const airTemp = document.getElementById("weatherAirTemp");
     const trackTemp = document.getElementById("weatherTrackTemp");
     const wind = document.getElementById("weatherWind");
     const humidity = document.getElementById("weatherHumidity");
+    
+    const formatTemp = window.formatTemp || ((t) => `${Math.round(t)}°C`);
+    const formatSpeed = window.formatSpeed || ((s) => `${Math.round(s)} km/h`);
 
-    if (heroTemp) heroTemp.textContent = `${Math.round(current.temperature_2m)}°C`;
+    if (heroTemp) heroTemp.textContent = formatTemp(current.temperature_2m);
     if (heroSub) heroSub.textContent = weatherText;
-    if (airTemp) airTemp.textContent = `${Math.round(current.temperature_2m)}°C`;
-    if (trackTemp) trackTemp.textContent = `${Math.round(current.temperature_2m + 9)}°C`;
-    if (wind) wind.innerHTML = `${Math.round(current.wind_speed_10m)} <small>km/h</small>`;
+    if (airTemp) airTemp.textContent = formatTemp(current.temperature_2m);
+    if (trackTemp) trackTemp.textContent = formatTemp(current.temperature_2m + 9);
+    if (wind) wind.innerHTML = formatSpeed(current.wind_speed_10m);
     if (humidity) humidity.textContent = `${Math.round(current.relative_humidity_2m)}%`;
   } catch (e) {
     console.warn("Live weather fetch failed:", e);
@@ -302,9 +293,6 @@ async function fetchLiveWeather(lat, lon) {
 }
 
 function initHomePage() {
-  // PATCH: homeYearSelect and the recent-sessions wiring were part of the
-  // old dashboard's "Recent Sessions" section, which the new landing page
-  // doesn't have. Guarded so this skips cleanly instead of throwing.
   const homeYearSelect = document.getElementById("homeYearSelect");
   const thisYear = new Date().getFullYear();
   if (homeYearSelect) {
@@ -328,14 +316,13 @@ function initHomePage() {
   updateClocks();
   setInterval(updateClocks, 1000);
 
-  // Load live weather for current race weekend on homepage load
   updateHomepageLiveWeekend();
 }
 
 initHomePage();
 
-
 function initPicker() {
+  if (!yearSelect) return;
   const thisYear = new Date().getFullYear();
   for (let y = thisYear; y >= 2018; y--) {
     const opt = document.createElement("option");
@@ -360,6 +347,7 @@ let currentSchedule = {};
 const SPRINT_FORMATS = new Set(["sprint", "sprint_qualifying", "sprint_shootout"]);
 
 async function loadSchedule() {
+  if (!roundSelect) return;
   roundSelect.innerHTML = "<option>Loading…</option>";
   try {
     const res = await fetch(`/api/schedule/${yearSelect.value}`);
@@ -377,7 +365,7 @@ async function loadSchedule() {
     updateSessionOptions();
   } catch (e) {
     roundSelect.innerHTML = "<option>Failed to load</option>";
-    pickerStatus.textContent = friendlyErrorMessage(`Couldn't load schedule: ${e.message}`);
+    if (pickerStatus) pickerStatus.textContent = friendlyErrorMessage(`Couldn't load schedule: ${e.message}`);
   }
 }
 
@@ -431,22 +419,25 @@ function renderStrategy(data) {
 }
 
 function updateSessionOptions() {
+  if (!sessionTypeSelect || !roundSelect) return;
   const format = currentSchedule[roundSelect.value];
   const isSprintWeekend = SPRINT_FORMATS.has(format);
 
   const sprintOption = sessionTypeSelect.querySelector('option[value="S"]');
   const sprintQualiOption = sessionTypeSelect.querySelector('option[value="SQ"]');
 
-  sprintOption.disabled = !isSprintWeekend;
-  sprintQualiOption.disabled = !isSprintWeekend;
-  sprintOption.textContent = isSprintWeekend ? "Sprint" : "Sprint (not available this weekend)";
-  sprintQualiOption.textContent = isSprintWeekend ? "Sprint Qualifying" : "Sprint Qualifying (not available this weekend)";
+  if (sprintOption && sprintQualiOption) {
+    sprintOption.disabled = !isSprintWeekend;
+    sprintQualiOption.disabled = !isSprintWeekend;
+    sprintOption.textContent = isSprintWeekend ? "Sprint" : "Sprint (not available this weekend)";
+    sprintQualiOption.textContent = isSprintWeekend ? "Sprint Qualifying" : "Sprint Qualifying (not available this weekend)";
+  }
 
   if (sessionTypeSelect.value === "S" && !isSprintWeekend) sessionTypeSelect.value = "R";
   if (sessionTypeSelect.value === "SQ" && !isSprintWeekend) sessionTypeSelect.value = "R";
 }
 
-roundSelect.addEventListener("change", updateSessionOptions);
+roundSelect?.addEventListener("change", updateSessionOptions);
 
 async function submitLoadSession() {
   const year = yearSelect.value;
@@ -454,37 +445,35 @@ async function submitLoadSession() {
   const sessionType = sessionTypeSelect.value;
 
   if (!round || isNaN(Number(round))) {
-    pickerStatus.textContent = "Please wait for the round list to finish loading, then pick one.";
+    if (pickerStatus) pickerStatus.textContent = "Please wait for the round list to finish loading, then pick one.";
     return;
   }
 
   const isQuali = sessionType === "Q" || sessionType === "SQ";
-  pickerStatus.textContent = isQuali
-    ? "Loading qualifying results…"
-    : "Loading replay data — this can take a while the first time (building telemetry cache)…";
+  if (pickerStatus) {
+    pickerStatus.textContent = isQuali
+      ? "Loading qualifying results…"
+      : "Loading replay data — this can take a while the first time (building telemetry cache)…";
+  }
 
   try {
     if (isQuali) {
       const res = await fetch(`/api/quali?year=${year}&round=${round}&session_type=${sessionType}`);
-      if (!res.ok) {
-        throw new Error(await extractApiErrorMessage(res));
-      }
+      if (!res.ok) throw new Error(await extractApiErrorMessage(res));
       const data = await res.json();
       showQualiResults(data);
     } else {
       const res = await fetch(`/api/replay?year=${year}&round=${round}&session_type=${sessionType}&fps=8`);
-      if (!res.ok) {
-        throw new Error(await extractApiErrorMessage(res));
-      }
+      if (!res.ok) throw new Error(await extractApiErrorMessage(res));
       state.raceData = await res.json();
       startReplay();
     }
   } catch (e) {
-    pickerStatus.innerHTML = friendlyErrorMessage(e.message);
+    if (pickerStatus) pickerStatus.innerHTML = friendlyErrorMessage(e.message);
   }
 }
 
-document.getElementById("loadBtn").addEventListener("click", submitLoadSession);
+document.getElementById("loadBtn")?.addEventListener("click", submitLoadSession);
 
 function showQualiResults(data) {
   document.getElementById("picker").classList.add("hidden");
@@ -526,20 +515,20 @@ function showQualiResults(data) {
   document.getElementById("qualiTable").innerHTML = html;
 }
 
-document.getElementById("backToPickerBtn2").addEventListener("click", () => {
+document.getElementById("backToPickerBtn2")?.addEventListener("click", () => {
   document.getElementById("qualiResults").classList.add("hidden");
   document.getElementById("picker").classList.remove("hidden");
-  pickerStatus.textContent = "";
+  if (pickerStatus) pickerStatus.textContent = "";
 });
 
-document.getElementById("backToPickerBtn").addEventListener("click", () => {
+document.getElementById("backToPickerBtn")?.addEventListener("click", () => {
   state.playing = false;
   document.getElementById("replay").classList.add("hidden");
   document.getElementById("picker").classList.remove("hidden");
-  pickerStatus.textContent = "";
+  if (pickerStatus) pickerStatus.textContent = "";
 });
 
-document.getElementById("strategyBtn").addEventListener("click", async () => {
+document.getElementById("strategyBtn")?.addEventListener("click", async () => {
   const m = state.raceData.meta;
   document.getElementById("replay").classList.add("hidden");
   document.getElementById("strategyPanel").classList.remove("hidden");
@@ -547,9 +536,7 @@ document.getElementById("strategyBtn").addEventListener("click", async () => {
 
   try {
     const res = await fetch(`/api/strategy?year=${m.year}&round=${m.round}&session_type=${m.session_type}`);
-    if (!res.ok) {
-      throw new Error(await extractApiErrorMessage(res));
-    }
+    if (!res.ok) throw new Error(await extractApiErrorMessage(res));
     const data = await res.json();
     renderStrategy(data);
   } catch (e) {
@@ -557,16 +544,15 @@ document.getElementById("strategyBtn").addEventListener("click", async () => {
   }
 });
 
-document.getElementById("strategyBackBtn").addEventListener("click", () => {
+document.getElementById("strategyBackBtn")?.addEventListener("click", () => {
   document.getElementById("strategyPanel").classList.add("hidden");
   document.getElementById("replay").classList.remove("hidden");
 });
 
 const canvas = document.getElementById("trackCanvas");
-const ctx = canvas.getContext("2d");
+const ctx = canvas ? canvas.getContext("2d") : null;
 const progressCanvas = document.getElementById("progressCanvas");
-const progressCtx = progressCanvas.getContext("2d");
-
+const progressCtx = progressCanvas ? progressCanvas.getContext("2d") : null;
 
 function startReplay() {
   document.getElementById("picker").classList.add("hidden");
@@ -577,8 +563,11 @@ function startReplay() {
   state.selectedDrivers = [];
   state.lastTickMs = null;
 
-  playPauseIcon.src = "/static/images/controls/pause.png";
-  playPauseIcon.alt = "Pause";
+  const playPauseIcon = document.getElementById("playPauseIcon");
+  if (playPauseIcon) {
+    playPauseIcon.src = "/static/images/controls/pause.png";
+    playPauseIcon.alt = "Pause";
+  }
 
   resizeCanvases();
   computeTransform();
@@ -588,23 +577,32 @@ function startReplay() {
 
 function renderSessionBanner() {
   const m = state.raceData.meta;
-  document.getElementById("sessionBanner").innerHTML =
-    `<b>${m.event_name}</b> — ${m.circuit_name}, ${m.country}<br>` +
-    `${m.date} · Round ${m.round} · ${m.total_laps} laps`;
+  const banner = document.getElementById("sessionBanner");
+  if (banner) {
+    banner.innerHTML =
+      `<b>${m.event_name}</b> — ${m.circuit_name}, ${m.country}<br>` +
+      `${m.date} · Round ${m.round} · ${m.total_laps} laps`;
+  }
 }
 
 function resizeCanvases() {
-  canvas.width = window.innerWidth;
-  canvas.height = window.innerHeight;
-  progressCanvas.width = progressCanvas.clientWidth;
-  progressCanvas.height = progressCanvas.clientHeight;
+  if (canvas) {
+    canvas.width = window.innerWidth;
+    canvas.height = window.innerHeight;
+  }
+  if (progressCanvas) {
+    progressCanvas.width = progressCanvas.clientWidth;
+    progressCanvas.height = progressCanvas.clientHeight;
+  }
 }
+
 window.addEventListener("resize", () => {
   resizeCanvases();
   if (state.raceData) computeTransform();
 });
 
 function computeTransform() {
+  if (!canvas || !state.raceData) return;
   const { bounds } = state.raceData.track;
   const padding = 60;
   const availW = canvas.width - padding * 2;
@@ -626,6 +624,7 @@ function toCanvas([x, y]) {
 }
 
 function drawTrack() {
+  if (!ctx || !state.raceData) return;
   const {
     inner,
     outer,
@@ -633,8 +632,7 @@ function drawTrack() {
     drs_zones,
     sectors,
     sector_segments,
-    start_finish,
-    corners
+    start_finish
   } = state.raceData.track;
 
   ctx.strokeStyle = "#3a3a3a";
@@ -657,7 +655,6 @@ function drawTrack() {
     drs_zones.forEach(zone => {
       const [x1, y1] = toCanvas([zone.start_offset.x, zone.start_offset.y]);
       const [x2, y2] = toCanvas([zone.end_offset.x, zone.end_offset.y]);
-
 
       ctx.beginPath();
       ctx.moveTo(x1, y1);
@@ -719,7 +716,7 @@ function drawTrack() {
 }
 
 function drawPolyline(points, dashed) {
-  if (!points.length) return;
+  if (!points || !points.length || !ctx) return;
   ctx.save();
   if (dashed) ctx.setLineDash([6, 6]);
   ctx.beginPath();
@@ -771,67 +768,50 @@ function getInterpolatedDrivers(t) {
 function lerp(a, b, frac) { return a + (b - a) * frac; }
 
 function tick(nowMs) {
+  if (!state.raceData) return;
 
-    if (!state.raceData) return;
-
-    if (state.lastTickMs === null) {
-        state.lastTickMs = nowMs;
-    }
-
-    const deltaS = (nowMs - state.lastTickMs) / 1000;
+  if (state.lastTickMs === null) {
     state.lastTickMs = nowMs;
+  }
 
-    const totalT =
-        state.raceData.frames[
-            state.raceData.frames.length - 1
-        ].t;
+  const deltaS = (nowMs - state.lastTickMs) / 1000;
+  state.lastTickMs = nowMs;
 
-    if (state.playing) {
+  const totalT = state.raceData.frames[state.raceData.frames.length - 1].t;
 
-        state.playheadT = Math.min(
-            totalT,
-            state.playheadT +
-            deltaS * PLAYBACK_SPEEDS[state.speedIndex]
-        );
+  if (state.playing) {
+    state.playheadT = Math.min(totalT, state.playheadT + deltaS * PLAYBACK_SPEEDS[state.speedIndex]);
 
-        if (state.playheadT >= totalT) {
-            state.playing = false;
-            playPauseIcon.src =
-                "/static/images/controls/play.png";
-            playPauseIcon.alt = "Play";
-        }
+    if (state.playheadT >= totalT) {
+      state.playing = false;
+      const playPauseIcon = document.getElementById("playPauseIcon");
+      if (playPauseIcon) {
+        playPauseIcon.src = "/static/images/controls/play.png";
+        playPauseIcon.alt = "Play";
+      }
     }
+  }
 
-    const frame =
-        getInterpolatedDrivers(state.playheadT);
+  const frame = getInterpolatedDrivers(state.playheadT);
 
-    ctx.clearRect(
-        0,
-        0,
-        canvas.width,
-        canvas.height
-    );
-
+  if (ctx && canvas) {
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
     drawTrack();
-
     drawCars(frame);
+  }
 
-    updateLapCounter(frame);
+  updateLapCounter(frame);
+  updateLeaderboard(frame);
+  updateWeather(frame);
+  updateDriverInfo(frame);
+  updateTimeLabel(totalT);
+  drawProgressBar(totalT);
 
-    updateLeaderboard(frame);
-
-    updateWeather(frame);
-
-    updateDriverInfo(frame);
-
-    updateTimeLabel(totalT);
-
-    drawProgressBar(totalT);
-
-    requestAnimationFrame(tick);
+  requestAnimationFrame(tick);
 }
 
 function drawCars(frame) {
+  if (!ctx) return;
   const colors = state.raceData.driver_colors;
   for (const [code, d] of Object.entries(frame.drivers)) {
     const [cx, cy] = toCanvas([d.x, d.y]);
@@ -872,7 +852,8 @@ function buildStatusBadges(d) {
 function updateLapCounter(frame) {
   const totalLaps = state.raceData.meta.total_laps;
   const currentLap = Math.min(frame.lap ?? 1, totalLaps);
-  document.getElementById("lapCounter").textContent = `Lap: ${currentLap}/${totalLaps}`;
+  const el = document.getElementById("lapCounter");
+  if (el) el.textContent = `Lap: ${currentLap}/${totalLaps}`;
 }
 
 const TYRE_BADGE = {
@@ -894,6 +875,9 @@ function buildTyreBadge(d) {
 }
 
 function updateLeaderboard(frame) {
+  const panel = document.getElementById("leaderboardPanel");
+  if (!panel) return;
+
   const rows = Object.entries(frame.drivers)
     .filter(([, d]) => d.position != null)
     .sort((a, b) => a[1].position - b[1].position);
@@ -931,7 +915,6 @@ function updateLeaderboard(frame) {
       </div>`;
   }
 
-  const panel = document.getElementById("leaderboardPanel");
   panel.innerHTML = html;
 
   panel.querySelectorAll(".lb-row").forEach(row => {
@@ -959,6 +942,7 @@ function updateLeaderboard(frame) {
 
 function updateWeather(frame) {
   const panel = document.getElementById("weatherPanel");
+  if (!panel) return;
 
   if (!frame.weather) {
     panel.innerHTML = "";
@@ -966,519 +950,360 @@ function updateWeather(frame) {
   }
 
   const w = frame.weather;
-  const fmt = (v, suffix = "", p = 1) =>
-    v == null ? "N/A" : `${v.toFixed(p)}${suffix}`;
+  const formatTemp = window.formatTemp || ((t) => `${Math.round(t)}°C`);
+  const formatSpeed = window.formatSpeed || ((s) => `${Math.round(s)} km/h`);
+
+  const trackTempText = w.track_temp != null ? formatTemp(w.track_temp) : "N/A";
+  const airTempText = w.air_temp != null ? formatTemp(w.air_temp) : "N/A";
+  const humidityText = w.humidity != null ? Math.round(w.humidity) + "%" : "N/A";
+  const windText = w.wind_speed != null ? formatSpeed(w.wind_speed) : "N/A";
+  const rainText = w.rain_state || "N/A";
 
   panel.innerHTML = `
     <div class="wp-title">Weather</div>
 
     <div class="wp-row">
       <img src="/static/images/weather/thermometer.png" class="weather-icon" alt="Track Temperature">
-      Track: ${fmt(w.track_temp, "°C")}
+      Track: ${trackTempText}
     </div>
 
     <div class="wp-row">
       <img src="/static/images/weather/thermometer.png" class="weather-icon" alt="Air Temperature">
-      Air: ${fmt(w.air_temp, "°C")}
+      Air: ${airTempText}
     </div>
 
     <div class="wp-row">
       <img src="/static/images/weather/drop.png" class="weather-icon" alt="Humidity">
-      Humidity: ${fmt(w.humidity, "%", 0)}
+      Humidity: ${humidityText}
     </div>
 
     <div class="wp-row">
       <img src="/static/images/weather/wind.png" class="weather-icon" alt="Wind">
-      Wind: ${fmt(w.wind_speed, " km/h")}
+      Wind: ${windText}
     </div>
 
     <div class="wp-row">
       <img src="/static/images/weather/rain.png" class="weather-icon" alt="Rain">
-      Rain: ${w.rain_state || "N/A"}
+      Rain: ${rainText}
     </div>
   `;
 }
 
-function neighborGapLabel(sortedRows, idx, direction) {
-  const neighborIdx = idx + direction;
-  if (neighborIdx < 0 || neighborIdx >= sortedRows.length) return null;
-  const [neighborCode, neighborD] = sortedRows[neighborIdx];
-  const [, thisD] = sortedRows[idx];
-  if (thisD.dist == null || neighborD.dist == null) return null;
-
-  const distM = Math.abs(thisD.dist - neighborD.dist) / 10.0;
-  const timeS = distM / 55.56;
-  const sign = direction === -1 ? "+" : "-";
-  const label = direction === -1 ? "Ahead" : "Behind";
-  return `${label} (${neighborCode}): ${sign}${timeS.toFixed(2)}s (${distM.toFixed(1)}m)`;
-}
-
 function updateDriverInfo(frame) {
+  const wrapper = document.getElementById("driverInfoWrapper");
+  if (!wrapper) return;
 
-    const wrapper = document.getElementById("driverInfoWrapper");
-
-    if (state.selectedDrivers.length === 0) {
-        wrapper.innerHTML = "";
-        return;
-    }
-
+  if (state.selectedDrivers.length === 0) {
     wrapper.innerHTML = "";
+    return;
+  }
 
-    const tyreNames = {
-        0: "🟣 C5",
-        1: "🔴 SOFT",
-        2: "🟡 MED",
-        3: "⚪ HARD",
-        4: "🟢 INT",
-        5: "🔵 WET"
-    };
+  wrapper.innerHTML = "";
 
-    const sortedRows = Object.entries(frame.drivers)
-        .filter(([, d]) => d.position != null)
-        .sort((a, b) => a[1].position - b[1].position);
+  const formatSpeed = window.formatSpeed || ((s) => `${Math.round(s)} km/h`);
 
-    for (const code of state.selectedDrivers) {
+  const tyreNames = {
+    0: "🟣 C5",
+    1: "🔴 SOFT",
+    2: "🟡 MED",
+    3: "⚪ HARD",
+    4: "🟢 INT",
+    5: "🔵 WET"
+  };
 
-        const d = frame.drivers[code];
+  for (const code of state.selectedDrivers) {
+    const d = frame.drivers[code];
+    if (!d) continue;
 
-        if (!d) continue;
+    const color = state.raceData.driver_colors[code] || "#888";
+    const tyre = tyreNames[d.tyre] || d.tyre;
+    const throttle = Math.round(d.throttle);
+    const brake = Math.round(d.brake > 1 ? d.brake : d.brake * 100);
 
-        const color =
-            state.raceData.driver_colors[code] || "#888";
+    const drs = d.drs >= 10
+      ? '<span style="color:#2ecc40">DRS ●</span>'
+      : '<span style="color:#888">DRS ○</span>';
 
-        const tyre =
-            tyreNames[d.tyre] || d.tyre;
+    const ahead = d.ahead
+      ? `Ahead (${d.ahead.driver}): +${d.ahead.gap.toFixed(2)}s (${d.ahead.distance.toFixed(1)}m)`
+      : "Ahead: N/A";
+    const behind = d.behind
+      ? `Behind (${d.behind.driver}): -${d.behind.gap.toFixed(2)}s (${d.behind.distance.toFixed(1)}m)`
+      : "Behind: N/A";
 
-        const throttle =
-            Math.round(d.throttle);
+    const maxTyreLife = state.raceData.max_tyre_life[String(d.tyre)] || 30;
+    const tyreHealth = Math.max(0, Math.min(1, 1 - d.tyre_life / maxTyreLife));
+    const tyrePct = Math.round(tyreHealth * 100);
+    const tyreColor = tyreHealth > 0.5 ? "#2ecc40" : tyreHealth > 0.25 ? "#f1c40f" : "#e74c3c";
 
-        const brake =
-            Math.round(d.brake > 1 ? d.brake : d.brake * 100);
+    wrapper.innerHTML += `
+      <div class="driver-panel">
+          <div class="driver-header">
+              <div class="team-strip" style="background:${color}"></div>
+              <div class="driver-code">${code}</div>
+              <div class="driver-position">P${d.position}</div>
+          </div>
 
-        const drs =
-            d.drs >= 10
-                ? '<span style="color:#2ecc40">DRS ●</span>'
-                : '<span style="color:#888">DRS ○</span>';
+          <div class="driver-speed">
+              ${formatSpeed(d.speed)}
+          </div>
 
-        const ahead = d.ahead
-          ? `Ahead (${d.ahead.driver}): +${d.ahead.gap.toFixed(2)}s (${d.ahead.distance.toFixed(1)}m)`
-          : "Ahead: N/A";
-        const behind = d.behind
-          ? `Behind (${d.behind.driver}): -${d.behind.gap.toFixed(2)}s (${d.behind.distance.toFixed(1)}m)`
-          : "Behind: N/A";
+          <div class="driver-status">
+              <span>${tyre}</span>
+              <span>Gear ${d.gear}</span>
+              <span>${drs}</span>
+          </div>
 
-        const maxTyreLife = state.raceData.max_tyre_life[String(d.tyre)] || 30;
-        const tyreHealth = Math.max(0, Math.min(1, 1 - d.tyre_life / maxTyreLife));
-        const tyrePct = Math.round(tyreHealth * 100);
-        const tyreColor = tyreHealth > 0.5 ? "#2ecc40" : tyreHealth > 0.25 ? "#f1c40f" : "#e74c3c";
+          <div class="telemetry-row">
+              <span>THR</span>
+              <div class="telemetry-track">
+                  <div class="telemetry-fill throttle" style="width:${throttle}%"></div>
+              </div>
+              <span>${throttle}%</span>
+          </div>
 
-        wrapper.innerHTML += `
+          <div class="telemetry-row">
+              <span>BRK</span>
+              <div class="telemetry-track">
+                  <div class="telemetry-fill brake" style="width:${brake}%"></div>
+              </div>
+              <span>${brake}%</span>
+          </div>
 
-<div class="driver-panel">
+          <div class="telemetry-row">
+              <span>TYRE</span>
+              <div class="telemetry-track">
+                  <div class="telemetry-fill" style="width:${tyrePct}%; background:${tyreColor}"></div>
+              </div>
+              <span>${Math.round(d.tyre_life)} laps</span>
+          </div>
 
-    <div class="driver-header">
-
-        <div class="team-strip"
-             style="background:${color}">
-        </div>
-
-        <div class="driver-code">
-            ${code}
-        </div>
-
-        <div class="driver-position">
-            P${d.position}
-        </div>
-
-    </div>
-
-    <div class="driver-speed">
-        ${Math.round(d.speed)} km/h
-    </div>
-
-    <div class="driver-status">
-
-        <span>${tyre}</span>
-
-        <span>Gear ${d.gear}</span>
-
-        <span>${drs}</span>
-
-    </div>
-
-    <div class="telemetry-row">
-
-        <span>THR</span>
-
-        <div class="telemetry-track">
-
-            <div class="telemetry-fill throttle"
-                 style="width:${throttle}%">
-            </div>
-
-        </div>
-
-        <span>${throttle}%</span>
-
-    </div>
-
-    <div class="telemetry-row">
-
-        <span>BRK</span>
-
-        <div class="telemetry-track">
-
-            <div class="telemetry-fill brake"
-                 style="width:${brake}%">
-            </div>
-
-        </div>
-
-        <span>${brake}%</span>
-
-    </div>
-
-    <div class="telemetry-row">
-
-        <span>TYRE</span>
-
-        <div class="telemetry-track">
-
-            <div class="telemetry-fill"
-                 style="width:${tyrePct}%; background:${tyreColor}">
-            </div>
-
-        </div>
-
-        <span>${Math.round(d.tyre_life)} laps</span>
-
-    </div>
-
-    <div class="gap-row ahead">
-        ${ahead}
-    </div>
-
-    <div class="gap-row behind">
-        ${behind}
-    </div>
-
-</div>
-
-`;
-    }
+          <div class="gap-row ahead">${ahead}</div>
+          <div class="gap-row behind">${behind}</div>
+      </div>`;
+  }
 }
 
 function drawProgressBar(totalT) {
-    const rect = progressCanvas.getBoundingClientRect();
+  if (!progressCanvas || !progressCtx) return;
 
-    if (
-        progressCanvas.width !== Math.floor(rect.width) ||
-        progressCanvas.height !== Math.floor(rect.height)
-    ) {
-        progressCanvas.width = Math.floor(rect.width);
-        progressCanvas.height = Math.floor(rect.height);
-    }
+  const rect = progressCanvas.getBoundingClientRect();
 
-    const w = progressCanvas.width;
-    const h = progressCanvas.height;
+  if (
+    progressCanvas.width !== Math.floor(rect.width) ||
+    progressCanvas.height !== Math.floor(rect.height)
+  ) {
+    progressCanvas.width = Math.floor(rect.width);
+    progressCanvas.height = Math.floor(rect.height);
+  }
 
-    progressCtx.clearRect(0, 0, w, h);
+  const w = progressCanvas.width;
+  const h = progressCanvas.height;
 
-    const LEFT_PAD = 0;
-    const RIGHT_PAD = 0;
-    const BAR_W = w;
+  progressCtx.clearRect(0, 0, w, h);
 
-    progressCtx.fillStyle = "#1a1a1a";
-    progressCtx.fillRect(
-        LEFT_PAD,
-        h * 0.35,
-        BAR_W,
-        h * 0.30
-    );
+  const LEFT_PAD = 0;
+  const BAR_W = w;
 
-    const progressW = (state.playheadT / totalT) * BAR_W;
+  progressCtx.fillStyle = "#1a1a1a";
+  progressCtx.fillRect(LEFT_PAD, h * 0.35, BAR_W, h * 0.30);
 
-    progressCtx.fillStyle = "#2ecc40";
-    progressCtx.fillRect(
-        LEFT_PAD,
-        h * 0.35,
-        progressW,
-        h * 0.30
-    );
+  const progressW = (state.playheadT / totalT) * BAR_W;
 
-    const totalLaps = state.raceData.meta.total_laps;
+  progressCtx.fillStyle = "#2ecc40";
+  progressCtx.fillRect(LEFT_PAD, h * 0.35, progressW, h * 0.30);
 
-    progressCtx.strokeStyle = "#555";
-    progressCtx.lineWidth = 1;
+  const totalLaps = state.raceData.meta.total_laps;
 
-    for (let lap = 1; lap <= totalLaps; lap++) {
+  progressCtx.strokeStyle = "#555";
+  progressCtx.lineWidth = 1;
 
-        const x =
-            LEFT_PAD +
-            (lap / totalLaps) * BAR_W;
-
-        progressCtx.beginPath();
-        progressCtx.moveTo(x, h * 0.30);
-        progressCtx.lineTo(x, h * 0.70);
-        progressCtx.stroke();
-    }
-
-    const eventColors = {
-        yellow_flag: "#ffdc00",
-        red_flag: "#ff3030",
-        safety_car: "#ff8c00",
-        vsc: "#ffa500"
-    };
-
-    for (const ev of state.raceData.events) {
-
-        const x1 =
-            LEFT_PAD +
-            (ev.t / totalT) * BAR_W;
-
-        if (ev.type === "dnf") {
-
-            progressCtx.strokeStyle = "#ff3030";
-            progressCtx.lineWidth = 2;
-
-            progressCtx.beginPath();
-
-            progressCtx.moveTo(x1 - 4, 4);
-            progressCtx.lineTo(x1 + 4, 10);
-
-            progressCtx.moveTo(x1 + 4, 4);
-            progressCtx.lineTo(x1 - 4, 10);
-
-            progressCtx.stroke();
-
-        } else {
-
-            const x2 =
-                LEFT_PAD +
-                ((ev.end_t ?? ev.t + 5) / totalT) * BAR_W;
-
-            progressCtx.fillStyle =
-                eventColors[ev.type] || "#888";
-
-            progressCtx.fillRect(
-                x1,
-                0,
-                Math.max(2, x2 - x1),
-                6
-            );
-        }
-    }
-
-    const playX =
-        LEFT_PAD +
-        (state.playheadT / totalT) * BAR_W;
-
-    progressCtx.strokeStyle = "#ffffff";
-    progressCtx.lineWidth = 2;
-
+  for (let lap = 1; lap <= totalLaps; lap++) {
+    const x = LEFT_PAD + (lap / totalLaps) * BAR_W;
     progressCtx.beginPath();
-    progressCtx.moveTo(playX, 0);
-    progressCtx.lineTo(playX, h);
+    progressCtx.moveTo(x, h * 0.30);
+    progressCtx.lineTo(x, h * 0.70);
     progressCtx.stroke();
+  }
+
+  const eventColors = {
+    yellow_flag: "#ffdc00",
+    red_flag: "#ff3030",
+    safety_car: "#ff8c00",
+    vsc: "#ffa500"
+  };
+
+  for (const ev of state.raceData.events) {
+    const x1 = LEFT_PAD + (ev.t / totalT) * BAR_W;
+
+    if (ev.type === "dnf") {
+      progressCtx.strokeStyle = "#ff3030";
+      progressCtx.lineWidth = 2;
+
+      progressCtx.beginPath();
+      progressCtx.moveTo(x1 - 4, 4);
+      progressCtx.lineTo(x1 + 4, 10);
+      progressCtx.moveTo(x1 + 4, 4);
+      progressCtx.lineTo(x1 - 4, 10);
+      progressCtx.stroke();
+    } else {
+      const x2 = LEFT_PAD + ((ev.end_t ?? ev.t + 5) / totalT) * BAR_W;
+
+      progressCtx.fillStyle = eventColors[ev.type] || "#888";
+      progressCtx.fillRect(x1, 0, Math.max(2, x2 - x1), 6);
+    }
+  }
+
+  const playX = LEFT_PAD + (state.playheadT / totalT) * BAR_W;
+
+  progressCtx.strokeStyle = "#ffffff";
+  progressCtx.lineWidth = 2;
+
+  progressCtx.beginPath();
+  progressCtx.moveTo(playX, 0);
+  progressCtx.lineTo(playX, h);
+  progressCtx.stroke();
 }
 
-progressCanvas.addEventListener("click", (e) => {
+progressCanvas?.addEventListener("click", (e) => {
+  if (!state.raceData) return;
 
-    if (!state.raceData) return;
+  const rect = progressCanvas.getBoundingClientRect();
+  const fraction = Math.max(0, Math.min(1, (e.clientX - rect.left) / rect.width));
+  const totalT = state.raceData.frames[state.raceData.frames.length - 1].t;
 
-    const rect = progressCanvas.getBoundingClientRect();
-
-    const x = e.clientX - rect.left;
-
-    const fraction = Math.max(
-        0,
-        Math.min(1, x / rect.width)
-    );
-
-    const totalT =
-        state.raceData.frames[
-            state.raceData.frames.length - 1
-        ].t;
-
-    state.playheadT = fraction * totalT;
+  state.playheadT = fraction * totalT;
 });
 
 function updateTimeLabel(totalT) {
+  const fmt = (s) => {
+    const mins = Math.floor(s / 60);
+    const secs = Math.floor(s % 60);
+    return `${mins}:${String(secs).padStart(2, "0")}`;
+  };
 
-    const fmt = (s) => {
-
-        const mins = Math.floor(s / 60);
-        const secs = Math.floor(s % 60);
-
-        return `${mins}:${String(secs).padStart(2, "0")}`;
-    };
-
-    document.getElementById("timeLabel").textContent =
-        `${fmt(state.playheadT)} / ${fmt(totalT)}`;
+  const label = document.getElementById("timeLabel");
+  if (label) label.textContent = `${fmt(state.playheadT)} / ${fmt(totalT)}`;
 }
 
 const playPauseBtn = document.getElementById("playPauseBtn");
 const playPauseIcon = document.getElementById("playPauseIcon");
 
 function togglePlay() {
+  state.playing = !state.playing;
 
-    state.playing = !state.playing;
-
+  if (playPauseIcon) {
     if (state.playing) {
-
-        playPauseIcon.src = "/static/images/controls/pause.png";
-        playPauseIcon.alt = "Pause";
-
+      playPauseIcon.src = "/static/images/controls/pause.png";
+      playPauseIcon.alt = "Pause";
     } else {
-
-        playPauseIcon.src = "/static/images/controls/play.png";
-        playPauseIcon.alt = "Play";
-
+      playPauseIcon.src = "/static/images/controls/play.png";
+      playPauseIcon.alt = "Play";
     }
+  }
 }
 
-playPauseBtn.addEventListener("click", togglePlay);
+playPauseBtn?.addEventListener("click", togglePlay);
 
-document.getElementById("rewindBtn").addEventListener("click", () => {
-
-    state.playheadT = Math.max(0, state.playheadT - 10);
-
+document.getElementById("rewindBtn")?.addEventListener("click", () => {
+  state.playheadT = Math.max(0, state.playheadT - 10);
 });
 
-document.getElementById("forwardBtn").addEventListener("click", () => {
-
-    const totalT =
-        state.raceData.frames[state.raceData.frames.length - 1].t;
-
-    state.playheadT =
-        Math.min(totalT, state.playheadT + 10);
-
+document.getElementById("forwardBtn")?.addEventListener("click", () => {
+  if (!state.raceData) return;
+  const totalT = state.raceData.frames[state.raceData.frames.length - 1].t;
+  state.playheadT = Math.min(totalT, state.playheadT + 10);
 });
 
 function setSpeedIndex(i) {
+  state.speedIndex = Math.max(0, Math.min(PLAYBACK_SPEEDS.length - 1, i));
 
-    state.speedIndex = Math.max(
-        0,
-        Math.min(PLAYBACK_SPEEDS.length - 1, i)
-    );
-
-    document.getElementById("speedLabel").textContent =
-        `${PLAYBACK_SPEEDS[state.speedIndex]}x`;
+  const speedLabel = document.getElementById("speedLabel");
+  if (speedLabel) speedLabel.textContent = `${PLAYBACK_SPEEDS[state.speedIndex]}x`;
 }
 
-document.getElementById("speedUpBtn").addEventListener("click", () => {
-
-    setSpeedIndex(state.speedIndex + 1);
-
+document.getElementById("speedUpBtn")?.addEventListener("click", () => {
+  setSpeedIndex(state.speedIndex + 1);
 });
 
-document.getElementById("speedDownBtn").addEventListener("click", () => {
-
-    setSpeedIndex(state.speedIndex - 1);
-
+document.getElementById("speedDownBtn")?.addEventListener("click", () => {
+  setSpeedIndex(state.speedIndex - 1);
 });
 
 window.addEventListener("keydown", (e) => {
+  if (!state.raceData) return;
 
-    if (!state.raceData) return;
+  const totalT = state.raceData.frames[state.raceData.frames.length - 1].t;
 
-    const totalT =
-        state.raceData.frames[state.raceData.frames.length - 1].t;
+  switch (e.code) {
+    case "Space":
+      e.preventDefault();
+      togglePlay();
+      break;
 
-    switch (e.code) {
-        case "Space":
-            e.preventDefault();
-            togglePlay();
+    case "ArrowLeft":
+      state.playheadT = Math.max(0, state.playheadT - 5);
+      break;
 
-            break;
+    case "ArrowRight":
+      state.playheadT = Math.min(totalT, state.playheadT + 5);
+      break;
 
-        case "ArrowLeft":
-            state.playheadT =
-                Math.max(0, state.playheadT - 5);
+    case "ArrowUp":
+      setSpeedIndex(state.speedIndex + 1);
+      break;
 
-            break;
+    case "ArrowDown":
+      setSpeedIndex(state.speedIndex - 1);
+      break;
 
-        case "ArrowRight":
-            state.playheadT =
-                Math.min(totalT, state.playheadT + 5);
+    case "Digit1":
+      setSpeedIndex(PLAYBACK_SPEEDS.indexOf(0.5));
+      break;
 
-            break;
+    case "Digit2":
+      setSpeedIndex(PLAYBACK_SPEEDS.indexOf(1));
+      break;
 
-        case "ArrowUp":
-            setSpeedIndex(state.speedIndex + 1);
+    case "Digit3":
+      setSpeedIndex(PLAYBACK_SPEEDS.indexOf(2));
+      break;
 
-            break;
+    case "Digit4":
+      setSpeedIndex(PLAYBACK_SPEEDS.indexOf(4));
+      break;
 
-        case "ArrowDown":
-            setSpeedIndex(state.speedIndex - 1);
+    case "KeyR":
+      state.playheadT = 0;
+      break;
 
-            break;
+    case "KeyD":
+      state.showDrsZones = !state.showDrsZones;
+      break;
 
-        case "Digit1":
-            setSpeedIndex(PLAYBACK_SPEEDS.indexOf(0.5));
+    case "KeyS":
+      state.showSectors = !state.showSectors;
+      break;
 
-            break;
+    case "KeyB":
+      state.showProgressBar = !state.showProgressBar;
+      document.querySelector(".bottom-bar")?.classList.toggle("hidden", !state.showProgressBar);
+      break;
 
-        case "Digit2":
-            setSpeedIndex(PLAYBACK_SPEEDS.indexOf(1));
-
-            break;
-
-        case "Digit3":
-            setSpeedIndex(PLAYBACK_SPEEDS.indexOf(2));
-
-            break;
-
-        case "Digit4":
-            setSpeedIndex(PLAYBACK_SPEEDS.indexOf(4));
-
-            break;
-
-        case "KeyR":
-            state.playheadT = 0;
-
-            break;
-
-        case "KeyD":
-            state.showDrsZones = !state.showDrsZones;
-
-            break;
-
-        case "KeyS":
-            state.showSectors = !state.showSectors;
-
-            break;
-
-        case "KeyB":
-            state.showProgressBar = !state.showProgressBar;
-
-            document
-                .querySelector(".bottom-bar")
-                .classList.toggle(
-                    "hidden",
-                    !state.showProgressBar
-                );
-
-            break;
-
-        case "KeyH":
-            document
-                .getElementById("controlsLegend")
-                .classList.toggle("hidden");
-
-            break;
-    }
-
+    case "KeyH":
+      document.getElementById("controlsLegend")?.classList.toggle("hidden");
+      break;
+  }
 });
 
 let teleInitialized = false;
-let teleSchedule = {};
 
 function initTelemetryPanel() {
   if (teleInitialized) return;
   teleInitialized = true;
 
   const yearSel = document.getElementById("teleYearSelect");
+  if (!yearSel) return;
   const thisYear = new Date().getFullYear();
   for (let y = thisYear; y >= 2018; y--) {
     const opt = document.createElement("option");
@@ -1487,15 +1312,16 @@ function initTelemetryPanel() {
   }
 
   yearSel.addEventListener("change", teleLoadSchedule);
-  document.getElementById("teleRoundSelect").addEventListener("change", teleLoadDrivers);
-  document.getElementById("teleSessionSelect").addEventListener("change", teleLoadDrivers);
-  document.getElementById("teleCompareBtn").addEventListener("click", teleRunCompare);
+  document.getElementById("teleRoundSelect")?.addEventListener("change", teleLoadDrivers);
+  document.getElementById("teleSessionSelect")?.addEventListener("change", teleLoadDrivers);
+  document.getElementById("teleCompareBtn")?.addEventListener("click", teleRunCompare);
 
   teleLoadSchedule();
 }
 
 async function teleLoadSchedule() {
   const roundSel = document.getElementById("teleRoundSelect");
+  if (!roundSel) return;
   roundSel.innerHTML = "<option>Loading…</option>";
   try {
     const year = document.getElementById("teleYearSelect").value;
@@ -1519,9 +1345,11 @@ async function teleLoadDrivers() {
   const driverASel = document.getElementById("teleDriverASelect");
   const driverBSel = document.getElementById("teleDriverBSelect");
   const status = document.getElementById("telemetryStatus");
+  if (!driverASel || !driverBSel) return;
+
   driverASel.innerHTML = "<option>Loading…</option>";
   driverBSel.innerHTML = "<option>Loading…</option>";
-  status.innerHTML = "";
+  if (status) status.innerHTML = "";
 
   const year = document.getElementById("teleYearSelect").value;
   const round = document.getElementById("teleRoundSelect").value;
@@ -1530,26 +1358,31 @@ async function teleLoadDrivers() {
 
   try {
     const res = await fetch(`/api/drivers?year=${year}&round=${round}&session_type=${sessionType}`);
-    if (!res.ok) {
-      throw new Error(await extractApiErrorMessage(res));
-    }
+    if (!res.ok) throw new Error(await extractApiErrorMessage(res));
     const drivers = await res.json();
     const optionsHtml = drivers.map(d => `<option value="${d.code}">${d.code} — ${d.name}</option>`).join("");
     driverASel.innerHTML = optionsHtml;
     driverBSel.innerHTML = optionsHtml;
-    if (drivers.length > 1) driverBSel.selectedIndex = 1;
+
+    const prefDriver = window.userSettings?.default_driver_comp || "VER";
+    const prefIdx = drivers.findIndex(d => d.code === prefDriver);
+    if (prefIdx !== -1) driverASel.selectedIndex = prefIdx;
+
+    if (drivers.length > 1) {
+      driverBSel.selectedIndex = driverASel.selectedIndex === 0 ? 1 : 0;
+    }
   } catch (e) {
     driverASel.innerHTML = "<option>Failed to load</option>";
     driverBSel.innerHTML = "<option>Failed to load</option>";
-    status.innerHTML = friendlyErrorMessage(e.message);
+    if (status) status.innerHTML = friendlyErrorMessage(e.message);
   }
 }
 
 async function teleRunCompare() {
   const status = document.getElementById("telemetryStatus");
   const resultsEl = document.getElementById("telemetryResults");
-  status.textContent = "Loading telemetry…";
-  resultsEl.classList.add("hidden");
+  if (status) status.textContent = "Loading telemetry…";
+  resultsEl?.classList.add("hidden");
 
   const year = document.getElementById("teleYearSelect").value;
   const round = document.getElementById("teleRoundSelect").value;
@@ -1558,24 +1391,22 @@ async function teleRunCompare() {
   const driverB = document.getElementById("teleDriverBSelect").value;
 
   if (!driverA || !driverB) {
-    status.textContent = "Pick two drivers to compare.";
+    if (status) status.textContent = "Pick two drivers to compare.";
     return;
   }
   if (driverA === driverB) {
-    status.textContent = "Pick two different drivers.";
+    if (status) status.textContent = "Pick two different drivers.";
     return;
   }
 
   try {
     const res = await fetch(`/api/telemetry/compare?year=${year}&round=${round}&session_type=${sessionType}&driver_a=${driverA}&driver_b=${driverB}`);
-    if (!res.ok) {
-      throw new Error(await extractApiErrorMessage(res));
-    }
+    if (!res.ok) throw new Error(await extractApiErrorMessage(res));
     const data = await res.json();
-    status.textContent = "";
+    if (status) status.textContent = "";
     renderTelemetryCompare(data);
   } catch (e) {
-    status.innerHTML = friendlyErrorMessage(e.message);
+    if (status) status.innerHTML = friendlyErrorMessage(e.message);
   }
 }
 
@@ -1588,6 +1419,7 @@ function fmtLapTime(seconds) {
 
 function drawTelemetryLine(canvasId, seriesA, seriesB, colorA, colorB, minY, maxY) {
   const canvas = document.getElementById(canvasId);
+  if (!canvas) return;
   const rect = canvas.getBoundingClientRect();
   canvas.width = Math.floor(rect.width);
   canvas.height = Math.floor(rect.height);
@@ -1625,51 +1457,15 @@ function renderTelemetryCompare(data) {
   document.getElementById("teleBInfo").innerHTML =
     `<b style="color:${colorB}">${b.driver}</b> · Lap ${b.lap_number} · ${fmtLapTime(b.lap_time)} · ${b.compound}`;
 
-  document.getElementById("telemetryResults").classList.remove("hidden");
+  document.getElementById("telemetryResults")?.classList.remove("hidden");
 
-  const speedMax = Math.max(...a.speed, ...b.speed) * 1.05;
-  drawTelemetryLine("teleSpeedCanvas", a.speed, b.speed, colorA, colorB, 0, speedMax);
+  // Format speeds for comparison plot
+  const rawSpeedA = window.userSettings?.units === "imperial" ? a.speed.map(s => s * 0.621371) : a.speed;
+  const rawSpeedB = window.userSettings?.units === "imperial" ? b.speed.map(s => s * 0.621371) : b.speed;
+
+  const speedMax = Math.max(...rawSpeedA, ...rawSpeedB) * 1.05;
+  drawTelemetryLine("teleSpeedCanvas", rawSpeedA, rawSpeedB, colorA, colorB, 0, speedMax);
   drawTelemetryLine("teleThrottleCanvas", a.throttle, b.throttle, colorA, colorB, 0, 100);
-
-  drawTelemetryLine("teleBrakeCanvas", a.brake, b.brake, colorA, colorB, 0, 100);
-
-  const sectorRows = ["sector1", "sector2", "sector3"].map((key, i) => {
-    const ta = a.sector_times[key], tb = b.sector_times[key];
-    const delta = (ta != null && tb != null) ? (ta - tb) : null;
-    const deltaText = delta == null ? "-" : `${delta >= 0 ? "+" : ""}${delta.toFixed(3)}s`;
-    const deltaColor = delta == null ? "#999" : delta < 0 ? "#2ecc40" : "#ff4444";
-    return `<div class="telemetry-sector-row">
-      <span>Sector ${i + 1}</span>
-      <span style="color:${colorA}">${ta != null ? ta.toFixed(3) + "s" : "-"}</span>
-      <span style="color:${colorB}">${tb != null ? tb.toFixed(3) + "s" : "-"}</span>
-      <span style="color:${deltaColor}">${deltaText}</span>
-    </div>`;
-  }).join("");
-
-  document.getElementById("teleSectorTable").innerHTML = `
-    <div class="telemetry-sector-row" style="font-weight:700; color:#9aa1ad;">
-      <span>Sector</span><span>${a.driver}</span><span>${b.driver}</span><span>Delta (A − B)</span>
-    </div>
-    ${sectorRows}`;
-}
-
-
-function renderTelemetryCompare(data) {
-  const a = data.driver_a, b = data.driver_b;
-  const colorA = state.raceData?.driver_colors?.[a.driver] || "#00aeef";
-  const colorB = state.raceData?.driver_colors?.[b.driver] || "#ff3333";
-
-  document.getElementById("teleAInfo").innerHTML =
-    `<b style="color:${colorA}">${a.driver}</b> · Lap ${a.lap_number} · ${fmtLapTime(a.lap_time)} · ${a.compound}`;
-  document.getElementById("teleBInfo").innerHTML =
-    `<b style="color:${colorB}">${b.driver}</b> · Lap ${b.lap_number} · ${fmtLapTime(b.lap_time)} · ${b.compound}`;
-
-  document.getElementById("telemetryResults").classList.remove("hidden");
-
-  const speedMax = Math.max(...a.speed, ...b.speed) * 1.05;
-  drawTelemetryLine("teleSpeedCanvas", a.speed, b.speed, colorA, colorB, 0, speedMax);
-  drawTelemetryLine("teleThrottleCanvas", a.throttle, b.throttle, colorA, colorB, 0, 100);
-
   drawTelemetryLine("teleBrakeCanvas", a.brake, b.brake, colorA, colorB, 0, 100);
 
   const sectorRows = ["sector1", "sector2", "sector3"].map((key, i) => {
@@ -1711,42 +1507,15 @@ async function initDriversPanel() {
 
 // Global bridge function — accessible everywhere (including constructors-panel.js)
 async function goToDriverProfile(code) {
-  // 1. Hide all active panel views and show the Drivers Panel
   document.getElementById("constructorsPanel")?.classList.add("hidden");
   document.getElementById("homePage")?.classList.add("hidden");
   document.getElementById("telemetryPanel")?.classList.add("hidden");
   document.getElementById("sessionsPanel")?.classList.add("hidden");
   document.getElementById("driversPanel")?.classList.remove("hidden");
 
-  // 2. Highlight 'Drivers' in the left sidebar navigation
   document.querySelectorAll(".nav-item").forEach(item => {
     item.classList.toggle("active", item.dataset.nav === "drivers");
   });
-
-  // 3. Ensure the drivers panel is initialized
-  if (!driversInitialized) {
-    await initDriversPanel();
-  }
-
-  // 4. Open the requested driver's full profile
-  const opened = window.openDriverProfile ? window.openDriverProfile(code) : false;
-  if (!opened) {
-    console.warn(`[app] couldn't open driver profile for code "${code}" — driver not found in current season data`);
-  }
-}
-
-
-
-initPicker();
-setSpeedIndex(state.speedIndex);
-
-
-// Called from the Constructors page when a driver mini-card is clicked —
-// switches over to the Drivers panel and opens straight to that driver's
-// full profile instead of landing on the list view.
-async function goToDriverProfile(code) {
-  document.getElementById("constructorsPanel").classList.add("hidden");
-  document.getElementById("driversPanel").classList.remove("hidden");
 
   if (!driversInitialized) {
     await initDriversPanel();
@@ -1758,7 +1527,6 @@ async function goToDriverProfile(code) {
   }
 }
 window.goToDriverProfile = goToDriverProfile;
-
 
 let constructorsInitialized = false;
 
@@ -1775,81 +1543,50 @@ async function initConstructorsPanel() {
       `<p class="cp-empty">Couldn't load constructors data.</p>`;
   }
 }
-// ADVANCED LIVE SEARCH MODULE — Dynamically Fetched Data & Local Images
 
-// Map driver codes to local image files in /static/images/drivers/
+// ADVANCED LIVE SEARCH MODULE — Dynamically Fetched Data & Local Images
 const LOCAL_DRIVER_IMAGES = {
-  LEC: "leclerc.png",
-  HAM: "hamilton.png",
-  VER: "verstappen.png",
-  NOR: "norris.png",
-  PIA: "piastri.png",
-  RUS: "russell.png",
-  ALO: "alonso.png",
-  SAI: "sainz.png",
-  GAS: "gasly.png",
-  OCO: "ocon.png",
-  TSU: "tsunoda.png",
-  ALB: "albon.png",
-  BOT: "bottas.png",
-  PER: "perez.png",
-  HUL: "hulkenberg.png",
-  STR: "stroll.png",
-  BEA: "bearman.png",
-  ANT: "antonelli.png",
-  LAW: "lawson.png",
-  COL: "colapinto.png",
-  BOR: "bortoleto.png",
-  HAD: "hadjar.png"
+  LEC: "leclerc.png", HAM: "hamilton.png", VER: "verstappen.png", NOR: "norris.png",
+  PIA: "piastri.png", RUS: "russell.png", ALO: "alonso.png", SAI: "sainz.png",
+  GAS: "gasly.png", OCO: "ocon.png", TSU: "tsunoda.png", ALB: "albon.png",
+  BOT: "bottas.png", PER: "perez.png", HUL: "hulkenberg.png", STR: "stroll.png",
+  BEA: "bearman.png", ANT: "antonelli.png", LAW: "lawson.png", COL: "colapinto.png",
+  BOR: "bortoleto.png", HAD: "hadjar.png"
 };
 
-// SVG Fallback avatar if a driver photo is missing
 const SVG_FALLBACK_AVATAR = `data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="%238a93a6"><path d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z"/></svg>`;
 
-// Helper to resolve driver headshot from local directory or API URL
 function getDriverImage(driver) {
   if (!driver) return SVG_FALLBACK_AVATAR;
   const code = (driver.code || "").toUpperCase();
 
-  // 1. Try local code mapping
   if (LOCAL_DRIVER_IMAGES[code]) {
     return `/static/images/drivers/${LOCAL_DRIVER_IMAGES[code]}`;
   }
 
-  // 2. Try driver last name match from full name
   if (driver.name) {
     const surname = driver.name.trim().split(" ").pop().toLowerCase();
     return `/static/images/drivers/${surname}.png`;
   }
 
-  // 3. Fallback to API headshot URL if provided
   if (driver.headshot_url) {
     return driver.headshot_url;
   }
 
-  // 4. Default fallback code path
   return `/static/images/drivers/${code.toLowerCase()}.png`;
 }
 
-// Global caches for quick search responses
 let searchScheduleCache = [];
 let searchDriversCache = [];
 
-// Pre-load current season schedule and drivers for instant searching
 async function preloadSearchData() {
   const currentYear = new Date().getFullYear();
   try {
-    // 1. Fetch Schedule
     const schedRes = await fetch(`/api/schedule/${currentYear}`);
-    if (schedRes.ok) {
-      searchScheduleCache = await schedRes.json();
-    }
+    if (schedRes.ok) searchScheduleCache = await schedRes.json();
 
-    // 2. Fetch Drivers for current year
     const drvRes = await fetch(`/api/drivers?year=${currentYear}&round=1&session_type=R`);
-    if (drvRes.ok) {
-      searchDriversCache = await drvRes.json();
-    }
+    if (drvRes.ok) searchDriversCache = await drvRes.json();
   } catch (err) {
     console.warn("[Search] Could not pre-fetch live search index:", err);
   }
@@ -1861,7 +1598,6 @@ function initTopbarSearch() {
 
   if (!input || !resultsContainer) return;
 
-  // Trigger pre-fetch on initialization
   preloadSearchData();
 
   input.addEventListener("input", async (e) => {
@@ -1875,7 +1611,6 @@ function initTopbarSearch() {
 
     const matches = [];
 
-    // --- 1. SEARCH DRIVERS ---
     searchDriversCache.forEach(d => {
       const nameMatch = (d.name || "").toLowerCase().includes(query);
       const codeMatch = (d.code || "").toLowerCase().includes(query);
@@ -1896,7 +1631,6 @@ function initTopbarSearch() {
       }
     });
 
-    // --- 2. SEARCH SCHEDULE / TRACKS / GRAND PRIX ---
     searchScheduleCache.forEach(w => {
       const eventMatch = (w.event_name || "").toLowerCase().includes(query);
       const countryMatch = (w.country || "").toLowerCase().includes(query);
@@ -1920,7 +1654,6 @@ function initTopbarSearch() {
       }
     });
 
-    // --- RENDER MATCHES ---
     if (matches.length === 0) {
       resultsContainer.innerHTML = `<div class="search-no-results">No matching drivers, tracks, or sessions found.</div>`;
     } else {
@@ -1970,7 +1703,6 @@ function initTopbarSearch() {
     resultsContainer.classList.remove("hidden");
   });
 
-  // Hide dropdown on outside click
   document.addEventListener("click", (e) => {
     if (!input.contains(e.target) && !resultsContainer.contains(e.target)) {
       resultsContainer.classList.add("hidden");
@@ -1978,8 +1710,20 @@ function initTopbarSearch() {
   });
 }
 
-document.addEventListener("DOMContentLoaded", initTopbarSearch);
-initTopbarSearch();
+// REACTIVE SETTINGS LISTENER
+window.addEventListener("settingsUpdated", (event) => {
+  console.log("[App] Settings updated! Refreshing UI components...", event.detail);
 
-initPicker();
-setSpeedIndex(state.speedIndex);
+  updateHomepageLiveWeekend();
+
+  const teleResults = document.getElementById("telemetryResults");
+  if (teleResults && !teleResults.classList.contains("hidden")) {
+    teleRunCompare();
+  }
+});
+
+document.addEventListener("DOMContentLoaded", () => {
+  initPicker();
+  initTopbarSearch();
+  setSpeedIndex(state.speedIndex);
+});

@@ -108,3 +108,7 @@ def read_current_user(current_user: models.User = Depends(get_current_user)):
 @router.post("/logout")
 def logout():
     return {"detail": "Logged out"}
+
+
+def get_current_active_user(current_user: models.User = Depends(get_current_user)):
+    return current_user

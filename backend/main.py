@@ -27,9 +27,12 @@ import asyncio
 import os
 from urllib.parse import urlencode
 
-from fastapi import HTTPException
+from fastapi import FastAPI, HTTPException, Query, Depends
+from fastapi.responses import FileResponse, JSONResponse, RedirectResponse, HTMLResponse
+from pydantic import BaseModel
+
+
 from fastapi.responses import RedirectResponse
-from fastapi import FastAPI, HTTPException, Query
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.staticfiles import StaticFiles
 from fastapi.responses import FileResponse, JSONResponse, RedirectResponse
@@ -56,8 +59,9 @@ from src.track_geometry import build_track_geometry, extract_race_events, point_
 from src.serialize import serialize_frames, serialize_driver_colors
 
 # --- Auth (Racer PRO signup/login) ---
-from src.auth.routes import router as auth_router
-from src.auth.database import Base, engine
+from src.auth.routes import router as auth_router, get_current_active_user
+from src.auth.database import Base, engine, SessionLocal
+from src.auth.models import User
 from src.timing_tower import build_timing_tower
 from src.race_control import build_race_control_feed
 from src.minisectors import build_minisectors
@@ -75,7 +79,6 @@ app.add_middleware(
 )
 
 # Creates the `users` table if it doesn't exist yet.
-# For anything beyond local dev, use Alembic migrations instead.
 Base.metadata.create_all(bind=engine)
 
 app.include_router(auth_router)
@@ -113,7 +116,6 @@ def login_discord():
     return RedirectResponse(url=discord_url)
 
 
-
 @app.get("/auth/x", summary="X (Twitter) OAuth Login")
 def login_x():
     """Redirects the user to X's OAuth2 authorization portal."""
@@ -133,8 +135,6 @@ def login_x():
             detail="X_REDIRECT_URI not configured in environment variables."
         )
 
-    from urllib.parse import urlencode
-
     params = {
         "client_id": client_id,
         "redirect_uri": redirect_uri,
@@ -152,13 +152,140 @@ def login_x():
 
     return RedirectResponse(url=x_url)
 
+
+# --- Driver Profile Endpoints ---
+
+class UserProfileUpdate(BaseModel):
+    username: Optional[str] = None
+    favorite_driver: Optional[str] = None
+    favorite_team: Optional[str] = None
+
+@app.get("/auth/profile", summary="Get User Profile Details")
+def get_user_profile(current_user: User = Depends(get_current_active_user)):
+    return {
+        "id": current_user.id,
+        "username": current_user.username,
+        "email": current_user.email,
+        "picture_url": getattr(current_user, "picture_url", None),
+        "is_pro": current_user.is_pro,
+        "favorite_driver": getattr(current_user, "favorite_driver", "VER"),
+        "favorite_team": getattr(current_user, "favorite_team", "Red Bull Racing"),
+        "replays_watched": getattr(current_user, "replays_watched", 24),
+    }
+
+@app.put("/auth/profile", summary="Update User Profile Details")
+def update_user_profile(payload: UserProfileUpdate, current_user: User = Depends(get_current_active_user)):
+    db = SessionLocal()
+    try:
+        user = db.query(User).filter(User.id == current_user.id).first()
+        if not user:
+            raise HTTPException(status_code=404, detail="User not found")
+            
+        if payload.username:
+            user.username = payload.username
+        if payload.favorite_driver:
+            user.favorite_driver = payload.favorite_driver
+        if payload.favorite_team:
+            user.favorite_team = payload.favorite_team
+        
+        db.commit()
+        db.refresh(user)
+        return {"message": "Profile updated successfully", "username": user.username}
+    finally:
+        db.close()
+
+
+# --- User Settings & Extended Profile (Tier 2 & Tier 3) ---
+
+class UserSettingsUpdate(BaseModel):
+    telemetry_preferences: Optional[str] = None
+    default_driver_comp: Optional[str] = None
+    units: Optional[str] = None
+    theme: Optional[str] = None
+    accent_color: Optional[str] = None
+    notifications_enabled: Optional[bool] = None
+
+
+@app.get("/auth/settings", summary="Get User Settings")
+def get_user_settings(current_user: User = Depends(get_current_active_user)):
+    return {
+        "telemetry_preferences": getattr(current_user, "telemetry_preferences", "speed,throttle,brake"),
+        "default_driver_comp": getattr(current_user, "default_driver_comp", "VER"),
+        "units": getattr(current_user, "units", None) or "metric",
+        "theme": getattr(current_user, "theme", "dark"),
+        "accent_color": getattr(current_user, "accent_color", "#e10600"),
+        "notifications_enabled": bool(getattr(current_user, "notifications_enabled", 1))
+    }
+
+@app.put("/auth/settings", summary="Update User Settings")
+def update_user_settings(payload: UserSettingsUpdate, current_user: User = Depends(get_current_active_user)):
+    db = SessionLocal()
+    try:
+        user = db.query(User).filter(User.id == current_user.id).first()
+        if not user:
+            raise HTTPException(status_code=404, detail="User not found")
+        
+        if payload.telemetry_preferences is not None:
+            user.telemetry_preferences = payload.telemetry_preferences
+        if payload.default_driver_comp is not None:
+            user.default_driver_comp = payload.default_driver_comp
+        if payload.units is not None:
+            user.units = payload.units  # <-- Ensures user.units is assigned
+        if payload.theme is not None:
+            user.theme = payload.theme
+        if payload.accent_color is not None:
+            user.accent_color = payload.accent_color
+        if payload.notifications_enabled is not None:
+            user.notifications_enabled = 1 if payload.notifications_enabled else 0
+            
+        db.commit()
+        db.refresh(user)
+        return {"message": "Settings updated successfully", "units": user.units}
+    finally:
+        db.close()
+
+@app.get("/profile/extended", summary="Get Extended Tier 2 Profile Data")
+def get_extended_profile(current_user: User = Depends(get_current_active_user)):
+    return {
+        "xp": getattr(current_user, "xp", 1250),
+        "level": getattr(current_user, "level", 4),
+        "next_milestone_xp": 2000,
+        "circuits_visited": getattr(current_user, "circuits_visited", 12),
+        "most_watched_circuit": getattr(current_user, "most_watched_circuit", "Silverstone"),
+        "circuit_completion": getattr(current_user, "circuit_completion_rate", 86.0),
+        "season_stats": {
+            "sessions": getattr(current_user, "replays_watched", 24),
+            "laps": 128,
+            "watch_time": f"{getattr(current_user, 'watch_time_hours', 18.5)} hrs"
+        },
+        "achievements": [
+            {"id": "first_lap", "name": "First Lap", "unlocked": True},
+            {"id": "telemetry_eng", "name": "Telemetry Engineer", "unlocked": True},
+            {"id": "hot_lap", "name": "Hot Lap Hunter", "unlocked": True},
+            {"id": "race_eng", "name": "Race Engineer", "unlocked": False},
+            {"id": "speed_demon", "name": "Speed Demon", "unlocked": True},
+            {"id": "paddock_reg", "name": "Paddock Regular", "unlocked": True}
+        ]
+    }
+
+@app.get("/settings", response_class=HTMLResponse, summary="Serve Settings Page")
+def serve_settings_page():
+    settings_file = FRONTEND_DIR / "setting.html"
+    if not settings_file.exists():
+        raise HTTPException(
+            status_code=404, 
+            detail=f"File setting.html not found at {settings_file}"
+        )
+    with open(settings_file, "r", encoding="utf-8") as f:
+        return HTMLResponse(content=f.read())
+
+
 SOURCE_FPS = 25  # must match DT = 1/FPS in f1_data.py
 
 DATA_DIR = Path(__file__).parent / "data"
 
 with open(DATA_DIR / "drivers.json", "r", encoding="utf-8") as f:
     DRIVERS = json.load(f)
-
 
 
 @app.on_event("startup")
@@ -170,18 +297,11 @@ async def warm_driver_stats_cache():
         warm_season_stats(current_year)
         print("[startup] Driver stats cache ready.")
 
-    # Fire-and-forget in a background thread so the server binds and starts
-    # serving requests immediately, instead of blocking on ~13 rounds worth
-    # of FastF1 session loads before Uvicorn even accepts a connection.
     loop = asyncio.get_event_loop()
     loop.run_in_executor(None, _compute)
 
 @app.on_event("startup")
 async def warm_track_outline_cache():
-    """Pre-computes track outlines for the current season in the
-    background so /api/schedule can serve them immediately instead of
-    the frontend having to fetch each card's shape one by one after
-    the page loads."""
     current_year = datetime.date.today().year
 
     def _compute():
@@ -202,19 +322,10 @@ async def warm_track_outline_cache():
     loop.run_in_executor(None, _compute)
 
 
-STATS_REFRESH_CHECK_INTERVAL = 60 * 60  # re-check every hour whether the driver-stats cache needs refreshing
+STATS_REFRESH_CHECK_INTERVAL = 60 * 60
 
 
 async def _periodic_stats_refresh_loop():
-    """
-    Runs for the lifetime of the server, re-checking the driver-stats cache
-    on an interval. warm_season_stats() only actually recomputes once its
-    internal 24h TTL has expired, so calling it here every hour is cheap —
-    it's a fast freshness check on the hours it's still valid, and a real
-    recompute only on the day it's actually stale. This is what makes the
-    TTL inside driver_panel.py mean something while the server stays up,
-    instead of only ever being checked once at startup.
-    """
     loop = asyncio.get_event_loop()
     while True:
         await asyncio.sleep(STATS_REFRESH_CHECK_INTERVAL)
@@ -257,23 +368,17 @@ async def start_stats_refresh_loop():
 
 @app.on_event("startup")
 async def start_live_watcher():
-    """Background loop that auto-detects live F1 sessions and starts
-    capturing them — see src/live/session_watcher.py."""
     loop = asyncio.get_event_loop()
     loop.run_in_executor(None, run_live_watcher)
 
 
 @app.get("/api/live/status")
 def live_status():
-    """Lets the frontend show a LIVE badge vs REPLAY, and know which
-    session (if any) is currently being captured."""
     return live_state.snapshot()
 
 
 @app.get("/api/next-session")
 def next_session(year: int = Query(...)):
-    """Next upcoming session (any type) with a precise UTC timestamp —
-    powers the countdown badge on the Telemetry tab."""
     try:
         result = get_next_session(year)
     except Exception as e:
@@ -283,14 +388,6 @@ def next_session(year: int = Query(...)):
 
 @app.get("/api/schedule/{year}")
 def schedule(year: int):
-    """
-    Race weekends for a season — powers the frontend's race picker.
-    Each weekend includes `track_outline` when it's already cached
-    (see get_cached_track_outline) so the frontend can render real
-    circuit shapes immediately, with no per-card fetch/placeholder
-    swap. Rounds not yet warmed simply omit it (null) and the
-    frontend falls back to fetching just those individually.
-    """
     try:
         weekends = get_race_weekends_by_year(year)
     except Exception as e:
@@ -303,9 +400,6 @@ def schedule(year: int):
 
 
 def _get_example_lap(year: int, round_number: int, race_session):
-    """Same fallback logic as your original main.py: prefer a qualifying
-    lap for clean DRS-zone data, fall back to the fastest race lap.
-    """
     try:
         quali_session = load_session(year, round_number, "Q")
         if quali_session is not None and len(quali_session.laps) > 0:
@@ -337,143 +431,49 @@ def get_driver(code: str):
     )
 
 
-@app.get(
-    "/api/replay",
-    response_class=JSONResponse,
-    summary="Race Replay",
-    description="""
-Returns the complete replay payload required by the frontend.
-
-Includes:
-
-- Event metadata
-- Driver colors
-- Track geometry
-- Circuit corners
-- Race events
-- Downsampled telemetry frames
-""",
-    responses={
-        200: {
-            "description": "Replay payload",
-            "content": {
-                "application/json": {
-                    "example": {
-                        "meta": {
-                            "event_name": "British Grand Prix",
-                            "circuit_name": "Silverstone",
-                            "country": "United Kingdom",
-                            "year": 2025,
-                            "round": 12,
-                            "date": "July 06, 2025",
-                            "total_laps": 52,
-                            "session_type": "R"
-                        },
-                        "driver_colors": {
-                            "VER": "#3671C6",
-                            "NOR": "#FF8700",
-                            "LEC": "#E80020"
-                        },
-                        "max_tyre_life": {
-                            "1": 28,
-                            "2": 42
-                        },
-                        "track": {
-                            "corners": [
-                                {
-                                    "number": 1,
-                                    "letter": "",
-                                    "angle": 180.0,
-                                    "distance": 122.5
-                                }
-                            ]
-                        },
-                        "events": [],
-                        "frames": [],
-                        "frame_rate": 8
-                    }
-                }
-            }
-        }
-    }
-)
-
-
+@app.get("/api/replay", response_class=JSONResponse, summary="Race Replay")
 def replay(
     year: int = Query(...),
     round: int = Query(..., alias="round"),
     session_type: str = Query("R", pattern="^(R|S|FP1|FP2|FP3)$"),
     fps: int = Query(8, ge=1, le=25),
 ):
-    """
-    Full replay payload containing track geometry, telemetry,
-    race events and driver information.
-    """
-
     try:
         session = load_session(year, round, session_type)
     except Exception as e:
-        raise HTTPException(
-            status_code=502,
-            detail=f"Failed to load session: {e}"
-        )
+        raise HTTPException(status_code=502, detail=f"Failed to load session: {e}")
 
     try:
-        race_telemetry = get_race_telemetry(
-            session,
-            session_type=session_type,
-        )
+        race_telemetry = get_race_telemetry(session, session_type=session_type)
     except Exception as e:
-        raise HTTPException(
-            status_code=502,
-            detail=f"Failed to build telemetry: {e}"
-        )
+        raise HTTPException(status_code=502, detail=f"Failed to build telemetry: {e}")
 
     example_lap = _get_example_lap(year, round, session)
     track = build_track_geometry(example_lap)
 
-    # FastF1 official circuit corners
     try:
         circuit_info = session.get_circuit_info()
-
         track["corners"] = []
 
-        if (
-            circuit_info is not None
-            and hasattr(circuit_info, "corners")
-            and circuit_info.corners is not None
-        ):
-            
+        if circuit_info is not None and hasattr(circuit_info, "corners") and circuit_info.corners is not None:
             for _, corner in circuit_info.corners.iterrows():
                 corner_pos = point_at_distance(example_lap, float(corner["Distance"]))
                 track["corners"].append(
                     {
                         "number": int(corner["Number"]),
-                        "letter": ""
-                        if str(corner["Letter"]) == "nan"
-                        else str(corner["Letter"]),
+                        "letter": "" if str(corner["Letter"]) == "nan" else str(corner["Letter"]),
                         "angle": float(corner["Angle"]),
                         "distance": float(corner["Distance"]),
                         "x": corner_pos["x"],
                         "y": corner_pos["y"],
                     }
                 )
-
     except Exception as e:
         print("Corner data unavailable:", e)
         track["corners"] = []
 
-    events = extract_race_events(
-        race_telemetry["frames"],
-        race_telemetry["track_statuses"],
-    )
-
-    frames = serialize_frames(
-        race_telemetry["frames"],
-        source_fps=SOURCE_FPS,
-        target_fps=fps,
-    )
-
+    events = extract_race_events(race_telemetry["frames"], race_telemetry["track_statuses"])
+    frames = serialize_frames(race_telemetry["frames"], source_fps=SOURCE_FPS, target_fps=fps)
     event_date = session.event.get("EventDate")
 
     return {
@@ -483,19 +483,12 @@ def replay(
             "country": session.event.get("Country", ""),
             "year": year,
             "round": round,
-            "date": event_date.strftime("%B %d, %Y")
-            if event_date
-            else "",
+            "date": event_date.strftime("%B %d, %Y") if event_date else "",
             "total_laps": race_telemetry["total_laps"],
             "session_type": session_type,
         },
-        "driver_colors": serialize_driver_colors(
-            race_telemetry["driver_colors"]
-        ),
-        "max_tyre_life": race_telemetry.get(
-            "max_tyre_life",
-            {},
-        ),
+        "driver_colors": serialize_driver_colors(race_telemetry["driver_colors"]),
+        "max_tyre_life": race_telemetry.get("max_tyre_life", {}),
         "track": track,
         "events": events,
         "frames": frames,
@@ -503,16 +496,7 @@ def replay(
     }
 
 
-@app.get(
-    "/api/quali",
-    summary="Qualifying Results",
-    description="""
-Returns qualifying (or sprint qualifying) session results as a results
-table — NOT a car replay. Qualifying has no synced multi-car timeline the
-way Race/Sprint do (each driver runs isolated flying laps, often at
-different times), so /api/replay's frame-based approach doesn't apply here.
-""",
-)
+@app.get("/api/quali", summary="Qualifying Results")
 def quali(
     year: int = Query(...),
     round: int = Query(..., alias="round"),
@@ -542,14 +526,8 @@ def quali(
         "results": quali_data["results"],
     }
 
-@app.get(
-    "/api/strategy",
-    summary="Tyre Strategy",
-    description="""
-Returns each driver's tyre stint history (compound + lap range per stint),
-built directly from FastF1's lap data — not derived from replay frames.
-""",
-)
+
+@app.get("/api/strategy", summary="Tyre Strategy")
 def strategy(
     year: int = Query(...),
     round: int = Query(..., alias="round"),
@@ -581,11 +559,8 @@ def strategy(
         "drivers": strategy_data["drivers"],
     }
 
-@app.get(
-    "/api/drivers",
-    summary="Session Driver List",
-    description="Lightweight driver list (code, name, color) for a session — used to populate driver-select dropdowns without loading full telemetry.",
-)
+
+@app.get("/api/drivers", summary="Session Driver List")
 def drivers_list(
     year: int = Query(...),
     round: int = Query(..., alias="round"),
@@ -602,19 +577,7 @@ def drivers_list(
         raise HTTPException(status_code=502, detail=f"Failed to list drivers: {e}")
 
 
-@app.get(
-    "/api/drivers/panel",
-    summary="Driver Panel",
-    description="""
-Full driver panel: live championship position/points/team/color pulled
-from the Jolpica F1 API (successor to Ergast), merged with static
-banner/description metadata from data/drivers.json. Powers the sidebar
-"Drivers" tab.
-
-Calling without `round` returns standings as of the most recently
-completed race automatically.
-""",
-)
+@app.get("/api/drivers/panel", summary="Driver Panel")
 def drivers_panel(
     year: int = Query(...),
     round: int | None = Query(None, alias="round"),
@@ -627,16 +590,7 @@ def drivers_panel(
         raise HTTPException(status_code=502, detail=f"Couldn't reach Jolpica API: {e}")
 
 
-@app.get(
-    "/api/constructors/panel",
-    summary="Constructors Panel",
-    description="""
-Full Constructors Championship: live standings from the Jolpica F1 API,
-merged with round-by-round points history and team-level stats (podiums,
-poles, fastest laps) aggregated from each team's two drivers. Powers the
-Constructors tab.
-""",
-)
+@app.get("/api/constructors/panel", summary="Constructors Panel")
 def constructors_panel(
     year: int = Query(...),
     round: int | None = Query(None, alias="round"),
@@ -649,12 +603,8 @@ def constructors_panel(
     except requests.RequestException as e:
         raise HTTPException(status_code=502, detail=f"Couldn't reach Jolpica API: {e}")
 
-    
-@app.get(
-    "/api/telemetry/compare",
-    summary="Driver Telemetry Comparison",
-    description="Speed/Throttle/Brake traces for two drivers' laps (fastest by default), resampled onto a shared distance grid so they overlay directly.",
-)
+
+@app.get("/api/telemetry/compare", summary="Driver Telemetry Comparison")
 def telemetry_compare(
     year: int = Query(...),
     round: int = Query(..., alias="round"),
@@ -689,12 +639,7 @@ def telemetry_compare(
     }
 
 
-
-@app.get(
-    "/api/race-control",
-    summary="Race Control Messages",
-    description="Penalties, deleted lap times, investigations, and flags for a completed session, most recent first.",
-)
+@app.get("/api/race-control", summary="Race Control Messages")
 def race_control(
     year: int = Query(...),
     round: int = Query(..., alias="round"),
@@ -707,12 +652,7 @@ def race_control(
     return {"messages": rows}
 
 
-
-@app.get(
-    "/api/minisectors",
-    summary="Minisectors",
-    description="Per-driver fastest-lap speed broken into equal distance segments, flagged for which driver was fastest through each one. Heavier than other endpoints — needs full car telemetry.",
-)
+@app.get("/api/minisectors", summary="Minisectors")
 def minisectors(
     year: int = Query(...),
     round: int = Query(..., alias="round"),
@@ -724,7 +664,8 @@ def minisectors(
         raise HTTPException(status_code=502, detail=f"Failed to build minisectors: {e}")
     return data
 
-# Serve the frontend 
+
+# Serve the frontend & profile page
 FRONTEND_DIR = Path(__file__).resolve().parent.parent / "frontend"
 
 
@@ -733,15 +674,16 @@ def index():
     return FileResponse(FRONTEND_DIR / "index.html")
 
 
+@app.get("/profile", response_class=HTMLResponse, summary="Serve Driver Profile Page")
+def serve_profile_page():
+    with open(FRONTEND_DIR / "profile.html", "r", encoding="utf-8") as f:
+        return f.read()
+
+
 app.mount("/static", StaticFiles(directory=FRONTEND_DIR / "static"), name="static")
 
 
-
-@app.get(
-    "/api/track-outline/{year}/{round}",
-    summary="Track Outline",
-    description="Lightweight real circuit outline (centerline points + start/finish), normalized for small preview cards. Cached to disk after the first load.",
-)
+@app.get("/api/track-outline/{year}/{round}", summary="Track Outline")
 def track_outline(year: int, round: int):
     try:
         return get_track_outline(year, round)
@@ -755,22 +697,14 @@ def track_map(year: int, gp: str, session_type: str, driver_code: str):
         return get_track_map_with_telemetry(year, gp, session_type, driver_code)
     except Exception as e:
         return {"error": str(e)}
-    
 
 
-@app.get(
-    "/api/timing-tower",
-    summary="Timing Tower",
-    description="Position, gaps, sector times, tyre compound and pit status for every driver in a completed session.",
-)
+@app.get("/api/timing-tower", summary="Timing Tower")
 def timing_tower(
     year: int = Query(...),
     round: int = Query(..., alias="round"),
     session_type: str = Query("R", pattern="^(R|S|Q|SQ|FP1|FP2|FP3)$"),
 ):
-    # Serve from the live capture if this exact session is currently
-    # being captured — otherwise fall back to the existing FastF1 path
-    # unchanged, so replays/historical sessions work exactly as before.
     if live_state.matches(year, round, session_type):
         snap = live_state.snapshot()
         return {

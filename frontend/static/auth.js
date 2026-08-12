@@ -71,13 +71,22 @@ const Auth = (() => {
           </button>
 
           <button class="auth-btn-terminal" id="btn-auth-passkey">
-            <span class="auth-btn-icon">${ICONS.key}</span> SIGN IN WITH PASSKEY / EMAIL
+            <span class="auth-btn-icon">${ICONS.key}</span> SIGN IN WITH EMAIL / PASSWORD
           </button>
         </div>
 
-        <!-- Custom Form (Passkey/Email Fallback) -->
+        <!-- Custom Form (Login / Signup Toggle View) -->
         <div id="auth-email-view" style="display:none; width: 100%;">
-          <form id="email-login-form" class="auth-form">
+          <div style="display:flex; justify-content: center; gap: 20px; margin-bottom: 16px;">
+            <button type="button" id="tab-login" style="background:none; border:none; color:#fff; font-family:var(--auth-font-display); font-size:12px; font-weight:700; cursor:pointer; border-bottom: 2px solid var(--auth-red); padding-bottom: 4px;">LOG IN</button>
+            <button type="button" id="tab-signup" style="background:none; border:none; color:var(--auth-muted); font-family:var(--auth-font-display); font-size:12px; font-weight:700; cursor:pointer; padding-bottom: 4px;">SIGN UP</button>
+          </div>
+
+          <form id="email-auth-form" class="auth-form">
+            <div class="auth-field" id="field-username" style="display:none;">
+              <label>USERNAME</label>
+              <input type="text" name="username" placeholder="RacerX" />
+            </div>
             <div class="auth-field">
               <label>EMAIL ADDRESS</label>
               <input type="email" name="email" required autocomplete="email" placeholder="driver@f1replay.com" />
@@ -87,7 +96,7 @@ const Auth = (() => {
               <input type="password" name="password" required autocomplete="current-password" placeholder="••••••••" />
             </div>
             <div class="auth-error" id="auth-form-error"></div>
-            <button type="submit" class="auth-submit-btn">AUTHENTICATE & ENTER</button>
+            <button type="submit" class="auth-submit-btn" id="email-submit-label">LOG IN</button>
           </form>
           <button class="auth-back-home" id="btn-back-social" style="margin-top:14px;">← BACK TO TERMINAL</button>
         </div>
@@ -104,6 +113,8 @@ const Auth = (() => {
 
     document.body.appendChild(overlay);
 
+    let isSignupMode = false;
+
     // Event handlers
     overlay.querySelector("#auth-modal-close").addEventListener("click", closeModal);
     
@@ -119,6 +130,32 @@ const Auth = (() => {
       document.getElementById("auth-email-view").style.display = "none";
     });
 
+    // Toggle Login vs Signup tabs inside Email view
+    const tabLogin = overlay.querySelector("#tab-login");
+    const tabSignup = overlay.querySelector("#tab-signup");
+    const fieldUsername = overlay.querySelector("#field-username");
+    const submitLabel = overlay.querySelector("#email-submit-label");
+
+    tabLogin.addEventListener("click", () => {
+      isSignupMode = false;
+      tabLogin.style.color = "#fff";
+      tabLogin.style.borderBottom = "2px solid var(--auth-red)";
+      tabSignup.style.color = "var(--auth-muted)";
+      tabSignup.style.borderBottom = "none";
+      fieldUsername.style.display = "none";
+      submitLabel.textContent = "LOG IN";
+    });
+
+    tabSignup.addEventListener("click", () => {
+      isSignupMode = true;
+      tabSignup.style.color = "#fff";
+      tabSignup.style.borderBottom = "2px solid var(--auth-red)";
+      tabLogin.style.color = "var(--auth-muted)";
+      tabLogin.style.borderBottom = "none";
+      fieldUsername.style.display = "block";
+      submitLabel.textContent = "CREATE ACCOUNT";
+    });
+
     // Discord OAuth Action
     overlay.querySelector("#btn-auth-discord").addEventListener("click", () => {
       window.location.href = "/auth/discord";
@@ -129,7 +166,38 @@ const Auth = (() => {
       window.location.href = "/auth/x";
     });
 
-    overlay.querySelector("#email-login-form").addEventListener("submit", handleEmailAuth);
+    // Handle Email Login / Signup Form Submit
+    overlay.querySelector("#email-auth-form").addEventListener("submit", async (e) => {
+      e.preventDefault();
+      const form = e.target;
+      const errorEl = document.getElementById("auth-form-error");
+      errorEl.textContent = "";
+      const submitBtn = form.querySelector("button[type=submit]");
+      submitBtn.disabled = true;
+
+      try {
+        const endpoint = isSignupMode ? "/auth/signup" : "/auth/login";
+        const payload = {
+          email: form.email.value.trim(),
+          password: form.password.value,
+          ...(isSignupMode ? { username: form.username.value.trim() } : {})
+        };
+
+        const data = await apiFetch(endpoint, {
+          method: "POST",
+          body: JSON.stringify(payload)
+        });
+
+        setToken(data.access_token);
+        currentUser = data.user;
+        closeModal();
+        renderBadge();
+      } catch (err) {
+        errorEl.textContent = err.message;
+      } finally {
+        submitBtn.disabled = false;
+      }
+    });
 
     renderGoogleButtons();
   }
@@ -197,28 +265,6 @@ const Auth = (() => {
     if (overlay) overlay.classList.remove("open");
   }
 
-  async function handleEmailAuth(e) {
-    e.preventDefault();
-    const form = e.target;
-    const errorEl = document.getElementById("auth-form-error");
-    errorEl.textContent = "";
-    const submitBtn = form.querySelector("button[type=submit]");
-    submitBtn.disabled = true;
-
-    try {
-      const payload = { email: form.email.value.trim(), password: form.password.value };
-      const data = await apiFetch("/auth/login", { method: "POST", body: JSON.stringify(payload) });
-      setToken(data.access_token);
-      currentUser = data.user;
-      closeModal();
-      renderBadge();
-    } catch (err) {
-      errorEl.textContent = err.message;
-    } finally {
-      submitBtn.disabled = false;
-    }
-  }
-
   function logout() {
     clearToken();
     currentUser = null;
@@ -250,6 +296,7 @@ const Auth = (() => {
           <span class="account-badge__chevron">&#9662;</span>
         </div>
         <div class="account-menu" id="account-menu">
+          <a href="/profile" class="account-menu__item" style="text-decoration:none; color:inherit; display:block;">User Profile</a>
           <div class="account-menu__item" id="account-menu-logout">Log out</div>
         </div>
       </div>
@@ -271,7 +318,22 @@ const Auth = (() => {
   }
 
   async function init() {
+    // Capture token if redirected back from Discord or X OAuth
+    const urlParams = new URLSearchParams(window.location.search);
+    const urlToken = urlParams.get("token");
+
+    if (urlToken) {
+      setToken(urlToken);
+
+      const cleanUrl =
+        window.location.pathname +
+        window.location.hash;
+
+      window.history.replaceState({}, document.title, cleanUrl);
+    }
+
     const token = getToken();
+
     if (token) {
       try {
         currentUser = await apiFetch("/auth/me");
@@ -280,6 +342,7 @@ const Auth = (() => {
         currentUser = null;
       }
     }
+
     renderBadge();
   }
 

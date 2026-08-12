@@ -1,4 +1,3 @@
-import uuid
 from typing import Optional
 
 from pydantic import BaseModel, EmailStr, field_validator
@@ -32,11 +31,10 @@ class UserLogin(BaseModel):
 
 
 class UserOut(BaseModel):
-    id: uuid.UUID
+    id: int
     username: str
-    email: EmailStr
+    email: Optional[EmailStr] = None
     is_pro: bool
-    avatar_color: str
     picture_url: Optional[str] = None
 
     class Config:

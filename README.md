@@ -159,16 +159,16 @@ F1-RACE-REPLAY-WEB/
 │   ├── .env.example
 │   ├── data/
 │   │   └── drivers.json
-│   ├── computed_data/              # cached season stats snapshots
+│   ├── computed_data/
 │   │
 │   ├── src/
-│   │   ├── auth/                   # signup/login (Racer PRO)
-│   │   ├── lib/                    # settings, time, tyre helpers
-│   │   ├── live/                   # live-session watcher + shared state
+│   │   ├── auth/
+│   │   ├── lib/
+│   │   ├── live/
 │   │   │
-│   │   ├── driver_panel.py         # standings, season stats, driver profiles
-│   │   ├── constructors_panel.py   # constructor standings, team stats, profiles
-│   │   ├── f1_data.py              # core FastF1 replay pipeline
+│   │   ├── driver_panel.py
+│   │   ├── constructors_panel.py
+│   │   ├── f1_data.py
 │   │   ├── minisectors.py
 │   │   ├── next_session.py
 │   │   ├── race_control.py
@@ -176,39 +176,35 @@ F1-RACE-REPLAY-WEB/
 │   │   ├── timing_tower.py
 │   │   └── track_geometry.py
 │   │
-│   ├── test_telemetry_debug.py     # telemetry debugging/testing
+│   ├── test_telemetry_debug.py
 │   ├── main.py
 │   └── requirements.txt
 │
 ├── frontend/
 │   ├── index.html
+│   ├── profile.html
+│   ├── setting.html
 │   │
 │   └── static/
 │       ├── images/
-│       │
 │       ├── app.js
 │       ├── auth.css
 │       ├── auth.js
-│       │
+│       ├── profile.css
+│       ├── settings_applier.js
 │       ├── constructors-panel.css
 │       ├── constructors-panel.js
-│       │
 │       ├── driver-panel.css
 │       ├── driver-panel.js
-│       │
 │       ├── home-dashboard.css
 │       ├── replay.css
-│       │
 │       ├── session-panel.css
 │       ├── session-panel.js
-│       │
 │       ├── style.css
-│       │
 │       ├── timing-tower.css
 │       ├── timing-tower.js
-│       │
-│       └── track-map.css
-│       └── track-map.js             # 3D Three.js track view
+│       ├── track-map.css
+│       └── track-map.js
 │
 ├── README.md
 └── requirements.txt
