@@ -88,10 +88,12 @@ body::after{
     from{ opacity:0; transform:translateY(18px) rotateX(6deg); }
     to{ opacity:1; transform:translateY(0) rotateX(0deg); }
 }
+
 @keyframes floatY{
     0%,100%{ transform:translateY(0); }
     50%{ transform:translateY(-6px); }
 }
+
 @keyframes glowPulse{
     0%,100%{ box-shadow:0 0 0 1px rgba(225,6,0,.25), 0 10px 30px rgba(225,6,0,.12); }
     50%{ box-shadow:0 0 0 1px rgba(225,6,0,.45), 0 14px 40px rgba(225,6,0,.22); }
@@ -110,7 +112,6 @@ body::after{
 }
 
 .sidebar-brand{ margin-bottom:30px; }
-
 .sidebar-nav{
     display:flex;
     flex-direction:column;
@@ -346,6 +347,7 @@ body::after{
     transform:perspective(600px) rotateX(6deg) translateY(-3px) scale(1.02);
     box-shadow:0 14px 36px rgba(225,6,0,.5);
 }
+
 .hero-btn-primary:hover::after{
     opacity:1;
     background-position:-50% 0%;
@@ -387,13 +389,13 @@ body::after{
     gap:2px;
     animation:fadeUp3d .6s ease both;
 }
+
 .hero-features div:nth-child(1){ animation-delay:.05s; }
 .hero-features div:nth-child(2){ animation-delay:.10s; }
 .hero-features div:nth-child(3){ animation-delay:.15s; }
 .hero-features div:nth-child(4){ animation-delay:.20s; }
 .hero-features b{ font-size:12px; color:#fff; font-weight:800; }
 .hero-features span{ font-size:11px; color:#8a92a0; }
-
 .recent-sessions{
     margin:0 32px 32px;
 }
@@ -453,6 +455,7 @@ body::after{
     transform-style:preserve-3d;
     animation:fadeUp3d .5s ease both;
 }
+
 .sessions-grid .session-card:nth-child(1){ animation-delay:.02s; }
 .sessions-grid .session-card:nth-child(2){ animation-delay:.06s; }
 .sessions-grid .session-card:nth-child(3){ animation-delay:.10s; }
@@ -460,7 +463,6 @@ body::after{
 .sessions-grid .session-card:nth-child(5){ animation-delay:.18s; }
 .sessions-grid .session-card:nth-child(6){ animation-delay:.22s; }
 .sessions-grid .session-card:nth-child(n+7){ animation-delay:.26s; }
-
 .session-card::after{
     content:"";
     position:absolute;
@@ -478,6 +480,7 @@ body::after{
     border-color:rgba(225,6,0,.4);
     box-shadow:0 16px 36px rgba(225,6,0,.2);
 }
+
 .session-card:hover::after{
     opacity:1;
     background-position:-50% 0%;
@@ -536,7 +539,6 @@ body::after{
 }
 
 .session-card:hover .session-card-play{ opacity:1; }
-
 .home-statusbar{
     margin:auto 32px 24px;
     display:flex;
@@ -583,7 +585,6 @@ body::after{
     .home-sidebar{ display:none; }
     .home-hero h1{ font-size:28px; }
 }
-
 
 /* Picker Screen — cinematic landing page */
 .picker-page{
@@ -661,7 +662,6 @@ body::after{
 .badge-icon{ font-size:16px; }
 .badge-title{ font-size:11px; font-weight:800; color:#fff; letter-spacing:.5px; }
 .badge-sub{ font-size:11px; color:#8a92a0; }
-
 .picker-card{
     position:relative;
     z-index:2;
@@ -772,7 +772,6 @@ body::after{
 }
 
 .field-icon{ font-style:normal; font-size:12px; }
-
 .picker-field select{
     width:100%;
     background:transparent;
@@ -826,6 +825,7 @@ body::after{
     transform:perspective(700px) rotateX(5deg) translateY(-3px) scale(1.01);
     box-shadow:0 14px 40px rgba(225,6,0,.5);
 }
+
 .picker-load-btn:hover::after{
     opacity:1;
     background-position:-50% 0%;
@@ -870,13 +870,12 @@ body::after{
     flex-shrink:0;
     animation:floatY 4.5s ease-in-out infinite;
 }
+
 .feature:nth-child(2) .feature-icon{ animation-delay:.4s; }
 .feature:nth-child(3) .feature-icon{ animation-delay:.8s; }
-
 .feature-icon-red{ background:rgba(225,6,0,.15); }
 .feature-icon-purple{ background:rgba(138,43,226,.15); }
 .feature-icon-blue{ background:rgba(0,150,255,.15); }
-
 .feature-title{
     font-size:11px;
     font-weight:800;
@@ -926,7 +925,6 @@ body::after{
 }
 
 .status-icon{ font-size:16px; }
-
 .status-label{
     font-size:10px;
     font-weight:700;
@@ -941,7 +939,6 @@ body::after{
 }
 
 .status-ready{ color:#2ecc71; }
-
 .error-detail{
     display:block;
     margin-top:6px;
@@ -956,8 +953,7 @@ body::after{
     .picker-statusbar{ flex-wrap:wrap; gap:14px; }
 }
 
-/*STRATEGY PANEL (pit-stop view) */
-
+/* STRATEGY PANEL (pit-stop view) */
 .strategy-header-row{
     display:flex;
     justify-content:space-between;
@@ -1083,8 +1079,7 @@ body::after{
     padding:28px;
 }
 
-/*QUALIFYING / SPRINT QUALIFYING RESULTS VIEW */
-
+/* QUALIFYING / SPRINT QUALIFYING RESULTS VIEW */
 .quali-results{
     position:relative;
     width:100vw;
@@ -1128,7 +1123,6 @@ body::after{
 }
 
 /* SCROLLBARS (global default) */
-
 ::-webkit-scrollbar{
     width:8px;
     height:8px;
@@ -1147,8 +1141,7 @@ body::after{
     background:rgba(255,255,255,.3);
 }
 
-/* TELEMETRY COMPARISON PANEL (separate from replay's driver panel) */
-
+/* TELEMETRY COMPARISON PANEL */
 .telemetry-content-wide{
     width:100%;
     max-width:1800px;
@@ -1317,10 +1310,7 @@ body::after{
     }
 }
 
-/* 
-   SHARED — used across multiple pages (replay, quali, strategy,
-   telemetry, drivers panels all use the same back button) */
-
+/* SHARED BACK BUTTON */
 .back-btn{
     position:absolute;
     top:18px;
@@ -1343,187 +1333,301 @@ body::after{
     transform:translateY(-1px);
 }
 
-
-
-/* --- Weather Conditions Card Styling --- */
-
+/* WEATHER CONDITIONS CARD STYLING */
 .weather-card {
-  background: #151922;
-  border: 1px solid rgba(255, 255, 255, 0.08);
-  border-radius: 12px;
-  padding: 16px 18px;
-  display: flex;
-  flex-direction: column;
+    background: #151922;
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    border-radius: 12px;
+    padding: 16px 18px;
+    display: flex;
+    flex-direction: column;
 }
 
-/* Card Header & Live Badge */
 .weather-card-header {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  margin-bottom: 12px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 12px;
 }
 
 .weather-card-header .card-title {
-  font-size: 11px;
-  font-weight: 700;
-  letter-spacing: 1px;
-  color: #8b92a5;
-  text-transform: uppercase;
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 1px;
+    color: #8b92a5;
+    text-transform: uppercase;
 }
 
 .live-pill {
-  background: rgba(230, 0, 0, 0.2);
-  color: #ff3b30;
-  border: 1px solid rgba(255, 59, 48, 0.4);
-  font-size: 10px;
-  font-weight: 700;
-  padding: 2px 6px;
-  border-radius: 4px;
+    background: rgba(230, 0, 0, 0.2);
+    color: #ff3b30;
+    border: 1px solid rgba(255, 59, 48, 0.4);
+    font-size: 10px;
+    font-weight: 700;
+    padding: 2px 6px;
+    border-radius: 4px;
 }
 
-/* Hero Section (Main Temp & Thermometer Icon) */
 .weather-hero {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  padding-bottom: 12px;
-  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
-  margin-bottom: 12px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding-bottom: 12px;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+    margin-bottom: 12px;
 }
 
 .hero-temp {
-  font-size: 32px;
-  font-weight: 800;
-  color: #ffffff;
-  line-height: 1;
+    font-size: 32px;
+    font-weight: 800;
+    color: #ffffff;
+    line-height: 1;
 }
 
 .hero-subtext {
-  display: block;
-  font-size: 12px;
-  color: #9aa1ad;
-  margin-top: 4px;
+    display: block;
+    font-size: 12px;
+    color: #9aa1ad;
+    margin-top: 4px;
 }
 
 .hero-weather-icon {
-  width: 36px;
-  height: 36px;
-  object-fit: contain;
+    width: 36px;
+    height: 36px;
+    object-fit: contain;
 }
 
-/* Metric Items Grid */
 .weather-metrics-grid {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 10px 12px;
-  margin-bottom: 14px;
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 10px 12px;
+    margin-bottom: 14px;
 }
 
 .metric-item {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  background: rgba(255, 255, 255, 0.03);
-  border-radius: 6px;
-  padding: 8px 10px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    background: rgba(255, 255, 255, 0.03);
+    border-radius: 6px;
+    padding: 8px 10px;
 }
 
 .metric-label {
-  display: flex;
-  align-items: center;
-  gap: 6px;
-  font-size: 10px;
-  font-weight: 600;
-  color: #8b92a5;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 10px;
+    font-weight: 600;
+    color: #8b92a5;
 }
 
 .metric-icon {
-  width: 15px;
-  height: 15px;
-  object-fit: contain;
+    width: 15px;
+    height: 15px;
+    object-fit: contain;
 }
 
 .metric-value {
-  font-size: 12px;
-  font-weight: 700;
-  color: #ffffff;
+    font-size: 12px;
+    font-weight: 700;
+    color: #ffffff;
 }
 
 .metric-value small {
-  font-size: 9px;
-  color: #8b92a5;
+    font-size: 9px;
+    color: #8b92a5;
 }
 
-/* Link Row Button at Bottom */
 .weather-card .hp-link-row {
-  border-top: 1px solid rgba(255, 255, 255, 0.08);
-  padding-top: 10px;
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  color: #8b92a5;
-  font-size: 11px;
-  font-weight: 700;
-  cursor: pointer;
-  transition: color 0.2s ease;
+    border-top: 1px solid rgba(255, 255, 255, 0.08);
+    padding-top: 10px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    color: #8b92a5;
+    font-size: 11px;
+    font-weight: 700;
+    cursor: pointer;
+    transition: color 0.2s ease;
 }
 
 .weather-card .hp-link-row:hover {
-  color: #ffffff;
+    color: #ffffff;
 }
 
-
-
-
-
-
-
-
-
-/* Base Container Layout */
+/* BASE CONTAINER LAYOUT */
 .dashboard-grid {
-  display: flex;
-  flex-direction: column;
-  gap: 20px;
-  width: 100%;
-  max-width: 1060px; /* Fits 3 x 340px cards + 2 x 20px gaps */
-  margin: 0 auto;
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+    width: 100%;
+    max-width: 1060px;
+    margin: 0 auto;
 }
 
-/* Shared Card Styling (Hero & Bottom Cards) */
 .hero-card,
 .info-card {
-  background-color: #0f172a; /* Deep dark blue/slate matching your Hero */
-  border: 1px solid #1e293b;   /* Subtle border matching your Hero */
-  border-radius: 16px;         /* Rounded corners */
-  box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.3);
-  color: #ffffff;
-  padding: 24px;
-  box-sizing: border-box;
+    background-color: #0f172a;
+    border: 1px solid #1e293b;
+    border-radius: 16px;
+    box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.3);
+    color: #ffffff;
+    padding: 24px;
+    box-sizing: border-box;
 }
 
-/* Hero Specific Dimensions */
 .hero-card {
-  width: 100%;
-  height: 380px; /* Fixed height matching wireframe */
-  display: flex;
-  flex-direction: column;
-  justify-content: space-between;
+    width: 100%;
+    height: 380px;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
 }
 
-/* Bottom 3-Card Row Grid */
 .cards-row {
-  display: grid;
-  grid-template-columns: repeat(3, 340px);
-  gap: 20px;
-  justify-content: center;
+    display: grid;
+    grid-template-columns: repeat(3, 340px);
+    gap: 20px;
+    justify-content: center;
 }
 
-/* Bottom Cards Dimensions */
 .info-card {
-  width: 340px;
-  min-height: 320px; /* Equal height matching the top section's card style */
-  display: flex;
-  flex-direction: column;
+    width: 340px;
+    min-height: 320px;
+    display: flex;
+    flex-direction: column;
+}
+
+/* ==========================================================================
+   PROFILE DASHBOARD FULL-WIDTH OVERRIDES & FIXES
+   ========================================================================== */
+
+/* Light Theme Variable & Background Reset */
+body.light-theme {
+    --bg-primary: #F4F5F8;
+    --bg-card: #FFFFFF;
+    --bg-card-sub: #F8FAFC;
+    --border-color: #E2E8F0;
+    --border-strong: #CBD5E1;
+    --text-main: #0F172A;
+    --text-muted: #64748B;
+    --text-sub: #94A3B8;
+    --sidebar-bg: #FFFFFF;
+    --shadow-sm: 0 1px 3px rgba(0,0,0,0.05);
+    --shadow-md: 0 10px 25px -5px rgba(0,0,0,0.05), 0 8px 10px -6px rgba(0,0,0,0.03);
+    background-color: var(--bg-primary) !important;
+    color: var(--text-main) !important;
+    overflow-y: auto !important;
+    height: auto !important;
+}
+
+body.light-theme::before,
+body.light-theme::after {
+    display: none !important;
+}
+
+/* Allow Document Body to Scroll Normally */
+html, body {
+    overflow-y: auto !important;
+    height: auto !important;
+}
+
+/* Full Width App Layout Container */
+.app-layout {
+    display: flex !important;
+    width: 100vw !important;
+    min-height: 100vh !important;
+    position: relative !important;
+}
+
+/* Completely Hide Left Sidebar Navigation */
+.sidebar,
+.home-sidebar {
+    display: none !important;
+}
+
+/* Remove Sidebar Margin & Stretch Main Content to 100% Full Width */
+.main-content {
+    margin-left: 0 !important;
+    flex: 1 !important;
+    width: 100% !important;
+    max-width: 100% !important;
+    display: flex;
+    flex-direction: column;
+    min-width: 0;
+}
+
+/* Topbar Sticky Header Adjustment */
+.topbar {
+    height: 70px;
+    background-color: var(--bg-card, #ffffff);
+    border-bottom: 1px solid var(--border-color, #e2e8f0);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0 32px;
+    position: sticky;
+    top: 0;
+    z-index: 90;
+}
+
+/* Dashboard Body Max Width Container */
+.dashboard-body {
+    padding: 32px !important;
+    display: flex;
+    flex-direction: column;
+    gap: 24px;
+    max-width: 1400px;
+    margin: 0 auto;
+    width: 100%;
+}
+
+/* ==========================================
+   FAVORITE F1 CARD & HORIZONTAL ROW FIX
+   ========================================== */
+
+.fav-f1-content {
+  display: flex !important;
+  flex-direction: row !important;
+  align-items: flex-start !important;
+  justify-content: space-between !important;
+  gap: 16px !important;
+  width: 100% !important;
+  margin-top: 12px !important;
+}
+
+.fav-item {
+  flex: 1 !important;
+  display: flex !important;
+  flex-direction: column !important;
+  align-items: flex-start !important;
+}
+
+.fav-label {
+  font-size: 10px !important;
+  font-weight: 800 !important;
+  color: var(--text-sub, #94a3b8) !important;
+  letter-spacing: 0.8px !important;
+  margin-bottom: 4px !important;
+}
+
+.fav-item strong {
+  font-size: 13px !important;
+  font-weight: 800 !important;
+  color: var(--text-main, #0f172a) !important;
+}
+
+.fav-sub {
+  font-size: 10px !important;
+  color: var(--text-sub, #94a3b8) !important;
+}
+
+.fav-img-driver,
+.fav-img-team,
+.fav-img-track {
+  height: 50px !important;
+  width: auto !important;
+  object-fit: contain !important;
+  margin-top: 8px !important;
 }

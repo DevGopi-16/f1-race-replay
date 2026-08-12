@@ -191,6 +191,7 @@ F1-RACE-REPLAY-WEB/
 │       ├── auth.css
 │       ├── auth.js
 │       ├── profile.css
+│       ├── profile.js
 │       ├── settings_applier.js
 │       ├── constructors-panel.css
 │       ├── constructors-panel.js

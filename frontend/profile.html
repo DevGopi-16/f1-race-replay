@@ -3,395 +3,725 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>User Profile | F1+ Replay</title>
-  <link rel="stylesheet" href="/static/auth.css">
+  <title>User Profile | F1 REPLAY</title>
+  <link rel="stylesheet" href="/static/style.css">
   <link rel="stylesheet" href="/static/profile.css">
+  <!-- Chart.js for Radar Chart -->
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
   <style>
-    /* Clean vector achievement card styling */
-    .achievement-card {
-      background: rgba(255, 255, 255, 0.03);
-      border: 1px solid rgba(255, 255, 255, 0.08);
-      border-radius: 10px;
-      padding: 16px 12px;
+    /* Full-width container override */
+    .main-content {
+      margin-left: 0 !important;
+      width: 100% !important;
+      max-width: 100% !important;
+    }
+
+    /* Modal Pop-up Overlays & Box Styles */
+    .modal-overlay {
+      position: fixed;
+      inset: 0;
+      background: rgba(0, 0, 0, 0.65);
+      backdrop-filter: blur(8px);
       display: flex;
-      flex-direction: column;
       align-items: center;
       justify-content: center;
-      gap: 8px;
-      transition: all 0.3s ease;
+      z-index: 1000;
+      opacity: 1;
+      transition: opacity 0.25s ease;
     }
-
-    .achievement-card:hover {
-      background: rgba(255, 255, 255, 0.06);
-      border-color: rgba(255, 255, 255, 0.15);
-      transform: translateY(-2px);
+    .modal-overlay.hidden {
+      display: none !important;
+      opacity: 0;
+      pointer-events: none;
     }
-
-    .achievement-icon {
-      width: 24px;
-      height: 24px;
-      stroke: #e10600;
-      fill: none;
-      stroke-width: 1.8;
-      stroke-linecap: round;
-      stroke-linejoin: round;
-      filter: drop-shadow(0 0 6px rgba(225, 6, 0, 0.4));
+    .modal-card {
+      background: var(--bg-card, #ffffff);
+      border: 1px solid var(--border-color, #e2e8f0);
+      border-radius: 16px;
+      width: 100%;
+      max-width: 440px;
+      padding: 24px;
+      box-shadow: 0 20px 40px rgba(0,0,0,0.3);
+      position: relative;
     }
-
-    .achievement-title {
-      font-size: 12px;
-      font-weight: 600;
-      color: #f8fafc;
+    .modal-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 20px;
+      border-bottom: 1px solid var(--border-color, #e2e8f0);
+      padding-bottom: 12px;
+    }
+    .modal-header h3 {
+      font-size: 16px;
+      font-weight: 800;
       margin: 0;
-      text-align: center;
     }
-
-    .achievement-card.locked {
-      opacity: 0.45;
-      background: rgba(0, 0, 0, 0.2);
-      border-style: dashed;
-      border-color: rgba(255, 255, 255, 0.06);
+    .close-btn {
+      background: transparent;
+      border: none;
+      font-size: 22px;
+      cursor: pointer;
+      color: var(--text-muted, #64748b);
     }
-
-    .achievement-card.locked .achievement-icon {
-      stroke: #64748b;
-      filter: none;
+    .form-group {
+      margin-bottom: 16px;
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
     }
-
-    .achievement-card.locked .achievement-title {
-      color: #64748b;
+    .form-group label {
+      font-size: 11px;
+      font-weight: 700;
+      color: var(--text-sub, #94a3b8);
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+    .glass-input {
+      width: 100%;
+      padding: 10px 12px;
+      background: var(--bg-card-sub, #f8fafc);
+      border: 1px solid var(--border-color, #e2e8f0);
+      border-radius: 8px;
+      font-size: 13px;
+      color: var(--text-main, #0f172a);
+      outline: none;
+    }
+    .glass-input:focus {
+      border-color: #e10600;
     }
   </style>
 </head>
-<body>
+<body class="light-theme">
 
-  <!-- Ambient Racing Glow Orbs -->
-  <div class="bg-glow-orb orb-1"></div>
-  <div class="bg-glow-orb orb-2"></div>
+  <div class="app-layout">
 
-  <div class="profile-container glass-card">
-    
-    <!-- Header Section -->
-    <div class="profile-header">
-      <div class="profile-header-left">
-        <div class="glass-avatar" id="profile-avatar-box">P</div>
-        <div class="profile-title">
-          <h1 id="profile-username-heading">Loading... <span style="color: #ff2a20;">✓</span></h1>
-          <p id="profile-email-text">driver@f1replay.com</p>
-          <div class="pro-badge">👑 PRO RACER</div>
+    <!-- MAIN CONTENT AREA (FULL WIDTH) -->
+    <main class="main-content">
+      
+      <!-- TOP NAVIGATION BAR -->
+      <header class="topbar">
+        <div class="topbar-left-logo" style="display: flex; align-items: center; gap: 8px; font-weight: 900; font-size: 18px; margin-right: 20px;">
+          <a href="/" style="text-decoration: none; color: inherit;"><span class="f1-red" style="color: #e10600;">F1</span> REPLAY</a>
         </div>
-      </div>
-      <div class="header-graphic">
-        <!-- Optional illustrative badge slot -->
-      </div>
-    </div>
-
-    <!-- Tier 2: XP & Racing Level Progress Card -->
-    <div class="glass-subcard" style="margin-bottom: 24px;">
-      <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:8px;">
-          <span style="font-size:11px; font-weight:700; color:#8a9bb8;">RACING LEVEL <strong id="user-level" style="color:#fff; font-size:16px;">4</strong></span>
-          <span style="font-size:11px; color:#ff2a20;" id="user-xp">1250 / 2000 XP</span>
-      </div>
-      <div style="width:100%; height:8px; background:rgba(255,255,255,0.08); border-radius:4px; overflow:hidden;">
-          <div id="xp-progress-bar" style="width:62%; height:100%; background:linear-gradient(90deg, #e10600, #ff5722); box-shadow:0 0 10px #e10600;"></div>
-      </div>
-    </div>
-
-    <!-- Tier 2: Achievements & Badges Grid -->
-    <div class="glass-subcard" style="margin-bottom: 24px;">
-      <div class="section-title" style="display: flex; align-items: center; gap: 8px;">
-        <svg class="achievement-icon" style="width: 16px; height: 16px;" viewBox="0 0 24 24">
-          <path d="M6 9H4.5a2.5 2.5 0 0 1 0-5H6"></path>
-          <path d="M18 9h1.5a2.5 2.5 0 0 0 0-5H18"></path>
-          <path d="M4 22h16"></path>
-          <path d="M10 14.66V17c0 .55-.47.98-.97 1.21C7.85 18.75 7 20.24 7 22"></path>
-          <path d="M14 14.66V17c0 .55.47.98.97 1.21C16.15 18.75 17 20.24 17 22"></path>
-          <path d="M18 2H6v7a6 6 0 0 0 12 0V2z"></path>
-        </svg>
-        DRIVER ACHIEVEMENTS
-      </div>
-      <div id="achievements-grid" style="display:grid; grid-template-columns: repeat(3, 1fr); gap:12px; margin-top:12px;">
-          <!-- Populated dynamically via script -->
-      </div>
-    </div>
-
-    <!-- Link to Tier 3 Settings Page -->
-    <div style="text-align: right; margin-bottom: 15px;">
-      <a href="/settings" style="color: #8a9bb8; font-size: 12px; text-decoration: none; border-bottom: 1px dotted #8a9bb8;">⚙️ Advanced Terminal Settings →</a>
-    </div>
-
-    <!-- Top Stats Grid -->
-    <div class="stats-grid">
-      <div class="glass-subcard stat-card">
-        <div class="stat-card-top">
-          <span>ACCOUNT TIER</span>
-          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#8a9bb8" stroke-width="2"><path d="M5 20h14v-2H5m14-9h-4V4H9v5H5l7 7 7-7z"/></svg>
+        <div class="search-box">
+          <span class="search-icon">🔍</span>
+          <input type="text" id="topbarSearchInput" placeholder="Search drivers, tracks, sessions..." />
+          <span class="search-shortcut">⌘K</span>
         </div>
-        <strong style="color: #ff2a20; text-shadow: 0 0 12px rgba(225,6,0,0.4);">PRO RACER</strong>
-      </div>
-      <div class="glass-subcard stat-card">
-        <div class="stat-card-top">
-          <span>REPLAYS WATCHED</span>
-          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#8a9bb8" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
-        </div>
-        <strong id="stat-replays">24 Sessions</strong>
-      </div>
-    </div>
-
-    <!-- Two Column Dashboard Grid (Form on Left, Activity on Right) -->
-    <form id="profile-form">
-      <div class="dashboard-grid">
-        
-        <!-- Left Box: Profile Information Form -->
-        <div class="glass-subcard">
-          <div class="section-title">
-            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
-            PROFILE INFORMATION
-          </div>
-          
-          <div class="form-group">
-            <label>Username</label>
-            <input type="text" id="input-username" class="glass-input" required />
-          </div>
-          <div class="form-group">
-            <label>Favorite Driver</label>
-            <select id="input-driver" class="glass-input">
-              <option value="VER">Max Verstappen (VER)</option>
-              <option value="HAM">Lewis Hamilton (HAM)</option>
-              <option value="LEC">Charles Leclerc (LEC)</option>
-              <option value="NOR">Lando Norris (NOR)</option>
-              <option value="PIA">Oscar Piastri (PIA)</option>
-              <option value="SAI">Carlos Sainz (SAI)</option>
-            </select>
-          </div>
-          <div class="form-group" style="margin-bottom: 0;">
-            <label>Favorite Constructor Team</label>
-            <select id="input-team" class="glass-input">
-              <option value="Red Bull Racing">Red Bull Racing</option>
-              <option value="Ferrari">Scuderia Ferrari</option>
-              <option value="McLaren">McLaren F1 Team</option>
-              <option value="Mercedes">Mercedes-AMG PETRONAS</option>
-              <option value="Aston Martin">Aston Martin Aramco</option>
-            </select>
-          </div>
-        </div>
-
-        <!-- Right Box: Recent Paddock Activity Feed -->
-        <div class="glass-subcard">
-          <div class="section-title">
-            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#ff2a20" stroke-width="2"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>
-            RECENT PADDOCK ACTIVITY
-          </div>
-          
-          <div class="activity-feed">
-            <div class="activity-item">
-              <span>🏁 Watched 2026 British Grand Prix Replay</span>
-              <span>2 hours ago</span>
+        <div class="topbar-actions">
+          <button class="topbar-icon-btn badge-btn">🔔<span class="badge">3</span></button>
+          <button class="topbar-icon-btn">⚙️</button>
+          <div class="topbar-user">
+            <img id="topbar-avatar" 
+                 src="/static/images/user-profile.png" 
+                 alt="Avatar" 
+                 onerror="this.onerror=null; this.src='data:image/svg+xml;utf8,<svg xmlns=\'http://www.w3.org/2000/svg\' viewBox=\'0 0 24 24\' fill=\'%238a93a6\'><path d=\'M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z\'/></svg>'" />
+            <div class="topbar-user-info">
+              <span class="user-name" id="topbar-username">GopiPrajapati</span>
+              <span class="user-badge">👑 PRO RACER</span>
             </div>
-            <div class="activity-item">
-              <span>⚡ Compared telemetry: VER vs NOR</span>
-              <span>Yesterday</span>
+            <span class="dropdown-arrow">⌄</span>
+          </div>
+        </div>
+      </header>
+
+      <div class="dashboard-body">
+
+        <!-- MAIN HERO PROFILE BANNER -->
+        <section class="hero-banner-card">
+          <div class="hero-left">
+            <div class="hero-avatar-wrapper">
+              <img id="hero-avatar" 
+                   src="/static/images/user-profile.png" 
+                   alt="GopiPrajapati" 
+                   onerror="this.onerror=null; this.src='data:image/svg+xml;utf8,<svg xmlns=\'http://www.w3.org/2000/svg\' viewBox=\'0 0 24 24\' fill=\'%238a93a6\'><path d=\'M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z\'/></svg>'" />
+              <button class="avatar-edit-btn">📷</button>
+            </div>
+            <div class="hero-details">
+              <div class="hero-name-row">
+                <h1 id="hero-username">GopiPrajapati</h1>
+                <span class="verified-check">✔</span>
+              </div>
+              <div class="hero-pro-tag">🏆 PRO RACER</div>
+              <p class="hero-quote">“Chasing milliseconds, one lap at a time.”</p>
+              <div class="hero-meta">
+                <span>📍 Mumbai, India</span>
+                <span>📅 Joined March 2026</span>
+              </div>
+              <div class="hero-buttons">
+                <button class="btn-primary" id="btn-edit-profile">Edit Profile</button>
+                <button class="btn-secondary">Share Profile</button>
+              </div>
             </div>
           </div>
+
+          <div class="hero-right-f1-car">
+            <img src="/static/images/car/ferrari.avif" alt="Scuderia Ferrari F1 Car" onerror="this.style.display='none'" />
+          </div>
+        </section>
+
+        <!-- STATS HIGHLIGHT BAR -->
+        <section class="stats-highlight-row">
+          <div class="stat-box level-stat">
+            <div class="level-hexagon-sm">4</div>
+            <div>
+              <div class="stat-sublabel">RACING LEVEL</div>
+              <div class="stat-highlight">🏆 PRO RACER</div>
+              <div class="stat-sub">1,250 / 2,000 XP</div>
+            </div>
+          </div>
+          <div class="stat-box">
+            <div class="stat-sublabel">TOTAL SESSIONS</div>
+            <div class="stat-val">24</div>
+            <div class="stat-sub">Sessions Watched</div>
+          </div>
+          <div class="stat-box">
+            <div class="stat-sublabel">TOTAL LAPS</div>
+            <div class="stat-val">128</div>
+            <div class="stat-sub">Laps Watched</div>
+          </div>
+          <div class="stat-box">
+            <div class="stat-sublabel">COMPLETION RATE</div>
+            <div class="stat-val">86%</div>
+            <div class="stat-sub">Replay Completion</div>
+          </div>
+          <div class="stat-box">
+            <div class="stat-sublabel">🏆 ACHIEVEMENTS</div>
+            <div class="stat-val">14</div>
+            <div class="stat-sub">Unlocked</div>
+          </div>
+          <div class="stat-box">
+            <div class="stat-sublabel">RACING SCORE</div>
+            <div class="stat-val">8,420</div>
+            <div class="stat-sub">Top 12% of Racers</div>
+          </div>
+        </section>
+
+        <!-- PROFILE SUB-TABS -->
+        <nav class="profile-tabs">
+          <button class="tab-btn active" data-tab="overview-panel">OVERVIEW</button>
+          <button class="tab-btn" data-tab="racing-stats-panel">RACING STATS</button>
+          <button class="tab-btn" data-tab="achievements-panel">ACHIEVEMENTS</button>
+          <button class="tab-btn" data-tab="replays-panel">REPLAYS</button>
+          <button class="tab-btn" data-tab="activity-panel">ACTIVITY</button>
+          <button class="tab-btn" data-tab="collection-panel">COLLECTION</button>
+          <button class="tab-btn" data-tab="settings-panel">SETTINGS</button>
+        </nav>
+
+        <!-- MIDDLE GRID (3 CARDS) -->
+        <div class="grid-3-col">
           
-          <div style="margin-top: 10px; text-align: center; border-top: 1px solid rgba(255,255,255,0.06); padding-top: 10px;">
-            <span style="font-size: 11px; color: #8a9bb8; cursor: pointer;">View All Activity →</span>
+          <!-- FAVORITE F1 CARD -->
+          <div class="dashboard-card">
+            <div class="card-header">
+              <h3>FAVORITE F1</h3>
+              <button class="icon-action-btn">✏️</button>
+            </div>
+            <div class="fav-f1-content">
+              <div class="fav-item">
+                <span class="fav-label">DRIVER</span>
+                <strong id="fav-driver-name">Lewis Hamilton</strong>
+                <img src="/static/images/drivers/hamilton.png" alt="Lewis Hamilton" class="fav-img-driver" onerror="this.style.display='none'" />
+              </div>
+              <div class="fav-item">
+                <span class="fav-label">CONSTRUCTOR</span>
+                <strong id="fav-team-name">Scuderia Ferrari</strong>
+                <img src="/static/images/teams/ferrari-logo.png" alt="Scuderia Ferrari" class="fav-img-team" onerror="this.style.display='none'" />
+              </div>
+              <div class="fav-item">
+                <span class="fav-label">TRACK</span>
+                <strong>Silverstone</strong>
+                <span class="fav-sub">England</span>
+                <img src="/static/images/tracks/silverstone.png" alt="Silverstone Track" class="fav-img-track" onerror="this.style.display='none'" />
+              </div>
+            </div>
           </div>
+
+          <!-- PERFORMANCE OVERVIEW (RADAR CHART) -->
+          <div class="dashboard-card">
+            <div class="card-header">
+              <h3>PERFORMANCE OVERVIEW</h3>
+            </div>
+            <div class="radar-chart-container">
+              <canvas id="performanceRadarChart"></canvas>
+            </div>
+            <div class="radar-legend">
+              <span class="legend-item"><span class="dot legend-you"></span> You</span>
+              <span class="legend-item"><span class="dot legend-avg"></span> Top 12% Avg</span>
+            </div>
+          </div>
+
+          <!-- TOP ACHIEVEMENTS -->
+          <div class="dashboard-card">
+            <div class="card-header">
+              <h3>TOP ACHIEVEMENTS</h3>
+              <a href="/achievements" class="link-action">View All ></a>
+            </div>
+            <div class="achievements-mini-grid">
+              <div class="achieve-card unlocked">
+                <div class="achieve-icon">🚩</div>
+                <div class="achieve-info">
+                  <strong>First Lap</strong>
+                  <p>Complete your first lap</p>
+                  <span class="status-tag">Unlocked</span>
+                </div>
+              </div>
+              <div class="achieve-card progress">
+                <div class="achieve-icon">📊</div>
+                <div class="achieve-info">
+                  <strong>Telemetry Engineer</strong>
+                  <p>Analyze 50 telemetry sessions</p>
+                  <div class="mini-progress-bar"><div class="fill" style="width: 78%;"></div></div>
+                  <span class="progress-txt">78%</span>
+                </div>
+              </div>
+              <div class="achieve-card unlocked">
+                <div class="achieve-icon">⏱️</div>
+                <div class="achieve-info">
+                  <strong>Hot Lap Hunter</strong>
+                  <p>Set a lap under 1:30</p>
+                  <span class="status-tag">Unlocked</span>
+                </div>
+              </div>
+              <div class="achieve-card progress">
+                <div class="achieve-icon">🏎️</div>
+                <div class="achieve-info">
+                  <strong>Speed Demon</strong>
+                  <p>Watch 100 laps</p>
+                  <div class="mini-progress-bar"><div class="fill" style="width: 86%;"></div></div>
+                  <span class="progress-txt">86%</span>
+                </div>
+              </div>
+              <div class="achieve-card unlocked">
+                <div class="achieve-icon">🎧</div>
+                <div class="achieve-info">
+                  <strong>Paddock Regular</strong>
+                  <p>Watch 20 different GP</p>
+                  <span class="status-tag">Unlocked</span>
+                </div>
+              </div>
+              <div class="achieve-card progress">
+                <div class="achieve-icon">🔧</div>
+                <div class="achieve-info">
+                  <strong>Race Engineer</strong>
+                  <p>Compare 10 drivers</p>
+                  <div class="mini-progress-bar"><div class="fill" style="width: 60%;"></div></div>
+                  <span class="progress-txt">60%</span>
+                </div>
+              </div>
+            </div>
+          </div>
+
+        </div>
+
+        <!-- LOWER GRID (LEFT REPLAYS & FEED / RIGHT COLLECTION & JOURNEY) -->
+        <div class="grid-2-col">
+          
+          <!-- LEFT COLUMN -->
+          <div class="grid-col-stack">
+            <!-- RECENT REPLAYS -->
+            <div class="dashboard-card">
+              <div class="card-header">
+                <h3>RECENT REPLAYS</h3>
+                <a href="/sessions" class="link-action">View All ></a>
+              </div>
+              <div class="replay-list">
+                <div class="replay-item">
+                  <span class="flag">🇬🇧</span>
+                  <div class="replay-details">
+                    <strong>British Grand Prix 2026</strong>
+                    <span>Silverstone Circuit</span>
+                  </div>
+                  <span class="time-ago">2 hours ago</span>
+                  <button class="btn-watch">Watch</button>
+                </div>
+                <div class="replay-item">
+                  <span class="flag">🇮🇹</span>
+                  <div class="replay-details">
+                    <strong>Italian Grand Prix 2026</strong>
+                    <span>Monza Circuit</span>
+                  </div>
+                  <span class="time-ago">Yesterday</span>
+                  <button class="btn-watch">Watch</button>
+                </div>
+                <div class="replay-item">
+                  <span class="flag">🇲🇨</span>
+                  <div class="replay-details">
+                    <strong>Monaco Grand Prix 2026</strong>
+                    <span>Monaco Circuit</span>
+                  </div>
+                  <span class="time-ago">2 days ago</span>
+                  <button class="btn-watch">Watch</button>
+                </div>
+                <div class="replay-item">
+                  <span class="flag">🇧🇪</span>
+                  <div class="replay-details">
+                    <strong>Belgian Grand Prix 2026</strong>
+                    <span>Spa-Francorchamps</span>
+                  </div>
+                  <span class="time-ago">3 days ago</span>
+                  <button class="btn-watch">Watch</button>
+                </div>
+                <div class="replay-item">
+                  <span class="flag">🇨🇦</span>
+                  <div class="replay-details">
+                    <strong>Canadian Grand Prix 2026</strong>
+                    <span>Circuit Gilles Villeneuve</span>
+                  </div>
+                  <span class="time-ago">5 days ago</span>
+                  <button class="btn-watch">Watch</button>
+                </div>
+              </div>
+            </div>
+
+            <!-- ACTIVITY FEED -->
+            <div class="dashboard-card">
+              <div class="card-header">
+                <h3>ACTIVITY FEED</h3>
+                <a href="/activity" class="link-action">View All ></a>
+              </div>
+              <div class="activity-timeline">
+                <div class="act-item">
+                  <span class="act-icon">🏁</span>
+                  <div class="act-details">
+                    <strong>Watched British Grand Prix Replay</strong>
+                    <span>Watched 42 laps</span>
+                  </div>
+                  <span class="act-time">2 hours ago</span>
+                </div>
+                <div class="act-item">
+                  <span class="act-icon">⚡</span>
+                  <div class="act-details">
+                    <strong>Compared VER vs NOR</strong>
+                    <span>Telemetry comparison</span>
+                  </div>
+                  <span class="act-time">Yesterday</span>
+                </div>
+                <div class="act-item">
+                  <span class="act-icon">📊</span>
+                  <div class="act-details">
+                    <strong>Analyzed Race Telemetry</strong>
+                    <span>British GP 2026</span>
+                  </div>
+                  <span class="act-time">Yesterday</span>
+                </div>
+                <div class="act-item">
+                  <span class="act-icon">🏅</span>
+                  <div class="act-details">
+                    <strong>Unlocked Achievement</strong>
+                    <span>Hot Lap Hunter</span>
+                  </div>
+                  <span class="act-time">2 days ago</span>
+                </div>
+                <div class="act-item">
+                  <span class="act-icon">🎮</span>
+                  <div class="act-details">
+                    <strong>Completed 5 Sessions</strong>
+                    <span>Great consistency!</span>
+                  </div>
+                  <span class="act-time">3 days ago</span>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- RIGHT COLUMN -->
+          <div class="grid-col-stack">
+            
+            <!-- TRACK COLLECTION -->
+            <div class="dashboard-card">
+              <div class="card-header">
+                <h3>TRACK COLLECTION</h3>
+              </div>
+              <div class="track-header-stat">
+                <span class="large-num">12 <small>/ 24</small></span>
+                <span class="sub-txt">Tracks Explored</span>
+                <div class="progress-bar-thin"><div class="fill" style="width: 50%;"></div></div>
+                <span class="pct-txt">50%</span>
+              </div>
+              <div class="track-carousel">
+                <div class="track-mini-card">
+                  <img src="/static/images/tracks/silverstone-wire.png" alt="Silverstone" onerror="this.style.display='none'" />
+                  <strong>Silverstone</strong>
+                  <span>England</span>
+                  <span class="status-tag">Explored</span>
+                </div>
+                <div class="track-mini-card">
+                  <img src="/static/images/tracks/monza-wire.png" alt="Monza" onerror="this.style.display='none'" />
+                  <strong>Monza</strong>
+                  <span>Italy</span>
+                  <span class="status-tag">Explored</span>
+                </div>
+                <div class="track-mini-card">
+                  <img src="/static/images/tracks/monaco-wire.png" alt="Monaco" onerror="this.style.display='none'" />
+                  <strong>Monaco</strong>
+                  <span>Monaco</span>
+                  <span class="status-tag">Explored</span>
+                </div>
+                <div class="track-mini-card">
+                  <img src="/static/images/tracks/spa-wire.png" alt="Spa" onerror="this.style.display='none'" />
+                  <strong>Spa</strong>
+                  <span>Belgium</span>
+                  <span class="status-tag">Explored</span>
+                </div>
+              </div>
+            </div>
+
+            <!-- RACING JOURNEY STEPPER -->
+            <div class="dashboard-card">
+              <div class="card-header">
+                <h3>RACING JOURNEY</h3>
+              </div>
+              <div class="journey-stepper">
+                <div class="step-item completed">
+                  <div class="step-icon">🔒</div>
+                  <span>Level 1</span>
+                  <small>Rookie</small>
+                </div>
+                <div class="step-item completed">
+                  <div class="step-icon">🔒</div>
+                  <span>Level 2</span>
+                  <small>Amateur</small>
+                </div>
+                <div class="step-item completed">
+                  <div class="step-icon">🔒</div>
+                  <span>Level 3</span>
+                  <small>Track Regular</small>
+                </div>
+                <div class="step-item active">
+                  <div class="step-icon">🏆</div>
+                  <span>Level 4</span>
+                  <small>PRO RACER</small>
+                </div>
+                <div class="step-item">
+                  <div class="step-icon">🔒</div>
+                  <span>Level 5</span>
+                  <small>Race Engineer</small>
+                </div>
+                <div class="step-item">
+                  <div class="step-icon">🔒</div>
+                  <span>Level 6</span>
+                  <small>Telemetry</small>
+                </div>
+                <div class="step-item">
+                  <div class="step-icon">🔒</div>
+                  <span>Level 7</span>
+                  <small>F1 Analyst</small>
+                </div>
+                <div class="step-item">
+                  <div class="step-icon">🔒</div>
+                  <span>Level 8</span>
+                  <small>Paddock Elite</small>
+                </div>
+                <div class="step-item">
+                  <div class="step-icon">🔒</div>
+                  <span>Level 9</span>
+                  <small>Grand Prix Master</small>
+                </div>
+                <div class="step-item">
+                  <div class="step-icon">🔒</div>
+                  <span>Level 10</span>
+                  <small>World Champion</small>
+                </div>
+              </div>
+            </div>
+
+            <!-- PROFILE COMPLETION & BANNER AD -->
+            <div class="dashboard-card completion-card">
+              <div class="completion-left">
+                <div class="circle-progress">
+                  <svg viewBox="0 0 36 36" class="circular-chart red">
+                    <path class="circle-bg" d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831" />
+                    <path class="circle" stroke-dasharray="92, 100" d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831" />
+                    <text x="18" y="20.35" class="percentage">92%</text>
+                  </svg>
+                  <span class="compl-sub">Complete</span>
+                </div>
+              </div>
+              <div class="completion-right">
+                <div class="checklist-grid">
+                  <span>✔ Profile Photo</span>
+                  <span>✔ Bio</span>
+                  <span>✔ Favorite Driver</span>
+                  <span>✔ Racing Preferences</span>
+                  <span>✔ Favorite Team</span>
+                  <span>✔ Profile Banner</span>
+                  <span>✔ Favorite Track</span>
+                  <span>✔ Customize Theme</span>
+                </div>
+              </div>
+            </div>
+
+            <!-- COMPLETE YOUR PROFILE PROMO -->
+            <div class="banner-promo-card">
+              <div class="promo-text">
+                <h4>Complete your profile</h4>
+                <p>Add a profile banner to get 100% completion</p>
+                <button class="btn-primary-sm">Add Banner</button>
+              </div>
+              <img src="/static/images/f1-car-mini.png" alt="F1 Mini" class="promo-car-img" onerror="this.style.display='none'" />
+            </div>
+
+          </div>
+
         </div>
 
       </div>
 
-      <!-- Journey Banner Section -->
-      <div class="journey-banner">
-        <div class="journey-left">
-          <div class="journey-icon">
-            <svg class="achievement-icon" viewBox="0 0 24 24" style="width:24px; height:24px;">
-              <path d="M6 9H4.5a2.5 2.5 0 0 1 0-5H6"></path>
-              <path d="M18 9h1.5a2.5 2.5 0 0 0 0-5H18"></path>
-              <path d="M4 22h16"></path>
-              <path d="M10 14.66V17c0 .55-.47.98-.97 1.21C7.85 18.75 7 20.24 7 22"></path>
-              <path d="M14 14.66V17c0 .55.47.98.97 1.21C16.15 18.75 17 20.24 17 22"></path>
-              <path d="M18 2H6v7a6 6 0 0 0 12 0V2z"></path>
-            </svg>
-          </div>
-          <div class="journey-text">
-            <h4>YOUR JOURNEY</h4>
-            <p>Every lap. Every battle. Every victory.</p>
-          </div>
-        </div>
-        <div class="journey-metrics">
-          <div class="metric-item">
-            <span>Sessions</span>
-            <strong style="color:#fff;">24</strong>
-          </div>
-          <div class="metric-item">
-            <span>Laps Watched</span>
-            <strong style="color:#ff2a20;">128</strong>
-          </div>
-          <div class="metric-item">
-            <span>Completion Rate</span>
-            <strong style="color:#fff;">86%</strong>
-          </div>
+
+      <!-- RACING STATS TAB PANEL -->
+      <div class="tab-panel hidden" id="racing-stats-panel">
+        <div class="dashboard-card">
+          <div class="card-header"><h3>RACING STATS</h3></div>
+          <p style="padding: 20px; color:var(--text-sub,#94a3b8); font-size: 13-px;">
+            Detailed racing stats coming soon.
+          </p>
         </div>
       </div>
 
-      <div id="profile-message" style="margin-bottom: 12px; font-size: 13px; text-align: center;"></div>
-
-      <!-- Card Footer with Back Link and Submit Button -->
-      <div class="card-footer">
-        <a href="/" class="back-link">
-          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="19" y1="12" x2="5" y2="12"/><polyline points="12 19 5 12 12 5"/></svg>
-          Return to Live Replay Terminal
-        </a>
-        <button type="submit" class="glass-btn">
-          Update User Profile
-          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
-        </button>
+      <!-- ACHIEVEMENTS TAB PANEL -->
+      <div class="tab-panel hidden" id="achievements-panel">
+        <div class="dashboard-card">
+          <div class="card-header"><h3>ALL ACHIEVEMENTS</h3></div>
+          <p style="padding:20px 0; color:var(--text-sub,#94a3b8); font-size:13px;">
+            Full achievements list coming soon.
+          </p>
+        </div>
       </div>
 
-    </form>
+      <!-- REPLAYS TAB PANEL -->
+      <div class="tab-panel hidden" id="replays-panel">
+        <div class="dashboard-card">
+          <div class="card-header"><h3>ALL REPLAYS</h3></div>
+          <p style="padding:20px 0; color:var(--text-sub,#94a3b8); font-size:13px;">
+            Full replay library coming soon.
+          </p>
+        </div>
+      </div>
 
+
+      <!-- ACTIVITY TAB PANEL -->
+      <div class="tab-panel hidden" id="activity-panel">
+        <div class="dashboard-card">
+          <div class="card-header"><h3>FULL ACTIVITY LOG</h3></div>
+          <p style="padding:20px 0; color:var(--text-sub,#94a3b8); font-size:13px;">
+            Full activity feed coming soon.
+          </p>
+        </div>
+      </div>
+
+      <!-- COLLECTION TAB PANEL -->
+      <div class="tab-panel hidden" id="collection-panel">
+        <div class="dashboard-card">
+          <div class="card-header"><h3>FULL COLLECTION</h3></div>
+          <p style="padding:20px 0; color:var(--text-sub,#94a3b8); font-size:13px;">
+            Full track collection coming soon.
+          </p>
+        </div>
+      </div>
+
+      <!-- SETTINGS TAB PANEL -->
+      <div class="tab-panel hidden" id="settings-panel">
+        <div class="dashboard-card">
+          <div class="card-header"><h3>SETTINGS</h3></div>
+          <p style="padding:20px 0; color:var(--text-sub,#94a3b8); font-size:13px;">
+            Go to <a href="/setting.html">Settings page</a> to manage your account.
+          </p>
+        </div>
+      </div>
+
+      <!-- FOOTER SECTION -->
+      <footer class="dashboard-footer">
+        <div class="footer-left">
+          <div class="f1-logo-footer"><span class="f1-red">F1</span> REPLAY</div>
+          <p>The ultimate F1 replay and telemetry analysis platform.</p>
+        </div>
+        <div class="footer-links-grid">
+          <div>
+            <h5>PLATFORM</h5>
+            <a href="/sessions">Browse Sessions</a>
+            <a href="/live">Live Replay Terminal</a>
+            <a href="/telemetry">Telemetry Analysis</a>
+            <a href="/comparison">Driver Comparison</a>
+            <a href="/track-explorer">Track Map Explorer</a>
+          </div>
+          <div>
+            <h5>COMPETITIONS</h5>
+            <a href="/championships">Championships</a>
+            <a href="/constructors">Constructors</a>
+            <a href="/leaderboards">Leaderboards</a>
+            <a href="/hall-of-fame">Hall of Fame</a>
+          </div>
+          <div>
+            <h5>SUPPORT</h5>
+            <a href="/help">Help Center</a>
+            <a href="/docs">Documentation</a>
+            <a href="/contact">Contact Us</a>
+            <a href="/bug">Report Bug</a>
+          </div>
+          <div>
+            <h5>LEGAL</h5>
+            <a href="/privacy">Privacy Policy</a>
+            <a href="/terms">Terms of Service</a>
+            <a href="/cookies">Cookie Policy</a>
+            <a href="/data">Data Policy</a>
+          </div>
+        </div>
+        <div class="footer-socials">
+          <h5>STAY CONNECTED</h5>
+          <div class="social-icons">
+            <a href="#">🐦</a>
+            <a href="#">👾</a>
+            <a href="#">📷</a>
+            <a href="#">📺</a>
+          </div>
+          <span class="copyright-txt">© 2026 F1 Replay. All rights reserved.</span>
+        </div>
+      </footer>
+
+    </main>
   </div>
 
-  <script src="/static/auth.js"></script>
-  <script>
-    document.addEventListener("DOMContentLoaded", async () => {
-      const token = localStorage.getItem("f1_replay_token");
-      if (!token) {
-        window.location.href = "/";
-        return;
-      }
+  <!-- EDIT PROFILE MODAL -->
+  <div id="editProfileModal" class="modal-overlay hidden">
+    <div class="modal-card">
+      <div class="modal-header">
+        <h3>Edit Profile Information</h3>
+        <button id="closeModalBtn" class="close-btn">&times;</button>
+      </div>
+      <form id="editProfileForm">
+        <div class="form-group">
+          <label>Username</label>
+          <input type="text" id="modalUsername" class="glass-input" required />
+        </div>
+        <div class="form-group">
+          <label>Favorite Driver</label>
+          <select id="modalDriver" class="glass-input">
+            <option value="Lewis Hamilton">Lewis Hamilton (HAM)</option>
+            <option value="Max Verstappen">Max Verstappen (VER)</option>
+            <option value="Charles Leclerc">Charles Leclerc (LEC)</option>
+            <option value="Lando Norris">Lando Norris (NOR)</option>
+            <option value="Oscar Piastri">Oscar Piastri (PIA)</option>
+            <option value="Carlos Sainz">Carlos Sainz (SAI)</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label>Favorite Constructor Team</label>
+          <select id="modalTeam" class="glass-input">
+            <option value="Scuderia Ferrari">Scuderia Ferrari</option>
+            <option value="Red Bull Racing">Red Bull Racing</option>
+            <option value="McLaren F1 Team">McLaren F1 Team</option>
+            <option value="Mercedes-AMG PETRONAS">Mercedes-AMG PETRONAS</option>
+            <option value="Aston Martin Aramco">Aston Martin Aramco</option>
+          </select>
+        </div>
+        <button type="submit" class="btn-primary" style="width: 100%; margin-top: 12px;">Save Changes</button>
+      </form>
+    </div>
+  </div>
 
-      const inputUsername = document.getElementById("input-username");
-      const inputDriver = document.getElementById("input-driver");
-      const inputTeam = document.getElementById("input-team");
-
-      // Reusable SVG strings
-      const unlockedIconSVG = `
-        <svg class="achievement-icon" viewBox="0 0 24 24">
-          <circle cx="12" cy="8" r="6"></circle>
-          <path d="M15.477 12.89 17 22l-5-3-5 3 1.523-9.11"></path>
-        </svg>
-      `;
-
-      const lockedIconSVG = `
-        <svg class="achievement-icon" viewBox="0 0 24 24">
-          <rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect>
-          <path d="M7 11V7a5 5 0 0 1 10 0v4"></path>
-        </svg>
-      `;
-
-      // 1. Fetch Profile Information from backend first (Prioritizing Server Data)
-      try {
-        const res = await fetch("/auth/profile", {
-          headers: { "Authorization": `Bearer ${token}` }
-        });
-        if (!res.ok) throw new Error("Failed to load profile");
-        const data = await res.json();
-
-        // Assign server data directly, fallback to defaults if empty
-        const activeUsername = data.username || "Driver";
-        const activeDriver = data.favorite_driver || "VER";
-        const activeTeam = data.favorite_team || "Red Bull Racing";
-
-        document.getElementById("profile-username-heading").innerHTML = `${activeUsername} <span style="color: #ff2a20;">✓</span>`;
-        document.getElementById("profile-email-text").textContent = data.email;
-        
-        inputUsername.value = activeUsername;
-        inputDriver.value = activeDriver;
-        inputTeam.value = activeTeam;
-        document.getElementById("stat-replays").textContent = `${data.replays_watched || 24} Sessions`;
-
-        // Update local cache to match the true server state
-        localStorage.setItem("f1_replay_username", activeUsername);
-        localStorage.setItem("f1_replay_driver", activeDriver);
-        localStorage.setItem("f1_replay_team", activeTeam);
-
-        const avatarBox = document.getElementById("profile-avatar-box");
-        if (data.picture_url) {
-          avatarBox.innerHTML = `<img src="${data.picture_url}" alt="Avatar" />`;
-        } else {
-          avatarBox.textContent = activeUsername.charAt(0).toUpperCase();
-        }
-      } catch (err) {
-        console.error("Profile load error:", err);
-      }
-
-      // 2. Fetch Tier 2 Extended Profile & Achievements Data
-      try {
-        const extRes = await fetch("/profile/extended", {
-          headers: { "Authorization": `Bearer ${token}` }
-        });
-        if (extRes.ok) {
-          const extData = await extRes.json();
-
-          if (document.getElementById("user-level")) {
-            document.getElementById("user-level").textContent = extData.level;
-          }
-          if (document.getElementById("user-xp")) {
-            document.getElementById("user-xp").textContent = `${extData.xp} / ${extData.next_milestone_xp} XP`;
-          }
-          if (document.getElementById("xp-progress-bar")) {
-            const pct = Math.min((extData.xp / extData.next_milestone_xp) * 100, 100);
-            document.getElementById("xp-progress-bar").style.width = `${pct}%`;
-          }
-
-          const achContainer = document.getElementById("achievements-grid");
-          if (achContainer && extData.achievements) {
-            achContainer.innerHTML = extData.achievements.map(a => `
-              <div class="achievement-card ${a.unlocked ? '' : 'locked'}">
-                ${a.unlocked ? unlockedIconSVG : lockedIconSVG}
-                <p class="achievement-title">${a.name}</p>
-              </div>
-            `).join('');
-          }
-        }
-      } catch (err) {
-        console.error("Extended profile load error:", err);
-      }
-
-      // 3. Handle Form Submit & Send Updates to Backend
-      document.getElementById("profile-form").addEventListener("submit", async (e) => {
-        e.preventDefault();
-        const msgEl = document.getElementById("profile-message");
-        msgEl.style.color = "#94a3b8";
-        msgEl.textContent = "Saving changes...";
-
-        const selectedUsername = inputUsername.value.trim();
-        const selectedDriver = inputDriver.value;
-        const selectedTeam = inputTeam.value;
-
-        try {
-          const res = await fetch("/auth/profile", {
-            method: "PUT",
-            headers: {
-              "Content-Type": "application/json",
-              "Authorization": `Bearer ${token}`
-            },
-            body: JSON.stringify({
-              username: selectedUsername,
-              favorite_driver: selectedDriver,
-              favorite_team: selectedTeam
-            })
-          });
-
-          const result = await res.json();
-          if (!res.ok) throw new Error(result.detail || "Update failed");
-
-          // Update local cache after a successful server save
-          localStorage.setItem("f1_replay_username", selectedUsername);
-          localStorage.setItem("f1_replay_driver", selectedDriver);
-          localStorage.setItem("f1_replay_team", selectedTeam);
-
-          msgEl.style.color = "#22c55e";
-          msgEl.textContent = "Profile updated successfully!";
-          document.getElementById("profile-username-heading").innerHTML = `${selectedUsername} <span style="color: #ff2a20;">✓</span>`;
-        } catch (err) {
-          msgEl.style.color = "#ef4444";
-          msgEl.textContent = err.message;
-        }
-      });
-    });
-  </script>
+  <script src="/static/app.js"></script>
+  <script src="/static/profile.js"></script>
 </body>
 </html>
