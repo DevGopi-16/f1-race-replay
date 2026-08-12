@@ -8,14 +8,8 @@ same multiprocessing telemetry extraction, same pickle files in
 computed_data/. It just exposes the result over HTTP instead of handing it
 to an Arcade window.
 
-SETUP: this backend expects your original `src/f1_data.py` (and the
-`src/lib/` package it depends on: settings.py, time.py, tyres.py) to be
-present alongside the new src/track_geometry.py and src/serialize.py files
-in this project's src/ directory. Copy them over before running.
-
 uvicorn main:app --reload --port 8000
 """
-
 
 import json
 import sys
@@ -25,19 +19,18 @@ import requests
 import datetime
 import asyncio
 import os
+import shutil
 from urllib.parse import urlencode
+from typing import Optional
 
-from fastapi import FastAPI, HTTPException, Query, Depends
+from fastapi import FastAPI, HTTPException, Query, Depends, File, UploadFile
 from fastapi.responses import FileResponse, JSONResponse, RedirectResponse, HTMLResponse
 from pydantic import BaseModel
-
-
-from fastapi.responses import RedirectResponse
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.staticfiles import StaticFiles
-from fastapi.responses import FileResponse, JSONResponse, RedirectResponse
-from src.track_geometry import get_track_map_with_telemetry
 
+# --- Internal Source Modules ---
+from src.track_geometry import get_track_map_with_telemetry, build_track_geometry, extract_race_events, point_at_distance, get_track_outline, get_cached_track_outline
 from src.f1_data import (
     enable_cache,
     load_session,
@@ -48,14 +41,9 @@ from src.f1_data import (
     get_session_drivers,
     get_driver_lap_telemetry,
 )
-from src.driver_panel import build_driver_panel
-from typing import Optional
-from src.next_session import get_next_session
-# from src.driver_panel import get_season_stats_cached
 from src.driver_panel import build_driver_panel, get_season_stats_cached, warm_season_stats
 from src.constructors_panel import build_constructors_panel, warm_constructor_history
-
-from src.track_geometry import build_track_geometry, extract_race_events, point_at_distance, get_track_outline, get_cached_track_outline
+from src.next_session import get_next_session
 from src.serialize import serialize_frames, serialize_driver_colors
 
 # --- Auth (Racer PRO signup/login) ---
@@ -73,7 +61,7 @@ app = FastAPI(title="F1 Race Replay API")
 
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],  # tighten this before deploying publicly
+    allow_origins=["*"],  # tighten before deploying publicly
     allow_methods=["*"],
     allow_headers=["*"],
 )
@@ -84,56 +72,44 @@ Base.metadata.create_all(bind=engine)
 app.include_router(auth_router)
 
 
+# --- Directory Config & Static Mounts ---
+FRONTEND_DIR = Path(__file__).resolve().parent.parent / "frontend"
+STATIC_DIR = FRONTEND_DIR / "static"
+UPLOADS_DIR = STATIC_DIR / "uploads"
+UPLOADS_DIR.mkdir(parents=True, exist_ok=True)
+
+# Mount static files directory
+app.mount("/static", StaticFiles(directory=STATIC_DIR), name="static")
+
+
+# --- OAuth Routes ---
+
 @app.get("/auth/discord", summary="Discord OAuth Login")
 def login_discord():
     """Redirect the user to Discord OAuth2."""
-
     client_id = os.getenv("DISCORD_CLIENT_ID")
-
     if not client_id:
-        raise HTTPException(
-            status_code=500,
-            detail="DISCORD_CLIENT_ID is not configured."
-        )
+        raise HTTPException(status_code=500, detail="DISCORD_CLIENT_ID is not configured.")
 
-    redirect_uri = os.getenv(
-        "DISCORD_REDIRECT_URI",
-        "http://127.0.0.1:8000/auth/discord/callback"
-    )
-
+    redirect_uri = os.getenv("DISCORD_REDIRECT_URI", "http://127.0.0.1:8000/auth/discord/callback")
     params = {
         "client_id": client_id,
         "redirect_uri": redirect_uri,
         "response_type": "code",
         "scope": "identify email",
     }
-
-    discord_url = (
-        "https://discord.com/api/oauth2/authorize?"
-        + urlencode(params)
-    )
-
+    discord_url = "https://discord.com/api/oauth2/authorize?" + urlencode(params)
     return RedirectResponse(url=discord_url)
 
 
 @app.get("/auth/x", summary="X (Twitter) OAuth Login")
 def login_x():
     """Redirects the user to X's OAuth2 authorization portal."""
-
     client_id = os.getenv("X_CLIENT_ID", "")
     redirect_uri = os.getenv("X_REDIRECT_URI", "")
 
-    if not client_id:
-        raise HTTPException(
-            status_code=500,
-            detail="X_CLIENT_ID not configured in environment variables."
-        )
-
-    if not redirect_uri:
-        raise HTTPException(
-            status_code=500,
-            detail="X_REDIRECT_URI not configured in environment variables."
-        )
+    if not client_id or not redirect_uri:
+        raise HTTPException(status_code=500, detail="X OAuth environment variables not configured.")
 
     params = {
         "client_id": client_id,
@@ -144,16 +120,11 @@ def login_x():
         "code_challenge": "challenge",
         "code_challenge_method": "plain",
     }
-
-    x_url = (
-        "https://twitter.com/i/oauth2/authorize?"
-        + urlencode(params)
-    )
-
+    x_url = "https://twitter.com/i/oauth2/authorize?" + urlencode(params)
     return RedirectResponse(url=x_url)
 
 
-# --- Driver Profile Endpoints ---
+# --- Driver Profile & Settings Endpoints ---
 
 class UserProfileUpdate(BaseModel):
     username: Optional[str] = None
@@ -167,9 +138,9 @@ def get_user_profile(current_user: User = Depends(get_current_active_user)):
         "username": current_user.username,
         "email": current_user.email,
         "picture_url": getattr(current_user, "picture_url", None),
-        "is_pro": current_user.is_pro,
-        "favorite_driver": getattr(current_user, "favorite_driver", "VER"),
-        "favorite_team": getattr(current_user, "favorite_team", "Red Bull Racing"),
+        "is_pro": getattr(current_user, "is_pro", True),
+        "favorite_driver": getattr(current_user, "favorite_driver", "Lewis Hamilton"),
+        "favorite_team": getattr(current_user, "favorite_team", "Scuderia Ferrari"),
         "replays_watched": getattr(current_user, "replays_watched", 24),
     }
 
@@ -195,7 +166,37 @@ def update_user_profile(payload: UserProfileUpdate, current_user: User = Depends
         db.close()
 
 
-# --- User Settings & Extended Profile (Tier 2 & Tier 3) ---
+@app.post("/auth/profile/avatar", summary="Upload User Avatar")
+async def upload_user_avatar(
+    file: UploadFile = File(...),
+    current_user: User = Depends(get_current_active_user)
+):
+    """Saves uploaded avatar image to static/uploads and updates user record."""
+    extension = file.filename.split(".")[-1].lower() if "." in file.filename else "png"
+    if extension not in ["jpg", "jpeg", "png", "webp", "gif", "avif"]:
+        raise HTTPException(status_code=400, detail="Invalid image file format")
+
+    filename = f"avatar_user_{current_user.id}.{extension}"
+    file_path = UPLOADS_DIR / filename
+
+    with open(file_path, "wb") as buffer:
+        shutil.copyfileobj(file.file, buffer)
+
+    avatar_url = f"/static/uploads/{filename}"
+
+    db = SessionLocal()
+    try:
+        user = db.query(User).filter(User.id == current_user.id).first()
+        if user:
+            user.picture_url = avatar_url
+            db.commit()
+    finally:
+        db.close()
+
+    return {"message": "Avatar uploaded successfully", "picture_url": avatar_url}
+
+
+# --- Settings & Extended Tier Profile ---
 
 class UserSettingsUpdate(BaseModel):
     telemetry_preferences: Optional[str] = None
@@ -204,7 +205,6 @@ class UserSettingsUpdate(BaseModel):
     theme: Optional[str] = None
     accent_color: Optional[str] = None
     notifications_enabled: Optional[bool] = None
-
 
 @app.get("/auth/settings", summary="Get User Settings")
 def get_user_settings(current_user: User = Depends(get_current_active_user)):
@@ -230,7 +230,7 @@ def update_user_settings(payload: UserSettingsUpdate, current_user: User = Depen
         if payload.default_driver_comp is not None:
             user.default_driver_comp = payload.default_driver_comp
         if payload.units is not None:
-            user.units = payload.units  # <-- Ensures user.units is assigned
+            user.units = payload.units
         if payload.theme is not None:
             user.theme = payload.theme
         if payload.accent_color is not None:
@@ -268,25 +268,17 @@ def get_extended_profile(current_user: User = Depends(get_current_active_user)):
         ]
     }
 
-@app.get("/settings", response_class=HTMLResponse, summary="Serve Settings Page")
-def serve_settings_page():
-    settings_file = FRONTEND_DIR / "setting.html"
-    if not settings_file.exists():
-        raise HTTPException(
-            status_code=404, 
-            detail=f"File setting.html not found at {settings_file}"
-        )
-    with open(settings_file, "r", encoding="utf-8") as f:
-        return HTMLResponse(content=f.read())
 
+# --- Cache Warming & Startup Tasks ---
 
-SOURCE_FPS = 25  # must match DT = 1/FPS in f1_data.py
-
+SOURCE_FPS = 25
 DATA_DIR = Path(__file__).parent / "data"
 
-with open(DATA_DIR / "drivers.json", "r", encoding="utf-8") as f:
-    DRIVERS = json.load(f)
-
+if (DATA_DIR / "drivers.json").exists():
+    with open(DATA_DIR / "drivers.json", "r", encoding="utf-8") as f:
+        DRIVERS = json.load(f)
+else:
+    DRIVERS = []
 
 @app.on_event("startup")
 async def warm_driver_stats_cache():
@@ -321,9 +313,7 @@ async def warm_track_outline_cache():
     loop = asyncio.get_event_loop()
     loop.run_in_executor(None, _compute)
 
-
 STATS_REFRESH_CHECK_INTERVAL = 60 * 60
-
 
 async def _periodic_stats_refresh_loop():
     loop = asyncio.get_event_loop()
@@ -335,18 +325,15 @@ async def _periodic_stats_refresh_loop():
             try:
                 print(f"[stats-refresh] Checking driver stats cache for {current_year}...")
                 warm_season_stats(current_year)
-                print("[stats-refresh] Driver stats cache check complete.")
             except Exception as e:
                 print(f"[stats-refresh] Failed to refresh driver stats cache: {e}")
             try:
                 print(f"[stats-refresh] Checking constructor history cache for {current_year}...")
                 warm_constructor_history(current_year)
-                print("[stats-refresh] Constructor history cache check complete.")
             except Exception as e:
                 print(f"[stats-refresh] Failed to refresh constructor history cache: {e}")
 
         loop.run_in_executor(None, _compute)
-
 
 @app.on_event("startup")
 async def warm_constructor_history_cache():
@@ -360,11 +347,9 @@ async def warm_constructor_history_cache():
     loop = asyncio.get_event_loop()
     loop.run_in_executor(None, _compute)
 
-
 @app.on_event("startup")
 async def start_stats_refresh_loop():
     asyncio.create_task(_periodic_stats_refresh_loop())
-
 
 @app.on_event("startup")
 async def start_live_watcher():
@@ -372,10 +357,11 @@ async def start_live_watcher():
     loop.run_in_executor(None, run_live_watcher)
 
 
+# --- Core Telemetry & Session API Endpoints ---
+
 @app.get("/api/live/status")
 def live_status():
     return live_state.snapshot()
-
 
 @app.get("/api/next-session")
 def next_session(year: int = Query(...)):
@@ -384,7 +370,6 @@ def next_session(year: int = Query(...)):
     except Exception as e:
         raise HTTPException(status_code=502, detail=f"Failed to find next session: {e}")
     return result or {}
-
 
 @app.get("/api/schedule/{year}")
 def schedule(year: int):
@@ -397,7 +382,6 @@ def schedule(year: int):
         w["track_outline"] = get_cached_track_outline(year, w["round_number"])
 
     return weekends
-
 
 def _get_example_lap(year: int, round_number: int, race_session):
     try:
@@ -416,20 +400,13 @@ def _get_example_lap(year: int, round_number: int, race_session):
         raise HTTPException(status_code=502, detail="No valid laps found in session")
     return fastest_lap.get_telemetry()
 
-
 @app.get("/api/driver/{code}")
 def get_driver(code: str):
     code = code.lower()
-
     for driver in DRIVERS:
-        if driver["id"] == code:
+        if driver.get("id") == code:
             return driver
-
-    raise HTTPException(
-        status_code=404,
-        detail="Driver not found"
-    )
-
+    raise HTTPException(status_code=404, detail="Driver not found")
 
 @app.get("/api/replay", response_class=JSONResponse, summary="Race Replay")
 def replay(
@@ -454,7 +431,6 @@ def replay(
     try:
         circuit_info = session.get_circuit_info()
         track["corners"] = []
-
         if circuit_info is not None and hasattr(circuit_info, "corners") and circuit_info.corners is not None:
             for _, corner in circuit_info.corners.iterrows():
                 corner_pos = point_at_distance(example_lap, float(corner["Distance"]))
@@ -495,7 +471,6 @@ def replay(
         "frame_rate": fps,
     }
 
-
 @app.get("/api/quali", summary="Qualifying Results")
 def quali(
     year: int = Query(...),
@@ -525,7 +500,6 @@ def quali(
         },
         "results": quali_data["results"],
     }
-
 
 @app.get("/api/strategy", summary="Tyre Strategy")
 def strategy(
@@ -559,7 +533,6 @@ def strategy(
         "drivers": strategy_data["drivers"],
     }
 
-
 @app.get("/api/drivers", summary="Session Driver List")
 def drivers_list(
     year: int = Query(...),
@@ -576,33 +549,20 @@ def drivers_list(
     except Exception as e:
         raise HTTPException(status_code=502, detail=f"Failed to list drivers: {e}")
 
-
 @app.get("/api/drivers/panel", summary="Driver Panel")
-def drivers_panel(
-    year: int = Query(...),
-    round: int | None = Query(None, alias="round"),
-):
+def drivers_panel(year: int = Query(...), round: Optional[int] = Query(None, alias="round")):
     try:
         return build_driver_panel(year, DRIVERS, round_=round)
-    except requests.HTTPError as e:
-        raise HTTPException(status_code=502, detail=f"Jolpica API error: {e}")
     except requests.RequestException as e:
         raise HTTPException(status_code=502, detail=f"Couldn't reach Jolpica API: {e}")
 
-
 @app.get("/api/constructors/panel", summary="Constructors Panel")
-def constructors_panel(
-    year: int = Query(...),
-    round: int | None = Query(None, alias="round"),
-):
+def constructors_panel(year: int = Query(...), round: Optional[int] = Query(None, alias="round")):
     try:
         driver_data = build_driver_panel(year, DRIVERS, round_=round)
         return build_constructors_panel(year, driver_data, round_=round)
-    except requests.HTTPError as e:
-        raise HTTPException(status_code=502, detail=f"Jolpica API error: {e}")
     except requests.RequestException as e:
         raise HTTPException(status_code=502, detail=f"Couldn't reach Jolpica API: {e}")
-
 
 @app.get("/api/telemetry/compare", summary="Driver Telemetry Comparison")
 def telemetry_compare(
@@ -638,7 +598,6 @@ def telemetry_compare(
         "driver_b": data_b,
     }
 
-
 @app.get("/api/race-control", summary="Race Control Messages")
 def race_control(
     year: int = Query(...),
@@ -650,7 +609,6 @@ def race_control(
     except Exception as e:
         raise HTTPException(status_code=502, detail=f"Failed to load race control messages: {e}")
     return {"messages": rows}
-
 
 @app.get("/api/minisectors", summary="Minisectors")
 def minisectors(
@@ -664,25 +622,6 @@ def minisectors(
         raise HTTPException(status_code=502, detail=f"Failed to build minisectors: {e}")
     return data
 
-
-# Serve the frontend & profile page
-FRONTEND_DIR = Path(__file__).resolve().parent.parent / "frontend"
-
-
-@app.get("/")
-def index():
-    return FileResponse(FRONTEND_DIR / "index.html")
-
-
-@app.get("/profile", response_class=HTMLResponse, summary="Serve Driver Profile Page")
-def serve_profile_page():
-    with open(FRONTEND_DIR / "profile.html", "r", encoding="utf-8") as f:
-        return f.read()
-
-
-app.mount("/static", StaticFiles(directory=FRONTEND_DIR / "static"), name="static")
-
-
 @app.get("/api/track-outline/{year}/{round}", summary="Track Outline")
 def track_outline(year: int, round: int):
     try:
@@ -690,14 +629,12 @@ def track_outline(year: int, round: int):
     except Exception as e:
         raise HTTPException(status_code=502, detail=f"Failed to build track outline: {e}")
 
-
 @app.get("/api/track-map/{year}/{gp}/{session_type}/{driver_code}")
 def track_map(year: int, gp: str, session_type: str, driver_code: str):
     try:
         return get_track_map_with_telemetry(year, gp, session_type, driver_code)
     except Exception as e:
         return {"error": str(e)}
-
 
 @app.get("/api/timing-tower", summary="Timing Tower")
 def timing_tower(
@@ -745,3 +682,26 @@ def timing_tower(
         "rows": rows,
         "is_live": False,
     }
+
+
+# --- Frontend HTML Page Handlers ---
+
+@app.get("/", response_class=HTMLResponse, summary="Serve Landing Page")
+def index():
+    return FileResponse(FRONTEND_DIR / "index.html")
+
+@app.get("/profile", response_class=HTMLResponse, summary="Serve Driver Profile Page")
+def serve_profile_page():
+    profile_file = FRONTEND_DIR / "profile.html"
+    if not profile_file.exists():
+        raise HTTPException(status_code=404, detail="profile.html not found")
+    with open(profile_file, "r", encoding="utf-8") as f:
+        return HTMLResponse(content=f.read())
+
+@app.get("/settings", response_class=HTMLResponse, summary="Serve Settings Page")
+def serve_settings_page():
+    settings_file = FRONTEND_DIR / "setting.html"
+    if not settings_file.exists():
+        raise HTTPException(status_code=404, detail="setting.html not found")
+    with open(settings_file, "r", encoding="utf-8") as f:
+        return HTMLResponse(content=f.read())
