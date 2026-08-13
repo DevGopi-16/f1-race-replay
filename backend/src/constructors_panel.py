@@ -201,28 +201,44 @@ def _drivers_for_team(team_name: str, live_drivers: list[dict]) -> list[dict]:
 
 def _team_race_stats(team_drivers: list[dict]) -> dict:
     """
-    Aggregates points-finishes / DNFs / avg start / avg finish / best
-    finish across both of a team's drivers' round-by-round history.
+    Aggregates points-finishes / DNFs / mech failures / retirements /
+    reliability rate / avg start / avg finish / best finish across both
+    of a team's drivers' round-by-round history.
     """
     all_finishes = []
     all_quali = []
     dnf_count = 0
+    mechanical_failures = 0
+    retirements = 0
+    total_races_started = 0
     points_finish_rounds = set()
 
     for d in team_drivers:
         for h in d.get("history", []) or []:
+            total_races_started += 1
             if h.get("position") is not None:
                 all_finishes.append(h["position"])
             else:
                 dnf_count += 1
+                status = str(h.get("status", "")).lower()
+                if any(kw in status for kw in ["mechanical", "engine", "gearbox", "hydraulics", "power unit", "turbo", "exhaust"]):
+                    mechanical_failures += 1
+                else:
+                    retirements += 1
             if h.get("quali_position") is not None:
                 all_quali.append(h["quali_position"])
             if (h.get("points") or 0) > 0:
                 points_finish_rounds.add(h.get("round"))
 
+    finishes_count = total_races_started - dnf_count
+    reliability_rate = round((finishes_count / total_races_started) * 100, 1) if total_races_started > 0 else None
+
     return {
         "points_finishes": len(points_finish_rounds),
         "dnfs": dnf_count,
+        "mechanical_failures": mechanical_failures,
+        "retirements": retirements,
+        "reliability_rate": reliability_rate,
         "avg_start": round(sum(all_quali) / len(all_quali), 1) if all_quali else None,
         "avg_finish": round(sum(all_finishes) / len(all_finishes), 1) if all_finishes else None,
         "best_finish": min(all_finishes) if all_finishes else None,
@@ -250,6 +266,12 @@ def build_constructors_panel(
         fastest_laps = sum(d.get("fastest_laps", 0) or 0 for d in team_drivers)
         team_logo = team_drivers[0].get("teamLogo") if team_drivers else None
 
+        stats = _team_race_stats(team_drivers)
+
+        # Average pit stop / fastest pit stop values if tracked per team/driver
+        avg_pit = team_drivers[0].get("avg_pit_stop") if team_drivers else None
+        fastest_pit = team_drivers[0].get("fastest_pit_stop") if team_drivers else None
+
         merged.append({
             "id": cid,
             "name": name,
@@ -262,8 +284,14 @@ def build_constructors_panel(
             "podiums": podiums,
             "poles": poles,
             "fastest_laps": fastest_laps,
+            "dnfs": stats["dnfs"],
+            "mechanical_failures": stats["mechanical_failures"],
+            "retirements": stats["retirements"],
+            "reliability_rate": stats["reliability_rate"],
+            "avg_pit_stop": avg_pit,
+            "fastest_pit_stop": fastest_pit,
             "history": team_history,
-            "team_stats": _team_race_stats(team_drivers),
+            "team_stats": stats,
             "pace_by_circuit_type": _pace_by_circuit_type(team_history),
             "drivers": [
                 {
