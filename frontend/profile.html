@@ -148,7 +148,7 @@
               <img id="hero-avatar" 
                    src="/static/images/user-profile.png" 
                    alt="GopiPrajapati" 
-                   onerror="this.onerror=null; this.src='data:image/svg+xml;utf8,<svg xmlns=\'http://www.w3.org/2000/svg\' viewBox=\'0 0 24 24\' fill=\'%238a93a6\'><path d=\'M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z\'/></svg>'" />
+                   onerror="this.onerror=null; this.src='data:image/svg+xml;utf8,<svg xmlns=\'http://www.w3.org/2000/svg\' viewBox=\'0 0 24 24\' fill=\'%238a93a6\'><path d=\'M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4 z\'/></svg>'" />
               <button class="avatar-edit-btn">📷</button>
             </div>
             <div class="hero-details">
@@ -222,57 +222,167 @@
           <button class="tab-btn" data-tab="settings-panel">SETTINGS</button>
         </nav>
 
-        <!-- MIDDLE GRID (3 CARDS) -->
-        <div class="grid-3-col">
+        <!-- FAVORITE F1 MAIN CARD CONTAINER (FULL WIDTH) -->
+        <div class="fav-f1-main-card">
           
-          <!-- FAVORITE F1 CARD -->
-          <div class="dashboard-card">
-            <div class="card-header">
-              <h3>FAVORITE F1</h3>
-              <button class="icon-action-btn">✏️</button>
+          <!-- Header Row -->
+          <div class="fav-f1-header">
+            <div class="fav-f1-title-group">
+              <div class="f1-logo-stripes">
+                <span></span><span></span><span></span>
+              </div>
+              <h2>FAVORITE <span>F1</span></h2>
             </div>
-            <div class="fav-f1-content">
-              
-              <!-- DRIVER ITEM CARD -->
-              <div class="fav-item-card">
-                <div>
-                  <span class="fav-label">DRIVER</span>
-                  <strong id="fav-driver-name">Lewis Hamilton</strong>
-                  <span class="fav-sub">#44 • HAM</span>
-                </div>
-                <div class="fav-img-wrapper">
-                  <img src="/static/images/drivers/hamilton.png" alt="Lewis Hamilton" class="fav-img-driver" onerror="this.src='data:image/svg+xml;utf8,<svg xmlns=\'http://www.w3.org/2000/svg\' viewBox=\'0 0 24 24\' fill=\'%23e10600\'><path d=\'M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 3c1.66 0 3 1.34 3 3s-1.34 3-3 3-3-1.34-3-3 1.34-3 3-3zm0 14.2c-2.5 0-4.71-1.28-6-3.22.03-1.99 4-3.08 6-3.08 1.99 0 5.97 1.09 6 3.08-1.29 1.94-3.5 3.22-6 3.22z\'/></svg>'" />
-                </div>
-              </div>
-
-              <!-- CONSTRUCTOR ITEM CARD -->
-              <div class="fav-item-card">
-                <div>
-                  <span class="fav-label">CONSTRUCTOR</span>
-                  <strong id="fav-team-name">Scuderia Ferrari</strong>
-                  <span class="fav-sub">Maranello, Italy</span>
-                </div>
-                <div class="fav-img-wrapper">
-                  <img src="/static/images/teams/ferrari-logo.png" alt="Scuderia Ferrari" class="fav-img-team" onerror="this.style.display='none'" />
-                </div>
-              </div>
-
-              <!-- TRACK ITEM CARD -->
-              <div class="fav-item-card">
-                <div>
-                  <span class="fav-label">TRACK</span>
-                  <strong>Silverstone</strong>
-                  <span class="fav-sub">England</span>
-                </div>
-                <div class="fav-img-wrapper">
-                  <img src="/static/images/tracks/silverstone.png" alt="Silverstone Track" class="fav-img-track" onerror="this.style.display='none'" />
-                </div>
-              </div>
-
-            </div>
+            <p class="fav-f1-subtitle">Your personal F1 favorites in one place</p>
+            <button class="fav-f1-edit-btn" type="button">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path></svg>
+              Edit
+            </button>
           </div>
 
-          <!-- PERFORMANCE OVERVIEW (RADAR CHART) -->
+          <!-- 3 Column Cards Grid -->
+          <div class="fav-f1-grid">
+            
+            <!-- CARD 1: DRIVER -->
+            <div class="fav-f1-subcard driver-card">
+              <div class="subcard-header">
+                <div class="subcard-icon-badge">
+                  <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2a10 10 0 0 0-10 10c0 5.52 4.48 10 10 10s10-4.48 10-10a10 10 0 0 0-10-10zm0 3a7 7 0 0 1 7 7c0 1.93-.78 3.68-2.05 4.95l-1.42-1.42a4.98 4.98 0 0 0 1.47-3.53 5 5 0 0 0-10 0c0 1.38.56 2.63 1.47 3.53l-1.42 1.42A6.96 6.96 0 0 1 5 12a7 7 0 0 1 7-7z"/></svg>
+                </div>
+                <span class="subcard-label">DRIVER</span>
+              </div>
+
+              <!-- Driver Image Area with Watermark -->
+              <div class="driver-img-area">
+                <span class="watermark-number">44</span>
+                <img src="/static/images/drivers/hamilton.png" alt="Lewis Hamilton" class="driver-portrait" onerror="this.src='data:image/svg+xml;utf8,<svg xmlns=\'http://www.w3.org/2000/svg\' viewBox=\'0 0 24 24\' fill=\'%23e10600\'><path d=\'M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 3c1.66 0 3 1.34 3 3s-1.34 3-3 3-3-1.34-3-3 1.34-3 3-3zm0 14.2c-2.5 0-4.71-1.28-6-3.22.03-1.99 4-3.08 6-3.08 1.99 0 5.97 1.09 6 3.08-1.29 1.94-3.5 3.22-6 3.22z\'/></svg>'">
+              </div>
+
+              <!-- Driver Info Overlay -->
+              <div class="driver-details">
+                <h3>Lewis<br>Hamilton <span class="driver-num-tag" id="fav-driver-num">#44</span></h3>
+                <div class="country-code">
+                  <span class="flag-icon">🇬🇧</span>
+                  <span id="fav-driver-code">HAM</span>
+                </div>
+              </div>
+
+              <!-- Badge Pill -->
+              <div class="fav-badge-pill">
+                <span class="trophy-icon">🏆</span>
+                <span>7× World Champion</span>
+              </div>
+
+              <!-- Action Button -->
+              <a href="#" class="fav-action-btn">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path><circle cx="12" cy="7" r="4"></circle></svg>
+                View Driver Profile
+                <span class="btn-arrow">›</span>
+              </a>
+            </div>
+
+            <!-- CARD 2: CONSTRUCTOR -->
+            <div class="fav-f1-subcard constructor-card">
+              <div class="subcard-header">
+                <div class="subcard-icon-badge">
+                  <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2L3 5v6c0 5.55 3.84 10.74 9 12 5.16-1.26 9-6.45 9-12V5l-9-3zm0 4a2.5 2.5 0 0 1 2.5 2.5c0 1.03-.63 1.91-1.5 2.3v3.2a1 1 0 1 1-2 0v-3.2c-.87-.39-1.5-1.27-1.5-2.3A2.5 2.5 0 0 1 12 6z"/></svg>
+                </div>
+                <span class="subcard-label">CONSTRUCTOR</span>
+              </div>
+
+              <!-- Team Logo -->
+              <div class="team-logo-area">
+                <img src="/static/images/teams/ferrari.png" alt="Scuderia Ferrari" class="team-crest" onerror="this.style.display='none'">
+              </div>
+
+              <!-- Team Details -->
+              <div class="team-details">
+                <h3 id="fav-team-name-title">Scuderia<br>Ferrari</h3>
+                <div class="country-code">
+                  <span class="flag-icon">🇮🇹</span>
+                  <span id="fav-team-location">Maranello, Italy</span>
+                </div>
+              </div>
+
+              <!-- Stats Row -->
+              <div class="constructor-stats-bar">
+                <div class="c-stat">
+                  <strong>🏆 16</strong>
+                  <small>WDC</small>
+                </div>
+                <div class="c-stat">
+                  <strong>🏁 242</strong>
+                  <small>WINS</small>
+                </div>
+                <div class="c-stat">
+                  <strong>🏎️ 829</strong>
+                  <small>PODIUMS</small>
+                </div>
+              </div>
+
+              <!-- Action Button -->
+              <a href="#" class="fav-action-btn">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="3" width="20" height="14" rx="2" ry="2"></rect><line x1="8" y1="21" x2="16" y2="21"></line><line x1="12" y1="17" x2="12" y2="21"></line></svg>
+                View Constructor Profile
+                <span class="btn-arrow">›</span>
+              </a>
+            </div>
+
+            <!-- CARD 3: TRACK -->
+            <div class="fav-f1-subcard track-card">
+              <div class="subcard-header">
+                <div class="subcard-icon-badge">
+                  <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-6h2v6zm0-8h-2V7h2v2z"/></svg>
+                </div>
+                <span class="subcard-label">TRACK</span>
+              </div>
+
+              <!-- Neon Track Outline -->
+              <div class="track-outline-area">
+                <img src="/static/images/circuits/detailed/white-outline/silverstone-8.svg" alt="Silverstone Track" class="track-neon-img">
+                <!-- <img src="/static/images/silverstone_neon.png" alt="Silverstone Track" class="track-neon-img" onerror="this.style.display='none'"> -->
+              </div>
+
+              <!-- Track Details -->
+              <div class="track-details">
+                <h3 id="fav-track-name">Silverstone</h3>
+                <div class="country-code">
+                  <span class="flag-icon">🇬🇧</span>
+                  <span id="fav-track-country">England</span>
+                </div>
+              </div>
+
+              <!-- Track Specs Bar -->
+              <div class="track-stats-bar">
+                <div class="t-stat">
+                  <strong>1948</strong>
+                  <small>FIRST RACE</small>
+                </div>
+                <div class="t-stat">
+                  <strong>5.891</strong>
+                  <small>KM LENGTH</small>
+                </div>
+                <div class="t-stat">
+                  <strong>18</strong>
+                  <small>TURNS</small>
+                </div>
+              </div>
+
+              <!-- Action Button -->
+              <a href="#" class="fav-action-btn">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"></circle><polygon points="12 8 8 16 16 16 12 8"></polygon></svg>
+                View Track Details
+                <span class="btn-arrow">›</span>
+              </a>
+            </div>
+
+          </div>
+        </div>
+
+        <!-- SIDE-BY-SIDE GRID: PERFORMANCE OVERVIEW (LEFT) & TOP ACHIEVEMENTS (RIGHT) -->
+        <div class="grid-2-col" style="grid-template-columns: 1fr 1fr; align-items: start;">
+          
+          <!-- PERFORMANCE OVERVIEW (LEFT) -->
           <div class="dashboard-card">
             <div class="card-header">
               <h3>PERFORMANCE OVERVIEW</h3>
@@ -286,7 +396,7 @@
             </div>
           </div>
 
-          <!-- TOP ACHIEVEMENTS -->
+          <!-- TOP ACHIEVEMENTS (RIGHT) -->
           <div class="dashboard-card">
             <div class="card-header">
               <h3>TOP ACHIEVEMENTS</h3>

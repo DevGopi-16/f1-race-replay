@@ -20,10 +20,19 @@
     if (round) params.set("round", round);
 
     try {
+      // const res = await fetch(`/api/constructors/panel?${params}`);
+      // if (!res.ok) throw new Error(`HTTP ${res.status}`);
+      // _constructors = await res.json();
+      // _selectedName = _constructors[0]?.name || null;
       const res = await fetch(`/api/constructors/panel?${params}`);
       if (!res.ok) throw new Error(`HTTP ${res.status}`);
-      _constructors = await res.json();
+      
+      const json = await res.json();
+      // Extract the 'teams' array from your response object
+      _constructors = Array.isArray(json) ? json : (json.teams || json.data || json.results || []);
+      
       _selectedName = _constructors[0]?.name || null;
+   
       render();
       setupResizeHandler();
     } catch (err) {
