@@ -1,53 +1,13 @@
-/* ==========================================
-   F1 REPLAY - PROFILE DASHBOARD CONTROLLER
-   ========================================== */
+/* F1 REPLAY - PROFILE DASHBOARD CONTROLLER */
 
 document.addEventListener("DOMContentLoaded", async () => {
   const token = localStorage.getItem("f1_replay_token");
 
   // 1. Theme Toggle Handler
-  const btnLight = document.getElementById("btn-theme-light");
-  const btnDark = document.getElementById("btn-theme-dark");
+  initThemeToggle();
 
-  if (btnLight && btnDark) {
-    btnLight.addEventListener("click", () => {
-      document.body.classList.remove("dark-theme");
-      document.body.classList.add("light-theme");
-      btnLight.classList.add("active");
-      btnDark.classList.remove("active");
-      localStorage.setItem("f1_theme", "light");
-    });
-
-    btnDark.addEventListener("click", () => {
-      document.body.classList.remove("light-theme");
-      document.body.classList.add("dark-theme");
-      btnDark.classList.add("active");
-      btnLight.classList.remove("active");
-      localStorage.setItem("f1_theme", "dark");
-    });
-
-    // Restore saved theme preference
-    const savedTheme = localStorage.getItem("f1_theme");
-    if (savedTheme === "dark") {
-      btnDark.click();
-    }
-  }
   // 2. Profile Sub-Tab Switching
-  const tabBtns = document.querySelectorAll(".profile-tabs .tab-btn");
-  const tabPanels = document.querySelectorAll(".tab-panel");
-
-  tabBtns.forEach((btn) => {
-    btn.addEventListener("click", () => {
-        tabBtns.forEach((b) => b.classList.remove("active"));
-        btn.classList.add("active");
-
-        tabPanels.forEach((panel) => panel.classList.add("hidden"));
-        const targetId = btn.dataset.tab;
-        const targetPanel = document.getElementById(targetId);
-        if (targetPanel) targetPanel.classList.remove("hidden");
-    });
-  });
-
+  initTabNavigation();
 
   // 3. Render Performance Radar Chart using Chart.js
   initRadarChart();
@@ -55,42 +15,10 @@ document.addEventListener("DOMContentLoaded", async () => {
   // 4. Modal Pop-up Handlers
   initEditProfileModal();
 
-  // 4b. Wire up remaining action buttons
-  const avatarEditBtn = document.querySelector(".avatar-edit-btn");
-  if (avatarEditBtn) {
-    avatarEditBtn.addEventListener("click", () => {
-        const editBtn = document.getElementById("btn-edit-profile");
-        if (editBtn) editBtn.click(); // opens the existing edit modal
-    });
-  }
+  // 5. Action Buttons (Avatar, Share, Banner Upload, Watch Replays)
+  initActionButtons();
 
-  const shareBtn = document.querySelector(".btn-secondary");
-  if (shareBtn) {
-    shareBtn.addEventListener("click", async () => {
-        const url = window.location.href;
-        try {
-        await navigator.clipboard.writeText(url);
-        alert("Profile link copied to clipboard!");
-        } catch {
-        prompt("Copy your profile link:", url);
-        }
-    });
-  }
-
-  const addBannerBtn = document.querySelector(".banner-promo-card .btn-primary-sm");
-  if (addBannerBtn) {
-    addBannerBtn.addEventListener("click", () => {
-        alert("Banner upload coming soon.");
-    });
-  }
-
-  document.querySelectorAll(".btn-watch").forEach((btn) => {
-    btn.addEventListener("click", () => {
-        alert("Replay playback coming soon.");
-    });
-  });
-
-  // 5. Fetch Profile Data from Backend (If Auth Token exists)
+  // 6. Fetch Profile Data from Backend (If Auth Token exists)
   if (token) {
     try {
       const res = await fetch("/auth/profile", {
@@ -110,6 +38,164 @@ document.addEventListener("DOMContentLoaded", async () => {
     }
   }
 });
+
+
+/* Liquid Glass Theme Switch Handler*/
+function initThemeToggle() {
+  const toggleBtn = document.getElementById("themeToggleBtn");
+
+  // Force default to light mode unless explicitly set to dark
+  const savedTheme = localStorage.getItem("f1_theme") || "light";
+  if (savedTheme === "dark") {
+    document.body.classList.remove("light-theme");
+    document.body.classList.add("dark-theme");
+  } else {
+    document.body.classList.remove("dark-theme");
+    document.body.classList.add("light-theme");
+  }
+
+  if (toggleBtn) {
+    toggleBtn.addEventListener("click", () => {
+      const isDark = document.body.classList.contains("dark-theme");
+
+      if (isDark) {
+        document.body.classList.remove("dark-theme");
+        document.body.classList.add("light-theme");
+        localStorage.setItem("f1_theme", "light");
+      } else {
+        document.body.classList.remove("light-theme");
+        document.body.classList.add("dark-theme");
+        localStorage.setItem("f1_theme", "dark");
+      }
+
+      if (typeof updateRadarChartTheme === "function") {
+        updateRadarChartTheme(isDark);
+      }
+    });
+  }
+}
+
+/**
+ * Updates Chart.js radar chart colors when switching themes
+ */
+function updateRadarChartTheme(isDark) {
+  const chartInstance = Chart.getChart("performanceRadarChart");
+  if (chartInstance) {
+    const gridColor = isDark ? "rgba(255, 255, 255, 0.15)" : "rgba(203, 213, 225, 0.4)";
+    const labelColor = isDark ? "#94a3b8" : "#64748b";
+
+    chartInstance.options.scales.r.grid.color = gridColor;
+    chartInstance.options.scales.r.angleLines.color = gridColor;
+    chartInstance.options.scales.r.pointLabels.color = labelColor;
+    chartInstance.update();
+  }
+}
+
+/**
+ * Sub-Tab Navigation Switcher
+ */
+function initTabNavigation() {
+  const tabBtns = document.querySelectorAll(".profile-tabs .tab-btn");
+  const tabPanels = document.querySelectorAll(".tab-panel");
+  const dashboardBody = document.querySelector(".dashboard-body");
+
+  tabBtns.forEach((btn) => {
+    btn.addEventListener("click", () => {
+      tabBtns.forEach((b) => b.classList.remove("active"));
+      btn.classList.add("active");
+
+      const targetId = btn.dataset.tab;
+
+      // Handle overview tab separately to show main dashboard body
+      if (targetId === "overview-panel") {
+        if (dashboardBody) dashboardBody.style.display = "flex";
+        tabPanels.forEach((panel) => panel.classList.add("hidden"));
+        return;
+      }
+
+      // Hide main overview grid and show specific target tab panel
+      if (dashboardBody) dashboardBody.style.display = "none";
+      tabPanels.forEach((panel) => panel.classList.add("hidden"));
+
+      const targetPanel = document.getElementById(targetId);
+      if (targetPanel) targetPanel.classList.remove("hidden");
+    });
+  });
+}
+
+/**
+ * Action Buttons Initialization (Edit Avatar, Share, Add Banner, Replay buttons)
+ */
+function initActionButtons() {
+  // Avatar Edit Trigger
+  const avatarEditBtn = document.querySelector(".avatar-edit-btn");
+  if (avatarEditBtn) {
+    avatarEditBtn.addEventListener("click", () => {
+      const editBtn = document.getElementById("btn-edit-profile");
+      if (editBtn) editBtn.click();
+    });
+  }
+
+  // Share Profile Link
+  const shareBtn = document.querySelector(".btn-secondary");
+  if (shareBtn) {
+    shareBtn.addEventListener("click", async () => {
+      const url = window.location.href;
+      try {
+        await navigator.clipboard.writeText(url);
+        alert("Profile link copied to clipboard!");
+      } catch {
+        prompt("Copy your profile link:", url);
+      }
+    });
+  }
+
+  // Add Banner Handler (Completes profile to 100%)
+  const addBannerBtn = document.querySelector(".banner-promo-card .btn-primary-sm");
+  if (addBannerBtn) {
+    addBannerBtn.addEventListener("click", () => {
+      completeProfileTo100();
+    });
+  }
+
+  // Replay Watch Buttons
+  document.querySelectorAll(".btn-watch").forEach((btn) => {
+    btn.addEventListener("click", (e) => {
+      const raceName = e.target.closest(".replay-item")?.querySelector("strong")?.textContent || "Race Replay";
+      alert(`Launching session replay: ${raceName}`);
+    });
+  });
+}
+
+/**
+ * Updates UI completion ring and checklist to 100%
+ */
+function completeProfileTo100() {
+  const circle = document.querySelector(".circle");
+  const pctText = document.querySelector(".percentage");
+  const promoCard = document.querySelector(".banner-promo-card");
+
+  // Animate circular chart to 100%
+  if (circle) circle.setAttribute("stroke-dasharray", "100, 100");
+  if (pctText) pctText.textContent = "100%";
+
+  // Add a visual banner gradient to top hero
+  const heroCard = document.querySelector(".hero-banner-card");
+  if (heroCard) {
+    heroCard.style.background = "linear-gradient(135deg, #0f172a 0%, #1e293b 50%, #e10600 100%)";
+  }
+
+  // Hide the banner completion callout
+  if (promoCard) {
+    promoCard.style.transition = "opacity 0.3s ease";
+    promoCard.style.opacity = "0";
+    setTimeout(() => {
+      promoCard.style.display = "none";
+    }, 300);
+  }
+
+  alert("🎉 Profile Banner Added! Your Profile is now 100% complete.");
+}
 
 /**
  * Updates DOM text and image elements with profile values
@@ -144,7 +230,6 @@ function initEditProfileModal() {
 
   if (editBtn && modal) {
     editBtn.addEventListener("click", () => {
-      // Pre-fill modal input with current displayed username
       const heroName = document.getElementById("hero-username");
       const modalUsername = document.getElementById("modalUsername");
       if (heroName && modalUsername) {
@@ -158,7 +243,6 @@ function initEditProfileModal() {
     closeBtn.addEventListener("click", () => modal.classList.add("hidden"));
   }
 
-  // Close modal when clicking on dark overlay backdrop
   if (modal) {
     modal.addEventListener("click", (e) => {
       if (e.target === modal) modal.classList.add("hidden");
@@ -179,19 +263,18 @@ function initEditProfileModal() {
             method: "PUT",
             headers: {
               "Content-Type": "application/json",
-              Authorization: `Bearer ${token}`
+              Authorization: `Bearer ${token}`,
             },
             body: JSON.stringify({
               username: newUsername,
               favorite_driver: newDriver,
-              favorite_team: newTeam
-            })
+              favorite_team: newTeam,
+            }),
           });
 
           if (!res.ok) throw new Error("Failed to save changes on server");
         }
 
-        // Locally update UI elements
         updateProfileUI(newUsername, newDriver, newTeam);
         if (modal) modal.classList.add("hidden");
       } catch (err) {
@@ -222,7 +305,7 @@ function initRadarChart() {
           label: "You",
           data: [82, 76, 74, 91, 68],
           fill: true,
-          backgroundColor: "rgba(225, 6, 0, 0.2)",
+          backgroundColor: "rgba(225, 6, 0, 0.25)",
           borderColor: "#E10600",
           borderWidth: 2,
           pointBackgroundColor: "#E10600",
@@ -268,5 +351,3 @@ function initRadarChart() {
     },
   });
 }
-
-

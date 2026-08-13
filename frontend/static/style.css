@@ -32,14 +32,15 @@
 }
 
 html,
-body{
-    width:100%;
-    height:100%;
-    overflow:hidden;
-    background:var(--bg);
-    color:var(--text);
-    font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif;
-    position:relative;
+body {
+    width: 100%;
+    min-height: 100vh;
+    overflow-x: hidden;
+    overflow-y: auto;
+    background: var(--bg);
+    color: var(--text);
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+    position: relative;
 }
 
 body::before,
@@ -1499,9 +1500,7 @@ body::after{
     flex-direction: column;
 }
 
-/* ==========================================================================
-   PROFILE DASHBOARD FULL-WIDTH OVERRIDES & FIXES
-   ========================================================================== */
+/* PROFILE DASHBOARD FULL-WIDTH OVERRIDES & FIXES */
 
 /* Light Theme Variable & Background Reset */
 body.light-theme {
@@ -1541,12 +1540,10 @@ html, body {
     position: relative !important;
 }
 
-/* Completely Hide Left Sidebar Navigation */
-.sidebar,
-.home-sidebar {
+/* Only hide sidebars on pages that explicitly use .app-layout / profile page */
+.app-layout .sidebar {
     display: none !important;
 }
-
 /* Remove Sidebar Margin & Stretch Main Content to 100% Full Width */
 .main-content {
     margin-left: 0 !important;
@@ -1558,7 +1555,7 @@ html, body {
     min-width: 0;
 }
 
-/* Topbar Sticky Header Adjustment */
+/* TOPBAR HEADER CONTAINER FIX */
 .topbar {
     height: 70px;
     background-color: var(--bg-card, #ffffff);
@@ -1570,6 +1567,67 @@ html, body {
     position: sticky;
     top: 0;
     z-index: 90;
+    width: 100%;
+}
+
+/* TOP RIGHT ACTIONS & USER CAPSULE ALIGNMENT */
+.topbar-actions {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    margin-left: auto;
+}
+
+.topbar-icon-btn {
+    background: var(--bg-card-sub, #f8fafc);
+    border: 1px solid var(--border-color, #e2e8f0);
+    border-radius: 50%;
+    width: 36px;
+    height: 36px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    position: relative;
+}
+
+.topbar-user {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 6px 12px;
+    background: var(--bg-card-sub, #f8fafc);
+    border: 1px solid var(--border-color, #e2e8f0);
+    border-radius: 30px;
+    cursor: pointer;
+    flex-shrink: 0;
+}
+
+.topbar-user img {
+    width: 36px;
+    height: 36px;
+    border-radius: 50%;
+    object-fit: cover;
+    border: 2px solid #e10600;
+}
+
+.topbar-user-info {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    line-height: 1.2;
+}
+
+.user-name {
+    font-size: 12px;
+    font-weight: 800;
+    color: var(--text-main, #0f172a);
+}
+
+.user-badge {
+    font-size: 9px;
+    font-weight: 700;
+    color: #e10600;
 }
 
 /* Dashboard Body Max Width Container */
@@ -1583,9 +1641,7 @@ html, body {
     width: 100%;
 }
 
-/* ==========================================
-   FAVORITE F1 CARD & HORIZONTAL ROW FIX
-   ========================================== */
+/* FAVORITE F1 CARD & HORIZONTAL ROW FIX */
 
 .fav-f1-content {
   display: flex !important;
