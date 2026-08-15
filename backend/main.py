@@ -853,8 +853,8 @@ def serve_profile_page():
 
 @app.get("/settings", response_class=HTMLResponse, summary="Serve Settings Page")
 def serve_settings_page():
-    settings_file = FRONTEND_DIR / "setting.html"
+    settings_file = FRONTEND_DIR / "settings.html"
     if not settings_file.exists():
-        raise HTTPException(status_code=404, detail="setting.html not found")
+        raise HTTPException(status_code=404, detail="settings.html not found")
     with open(settings_file, "r", encoding="utf-8") as f:
         return HTMLResponse(content=f.read())
