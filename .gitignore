@@ -83,4 +83,4 @@ build/
 # Temporary / Backup Files
 *.save
 *.bak
-*.tmp
+*.tmp.fastf1-cache/
