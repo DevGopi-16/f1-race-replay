@@ -259,6 +259,52 @@ async function updateHomepageLiveWeekend() {
   }
 }
 
+async function loadHomeOverview() {
+  try {
+    const res = await fetch(`/api/home-overview`);
+    if (!res.ok) return;
+    const data = await res.json();
+    const m = data.meta;
+    const t = data.track_overview;
+
+    const heroRaceName = document.getElementById("heroRaceName");
+    const heroTrackName = document.getElementById("heroTrackName");
+    const trackMiniName = document.getElementById("trackMiniName");
+    const trackMiniLength = document.getElementById("trackMiniLength");
+    const trackTurns = document.getElementById("trackTurns");
+    const trackStraight = document.getElementById("trackStraight");
+    const trackLapRecord = document.getElementById("trackLapRecord");
+    const fastestTime = document.getElementById("fastestTime");
+    const fastestDriverName = document.getElementById("fastestDriverName");
+    const flTyreBadge = document.getElementById("flTyreBadge");
+
+    const fl = data.fastest_lap || {};
+    if (fastestTime && fl.time) fastestTime.textContent = fl.time;
+    if (fastestDriverName && fl.driver) fastestDriverName.textContent = fl.driver;
+    if (flTyreBadge && fl.compound) {
+      flTyreBadge.textContent = fl.compound; // e.g. "SOFT" — no compound-tier (C1-C5) data from FastF1
+      flTyreBadge.className = `fl-tyre-badge ${fl.compound.toLowerCase()}`;
+    }
+    if (heroRaceName) heroRaceName.textContent = `${m.year} ${m.event_name}`;
+    if (heroTrackName) heroTrackName.textContent = `📍 ${m.circuit_name}`;
+    if (trackMiniName) trackMiniName.textContent = m.circuit_name;
+    if (trackMiniLength && t.length_km != null) trackMiniLength.textContent = `${t.length_km} km`;
+
+
+    const trackMiniShape = document.getElementById("trackMiniShape");
+    if (trackMiniShape && m.circuit_svg) {
+      trackMiniShape.innerHTML = `<div class="track-mini-shape-masked" style="-webkit-mask-image:url('${m.circuit_svg}'); mask-image:url('${m.circuit_svg}');"></div>`;
+    }
+    
+    if (trackTurns && t.turns != null) trackTurns.textContent = t.turns;
+    if (trackStraight && t.longest_straight_km != null) trackStraight.textContent = `${t.longest_straight_km} km`;
+    if (trackLapRecord && t.lap_record) trackLapRecord.textContent = t.lap_record;
+  } catch (e) {
+    console.warn("Could not load home overview:", e);
+  }
+}
+
+
 async function fetchLiveWeather(lat, lon) {
   try {
     const res = await fetch(
@@ -317,6 +363,7 @@ function initHomePage() {
   setInterval(updateClocks, 1000);
 
   updateHomepageLiveWeekend();
+  loadHomeOverview();
 }
 
 initHomePage();

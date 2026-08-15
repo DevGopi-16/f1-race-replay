@@ -607,6 +607,20 @@
   filter: drop-shadow(0 0 6px rgba(255, 176, 32, 0.4));
 }
 
+.track-mini-shape-masked {
+  width: 100%;
+  height: 65px;
+  margin: 6px 0;
+  background-color: var(--hp-amber);
+  -webkit-mask-repeat: no-repeat;
+  mask-repeat: no-repeat;
+  -webkit-mask-position: center;
+  mask-position: center;
+  -webkit-mask-size: contain;
+  mask-size: contain;
+  filter: drop-shadow(0 0 6px rgba(255, 176, 32, 0.4));
+}
+
 .hp-stat-trio {
   display: grid;
   grid-template-columns: repeat(3, 1fr);
@@ -1168,4 +1182,26 @@
 @media (prefers-reduced-motion: reduce) {
   .hp-live-dot { animation: none; }
   .session-card, .hp-panel, .hero-btn-primary { transition: none; }
+}
+
+
+.fl-tyre-badge.medium {
+  background: #ffd400;
+  color: #000;
+  box-shadow: 0 0 10px rgba(255, 212, 0, 0.4);
+}
+.fl-tyre-badge.hard {
+  background: #e8e8e8;
+  color: #000;
+  box-shadow: 0 0 10px rgba(232, 232, 232, 0.4);
+}
+.fl-tyre-badge.intermediate {
+  background: #2ecc40;
+  color: #fff;
+  box-shadow: 0 0 10px rgba(46, 204, 64, 0.4);
+}
+.fl-tyre-badge.wet {
+  background: #00aeef;
+  color: #fff;
+  box-shadow: 0 0 10px rgba(0, 174, 239, 0.4);
 }

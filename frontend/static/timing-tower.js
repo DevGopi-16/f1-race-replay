@@ -842,11 +842,45 @@ const SESSION_TYPE_LABEL = {
   Q: "Qualifying", SQ: "Sprint Qualifying", S: "Sprint", R: "Race",
 };
 
+// function renderSessionHeader(meta, sessionType, isLive, year) {
+//   const container = document.querySelector("#telemetryPanel .telemetry-content-wide");
+//   if (!container) return;
+
+//   const existing = document.getElementById("telSessionHeader");
+//   if (existing) existing.remove();
+
+//   const sessionLabel = SESSION_TYPE_LABEL[sessionType] || sessionType;
+//   const statusHtml = isLive
+//     ? `<span class="tsh-status tsh-live"><span class="tsh-live-dot"></span> LIVE</span>`
+//     : `<span class="tsh-status tsh-replay">REPLAY</span>`;
+//   const flag = COUNTRY_FLAG[meta.country] || "";
+
+//   const header = document.createElement("div");
+//   header.id = "telSessionHeader";
+//   header.className = "tsh-bar";
+//   header.innerHTML = `
+//     <div class="tsh-titles">
+//       ${flag ? `<span class="tsh-flag">${flag}</span>` : ""}
+//       <div class="tsh-title-col">
+//         <div class="tsh-event">${meta.event_name || ""}: ${sessionLabel}</div>
+//         ${statusHtml}
+//       </div>
+//     </div>
+//   `;
+
+//   container.insertBefore(header, container.firstChild);
+
+//   if (year) {
+//     _renderNextEventBadge(year);
+//   }
+// }
+
 function renderSessionHeader(meta, sessionType, isLive, year) {
   const container = document.querySelector("#telemetryPanel .telemetry-content-wide");
   if (!container) return;
 
   const existing = document.getElementById("telSessionHeader");
+  const alreadyHasNextBadge = existing && existing.querySelector(".tsh-next"); // <-- add
   if (existing) existing.remove();
 
   const sessionLabel = SESSION_TYPE_LABEL[sessionType] || sessionType;
@@ -870,7 +904,7 @@ function renderSessionHeader(meta, sessionType, isLive, year) {
 
   container.insertBefore(header, container.firstChild);
 
-  if (year) {
+  if (year && !alreadyHasNextBadge) {   // <-- only fetch once
     _renderNextEventBadge(year);
   }
 }
@@ -939,7 +973,7 @@ async function _renderNextEventBadge(year) {
   try {
     const res = await fetch(`/api/next-session?year=${year}`);
     const data = await res.json();
-    console.log("Next-session raw response:", data);
+    // console.log("Next-session raw response:", data);
 
     const dateRaw = pick(data, ["datetime_utc", "date_utc", "utc_date", "start_utc", "start_time", "DateUtc", "Date", "date"]);
     const eventName = pick(data, ["event_name", "EventName"]) || pick(data, ["country", "Country"]) || "";

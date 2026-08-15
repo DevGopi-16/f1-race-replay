@@ -30,7 +30,7 @@ from fastapi.middleware.cors import CORSMiddleware
 from fastapi.staticfiles import StaticFiles
 
 # --- Internal Source Modules ---
-from src.track_geometry import get_track_map_with_telemetry, build_track_geometry, extract_race_events, point_at_distance, get_track_outline, get_cached_track_outline
+from src.track_geometry import get_track_map_with_telemetry, build_track_geometry, extract_race_events, point_at_distance, get_track_outline, get_cached_track_outline, build_track_overview
 from src.f1_data import (
     enable_cache,
     load_session,
@@ -55,6 +55,51 @@ from src.race_control import build_race_control_feed
 from src.minisectors import build_minisectors
 from src.live.session_watcher import run_forever as run_live_watcher
 from src.live.state import live_state
+
+# --- Circuit SVG lookup (Track Overview card shape) ---
+# Maps FastF1's event Location (a city name) to the circuit slug used in
+# frontend/static/images/circuits/minimal/{color}/{slug}.svg — picking the
+# latest layout revision available for tracks currently on the calendar.
+CIRCUIT_SVG_SLUGS = {
+    "Sakhir": "bahrain-3",
+    "Jeddah": "jeddah-1",
+    "Melbourne": "melbourne-2",
+    "Suzuka": "suzuka-2",
+    "Shanghai": "shanghai-1",
+    "Miami": "miami-1",
+    "Imola": "imola-3",
+    "Monaco": "monaco-6",
+    "Barcelona": "catalunya-6",
+    "Montreal": "montreal-6",
+    "Montréal": "montreal-6",
+    "Spielberg": "spielberg-3",
+    "Silverstone": "silverstone-8",
+    "Budapest": "hungaroring-3",
+    "Spa-Francorchamps": "spa-francorchamps-4",
+    "Zandvoort": "zandvoort-5",
+    "Monza": "monza-7",
+    "Baku": "baku-1",
+    "Singapore": "marina-bay-4",
+    "Austin": "austin-1",
+    "Mexico City": "mexico-city-3",
+    "São Paulo": "interlagos-2",
+    "Sao Paulo": "interlagos-2",
+    "Las Vegas": "las-vegas-1",
+    "Lusail": "lusail-1",
+    "Abu Dhabi": "yas-marina-2",
+}
+
+
+def get_circuit_svg_path(location: str, variant: str = "white-outline", style: str = "minimal") -> Optional[str]:
+    """Returns the frontend static path for a circuit's SVG shape, or None
+    if we don't have a mapping for this location."""
+    slug = CIRCUIT_SVG_SLUGS.get(location)
+    if not slug:
+        return None
+    return f"/static/images/circuits/{style}/{variant}/{slug}.svg"
+
+
+app = FastAPI(title="F1 Race Replay API")
 
 
 app = FastAPI(title="F1 Race Replay API")
@@ -382,6 +427,114 @@ def schedule(year: int):
         w["track_outline"] = get_cached_track_outline(year, w["round_number"])
 
     return weekends
+
+import datetime as _dt
+
+_HOME_OVERVIEW_CACHE: dict = {}
+
+
+def _find_latest_completed_weekend():
+    """Most recent race weekend whose date has already passed. Checks the
+    current year first, falls back to the previous year's last round if
+    the current season hasn't had a race yet (e.g. early January)."""
+    today_str = str(_dt.date.today())
+    year = _dt.date.today().year
+
+    try:
+        weekends = get_race_weekends_by_year(year)
+    except Exception:
+        weekends = []
+
+    past = [w for w in weekends if w["date"] <= today_str]
+
+    if not past:
+        year -= 1
+        try:
+            weekends = get_race_weekends_by_year(year)
+        except Exception:
+            weekends = []
+        past = weekends
+
+    if not past:
+        return None
+
+    past.sort(key=lambda w: w["date"])
+    return year, past[-1]
+
+@app.get("/api/home-overview", summary="Live homepage hero + track overview data")
+def home_overview():
+    found = _find_latest_completed_weekend()
+    if not found:
+        raise HTTPException(status_code=404, detail="No completed race weekends found")
+
+    year, weekend = found
+    round_number = weekend["round_number"]
+    cache_key = (year, round_number)
+
+    if cache_key in _HOME_OVERVIEW_CACHE:
+        return _HOME_OVERVIEW_CACHE[cache_key]
+
+    try:
+        session = load_session(year, round_number, "R", telemetry=True)
+    except Exception as e:
+        raise HTTPException(status_code=502, detail=f"Failed to load latest race session: {e}")
+
+    fastest_lap = session.laps.pick_fastest()
+    fastest_driver = None
+    fastest_time_str = None
+    fastest_compound = None
+
+    if fastest_lap is not None:
+        try:
+            driver_row = session.get_driver(fastest_lap["DriverNumber"])
+            fastest_driver = driver_row.get("FullName") or driver_row.get("Abbreviation")
+        except Exception:
+            fastest_driver = fastest_lap.get("Driver")
+
+        lap_time = fastest_lap.get("LapTime")
+        if lap_time is not None and not (hasattr(lap_time, "isnull") and lap_time.isnull()):
+            total_seconds = lap_time.total_seconds()
+            minutes = int(total_seconds // 60)
+            seconds = total_seconds % 60
+            fastest_time_str = f"{minutes}:{seconds:06.3f}"
+
+        compound_val = fastest_lap.get("Compound")
+        if compound_val is not None and str(compound_val) != "nan":
+            fastest_compound = str(compound_val).upper()
+
+    track_overview = {"length_km": None, "turns": None, "longest_straight_km": None, "lap_record": fastest_time_str}
+    try:
+        if fastest_lap is not None:
+            example_lap = fastest_lap.get_telemetry()
+            circuit_info = session.get_circuit_info()
+            track_overview = build_track_overview(example_lap, circuit_info, fastest_time_str)
+    except Exception as e:
+        print(f"[home-overview] track overview computation failed: {e}")
+
+    circuit_svg = get_circuit_svg_path(session.event.get("Location", ""))
+
+    event_date = session.event.get("EventDate")
+    result = {
+        "meta": {
+            "event_name": session.event.get("EventName", ""),
+            "circuit_name": session.event.get("Location", ""),
+            "country": session.event.get("Country", ""),
+            "year": year,
+            "round": round_number,
+            "date": event_date.strftime("%B %d, %Y") if event_date else "",
+            "circuit_svg": circuit_svg,
+        },
+        "fastest_lap": {
+            "time": fastest_time_str,
+            "driver": fastest_driver,
+            "compound": fastest_compound,
+        },
+        "track_overview": track_overview,
+    }
+
+    _HOME_OVERVIEW_CACHE.clear()
+    _HOME_OVERVIEW_CACHE[cache_key] = result
+    return result
 
 def _get_example_lap(year: int, round_number: int, race_session):
     try:
