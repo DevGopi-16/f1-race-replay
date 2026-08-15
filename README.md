@@ -165,7 +165,6 @@ F1-RACE-REPLAY-WEB/
 │   │   ├── auth/
 │   │   ├── lib/
 │   │   ├── live/
-│   │   │
 │   │   ├── driver_panel.py
 │   │   ├── constructors_panel.py
 │   │   ├── f1_data.py
@@ -187,6 +186,18 @@ F1-RACE-REPLAY-WEB/
 │   │
 │   └── static/
 │       ├── images/
+│       │   ├── banners/
+│       │   ├── car/
+│       │   ├── circuits/
+│       │   │   ├── detailed/
+│       │   │   └── minimal/
+│       │   ├── controls/
+│       │   ├── drivers/
+│       │   ├── newbanners/
+│       │   ├── teams/
+│       │   ├── tyres/
+│       │   └── weather/
+│       │
 │       ├── app.js
 │       ├── auth.css
 │       ├── auth.js
