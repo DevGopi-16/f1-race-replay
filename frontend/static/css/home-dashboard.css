@@ -1,8 +1,8 @@
-/* ==========================================================================
+/*
    HOME DASHBOARD — F1 RACE REPLAY
    Scoped entirely under .home-page so it never collides with
    replay.css / session-panel.css / track-map.css / driver-panel.css
-   ========================================================================== */
+ */
 
 .home-page {
   --hp-bg: #080b11;

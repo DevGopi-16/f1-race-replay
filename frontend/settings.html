@@ -1,0 +1,145 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+  <title>Terminal Settings | F1+ Replay</title>
+
+  <link rel="stylesheet" href="/static/css/auth.css">
+  <link rel="stylesheet" href="/static/css/profile.css">
+  <link rel="stylesheet" href="/static/css/settings.css">
+
+  <script src="/static/js/settings_applier.js"></script>
+  <script src="/static/js/settings.js" defer></script>
+</head>
+
+<body>
+
+  <div class="bg-glow-orb orb-1"></div>
+  <div class="bg-glow-orb orb-2"></div>
+
+  <main class="settings-page">
+
+    <section class="profile-container glass-card settings-card">
+
+      <header class="profile-header settings-header">
+
+        <div class="profile-title">
+          <h1 class="settings-title">⚙️ TERMINAL SETTINGS</h1>
+
+          <p class="settings-subtitle">
+            Configure telemetry preferences, default metrics, and units.
+          </p>
+        </div>
+
+        <a
+          href="/profile"
+          class="glass-btn settings-back-btn"
+        >
+          ← Back to Profile
+        </a>
+
+      </header>
+
+      <form id="settings-form">
+
+        <div class="glass-subcard settings-subcard">
+
+          <div class="form-group settings-group">
+
+            <label
+              for="set-metrics"
+              class="settings-label"
+            >
+              DEFAULT TELEMETRY METRICS
+            </label>
+
+            <select
+              id="set-metrics"
+              class="glass-input settings-input"
+            >
+              <option value="speed,throttle,brake">
+                Speed, Throttle, Brake
+              </option>
+
+              <option value="speed,gear,drs">
+                Speed, Gear, DRS
+              </option>
+
+              <option value="throttle,brake,rpm">
+                Throttle, Brake, RPM
+              </option>
+            </select>
+
+          </div>
+
+          <div class="form-group settings-group">
+
+            <label
+              for="set-driver"
+              class="settings-label"
+            >
+              DEFAULT DRIVER COMPARISON
+            </label>
+
+            <input
+              type="text"
+              id="set-driver"
+              class="glass-input settings-input"
+              value="VER"
+              autocomplete="off"
+              spellcheck="false"
+            />
+
+          </div>
+
+          <div class="form-group settings-group">
+
+            <label
+              for="set-units"
+              class="settings-label"
+            >
+              UNITS
+            </label>
+
+            <select
+              id="set-units"
+              class="glass-input settings-input"
+            >
+              <option value="metric">
+                Metric (km/h, °C)
+              </option>
+
+              <option value="imperial">
+                Imperial (mph, °F)
+              </option>
+            </select>
+
+          </div>
+
+        </div>
+
+        <div
+          id="settings-msg"
+          class="settings-message"
+          role="status"
+          aria-live="polite"
+        ></div>
+
+        <button
+          type="submit"
+          id="settings-submit-btn"
+          class="glass-btn settings-submit-btn"
+        >
+          SAVE PREFERENCES
+        </button>
+
+      </form>
+
+    </section>
+
+  </main>
+
+</body>
+</html>

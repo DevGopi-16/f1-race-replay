@@ -1,0 +1,140 @@
+/* =========================================================
+   SETTINGS PAGE
+   ========================================================= */
+
+.settings-page {
+  min-height: 100vh;
+  padding: 40px 20px;
+  display: flex;
+  justify-content: center;
+  align-items: flex-start;
+  box-sizing: border-box;
+}
+
+.settings-card {
+  width: 100%;
+  max-width: 650px;
+  margin: 0 auto;
+  padding: 30px;
+  box-sizing: border-box;
+}
+
+.settings-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 24px;
+  margin-bottom: 24px;
+}
+
+.settings-title {
+  margin: 0;
+  font-size: 22px;
+  color: #fff;
+}
+
+.settings-subtitle {
+  margin: 4px 0 0;
+  font-size: 12px;
+  color: #94a3b8;
+}
+
+.settings-back-btn {
+  width: auto;
+  padding: 8px 16px;
+  font-size: 12px;
+  text-decoration: none;
+  white-space: nowrap;
+}
+
+.settings-subcard {
+  margin-bottom: 20px;
+  background: rgba(255, 255, 255, 0.03);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 12px;
+  padding: 16px;
+}
+
+.settings-group {
+  margin-bottom: 14px;
+}
+
+.settings-group:last-child {
+  margin-bottom: 0;
+}
+
+.settings-label {
+  display: block;
+  margin-bottom: 6px;
+  font-size: 11px;
+  color: #8a9bb8;
+}
+
+.settings-input {
+  width: 100%;
+  padding: 10px;
+  box-sizing: border-box;
+  background: rgba(0, 0, 0, 0.2);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  color: #fff;
+  border-radius: 6px;
+}
+
+.settings-input:focus {
+  outline: none;
+  border-color: rgba(225, 6, 0, 0.7);
+  box-shadow: 0 0 0 2px rgba(225, 6, 0, 0.12);
+}
+
+.settings-input option {
+  background: #111827;
+  color: #fff;
+}
+
+.settings-message {
+  margin-bottom: 15px;
+  min-height: 18px;
+  font-size: 13px;
+  text-align: center;
+}
+
+.settings-submit-btn {
+  width: 100%;
+  padding: 12px;
+  background: #e10600;
+  color: #fff;
+  border: none;
+  border-radius: 6px;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.settings-submit-btn:hover {
+  filter: brightness(1.08);
+}
+
+.settings-submit-btn:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+@media (max-width: 600px) {
+  .settings-page {
+    padding: 20px 12px;
+  }
+
+  .settings-card {
+    padding: 20px;
+  }
+
+  .settings-header {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .settings-back-btn {
+    width: 100%;
+    text-align: center;
+    box-sizing: border-box;
+  }
+}
