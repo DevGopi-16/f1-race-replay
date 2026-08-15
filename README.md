@@ -49,20 +49,26 @@ It's also a real engineering exercise in its own right: large time-series datase
 <tr>
 <td width="50%" valign="top">
 
+### 🏠 Live Homepage Dashboard
+- Hero banner and Track Overview card auto-update to the **latest completed race weekend** — no hardcoded event
+- Fastest Lap card shows the real driver, lap time, and tyre compound for that session
+- Real circuit outline (not a placeholder shape) rendered per-track via CSS mask, with entrance and glow-pulse animation
+- Live weather pulled for the current/next race location
+
 ### 🏁 Race Replay
 - Accurate track map with animated car positions
 - Sector visualization (S1 / S2 / S3) & toggleable DRS zones
 - Seekable timeline with incident markers (🟡 Yellow / 🔴 Red / 🚨 SC / VSC)
 - Variable playback speed (0.5x – 4x)
 
+</td>
+<td width="50%" valign="top">
+
 ### 📊 Live Telemetry & Timing
 - Speed, gear, throttle %, brake %, DRS status per driver
 - Live timing tower — position, gaps, sector times, tyre compound & pit status
 - Auto-detects and captures **live sessions** in real time (no replay lag)
 - Race control feed — penalties, flags, deleted laps, investigations
-
-</td>
-<td width="50%" valign="top">
 
 ### 🧑‍✈️ Driver Panel
 - Full season standings with live points/position from the Jolpica F1 API
@@ -71,13 +77,12 @@ It's also a real engineering exercise in its own right: large time-series datase
 - Head-to-head teammate comparison with animated stat bars
 - Minimal **3D animated track map** (Three.js) — sector-colored, glowing car trail
 
-### 🛞 Tyre Strategy & Weather
-- Current compound (Soft / Medium / Hard) & stint age per driver
-- Track/air temperature, humidity, wind speed, rain status
-
 </td>
 </tr>
 </table>
+
+### 🛞 Tyre Strategy & Weather
+Current compound (Soft / Medium / Hard) & stint age per driver. Track/air temperature, humidity, wind speed, rain status.
 
 ### 🔬 Multi-Driver Comparison
 Overlaid speed / throttle / brake traces for any two drivers on a shared distance grid, with a live delta readout between them.
@@ -103,7 +108,7 @@ Sign-up/login (Racer PRO) with hashed credentials, so personalized features can 
 
 [![divider](https://raw.githubusercontent.com/HiradEmami/readme-ux-kit/master/assets/dividers/animated/unique_effects/divider_cyber_cycle_mirrored.svg)](https://github.com/DevGopi-16)
 
-## �� Architecture
+## 🏗 Architecture
 
 ```mermaid
 flowchart LR
@@ -119,7 +124,7 @@ flowchart LR
     style L fill:#3fa9ff,stroke:#15151E,color:#fff
 ```
 
-Telemetry is fetched once per session via FastF1 (with standings/points pulled live from the Jolpica API), cached locally, downsampled and serialized on the backend, then streamed to the browser — where it's interpolated frame-by-frame for smooth playback without shipping every raw data point over the wire. A background watcher thread auto-detects live sessions and captures them in parallel, so the same endpoints serve both historical replays and live races.
+Telemetry is fetched once per session via FastF1 (with standings/points pulled live from the Jolpica API), cached locally, downsampled and serialized on the backend, then streamed to the browser — where it's interpolated frame-by-frame for smooth playback without shipping every raw data point over the wire. A background watcher thread auto-detects live sessions and captures them in parallel, so the same endpoints serve both historical replays and live races. The homepage dashboard uses the same session-loading pipeline (cached per race weekend) to resolve and display the most recently completed event without any manual configuration.
 
 [![divider](https://raw.githubusercontent.com/HiradEmami/readme-ux-kit/master/assets/dividers/animated/bars/divider_dual_energy_tracks.svg)](https://github.com/DevGopi-16)
 
@@ -132,7 +137,7 @@ Telemetry is fetched once per session via FastF1 (with standings/points pulled l
 | **Backend** | ![FastAPI](https://img.shields.io/badge/-FastAPI-009688?logo=fastapi&logoColor=white) Python, SQLAlchemy (auth) |
 | **Data Sources** | ![FastF1](https://img.shields.io/badge/-FastF1-E10600) Jolpica F1 API (standings) |
 | **Frontend** | ![HTML5](https://img.shields.io/badge/-HTML5-E34F26?logo=html5&logoColor=white) ![CSS3](https://img.shields.io/badge/-CSS3-1572B6?logo=css3&logoColor=white) ![JavaScript](https://img.shields.io/badge/-JavaScript-F7DF1E?logo=javascript&logoColor=black) |
-| **Rendering** | HTML5 Canvas · SVG overlays · Three.js (3D track map) |
+| **Rendering** | HTML5 Canvas · SVG overlays (circuit masks) · Three.js (3D track map) |
 
 </div>
 
@@ -255,13 +260,13 @@ uvicorn main:app --reload --port 8000
 
 </div>
 
-> ℹ️ First load per race takes longer — FastF1 downloads and caches session data locally. Live-timing and 3D track map features need an internet connection at runtime (Three.js is loaded from a CDN).
+> ℹ️ First load per race takes longer — FastF1 downloads and caches session data locally. This includes the homepage dashboard's first request, which loads full telemetry for the latest race weekend before it's cached in memory. Live-timing and 3D track map features need an internet connection at runtime (Three.js is loaded from a CDN).
 
 <br/>
 
 ## ⚡ Performance
 
-Telemetry is **downsampled server-side** before transmission, then **interpolated client-side** for smooth animation — keeping payloads small without sacrificing playback quality. Driver season stats (podiums, poles, fastest laps) are cached to disk and refreshed on a rolling basis, so they don't re-trigger a full FastF1 recompute on every request.
+Telemetry is **downsampled server-side** before transmission, then **interpolated client-side** for smooth animation — keeping payloads small without sacrificing playback quality. Driver season stats (podiums, poles, fastest laps) are cached to disk and refreshed on a rolling basis, so they don't re-trigger a full FastF1 recompute on every request. The homepage dashboard's race-overview data is cached in memory per race weekend, so only the first request after a new race completes pays the full telemetry-load cost.
 
 [![divider](https://raw.githubusercontent.com/HiradEmami/readme-ux-kit/master/assets/dividers/animated/bars/divider_circuit_pulse_bar.svg)](https://github.com/DevGopi-16)
 
@@ -272,6 +277,8 @@ Telemetry is **downsampled server-side** before transmission, then **interpolate
 - [ ] Exportable replay clips (GIF/MP4)
 - [ ] Full live session mode via WebSockets (currently polling-based)
 - [ ] Historical head-to-head across multiple seasons
+- [ ] Warm the homepage overview cache at server startup to remove first-load latency
+- [ ] Live-wire the homepage right-rail timing panel to real session data
 
 <br/>
 
