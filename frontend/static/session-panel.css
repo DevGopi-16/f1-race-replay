@@ -9,9 +9,7 @@
   padding: 20px 24px 60px;
 }
 
-/* ---------------------------------------------------------------- */
-/* Top bar: heading + search/season                                  */
-/* ---------------------------------------------------------------- */
+/* Top bar: heading + search/season */
 
 .sp-topbar {
   display: flex;
@@ -108,9 +106,7 @@
   cursor: pointer;
 }
 
-/* ---------------------------------------------------------------- */
-/* Filters row: chips + sort/view                                    */
-/* ---------------------------------------------------------------- */
+/* Filters row: chips + sort/view */
 
 .sp-filters-row {
   display: flex;
@@ -206,10 +202,7 @@
   color: #ff3333;
 }
 
-/* ---------------------------------------------------------------- */
-/* More filters panel                                                */
-/* ---------------------------------------------------------------- */
-
+/* More filters panel */
 .sp-more-filters {
   display: flex;
   align-items: center;
@@ -259,9 +252,7 @@
 
 .sp-clear-filters-btn:hover { color: #fff; border-color: rgba(255,255,255,0.3); }
 
-/* ---------------------------------------------------------------- */
 /* Race grid                                                         */
-/* ---------------------------------------------------------------- */
 
 .race-grid {
   display: grid;
@@ -538,9 +529,7 @@
 .race-grid.list-view .race-card-meta { border: none; padding: 0; margin: 0; }
 .race-grid.list-view .race-card-foot { flex-direction: column; align-items: flex-end; gap: 6px; }
 
-/* ---------------------------------------------------------------- */
-/* Pagination                                                        */
-/* ---------------------------------------------------------------- */
+/* Pagination*/
 
 .sp-pagination {
   display: flex;

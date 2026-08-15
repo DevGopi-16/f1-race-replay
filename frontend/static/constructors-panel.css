@@ -1,6 +1,4 @@
-/* ==========================================================================
-   Constructors' Championship Panel — dashboard edition
-   ========================================================================== */
+/* Constructors' Championship Panel — dashboard edition */
 
 #constructors-panel {
   --cp-bg: #0a0a0d;
@@ -39,7 +37,7 @@
 }
 .cp-back-btn:hover { background: #222226; }
 
-/* ---------- List: header row ---------- */
+/* List: header row */
 .cp-header-row {
   display: grid;
   grid-template-columns: 1.1fr 1.6fr 0.85fr 0.85fr 0.85fr;
@@ -89,7 +87,7 @@
 .cp-stat-value-of { font-size: 16px; color: var(--cp-text-dim); font-weight: 600; }
 .cp-stat-sub { font-size: 11.5px; color: var(--cp-text-dim); }
 
-/* ---------- List: standings ---------- */
+/* List: standings */
 .cp-standings-card { background: var(--cp-panel); border: 1px solid var(--cp-border); border-radius: var(--cp-radius); padding: 18px 20px 10px; }
 .cp-standings-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 14px; }
 .cp-standings-title { display: flex; align-items: center; gap: 8px; font-size: 13px; font-weight: 700; letter-spacing: .04em; }
@@ -128,7 +126,7 @@
 .cp-empty { text-align: center; color: var(--cp-text-dim); padding: 40px 0; }
 .cp-error { text-align: center; padding: 40px 0; color: var(--cp-text-dim); }
 
-/* ---------- Profile view ---------- */
+/* Profile view */
 .cp-team-hero {
   display: flex; justify-content: space-between; align-items: center;
   background: linear-gradient(120deg, color-mix(in srgb, var(--team-color) 15%, transparent), var(--cp-panel) 60%);
@@ -207,7 +205,7 @@
 .cp-gap-leader-msg { font-size: 12px; color: var(--cp-text-dim); font-weight: 700; letter-spacing: .03em; margin: 4px 0 0; }
 .cp-gap-ahead-msg { font-size: 11.5px; color: var(--cp-teal); margin: 4px 0 0; }
 
-/* ---------- Transitions / skeleton ---------- */
+/* Transitions / skeleton */
 .cp-view-out { opacity: 0; transform: translateY(10px) scale(.99); transition: opacity .18s ease, transform .18s ease; }
 .cp-view-in { animation: cp-view-enter .42s cubic-bezier(.2,.8,.2,1) both; }
 @keyframes cp-view-enter { from { opacity: 0; transform: translateY(10px) scale(.99); } to { opacity: 1; transform: none; } }
@@ -219,7 +217,7 @@
 .cp-skeleton-row { display: flex; gap: 12px; flex-wrap: wrap; }
 .cp-skeleton-card { flex: 1; min-width: 140px; height: 90px; }
 
-/* ---------- Responsive ---------- */
+/*  Responsive  */
 @media (max-width: 1200px) {
   .cp-header-row { grid-template-columns: 1fr 1fr; }
   .cp-title-block { grid-column: 1 / -1; }
