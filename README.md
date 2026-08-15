@@ -158,68 +158,71 @@ F1-RACE-REPLAY-WEB/
 ├── backend/
 │   ├── .env.example
 │   ├── data/
-│   │   └── drivers.json
 │   ├── computed_data/
-│   │
-│   ├── src/
-│   │   ├── auth/
-│   │   ├── lib/
-│   │   ├── live/
-│   │   ├── driver_panel.py
-│   │   ├── constructors_panel.py
-│   │   ├── f1_data.py
-│   │   ├── minisectors.py
-│   │   ├── next_session.py
-│   │   ├── race_control.py
-│   │   ├── serialize.py
-│   │   ├── timing_tower.py
-│   │   └── track_geometry.py
-│   │
-│   ├── test_telemetry_debug.py
 │   ├── main.py
-│   └── requirements.txt
+│   └── src/
+│       ├── __init__.py
+│       ├── f1_data.py
+│       ├── serialize.py
+│       ├── driver_panel.py
+│       ├── constructors_panel.py
+│       ├── session_panel.py
+│       ├── timing_tower.py
+│       ├── track_map.py
+│       ├── replay.py
+│       ├── telemetry.py
+│       └── ...
 │
 ├── frontend/
 │   ├── index.html
 │   ├── profile.html
-│   ├── setting.html
+│   ├── settings.html
 │   │
 │   └── static/
-│       ├── images/
-│       │   ├── banners/
-│       │   ├── car/
-│       │   ├── circuits/
-│       │   │   ├── detailed/
-│       │   │   └── minimal/
-│       │   ├── controls/
-│       │   ├── drivers/
-│       │   ├── newbanners/
-│       │   ├── teams/
-│       │   ├── tyres/
-│       │   └── weather/
+│       ├── css/
+│       │   ├── style.css
+│       │   ├── auth.css
+│       │   ├── profile.css
+│       │   ├── settings.css
+│       │   ├── driver-panel.css
+│       │   ├── constructors-panel.css
+│       │   ├── home-dashboard.css
+│       │   ├── replay.css
+│       │   ├── session-panel.css
+│       │   ├── timing-tower.css
+│       │   └── track-map.css
 │       │
-│       ├── app.js
-│       ├── auth.css
-│       ├── auth.js
-│       ├── profile.css
-│       ├── profile.js
-│       ├── settings_applier.js
-│       ├── constructors-panel.css
-│       ├── constructors-panel.js
-│       ├── driver-panel.css
-│       ├── driver-panel.js
-│       ├── home-dashboard.css
-│       ├── replay.css
-│       ├── session-panel.css
-│       ├── session-panel.js
-│       ├── style.css
-│       ├── timing-tower.css
-│       ├── timing-tower.js
-│       ├── track-map.css
-│       └── track-map.js
+│       ├── js/
+│       │   ├── app.js
+│       │   ├── auth.js
+│       │   ├── profile.js
+│       │   ├── settings.js
+│       │   ├── settings_applier.js
+│       │   ├── driver-panel.js
+│       │   ├── constructors-panel.js
+│       │   ├── replay.js
+│       │   ├── session-panel.js
+│       │   ├── telemetry.js
+│       │   ├── timing-tower.js
+│       │   └── track-map.js
+│       │
+│       └── images/
+│           ├── banners/
+│           ├── car/
+│           ├── circuits/
+│           ├── constructors/
+│           ├── controls/
+│           ├── drivers/
+│           ├── teams/
+│           ├── tracks/
+│           ├── weather/
+│           └── ...
 │
+├── .gitignore
 ├── README.md
-└── requirements.txt
+├── requirements.txt
+├── roadmap.md
+└── telemetry.md
 ```
 
 </details>
