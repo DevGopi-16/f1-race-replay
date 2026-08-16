@@ -1,24 +1,8 @@
 /* ============================================================
-   F1 RACE REPLAY — GLOBAL DESIGN SYSTEM
-   ============================================================
-   Contains ONLY:
-   - Reset
-   - Design tokens
-   - Base document styles
-   - Typography
-   - Glass system
-   - Shared buttons
-   - Shared inputs
-   - Shared cards
-   - Shared badges/status
-   - Global animations
-   - Utility classes
-   - Scrollbars
-   - Shared responsive foundations
-
-   Page/component styles belong in their own CSS files.
+   F1 RACE REPLAY — CORE CSS BUNDLE
+   Generated from modular core files.
+   Load order is intentional.
    ============================================================ */
-
 
 /* ============================================================
    01. RESET
@@ -42,8 +26,6 @@ body {
     width: 100%;
     min-height: 100vh;
 }
-
-
 /* ============================================================
    02. DESIGN TOKENS
    ============================================================ */
@@ -245,7 +227,6 @@ body {
 /* ============================================================
    03. LIGHT THEME
    ============================================================ */
-
 body.light-theme {
 
     --bg:
@@ -296,11 +277,6 @@ body.light-theme {
     --text-disabled:
         #cbd5e1;
 }
-
-
-/* ============================================================
-   04. BASE DOCUMENT
-   ============================================================ */
 
 html,
 body {

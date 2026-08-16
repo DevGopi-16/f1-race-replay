@@ -122,32 +122,42 @@ const NAV_LABELS = {
 document.querySelectorAll(".nav-item").forEach(btn => {
   btn.addEventListener("click", () => {
     const target = btn.dataset.nav;
+
     if (target === "home") return;
-    if (target === "replay") { goToPickerScreen(); return; }
+
+    if (target === "replay") {
+      goToPickerScreen();
+      return;
+    }
+
     if (target === "sessions") {
       document.getElementById("homePage").classList.add("hidden");
       document.getElementById("sessionsPanel").classList.remove("hidden");
       initSessionsPanel();
       return;
     }
+
     if (target === "telemetry") {
       document.getElementById("homePage").classList.add("hidden");
       document.getElementById("telemetryPanel").classList.remove("hidden");
       initTelemetryPanel();
       return;
     }
+
     if (target === "drivers") {
       document.getElementById("homePage").classList.add("hidden");
       document.getElementById("driversPanel").classList.remove("hidden");
       initDriversPanel();
       return;
     }
+
     if (target === "constructors") {
       document.getElementById("homePage").classList.add("hidden");
       document.getElementById("constructorsPanel").classList.remove("hidden");
       initConstructorsPanel();
       return;
     }
+
     const label = NAV_LABELS[target] || target;
     showToast(`${label} isn't built yet — coming soon.`);
   });
