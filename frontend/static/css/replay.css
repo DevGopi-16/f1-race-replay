@@ -868,34 +868,3 @@
     padding-left: 5px;
   }
 }
-
-@media (max-width: 650px) {
-
-  #replay .weather-panel {
-    display: none;
-  }
-
-  #replay .leaderboard-panel {
-    width: 180px;
-    max-height: 45vh;
-  }
-
-  #replay .legend {
-    display: none;
-  }
-
-  #replay .bottom-bar {
-    height: 55px;
-    gap: 7px;
-    padding: 7px;
-  }
-
-  #replay .time-label {
-    display: none;
-  }
-
-  #replay .speed-control {
-    margin-left: 2px;
-    padding-left: 5px;
-  }
-}
