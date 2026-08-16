@@ -1,870 +1,769 @@
-.title {
-  display: none;
+/* F1 Race Replay UI — REPLAY PAGE STYLES
+   Extracted from style.css. Covers the #replay view only:
+   track canvas, session banner, weather, driver panels, leaderboard,
+   controls legend, bottom playback bar, flag legend.
+
+   IMPORTANT: this file depends on CSS variables defined in :root
+   inside style.css (--glass-bg, --glass-border, --glass-blur, --panel,
+   --shadow, --radius, --left-width, --right-width, etc).
+   Load style.css BEFORE this file. */
+
+/* Replay Layout */
+
+.replay{
+    position:relative;
+    width:100vw;
+    height:100vh;
+    overflow:hidden;
+    background:transparent;
+    z-index:1;
+}
+
+#trackCanvas{
+    position:absolute;
+    inset:0;
+    width:100%;
+    height:100%;
+    z-index:1;
+}
+
+/* Generic Panel — frosted glass card (weather / lap counter / leaderboard) */
+
+.panel{
+    position:absolute;
+    background:var(--panel);
+    backdrop-filter:blur(var(--glass-blur)) saturate(160%);
+    -webkit-backdrop-filter:blur(var(--glass-blur)) saturate(160%);
+    border:1px solid var(--panel-border);
+    border-radius:var(--radius);
+    box-shadow:var(--shadow);
+    padding:14px 16px;
+    z-index:20;
+    color:#fff;
+    animation:panelFade .3s ease;
+}
+
+@keyframes panelFade{
+    from{
+        opacity:0;
+        transform:translateY(8px) scale(.98);
+    }
+    to{
+        opacity:1;
+        transform:translateY(0) scale(1);
+    }
+}
+
+/* Session Banner */
+
+.session-banner{
+    position:absolute;
+    top:16px;
+    left:50%;
+    transform:translateX(-50%);
+    min-width:420px;
+    padding:12px 24px;
+    text-align:center;
+    background:var(--glass-bg-strong);
+    border:1px solid var(--glass-border);
+    border-radius:14px;
+    backdrop-filter:blur(var(--glass-blur)) saturate(160%);
+    -webkit-backdrop-filter:blur(var(--glass-blur)) saturate(160%);
+    box-shadow:var(--shadow);
+    z-index:100;
+}
+
+.session-banner b{
+    display:block;
+    font-size:17px;
+    color:#fff;
+    margin-bottom:4px;
+}
+
+/* LEFT SIDEBAR — Weather */
+
+.weather-panel{
+    position:absolute;
+    top:60px;
+    left:20px;
+}
+
+.weather-panel .wp-title{
+    font-size:16px;
+    font-weight:700;
+    margin-bottom:6px;
+    color:#fff;
+}
+
+.weather-panel .wp-row{
+    display:flex;
+    align-items:center;
+    gap:4px;
+    padding:2px 0;
+    font-size:13px;
+    color:#c8c8c8;
+    border-bottom:1px solid rgba(255,255,255,.06);
+}
+
+.weather-icon{
+    width:14px;
+    height:14px;
+    object-fit:contain;
+    flex-shrink:0;
+}
+
+.weather-label{
+    flex:1;
+    color:#fff;
+    font-weight:500;
+}
+
+.weather-value{
+    color:#5fd4ff;
+    font-weight:600;
+    font-size:13px;
+}
+
+/* DRIVER PANEL */
+
+.driver-info-wrapper{
+    position:absolute;
+    top:255px;
+    left:20px;
+    width:280px;
+    display:flex;
+    flex-direction:column;
+    gap:12px;
+    z-index:20;
+}
+
+.driver-panel{
+    background:var(--glass-bg-strong);
+    backdrop-filter:blur(var(--glass-blur)) saturate(160%);
+    -webkit-backdrop-filter:blur(var(--glass-blur)) saturate(160%);
+    border:1px solid var(--glass-border);
+    border-radius:var(--radius);
+    overflow:hidden;
+    box-shadow:var(--shadow);
+    color:#fff;
+    transition:.2s;
+}
+
+.driver-panel:hover{
+    box-shadow:0 10px 40px rgba(0,0,0,.55), inset 0 1px 0 rgba(255,255,255,.1);
+}
+
+.driver-header{
+    height:34px;
+    display:flex;
+    align-items:center;
+    background:rgba(0,0,0,.35);
+}
+
+.team-strip{
+    width:8px;
+    height:100%;
+}
+
+.driver-code{
+    flex:1;
+    padding-left:12px;
+    font-size:18px;
+    font-weight:700;
+}
+
+.driver-position{
+    padding-right:12px;
+    color:#FFD700;
+    font-weight:700;
+}
+
+.driver-speed{
+    text-align:center;
+    font-size:28px;
+    font-weight:800;
+    padding:10px 0;
+}
+
+.driver-status{
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+    padding:0 12px 10px;
+    color:#ddd;
+    font-size:13px;
+}
+
+/* Driver panel telemetry bars (THR / BRK / TYRE) */
+
+.telemetry-row{
+    display:flex;
+    align-items:center;
+    gap:8px;
+    padding:5px 12px;
+}
+
+.telemetry-row span:first-child{
+    width:34px;
+    color:#aaa;
+    font-size:12px;
+    font-weight:700;
+}
+
+.telemetry-row span:last-child{
+    width:40px;
+    text-align:right;
+    font-size:12px;
+}
+
+.telemetry-track{
+    flex:1;
+    height:8px;
+    background:rgba(255,255,255,.08);
+    border-radius:20px;
+    overflow:hidden;
+}
+
+.telemetry-fill{
+    height:100%;
+    border-radius:20px;
+    transition:width .15s linear;
+}
+
+.telemetry-fill.throttle{
+    background:linear-gradient(90deg, #1fa83c, #2ecc40);
+}
+
+.telemetry-fill.brake{
+    background:linear-gradient(90deg, #cc2020, #ff4040);
+}
+
+.telemetry-fill.ers{
+    background:#00bfff;
+}
+
+.gap-row{
+    padding:6px 12px;
+    font-size:12px;
+    font-weight:600;
+}
+
+.ahead{
+    color:#2ecc40;
+}
+
+.behind{
+    color:#ffb347;
+}
+
+/* RIGHT SIDEBAR — Leaderboard */
+
+.lap-counter-banner{
+    position:absolute;
+    top:50px;
+    right:20px;
+    width:var(--right-width);
+    text-align:center;
+    font-size:15px;
+    font-weight:700;
+    color:#fff;
+    padding:8px 16px;
+    font-variant-numeric:tabular-nums;
+    text-shadow:0 2px 8px rgba(0,0,0,.4);
+}
+
+.leaderboard-panel{
+    position:absolute;
+    top:100px;
+    right:20px;
+    width:var(--right-width);
+    max-height:calc(100vh - 220px);
+    overflow-y:auto;
+    overflow-x:hidden;
+    z-index:20;
+    scrollbar-gutter:stable;
+}
+
+.leaderboard-panel::-webkit-scrollbar{
+    width:8px;
+}
+
+.leaderboard-panel::-webkit-scrollbar-track{
+    background:rgba(255,255,255,.03);
+    border-radius:20px;
+}
+
+.leaderboard-panel::-webkit-scrollbar-thumb{
+    background:rgba(255,255,255,.35);
+    border-radius:20px;
+    border:1px solid rgba(255,255,255,.1);
+}
+
+.leaderboard-panel::-webkit-scrollbar-thumb:hover{
+    background:rgba(255,255,255,.5);
+}
+
+.lb-tyre-badge{
+    display:flex;
+    align-items:center;
+    gap:2px;
+    font-size:10px;
+    font-weight:800;
+    padding:2px 5px;
+    border-radius:4px;
+    flex-shrink:0;
+}
+
+.lb-tyre-life{
+    font-size:8px;
+    font-weight:600;
+    opacity:.75;
+}
+
+.lb-header{
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+    margin-bottom:14px;
+}
+
+.lb-title{
+    font-size:18px;
+    font-weight:700;
+}
+
+.lb-toggles{
+    display:flex;
+    gap:6px;
+}
+
+.lb-toggle-btn{
+    width:22px;
+    height:22px;
+    border-radius:50%;
+    border:1px solid var(--glass-border);
+    background:rgba(255,255,255,.06);
+    backdrop-filter:blur(8px);
+    color:#ccc;
+    font-size:11px;
+    font-weight:700;
+    cursor:pointer;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    padding:0;
+    transition:.15s;
+}
+
+.lb-toggle-btn:hover{
+    border-color:rgba(255,255,255,.4);
+}
+
+.lb-toggle-btn.active{
+    background:#2ecc71;
+    border-color:#2ecc71;
+    color:#000;
+    box-shadow:0 0 12px rgba(46,204,113,.5);
+}
+
+.lb-gap{
+    font-size:12px;
+    color:#999;
+    font-variant-numeric:tabular-nums;
+    min-width:44px;
+    text-align:right;
+}
+
+.lb-row.selected .lb-gap{
+    color:#333;
+}
+
+.lb-row{
+    display:flex;
+    align-items:center;
+    gap:10px;
+    padding:8px 10px;
+    border-radius:10px;
+    cursor:pointer;
+    transition:.18s;
+}
+
+.lb-row:hover{
+    background:rgba(255,255,255,.08);
+    backdrop-filter:blur(6px);
+}
+
+.lb-row.selected{
+    background:rgba(255,255,255,.92);
+    color:#000;
+}
+
+.lb-pos{
+    width:28px;
+    font-weight:700;
+    text-align:center;
+}
+
+.lb-code{
+    flex:1;
+    font-weight:700;
+    letter-spacing:.4px;
+}
+
+.lb-status{
+    display:flex;
+    gap:4px;
+    flex-shrink:0;
+    margin-left:auto;
+}
+
+.lb-badge{
+    font-size:9px;
+    font-weight:700;
+    padding:2px 6px;
+    border-radius:4px;
+    letter-spacing:.3px;
+    white-space:nowrap;
+}
+
+.lb-badge.drs{
+    background:rgba(46,204,113,.15);
+    color:#2ecc71;
+    border:1px solid #2ecc71;
+}
+
+.lb-badge.pit{
+    background:rgba(255,140,0,.15);
+    color:#ff8c00;
+    border:1px solid #ff8c00;
+}
+
+.lb-badge.out{
+    background:rgba(255,64,64,.15);
+    color:#ff4040;
+    border:1px solid #ff4040;
+}
+
+/* CONTROLS PANEL — left column, below driver boxes */
+
+.controls-legend{
+    position:absolute;
+    top:620px;
+    left:20px;
+    width:var(--left-width);
+    background:var(--glass-bg-strong);
+    backdrop-filter:blur(var(--glass-blur)) saturate(160%);
+    -webkit-backdrop-filter:blur(var(--glass-blur)) saturate(160%);
+    border:1px solid var(--glass-border);
+    border-radius:var(--radius);
+    padding:16px;
+    box-shadow:var(--shadow);
+    z-index:20;
+}
+
+.cl-title{
+    font-size:18px;
+    font-weight:700;
+    margin-bottom:12px;
+    color:#fff;
+}
+
+.cl-row{
+    display:flex;
+    gap:10px;
+    align-items:center;
+    padding:5px 0;
+    color:#c8c8c8;
+    border-bottom:1px solid rgba(255,255,255,.06);
+    font-size:13px;
+}
+
+.cl-row:last-child{
+    border-bottom:none;
+}
+
+.cl-row b{
+    color:#fff;
+    min-width:90px;
+}
+
+/* BOTTOM PLAYBACK BAR (flattened — no blur, see notes) */
+
+.bottom-bar{
+    position:absolute;
+    left:0;
+    right:0;
+    bottom:0;
+    padding:12px 24px 18px;
+    display:flex;
+    flex-direction:column;
+    align-items:center;
+    background:linear-gradient(
+        transparent,
+        rgba(5,5,7,.9) 25%,
+        rgba(5,5,7,.98)
+    );
+    z-index:50;
+}
+
+/* CONTROLS */
+
+.controls{
+    width:75%;
+    display:flex;
+    justify-content:center;
+    align-items:center;
+    gap:14px;
+    margin-bottom:12px;
+}
+
+/* ICON BUTTONS (flattened — no blur, see notes) */
+
+.icon-btn{
+    width:42px;
+    height:42px;
+    display:flex;
+    justify-content:center;
+    align-items:center;
+    background:#1c1e24;
+    border:1px solid rgba(255,255,255,.15);
+    border-radius:12px;
+    cursor:pointer;
+    box-shadow:inset 0 1px 0 rgba(255,255,255,.08);
+    transition:.2s ease;
+}
+
+.icon-btn:hover{
+    background:rgba(255,255,255,.12);
+    border-color:rgba(255,255,255,.3);
+    transform:translateY(-1px);
+}
+
+.icon-btn:active{
+    transform:scale(.95);
+}
+
+.icon-btn img{
+    width:20px;
+    height:20px;
+    object-fit:contain;
+    pointer-events:none;
+    user-select:none;
+}
+
+/* SPEED CONTROL (flattened — no blur) */
+
+.speed-control{
+    display:flex;
+    align-items:center;
+    gap:8px;
+    margin-left:8px;
+    background:#1c1e24;
+    border:1px solid rgba(255,255,255,.15);
+    border-radius:10px;
+    padding:2px 8px;
+}
+
+#speedLabel{
+    width:42px;
+    text-align:center;
+    color:#fff;
+    font-size:15px;
+    font-weight:700;
+    font-variant-numeric:tabular-nums;
+}
+
+/* TIME */
+
+.time-label{
+    margin-left:18px;
+    color:#d5d5d5;
+    font-size:14px;
+    font-weight:600;
+    font-variant-numeric:tabular-nums;
+    white-space:nowrap;
+}
+
+/* PROGRESS BAR (flattened — no blur, solid background) */
+
+.progress-canvas{
+    width:75%;
+    height:42px;
+    display:block;
+    cursor:pointer;
+    border-radius:10px;
+    background:#111318;
+    border:1px solid rgba(255,255,255,.12);
+}
+
+/* FLAG LEGEND */
+
+.legend{
+    position:absolute;
+    right:20px;
+    bottom:78px;
+    display:flex;
+    gap:16px;
+    align-items:center;
+    padding:8px 14px;
+    background:var(--glass-bg-strong);
+    backdrop-filter:blur(var(--glass-blur)) saturate(160%);
+    -webkit-backdrop-filter:blur(var(--glass-blur)) saturate(160%);
+    border:1px solid var(--glass-border);
+    border-radius:12px;
+    box-shadow:var(--shadow);
+    z-index:60;
+    font-size:12px;
+    color:#ddd;
+}
+
+.legend span{
+    display:flex;
+    align-items:center;
+}
+
+.dot{
+    width:10px;
+    height:10px;
+    border-radius:3px;
+    display:inline-block;
+    margin-right:6px;
+}
+
+.dot.yellow{ background:#ffdc00; }
+.dot.red{ background:#dc2626; }
+.dot.orange{ background:#ff8c00; }
+.dot.amber{ background:#f59e0b; }
+
+/* "Strategy" bottom-bar button offset (only used within #replay) */
+
+.strategy-btn{
+    left:170px;
+}
+
+/* RESPONSIVE — replay-only layout adjustments */
+
+@media (max-width:1600px){
+    :root{
+        --left-width:245px;
+        --right-width:220px;
+    }
+    .controls-legend{
+        top:590px;
+    }
+}
+
+@media (max-width:1400px){
+    :root{
+        --left-width:225px;
+        --right-width:205px;
+    }
+    .driver-info-wrapper{
+        top:245px;
+    }
+    .controls-legend{
+        top:570px;
+    }
+}
+
+@media (max-height:900px){
+    .driver-info-wrapper{
+        max-height:260px;
+    }
+    .controls-legend{
+        top:auto;
+        bottom:145px;
+    }
 }
 
 /* ============================================================
-   OLD F1 REPLAY DESIGN
-   Scoped ONLY to #replay
+   OLD REPLAY DESIGN OVERRIDES
+   Keep Replay isolated from the new dashboard styling.
    ============================================================ */
 
 #replay {
-  position: fixed;
-  inset: 0;
-  width: 100vw;
-  height: 100vh;
-  overflow: hidden;
-
-  background:
-    radial-gradient(
-      circle at 50% 40%,
-      rgba(40, 40, 45, 0.18),
-      transparent 55%
-    ),
-    #050505;
-
-  color: #fff;
-  font-family:
-    Inter,
-    -apple-system,
-    BlinkMacSystemFont,
-    "Segoe UI",
-    sans-serif;
+    position: relative;
+    width: 100vw;
+    height: 100vh;
+    overflow: hidden;
+    background: transparent;
+    z-index: 1;
 }
-
-/* ============================================================
-   TRACK CANVAS
-   ============================================================ */
-
-#replay #trackCanvas {
-  position: absolute;
-  inset: 0;
-
-  width: 100%;
-  height: 100%;
-
-  display: block;
-  z-index: 1;
-}
-
-/* ============================================================
-   SESSION BANNER
-   Australian GP / Melbourne / Date / Round / Laps
-   ============================================================ */
-
-#replay .session-banner {
-  position: absolute;
-
-  top: 24px;
-  left: 50%;
-
-  transform: translateX(-50%);
-
-  z-index: 20;
-
-  min-width: 420px;
-
-  padding: 14px 24px;
-
-  background: rgba(12, 12, 14, 0.82);
-
-  border: 1px solid rgba(255, 255, 255, 0.12);
-
-  border-radius: 12px;
-
-  backdrop-filter: blur(14px);
-  -webkit-backdrop-filter: blur(14px);
-
-  box-shadow:
-    0 10px 35px rgba(0, 0, 0, 0.35),
-    inset 0 1px 0 rgba(255, 255, 255, 0.05);
-
-  text-align: center;
-
-  pointer-events: none;
-}
-
-#replay .session-banner h1,
-#replay .session-banner h2,
-#replay .session-banner .session-title {
-  margin: 0;
-
-  font-size: 19px;
-  font-weight: 800;
-
-  letter-spacing: 0.5px;
-}
-
-#replay .session-banner p {
-  margin: 5px 0 0;
-
-  color: rgba(255, 255, 255, 0.62);
-
-  font-size: 12px;
-  font-weight: 600;
-
-  letter-spacing: 0.4px;
-}
-
-/* ============================================================
-   GENERIC OLD GLASS PANEL
-   ============================================================ */
 
 #replay .panel {
-  background: rgba(10, 10, 12, 0.82);
-
-  border: 1px solid rgba(255, 255, 255, 0.12);
-
-  border-radius: 12px;
-
-  backdrop-filter: blur(14px);
-  -webkit-backdrop-filter: blur(14px);
-
-  box-shadow:
-    0 12px 35px rgba(0, 0, 0, 0.35),
-    inset 0 1px 0 rgba(255, 255, 255, 0.04);
-
-  color: #fff;
+    background: var(--panel, rgba(15, 17, 22, 0.82));
+    border: 1px solid var(--panel-border, rgba(255, 255, 255, 0.12));
+    border-radius: var(--radius, 14px);
+    box-shadow: var(--shadow, 0 10px 40px rgba(0, 0, 0, 0.45));
 }
 
-/* ============================================================
-   WEATHER
-   ============================================================ */
+#replay .session-banner {
+    position: absolute;
+    top: 16px;
+    left: 50%;
+    transform: translateX(-50%);
+    min-width: 420px;
+    z-index: 100;
+}
 
 #replay .weather-panel {
-  position: absolute;
-
-  top: 24px;
-  left: 24px;
-
-  z-index: 20;
-
-  width: 220px;
-
-  padding: 16px 18px;
+    position: absolute;
+    top: 60px;
+    left: 20px;
 }
-
-#replay .weather-panel .weather-title {
-  margin-bottom: 12px;
-
-  color: rgba(255, 255, 255, 0.55);
-
-  font-size: 10px;
-  font-weight: 800;
-
-  letter-spacing: 1.5px;
-  text-transform: uppercase;
-}
-
-#replay .weather-panel .weather-main {
-  display: flex;
-
-  align-items: center;
-  justify-content: space-between;
-
-  margin-bottom: 14px;
-}
-
-#replay .weather-panel .weather-condition {
-  font-size: 15px;
-  font-weight: 700;
-}
-
-#replay .weather-panel .weather-icon {
-  font-size: 28px;
-}
-
-#replay .weather-panel .weather-grid {
-  display: grid;
-
-  grid-template-columns: 1fr 1fr;
-
-  gap: 10px;
-}
-
-#replay .weather-panel .weather-item {
-  display: flex;
-
-  flex-direction: column;
-
-  gap: 3px;
-}
-
-#replay .weather-panel .weather-label {
-  color: rgba(255, 255, 255, 0.42);
-
-  font-size: 9px;
-  font-weight: 700;
-
-  letter-spacing: 0.8px;
-  text-transform: uppercase;
-}
-
-#replay .weather-panel .weather-value {
-  color: #fff;
-
-  font-size: 13px;
-  font-weight: 700;
-}
-
-/* ============================================================
-   LAP COUNTER
-   ============================================================ */
-
-#replay .lap-counter-banner {
-  position: absolute;
-
-  top: 24px;
-  right: 24px;
-
-  z-index: 20;
-
-  min-width: 120px;
-
-  padding: 13px 18px;
-
-  text-align: center;
-
-  font-size: 13px;
-  font-weight: 800;
-
-  letter-spacing: 1px;
-}
-
-/* ============================================================
-   LEADERBOARD
-   ============================================================ */
-
-#replay .leaderboard-panel {
-  position: absolute;
-
-  top: 50%;
-  right: 24px;
-
-  transform: translateY(-50%);
-
-  z-index: 20;
-
-  width: 260px;
-
-  padding: 14px;
-
-  max-height: calc(100vh - 190px);
-
-  overflow: hidden;
-}
-
-#replay .leaderboard-title {
-  margin-bottom: 10px;
-
-  color: rgba(255, 255, 255, 0.55);
-
-  font-size: 10px;
-  font-weight: 800;
-
-  letter-spacing: 1.4px;
-
-  text-transform: uppercase;
-}
-
-#replay .leaderboard-row {
-  display: grid;
-
-  grid-template-columns:
-    28px
-    minmax(0, 1fr)
-    54px;
-
-  align-items: center;
-
-  min-height: 27px;
-
-  padding: 3px 5px;
-
-  border-radius: 6px;
-
-  font-size: 11px;
-
-  transition:
-    background 0.15s ease,
-    transform 0.15s ease;
-}
-
-#replay .leaderboard-row:hover {
-  background: rgba(255, 255, 255, 0.055);
-}
-
-#replay .leaderboard-row .position {
-  color: rgba(255, 255, 255, 0.45);
-
-  font-weight: 700;
-}
-
-#replay .leaderboard-row .driver {
-  display: flex;
-
-  align-items: center;
-
-  gap: 7px;
-
-  min-width: 0;
-
-  font-weight: 800;
-}
-
-#replay .leaderboard-row .driver-code {
-  overflow: hidden;
-
-  text-overflow: ellipsis;
-
-  white-space: nowrap;
-}
-
-#replay .leaderboard-row .gap {
-  color: rgba(255, 255, 255, 0.5);
-
-  text-align: right;
-
-  font-family: monospace;
-  font-size: 10px;
-}
-
-#replay .leaderboard-row.leader {
-  background: rgba(225, 6, 0, 0.12);
-
-  border-left: 2px solid #e10600;
-}
-
-#replay .leaderboard-row.selected {
-  background: rgba(255, 255, 255, 0.09);
-}
-
-/* ============================================================
-   DRIVER DOT
-   ============================================================ */
-
-#replay .driver-dot {
-  width: 6px;
-  height: 6px;
-
-  flex: 0 0 6px;
-
-  border-radius: 50%;
-
-  background: var(--driver-color, #e10600);
-
-  box-shadow:
-    0 0 8px
-    color-mix(
-      in srgb,
-      var(--driver-color, #e10600) 60%,
-      transparent
-    );
-}
-
-/* ============================================================
-   DRIVER INFO
-   ============================================================ */
 
 #replay .driver-info-wrapper {
-  position: absolute;
-
-  left: 24px;
-  bottom: 105px;
-
-  z-index: 20;
-
-  pointer-events: none;
+    position: absolute;
+    top: 255px;
+    left: 20px;
+    width: 280px;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    z-index: 20;
 }
 
-#replay .driver-info {
-  min-width: 220px;
-
-  padding: 12px 15px;
-
-  background: rgba(8, 8, 10, 0.82);
-
-  border: 1px solid rgba(255, 255, 255, 0.1);
-
-  border-radius: 10px;
-
-  backdrop-filter: blur(12px);
-  -webkit-backdrop-filter: blur(12px);
+#replay .lap-counter-banner {
+    position: absolute;
+    top: 50px;
+    right: 20px;
+    width: var(--right-width, 220px);
 }
 
-/* ============================================================
-   CONTROLS LEGEND
-   ============================================================ */
+#replay .leaderboard-panel {
+    position: absolute;
+    top: 100px;
+    right: 20px;
+    width: var(--right-width, 220px);
+    max-height: calc(100vh - 220px);
+    overflow-y: auto;
+    overflow-x: hidden;
+    z-index: 20;
+}
 
 #replay .controls-legend {
-  position: absolute;
-
-  left: 24px;
-  bottom: 145px;
-
-  z-index: 30;
-
-  width: 235px;
-
-  padding: 14px 16px;
-
-  opacity: 0.92;
-
-  transition:
-    opacity 0.2s ease,
-    transform 0.2s ease;
+    position: absolute;
+    top: 620px;
+    left: 20px;
+    width: var(--left-width, 280px);
+    z-index: 20;
 }
-
-#replay .controls-legend:hover {
-  opacity: 1;
-}
-
-#replay .cl-title {
-  margin-bottom: 10px;
-
-  color: #fff;
-
-  font-size: 10px;
-  font-weight: 800;
-
-  letter-spacing: 1.5px;
-
-  text-transform: uppercase;
-}
-
-#replay .cl-row {
-  display: flex;
-
-  align-items: center;
-
-  gap: 8px;
-
-  min-height: 21px;
-
-  color: rgba(255, 255, 255, 0.56);
-
-  font-size: 10px;
-}
-
-#replay .cl-row b {
-  display: inline-flex;
-
-  align-items: center;
-  justify-content: center;
-
-  min-width: 42px;
-
-  padding: 3px 5px;
-
-  color: #fff;
-
-  background: rgba(255, 255, 255, 0.08);
-
-  border: 1px solid rgba(255, 255, 255, 0.1);
-
-  border-radius: 4px;
-
-  font-family: monospace;
-  font-size: 9px;
-}
-
-/* ============================================================
-   BOTTOM PLAYBACK BAR
-   ============================================================ */
 
 #replay .bottom-bar {
-  position: absolute;
-
-  left: 24px;
-  right: 24px;
-  bottom: 22px;
-
-  z-index: 40;
-
-  height: 62px;
-
-  display: flex;
-
-  align-items: center;
-
-  gap: 18px;
-
-  padding: 10px 14px;
-
-  background: rgba(8, 8, 10, 0.9);
-
-  border: 1px solid rgba(255, 255, 255, 0.12);
-
-  border-radius: 12px;
-
-  backdrop-filter: blur(16px);
-  -webkit-backdrop-filter: blur(16px);
-
-  box-shadow:
-    0 15px 40px rgba(0, 0, 0, 0.4);
+    position: absolute;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    z-index: 50;
 }
-
-#replay .bottom-bar .controls {
-  display: flex;
-
-  align-items: center;
-
-  gap: 7px;
-
-  flex-shrink: 0;
-}
-
-/* ============================================================
-   ICON BUTTONS
-   ============================================================ */
-
-#replay .icon-btn {
-  width: 34px;
-  height: 34px;
-
-  display: inline-flex;
-
-  align-items: center;
-  justify-content: center;
-
-  padding: 0;
-
-  background: rgba(255, 255, 255, 0.055);
-
-  border: 1px solid rgba(255, 255, 255, 0.1);
-
-  border-radius: 7px;
-
-  cursor: pointer;
-
-  transition:
-    background 0.15s ease,
-    border-color 0.15s ease,
-    transform 0.15s ease;
-}
-
-#replay .icon-btn:hover {
-  background: rgba(255, 255, 255, 0.12);
-
-  border-color: rgba(255, 255, 255, 0.2);
-
-  transform: translateY(-1px);
-}
-
-#replay .icon-btn:active {
-  transform: translateY(0);
-}
-
-#replay .icon-btn img {
-  width: 17px;
-  height: 17px;
-
-  object-fit: contain;
-}
-
-/* ============================================================
-   SPEED CONTROL
-   ============================================================ */
-
-#replay .speed-control {
-  display: flex;
-
-  align-items: center;
-
-  gap: 5px;
-
-  margin-left: 5px;
-
-  padding-left: 10px;
-
-  border-left: 1px solid rgba(255, 255, 255, 0.1);
-}
-
-#replay #speedLabel {
-  min-width: 35px;
-
-  color: #fff;
-
-  text-align: center;
-
-  font-family: monospace;
-
-  font-size: 11px;
-  font-weight: 800;
-}
-
-/* ============================================================
-   TIME LABEL
-   ============================================================ */
-
-#replay .time-label {
-  min-width: 100px;
-
-  color: rgba(255, 255, 255, 0.62);
-
-  font-family: monospace;
-
-  font-size: 10px;
-
-  white-space: nowrap;
-}
-
-/* ============================================================
-   PROGRESS CANVAS
-   ============================================================ */
-
-#replay .progress-canvas {
-  width: 100%;
-  height: 30px;
-
-  flex: 1;
-
-  min-width: 100px;
-
-  cursor: pointer;
-}
-
-/* ============================================================
-   RACE CONTROL LEGEND
-   ============================================================ */
 
 #replay .legend {
-  position: absolute;
-
-  right: 310px;
-  bottom: 101px;
-
-  z-index: 25;
-
-  display: flex;
-
-  align-items: center;
-
-  gap: 14px;
-
-  padding: 7px 11px;
-
-  background: rgba(7, 7, 8, 0.75);
-
-  border: 1px solid rgba(255, 255, 255, 0.08);
-
-  border-radius: 7px;
-
-  backdrop-filter: blur(10px);
-  -webkit-backdrop-filter: blur(10px);
-
-  color: rgba(255, 255, 255, 0.58);
-
-  font-size: 9px;
-  font-weight: 700;
+    position: absolute;
+    right: 20px;
+    bottom: 78px;
+    z-index: 60;
 }
 
-#replay .legend span {
-  display: inline-flex;
-
-  align-items: center;
-
-  gap: 5px;
-}
-
-#replay .legend .dot {
-  width: 7px;
-  height: 7px;
-
-  display: inline-block;
-
-  border-radius: 50%;
-}
-
-#replay .legend .dot.yellow {
-  background: #ffd400;
-}
-
-#replay .legend .dot.red {
-  background: #e10600;
-}
-
-#replay .legend .dot.orange {
-  background: #ff8700;
-}
-
-#replay .legend .dot.amber {
-  background: #ffb020;
-}
-
-/* ============================================================
-   NEW REPLAY / STRATEGY BUTTONS
-   ============================================================ */
-
-#replay > .back-btn {
-  position: absolute;
-
-  top: 24px;
-
-  z-index: 35;
-
-  height: 36px;
-
-  padding: 0 13px;
-
-  display: inline-flex;
-
-  align-items: center;
-  justify-content: center;
-
-  gap: 6px;
-
-  color: rgba(255, 255, 255, 0.8);
-
-  background: rgba(10, 10, 12, 0.82);
-
-  border: 1px solid rgba(255, 255, 255, 0.12);
-
-  border-radius: 8px;
-
-  backdrop-filter: blur(12px);
-  -webkit-backdrop-filter: blur(12px);
-
-  font-size: 10px;
-  font-weight: 800;
-
-  cursor: pointer;
-
-  transition:
-    background 0.15s ease,
-    border-color 0.15s ease,
-    color 0.15s ease,
-    transform 0.15s ease;
-}
-
-#replay > #backToPickerBtn {
-  left: 24px;
-}
-
-#replay > #strategyBtn {
-  left: 145px;
-}
-
-#replay > .back-btn:hover {
-  color: #fff;
-
-  background: rgba(255, 255, 255, 0.09);
-
-  border-color: rgba(255, 255, 255, 0.22);
-
-  transform: translateY(-1px);
-}
-
-/* ============================================================
-   HIDDEN STATE
-   ============================================================ */
-
-#replay.hidden {
-  display: none !important;
-}
-
-/* ============================================================
-   RESPONSIVE
-   ============================================================ */
-
-@media (max-width: 1200px) {
-
-  #replay .leaderboard-panel {
-    width: 225px;
-  }
-
-  #replay .controls-legend {
-    width: 205px;
-  }
-
-  #replay .legend {
-    right: 270px;
-  }
-}
-
-@media (max-width: 900px) {
-
-  #replay .session-banner {
-    top: 12px;
-
-    min-width: 300px;
-
-    padding: 10px 15px;
-  }
-
-  #replay .weather-panel {
-    top: 70px;
-    left: 12px;
-
-    width: 190px;
-  }
-
-  #replay .lap-counter-banner {
-    top: 70px;
-    right: 12px;
-  }
-
-  #replay .leaderboard-panel {
-    right: 12px;
-
-    width: 200px;
-  }
-
-  #replay .controls-legend {
-    display: none;
-  }
-
-  #replay .bottom-bar {
-    left: 12px;
-    right: 12px;
-    bottom: 12px;
-  }
-
-  #replay .legend {
-    right: 220px;
-    bottom: 87px;
-  }
-
-  #replay > #backToPickerBtn {
-    left: 12px;
-    top: 12px;
-  }
-
-  #replay > #strategyBtn {
-    left: 130px;
-    top: 12px;
-  }
-}
-
-@media (max-width: 650px) {
-
-  #replay .weather-panel {
-    display: none;
-  }
-
-  #replay .leaderboard-panel {
-    width: 180px;
-
-    max-height: 45vh;
-  }
-
-  #replay .legend {
-    display: none;
-  }
-
-  #replay .bottom-bar {
-    height: 55px;
-
-    gap: 7px;
-
-    padding: 7px;
-  }
-
-  #replay .time-label {
-    display: none;
-  }
-
-  #replay .speed-control {
-    margin-left: 2px;
-    padding-left: 5px;
-  }
+#replay .strategy-btn {
+    left: 170px;
 }
