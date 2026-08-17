@@ -1,33 +1,123 @@
 /* ============================================================
-   F1 RACE REPLAY — PAGE STYLES
-   Clean rewrite. Single source of truth per section —
-   no duplicate blocks, no !important overrides.
+   F1 RACE REPLAY
+   CINEMATIC TELEMETRY PAGE
+   SINGLE LAYOUT SYSTEM
    ============================================================ */
 
 .replay-page {
-  --replay-border: var(--color-white-08);
-  --replay-muted: var(--color-white-45);
-  --replay-panel: rgba(255, 255, 255, 0.035);
+  --replay-border: rgba(255, 255, 255, 0.09);
+  --replay-border-strong: rgba(255, 255, 255, 0.14);
+  --replay-muted: rgba(255, 255, 255, 0.48);
+  --replay-muted-2: rgba(255, 255, 255, 0.30);
+  --replay-panel: rgba(255, 255, 255, 0.025);
+  --replay-panel-strong: rgba(255, 255, 255, 0.045);
+  --replay-red: var(--color-accent);
 
   position: relative;
+
   width: 100%;
-  padding-bottom: var(--space-24);
+  max-width: none;
+
+  min-height: 100dvh;
+
+  padding: 0;
+
+  background:
+    radial-gradient(
+      ellipse 80% 70% at 70% 45%,
+      rgba(255, 255, 255, 0.025),
+      transparent 65%
+    ),
+    #07090d;
+
+  color: var(--color-white);
+
+  overflow: visible;
 }
 
-/* ------------------------------------------------------------
-   INTRO / HERO HEADER
-   ------------------------------------------------------------ */
+
+/* ============================================================
+   MAIN REPLAY SHELL
+   ============================================================ */
+
+.replay-page {
+  display: grid;
+
+  grid-template-columns:
+    minmax(0, 1fr);
+
+  grid-template-rows:
+    auto
+    auto
+    auto
+    minmax(560px, 1fr)
+    auto;
+
+  gap: 16px;
+
+  min-height: 100dvh;
+
+  height: auto;
+
+  box-sizing: border-box;
+
+  padding:
+    96px
+    24px
+    24px;
+}
+
+
+/* ============================================================
+   SIDEBAR
+   ============================================================ */
+
+.replay-sidebar {
+  position: relative;
+
+  display: flex;
+  flex-direction: column;
+
+  min-width: 0;
+  min-height: 0;
+
+  overflow: hidden;
+
+  padding: 28px;
+
+  border:
+    1px solid var(--replay-border);
+
+  border-radius: 18px;
+
+  background:
+    linear-gradient(
+      145deg,
+      rgba(255, 255, 255, 0.045),
+      rgba(255, 255, 255, 0.015)
+    );
+
+  box-shadow:
+    0 30px 80px rgba(0, 0, 0, 0.30);
+
+  backdrop-filter: blur(18px);
+}
+
+
+/* ============================================================
+   HERO
+   ============================================================ */
 
 .replay-intro {
-  display: flex;
-  align-items: flex-end;
-  justify-content: space-between;
-  gap: var(--space-12);
+  display: block;
 
   width: 100%;
-  padding: var(--space-8) 0 var(--space-10);
 
-  border-bottom: var(--border-subtle);
+  margin: 0;
+  padding: 0 0 28px;
+
+  border-bottom:
+    1px solid var(--replay-border);
 }
 
 .replay-intro-copy {
@@ -37,454 +127,997 @@
 .replay-intro-eyebrow {
   display: flex;
   align-items: center;
-  gap: var(--space-3);
-  margin-bottom: var(--space-5);
+
+  gap: 9px;
+
+  margin:
+    0 0 18px;
 
   color: var(--replay-muted);
-  font-family: var(--font-body);
-  font-size: var(--text-caption);
-  font-weight: var(--weight-bold);
-  letter-spacing: var(--tracking-wider);
+
+  font-size: 10px;
+  font-weight: 800;
+
+  letter-spacing: 0.22em;
+
   text-transform: uppercase;
 }
 
 .replay-intro-eyebrow span:first-child {
-  width: 28px;
+  display: block;
+
+  width: 24px;
   height: 1px;
-  background: var(--color-accent);
-  box-shadow: 0 0 10px var(--color-accent-glow);
+
+  flex-shrink: 0;
+
+  background: var(--replay-red);
+
+  box-shadow:
+    0 0 12px var(--color-accent-glow);
 }
 
 .replay-intro h1 {
   margin: 0;
+
+  max-width: 330px;
+
   color: var(--color-white);
+
   font-family: var(--font-display);
-  font-size: clamp(2.75rem, 5.5vw, 5.5rem);
-  font-weight: var(--weight-extrabold);
-  line-height: 0.9;
-  letter-spacing: var(--tracking-tight);
+
+  font-size:
+    clamp(2.7rem, 4vw, 4.2rem);
+
+  font-weight: var(--weight-black);
+
+  line-height: 0.86;
+
+  letter-spacing: -0.065em;
+
   text-transform: uppercase;
 }
 
 .replay-intro h1 span {
-  color: var(--replay-muted);
+  display: block;
+
+  color: var(--replay-muted-2);
 }
 
 .replay-intro p {
-  max-width: 520px;
-  margin: var(--space-5) 0 0;
+  max-width: 310px;
+
+  margin:
+    20px 0 0;
+
   color: var(--replay-muted);
-  font-size: var(--text-body-sm);
-  line-height: 1.6;
+
+  font-size: 12px;
+
+  line-height: 1.65;
 }
+
+
+/* ============================================================
+   HERO STATUS
+   ============================================================ */
 
 .replay-intro-mark {
   display: flex;
-  flex-direction: column;
-  align-items: flex-end;
-  flex-shrink: 0;
+  align-items: flex-start;
+  justify-content: space-between;
 
-  padding-bottom: var(--space-1);
-  color: var(--replay-muted);
-  text-align: right;
+  width: 100%;
+
+  margin-top: 22px;
+
+  padding-top: 18px;
+
+  border-top:
+    1px solid var(--replay-border);
+
+  text-align: left;
 }
 
 .replay-intro-mark span {
-  font-size: var(--text-micro);
-  font-weight: var(--weight-bold);
-  letter-spacing: var(--tracking-widest);
+  color: var(--replay-muted);
+
+  font-size: 9px;
+  font-weight: 800;
+
+  letter-spacing: 0.18em;
+
+  text-transform: uppercase;
 }
 
 .replay-intro-mark strong {
-  margin-top: var(--space-1);
-  color: var(--color-accent);
+  margin: 0;
+
+  color: var(--replay-red);
+
   font-family: var(--font-display);
-  font-size: 1.5rem;
-  font-weight: var(--weight-black);
-  letter-spacing: var(--tracking-tight);
+
+  font-size: 14px;
+
+  font-weight: 900;
+
+  letter-spacing: 0.08em;
+
+  text-transform: uppercase;
 }
 
-@media (max-width: 700px) {
-  .replay-intro {
-    flex-direction: column;
-    align-items: flex-start;
-    gap: var(--space-6);
-    padding: var(--space-5) 0 var(--space-6);
-  }
 
-  .replay-intro-mark {
-    align-items: flex-start;
-  }
-}
-
-/* ------------------------------------------------------------
-   SELECTOR (year / round / session / fps)
-   ------------------------------------------------------------ */
+/* ============================================================
+   SELECTOR
+   ============================================================ */
 
 .replay-selector {
   display: grid;
-  grid-template-columns: repeat(4, minmax(110px, 1fr));
-  gap: var(--space-3);
-  padding: var(--space-5) 0;
+
+  grid-template-columns:
+    repeat(2, minmax(0, 1fr));
+
+  gap: 8px;
+
+  width: 100%;
+
+  margin: 22px 0 0;
+
+  padding: 0;
 }
 
 .replay-selector label {
   display: flex;
   flex-direction: column;
-  gap: var(--space-2);
+
+  justify-content: center;
+
+  min-width: 0;
+
+  min-height: 58px;
+
+  gap: 7px;
+
+  padding:
+    10px 12px;
+
+  box-sizing: border-box;
+
+  border:
+    1px solid var(--replay-border);
+
+  border-radius: 8px;
+
+  background:
+    rgba(255, 255, 255, 0.025);
+
+  transition:
+    border-color 160ms ease,
+    background 160ms ease;
 }
 
-.replay-selector label span {
-  font-size: var(--text-micro);
-  letter-spacing: var(--tracking-wider);
-  text-transform: uppercase;
+.replay-selector label:hover {
+  border-color:
+    var(--replay-border-strong);
+
+  background:
+    rgba(255, 255, 255, 0.045);
+}
+
+.replay-selector label > span,
+.replay-selector label > small {
   color: var(--replay-muted);
+
+  font-size: 8px;
+  font-weight: 800;
+
+  letter-spacing: 0.16em;
+
+  text-transform: uppercase;
 }
 
 .replay-selector select,
 .replay-selector input {
   width: 100%;
-  min-height: 42px;
-  padding: 0 var(--space-3);
 
-  border: var(--border-subtle);
-  border-radius: var(--radius-sm);
+  min-width: 0;
+
+  height: 30px;
+
+  padding:
+    0 7px;
+
+  border: 0;
+
   outline: none;
 
-  background: var(--color-white-05);
+  background:
+    transparent;
+
   color: var(--color-white);
-  font-size: var(--text-body-sm);
 
-  transition: var(--transition-fast);
+  font-family: var(--font-mono);
+
+  font-size: 11px;
+
+  font-weight: 700;
 }
 
-.replay-selector select:hover,
-.replay-selector input:hover {
-  border-color: var(--color-white-15);
-}
 
-.replay-selector select:focus,
-.replay-selector input:focus {
-  border-color: var(--color-accent);
-  box-shadow: 0 0 0 3px var(--color-accent-soft);
-}
+/* ============================================================
+   SESSION / HERO STAT
+   ============================================================ */
 
-@media (max-width: 700px) {
-  .replay-selector {
-    grid-template-columns: repeat(2, minmax(0, 1fr));
-  }
-}
-
-/* ------------------------------------------------------------
-   STATUS (loading / error)
-   ------------------------------------------------------------ */
-
-.replay-status {
-  display: flex;
-  align-items: center;
-  gap: var(--space-4);
-  margin-top: var(--space-6);
-  padding: var(--space-5);
-
-  border: var(--border-subtle);
-  border-radius: var(--radius-md);
-  background: var(--replay-panel);
-}
-
-.replay-status-dot {
-  width: 8px;
-  height: 8px;
-  flex: 0 0 auto;
-  border-radius: 50%;
-  background: currentColor;
-}
-
-.replay-status-loading {
-  color: var(--color-info);
-}
-
-.replay-status-error {
-  color: var(--color-danger);
-}
-
-.replay-status strong {
-  display: block;
-  font-size: var(--text-caption);
-  letter-spacing: var(--tracking-wide);
-  color: var(--color-white);
-}
-
-.replay-status p {
-  margin: var(--space-1) 0 0;
-  color: var(--replay-muted);
-  font-size: var(--text-body-sm);
-}
-
-/* ------------------------------------------------------------
-   RACE INFO BAR (ReplayHero — year/round/title/lap)
-   ------------------------------------------------------------ */
-
-.session-info-overlay {
-  width: 100%;
-  margin-top: var(--space-6);
-}
-
-.replay-hero {
+.replay-hero-stat {
   display: grid;
-  grid-template-columns: minmax(0, 1fr) auto;
-  align-items: end;
-  gap: var(--space-8);
 
-  width: 100%;
-  padding: var(--space-6) 0;
+  grid-template-columns:
+    minmax(0, 1fr)
+    auto;
 
-  border-bottom: var(--border-subtle);
+  align-items: center;
+
+  gap: 18px;
+
+  margin-top: auto;
+
+  padding-top: 22px;
+
+  border-top:
+    1px solid var(--replay-border);
 }
 
-.replay-hero-copy {
+.replay-hero-stat-copy {
   min-width: 0;
 }
 
-.replay-kicker {
+.replay-hero-stat-copy > span {
   display: block;
-  font-size: var(--text-micro);
-  letter-spacing: var(--tracking-wider);
-  text-transform: uppercase;
+
+  margin-bottom: 7px;
+
   color: var(--replay-muted);
+
+  font-family: var(--font-mono);
+
+  font-size: 9px;
+
+  letter-spacing: 0.12em;
 }
 
-.replay-hero-copy h2 {
-  margin: var(--space-2) 0 var(--space-1);
+.replay-hero-stat-copy strong {
+  display: block;
+
   color: var(--color-white);
+
   font-family: var(--font-display);
-  font-size: clamp(1.6rem, 2.8vw, 2.75rem);
-  font-weight: var(--weight-bold);
+
+  font-size: 18px;
+
   line-height: 1;
-  letter-spacing: var(--tracking-tight);
 
-  overflow-wrap: anywhere;
+  letter-spacing: -0.02em;
+
+  text-transform: uppercase;
 }
 
-.replay-hero-copy p {
-  margin: 0;
+.replay-hero-stat-copy small {
+  display: block;
+
+  margin-top: 7px;
+
   color: var(--replay-muted);
-  font-size: var(--text-body-sm);
+
+  font-size: 10px;
 }
 
-.replay-hero-stat {
-  flex-shrink: 0;
-  min-width: 130px;
-  padding-left: var(--space-6);
+.replay-hero-stat-value {
+  padding-left: 18px;
 
-  border-left: var(--border-subtle);
+  border-left:
+    1px solid var(--replay-border);
+
   text-align: right;
 }
 
-.replay-hero-stat > span {
+.replay-hero-stat-value span {
   display: block;
-  margin-bottom: var(--space-1);
-  font-size: var(--text-micro);
-  letter-spacing: var(--tracking-wider);
+
   color: var(--replay-muted);
+
+  font-family: var(--font-mono);
+
+  font-size: 8px;
+
+  letter-spacing: 0.14em;
 }
 
-.replay-lap-value {
-  display: inline-flex;
-  align-items: baseline;
-  gap: var(--space-1);
+.replay-hero-stat-value strong {
+  display: block;
+
+  margin-top: 5px;
+
+  color: var(--replay-red);
 
   font-family: var(--font-display);
-  font-size: 2rem;
-  font-weight: var(--weight-extrabold);
+
+  font-size: 25px;
+
   line-height: 1;
+}
+
+
+/* ============================================================
+   TRACK AREA
+   ============================================================ */
+
+.replay-track-panel {
+  position: relative;
+
+  display: flex;
+
+  min-width: 0;
+  min-height: 0;
+
+  height: 100%;
+
+  overflow: hidden;
+
+  border:
+    1px solid var(--replay-border-strong);
+
+  border-radius: 18px;
+
+  background:
+    radial-gradient(
+      ellipse at center,
+      rgba(255, 255, 255, 0.035),
+      rgba(7, 9, 13, 0.98) 72%
+    );
+
+  box-shadow:
+    inset 0 0 100px rgba(0, 0, 0, 0.35),
+    0 30px 100px rgba(0, 0, 0, 0.35);
+}
+
+
+/* ============================================================
+   TRACK VIEWPORT
+   ============================================================ */
+
+.track-viewport {
+  position: relative;
+
+  width: 100%;
+  height: 100%;
+
+  min-width: 0;
+  min-height: 0;
+
+  overflow: hidden;
+
+  background:
+    radial-gradient(
+      ellipse at center,
+      rgba(25, 30, 40, 0.48),
+      rgba(5, 7, 10, 0.98) 78%
+    );
+}
+
+
+/* TECHNICAL GRID */
+
+.track-viewport::before {
+  content: "";
+
+  position: absolute;
+
+  inset: 0;
+
+  z-index: 0;
+
+  pointer-events: none;
+
+  background-image:
+    linear-gradient(
+      rgba(255, 255, 255, 0.025) 1px,
+      transparent 1px
+    ),
+    linear-gradient(
+      90deg,
+      rgba(255, 255, 255, 0.025) 1px,
+      transparent 1px
+    );
+
+  background-size:
+    40px 40px;
+
+  mask-image:
+    radial-gradient(
+      ellipse at center,
+      black 0%,
+      transparent 82%
+    );
+}
+
+
+/* VIGNETTE */
+
+.track-viewport::after {
+  content: "";
+
+  position: absolute;
+
+  inset: 0;
+
+  z-index: 2;
+
+  pointer-events: none;
+
+  background:
+    radial-gradient(
+      ellipse at center,
+      transparent 42%,
+      rgba(0, 0, 0, 0.30) 100%
+    );
+}
+
+
+/* ============================================================
+   CANVAS
+   ============================================================ */
+
+.replay-track-canvas {
+  position: absolute;
+
+  inset: 0;
+
+  z-index: 1;
+
+  display: block;
+
+  width: 100%;
+  height: 100%;
+
+  pointer-events: none;
+}
+
+
+/* ============================================================
+   TRACK LABEL
+   ============================================================ */
+
+.track-overlay {
+  position: absolute;
+
+  top: 18px;
+  left: 18px;
+
+  z-index: 5;
+
+  display: flex;
+  align-items: center;
+
+  gap: 9px;
+
+  padding:
+    8px 11px;
+
+  border:
+    1px solid var(--replay-border);
+
+  border-radius: 7px;
+
+  background:
+    rgba(5, 7, 10, 0.72);
+
+  backdrop-filter: blur(12px);
+
+  color: var(--replay-muted);
+
+  font-family: var(--font-mono);
+
+  font-size: 8px;
+
+  font-weight: 800;
+
+  letter-spacing: 0.13em;
+}
+
+.track-overlay span {
+  display: flex;
+  align-items: center;
+
+  gap: 7px;
+}
+
+.track-overlay span::before {
+  content: "";
+
+  width: 5px;
+  height: 5px;
+
+  border-radius: 50%;
+
+  background: var(--replay-red);
+
+  box-shadow:
+    0 0 9px var(--color-accent-glow);
+}
+
+.track-overlay strong {
   color: var(--color-white);
 }
 
-.replay-lap-total {
-  font-size: 0.6em;
+
+/* ============================================================
+   FRAME INFO
+   ============================================================ */
+
+.track-frame-info {
+  position: absolute;
+
+  top: 18px;
+  right: 18px;
+
+  bottom: auto;
+
+  z-index: 5;
+
+  padding:
+    8px 11px;
+
+  border:
+    1px solid var(--replay-border);
+
+  border-radius: 7px;
+
+  background:
+    rgba(5, 7, 10, 0.72);
+
+  backdrop-filter: blur(12px);
+
   color: var(--replay-muted);
-  font-weight: var(--weight-medium);
+
+  font-family: var(--font-mono);
+
+  font-size: 8px;
+
+  font-weight: 800;
+
+  letter-spacing: 0.13em;
 }
 
-.replay-lap-separator {
-  color: var(--replay-muted);
-  opacity: 0.6;
+.track-frame-info strong {
+  color: var(--color-white);
 }
 
-@media (max-width: 700px) {
-  .replay-hero {
-    grid-template-columns: 1fr;
-    gap: var(--space-4);
-  }
 
-  .replay-hero-stat {
-    padding-left: 0;
-    padding-top: var(--space-4);
-    border-left: 0;
-    border-top: var(--border-subtle);
-    text-align: left;
-  }
-}
+/* ============================================================
+   CONTROLS — DOCKED INSIDE TRACK PANEL
+   ============================================================ */
 
-/* ------------------------------------------------------------
-   CONTROLS (play / timeline / fps)
-   ------------------------------------------------------------ */
+.replay-track-panel .replay-controls {
+  position: absolute;
 
-.replay-controls {
-  display: flex;
-  flex-direction: column;
-  gap: var(--space-4);
+  left: 18px;
+  right: 18px;
+  bottom: 18px;
 
-  margin-top: var(--space-5);
-  padding: var(--space-4) var(--space-5);
+  z-index: 10;
 
-  border: var(--border-subtle);
-  border-radius: var(--radius-lg);
-  background: var(--glass-bg);
-  backdrop-filter: var(--glass-blur);
+  width: auto;
+
+  margin: 0;
+
+  padding:
+    12px 16px 13px;
+
+  border:
+    1px solid rgba(255, 255, 255, 0.12);
+
+  border-radius: 11px;
+
+  background:
+    rgba(5, 7, 10, 0.82);
+
+  backdrop-filter:
+    blur(18px);
+
+  box-shadow:
+    0 12px 35px rgba(0, 0, 0, 0.35);
 }
 
 .replay-controls-row {
   display: flex;
+
   align-items: center;
-  gap: var(--space-4);
+
+  gap: 14px;
+
+  min-width: 0;
 }
 
 .replay-play-button {
   display: flex;
   align-items: center;
   justify-content: center;
+
+  width: 36px;
+  height: 36px;
+
   flex-shrink: 0;
 
-  width: 42px;
-  height: 42px;
+  border:
+    1px solid rgba(255, 255, 255, 0.18);
 
-  border: var(--border-subtle);
   border-radius: 50%;
-  background: var(--color-white);
-  color: var(--color-black);
+
+  background:
+    var(--color-white);
+
+  color:
+    var(--color-black);
 
   cursor: pointer;
-  transition: var(--transition-fast);
+
+  transition:
+    transform 150ms ease,
+    background 150ms ease;
 }
 
 .replay-play-button:hover:not(:disabled) {
-  background: var(--color-white-90);
-  transform: scale(1.05);
+  transform: scale(1.06);
+
+  background:
+    var(--color-white-90);
 }
 
 .replay-play-button:disabled {
   opacity: 0.35;
+
   cursor: not-allowed;
 }
 
 .replay-play-button svg {
-  width: 14px;
-  height: 14px;
+  width: 13px;
+  height: 13px;
 }
 
 .replay-frame-counter {
-  font-family: var(--font-mono);
-  font-size: var(--text-caption);
-  letter-spacing: var(--tracking-wide);
+  flex-shrink: 0;
+
   color: var(--replay-muted);
+
+  font-family: var(--font-mono);
+
+  font-size: 9px;
+
+  letter-spacing: 0.08em;
+
   white-space: nowrap;
 }
 
 .replay-frame-counter strong {
   color: var(--color-white);
-  font-weight: var(--weight-bold);
 }
 
 .replay-fps {
   margin-left: auto;
-  padding: var(--space-1) var(--space-3);
 
-  border: var(--border-subtle);
-  border-radius: var(--radius-pill);
+  flex-shrink: 0;
+
+  padding:
+    7px 10px;
+
+  border:
+    1px solid var(--replay-border);
+
+  border-radius: 6px;
 
   color: var(--replay-muted);
-  font-size: var(--text-micro);
-  font-weight: var(--weight-bold);
-  letter-spacing: var(--tracking-wide);
+
+  font-family: var(--font-mono);
+
+  font-size: 8px;
+
+  font-weight: 800;
+
+  letter-spacing: 0.10em;
+
   white-space: nowrap;
 }
 
+
+/* ============================================================
+   TIMELINE
+   ============================================================ */
+
 .replay-timeline {
+  display: block;
+
   width: 100%;
+
   height: 4px;
-  margin: 0;
+
+  margin:
+    12px 0 0;
+
+  padding: 0;
 
   appearance: none;
   -webkit-appearance: none;
+
   cursor: pointer;
 
-  border-radius: var(--radius-pill);
+  border: 0;
+
+  border-radius: 999px;
+
   background:
     linear-gradient(
       to right,
       var(--color-accent) 0%,
       var(--color-accent) var(--replay-progress, 0%),
-      var(--color-white-08) var(--replay-progress, 0%),
-      var(--color-white-08) 100%
+      rgba(255, 255, 255, 0.12) var(--replay-progress, 0%),
+      rgba(255, 255, 255, 0.12) 100%
     );
 }
 
 .replay-timeline:disabled {
   opacity: 0.4;
+
   cursor: not-allowed;
+}
+
+.replay-timeline::-webkit-slider-runnable-track {
+  height: 4px;
+
+  border-radius: 999px;
+
+  background: transparent;
 }
 
 .replay-timeline::-webkit-slider-thumb {
   appearance: none;
   -webkit-appearance: none;
 
-  width: 14px;
-  height: 14px;
-  margin-top: -5px;
+  width: 12px;
+  height: 12px;
+
+  margin-top: -4px;
+
+  border:
+    2px solid var(--color-black);
 
   border-radius: 50%;
-  border: 2px solid var(--color-black);
-  background: var(--color-white);
 
-  box-shadow: 0 0 0 1px var(--color-white-30);
-  transition: var(--transition-fast);
-}
+  background:
+    var(--color-white);
 
-.replay-timeline::-webkit-slider-thumb:hover {
-  transform: scale(1.15);
-}
-
-.replay-timeline::-moz-range-thumb {
-  width: 14px;
-  height: 14px;
-
-  border-radius: 50%;
-  border: 2px solid var(--color-black);
-  background: var(--color-white);
-  cursor: pointer;
+  box-shadow:
+    0 0 0 1px rgba(255, 255, 255, 0.30),
+    0 0 12px rgba(255, 255, 255, 0.25);
 }
 
 .replay-timeline::-moz-range-track {
   height: 4px;
-  border-radius: var(--radius-pill);
-  background: var(--color-white-08);
+
+  border: 0;
+
+  border-radius: 999px;
+
+  background:
+    rgba(255, 255, 255, 0.12);
 }
 
 .replay-timeline::-moz-range-progress {
   height: 4px;
-  border-radius: var(--radius-pill);
-  background: var(--color-accent);
+
+  border-radius: 999px;
+
+  background:
+    var(--color-accent);
 }
 
+.replay-timeline::-moz-range-thumb {
+  width: 12px;
+  height: 12px;
+
+  border:
+    2px solid var(--color-black);
+
+  border-radius: 50%;
+
+  background:
+    var(--color-white);
+}
+
+
+/* ============================================================
+   TABLET
+   ============================================================ */
+
+@media (max-width: 1100px) {
+  .replay-page {
+    grid-template-columns:
+      minmax(0, 1fr);
+
+    gap: 14px;
+
+    padding:
+      90px
+      16px
+      16px;
+  }
+
+  .replay-sidebar {
+    padding: 22px;
+  }
+
+  .replay-intro h1 {
+    font-size: 2.7rem;
+  }
+
+  .replay-selector {
+    grid-template-columns:
+      1fr 1fr;
+  }
+}
+
+
+/* ============================================================
+   TABLET PORTRAIT
+   ============================================================ */
+
+@media (max-width: 800px) {
+  .replay-page {
+    display: flex;
+    flex-direction: column;
+
+    height: auto;
+    min-height: 100dvh;
+
+    overflow: visible;
+
+    padding:
+      90px
+      16px
+      20px;
+  }
+
+  .replay-sidebar {
+    flex-shrink: 0;
+
+    max-height: none;
+  }
+
+  .replay-track-panel {
+    height: 65vh;
+
+    min-height: 500px;
+
+    flex-shrink: 0;
+  }
+
+  .replay-hero-stat {
+    margin-top: 22px;
+  }
+}
+
+
+/* ============================================================
+   MOBILE
+   ============================================================ */
+
 @media (max-width: 600px) {
+  .replay-page {
+    gap: 12px;
+
+    padding:
+      78px
+      12px
+      12px;
+  }
+
+  .replay-sidebar {
+    padding: 18px;
+
+    border-radius: 14px;
+  }
+
+  .replay-intro {
+    padding-bottom: 22px;
+  }
+
+  .replay-intro h1 {
+    font-size:
+      clamp(2.5rem, 14vw, 4rem);
+  }
+
+  .replay-intro p {
+    max-width: 100%;
+
+    font-size: 11px;
+  }
+
+  .replay-selector {
+    gap: 7px;
+  }
+
+  .replay-selector label {
+    min-height: 52px;
+
+    padding:
+      8px 9px;
+  }
+
+  .replay-track-panel {
+    min-height: 430px;
+
+    height: 58vh;
+
+    border-radius: 14px;
+  }
+
+  .track-overlay {
+    top: 10px;
+    left: 10px;
+
+    padding:
+      6px 8px;
+
+    font-size: 7px;
+  }
+
+  .track-frame-info {
+    top: 10px;
+    right: 10px;
+
+    padding:
+      6px 8px;
+
+    font-size: 7px;
+  }
+
+  .replay-track-panel .replay-controls {
+    left: 10px;
+    right: 10px;
+    bottom: 10px;
+
+    padding:
+      10px 11px;
+  }
+
   .replay-controls-row {
-    flex-wrap: wrap;
-    row-gap: var(--space-2);
+    gap: 9px;
+  }
+
+  .replay-play-button {
+    width: 34px;
+    height: 34px;
+  }
+
+  .replay-frame-counter {
+    font-size: 8px;
   }
 
   .replay-fps {
-    order: 1;
-    margin-left: 0;
+    padding:
+      6px 7px;
+
+    font-size: 7px;
+  }
+}
+
+
+/* ============================================================
+   REDUCE MOTION
+   ============================================================ */
+
+@media (prefers-reduced-motion: reduce) {
+  .replay-play-button,
+  .replay-selector label {
+    transition: none;
   }
 }

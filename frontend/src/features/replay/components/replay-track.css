@@ -1,130 +1,276 @@
 /* ============================================================
-   F1 RACE REPLAY — TRACK PANEL
-   Clean rewrite. Single definition per rule.
+   F1 RACE REPLAY — TRACK CANVAS
    ============================================================ */
-
-.replay-track-panel {
-  width: 100%;
-  min-width: 0;
-  margin-top: var(--space-5);
-}
 
 .track-viewport {
   position: relative;
-  isolation: isolate;
 
   width: 100%;
-  height: clamp(420px, 62vh, 720px);
+  height: 100%;
+
+  min-width: 0;
+  min-height: 0;
 
   overflow: hidden;
 
-  border: var(--border-subtle);
-  border-radius: var(--radius-lg);
-
   background:
     radial-gradient(
-      circle at 50% 45%,
-      rgba(255, 255, 255, 0.03),
-      transparent 60%
-    ),
-    #07090d;
+      ellipse at center,
+      #161b24 0%,
+      #080a0e 76%
+    );
 }
 
 .replay-track-canvas {
   position: absolute;
+
   inset: 0;
 
   display: block;
+
   width: 100%;
   height: 100%;
 
   z-index: 1;
-  pointer-events: none;
 }
 
 .track-overlay {
   position: absolute;
-  top: var(--space-4);
-  left: var(--space-4);
+
+  top: 18px;
+  left: 18px;
+
   z-index: 5;
 
   display: flex;
   align-items: center;
-  gap: var(--space-2);
 
-  padding: var(--space-2) var(--space-3);
+  gap: 9px;
 
-  border: var(--border-subtle);
-  border-radius: var(--radius-sm);
-  background: var(--glass-bg);
-  backdrop-filter: var(--glass-blur);
+  padding: 8px 11px;
 
-  color: var(--color-white-60);
-  font-size: var(--text-micro);
-  font-weight: var(--weight-bold);
-  letter-spacing: var(--tracking-wide);
+  border:
+    1px solid rgba(255,255,255,0.09);
 
-  pointer-events: none;
+  border-radius: 7px;
+
+  background:
+    rgba(5,7,10,0.72);
+
+  backdrop-filter: blur(12px);
+
+  color:
+    rgba(255,255,255,0.48);
+
+  font-family:
+    var(--font-mono);
+
+  font-size: 8px;
+
+  font-weight: 800;
+
+  letter-spacing: 0.13em;
 }
 
-.track-overlay::before {
+.track-overlay span {
+  display: flex;
+  align-items: center;
+
+  gap: 7px;
+}
+
+.track-overlay span::before {
   content: "";
-  width: 6px;
-  height: 6px;
+
+  width: 5px;
+  height: 5px;
+
   border-radius: 50%;
-  background: var(--color-accent);
-  box-shadow: 0 0 6px var(--color-accent-glow);
+
+  background:
+    var(--color-accent);
+
+  box-shadow:
+    0 0 10px var(--color-accent-glow);
 }
 
 .track-overlay strong {
-  color: var(--color-white);
-  font-weight: var(--weight-extrabold);
+  color:
+    var(--color-white);
 }
 
 .track-frame-info {
   position: absolute;
-  right: var(--space-4);
-  bottom: var(--space-4);
+
+  top: 18px;
+  right: 18px;
+
   z-index: 5;
 
-  padding: var(--space-2) var(--space-3);
+  padding: 8px 11px;
 
-  border: var(--border-subtle);
-  border-radius: var(--radius-sm);
-  background: var(--glass-bg);
-  backdrop-filter: var(--glass-blur);
+  border:
+    1px solid rgba(255,255,255,0.09);
 
-  color: var(--color-white-45);
-  font-size: var(--text-micro);
-  font-weight: var(--weight-bold);
-  letter-spacing: var(--tracking-wide);
+  border-radius: 7px;
 
-  pointer-events: none;
+  background:
+    rgba(5,7,10,0.72);
+
+  backdrop-filter: blur(12px);
+
+  color:
+    rgba(255,255,255,0.48);
+
+  font-family:
+    var(--font-mono);
+
+  font-size: 8px;
+
+  font-weight: 800;
+
+  letter-spacing: 0.13em;
 }
 
 .track-frame-info strong {
-  color: var(--color-white);
+  color:
+    var(--color-white);
 }
 
-@media (max-width: 900px) {
+@media (max-width: 800px) {
   .track-viewport {
-    height: clamp(360px, 58vh, 560px);
+    min-height: 430px;
   }
 }
 
 @media (max-width: 600px) {
-  .track-viewport {
-    height: clamp(320px, 52vh, 460px);
-    border-radius: var(--radius-md);
+  .track-overlay {
+    top: 10px;
+    left: 10px;
+
+    padding: 6px 8px;
+
+    font-size: 7px;
   }
 
-  .track-overlay,
   .track-frame-info {
-    top: var(--space-2);
-    left: var(--space-2);
-    right: var(--space-2);
-    bottom: var(--space-2);
-    padding: var(--space-1) var(--space-2);
-    font-size: 9px;
+    top: 10px;
+    right: 10px;
+
+    padding: 6px 8px;
+
+    font-size: 7px;
   }
 }
+
+/* ============================================================
+   FINAL TRACK VISIBILITY FIX
+   ============================================================ */
+
+.replay-track-panel {
+  position: relative;
+
+  width: 100%;
+  height: 100%;
+
+  min-width: 0;
+  min-height: 0;
+
+  display: flex;
+  flex-direction: column;
+
+  overflow: hidden;
+
+  box-sizing: border-box;
+}
+
+.track-viewport {
+  position: relative;
+
+  width: 100%;
+  height: 100%;
+
+  min-width: 0;
+  min-height: 0;
+
+  flex: 1 1 0;
+
+  overflow: hidden;
+
+  box-sizing: border-box;
+
+  background:
+    radial-gradient(
+      circle at center,
+      rgba(255,255,255,0.035),
+      rgba(7,9,13,0.98) 70%
+    );
+
+  border: 1px solid rgba(255,255,255,0.08);
+  border-radius: 16px;
+}
+
+.track-viewport::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  pointer-events: none;
+
+  background:
+    linear-gradient(
+      rgba(255,255,255,0.025) 1px,
+      transparent 1px
+    ),
+    linear-gradient(
+      90deg,
+      rgba(255,255,255,0.025) 1px,
+      transparent 1px
+    );
+
+  background-size: 48px 48px;
+}
+
+.replay-track-canvas {
+  position: absolute;
+
+  top: 0;
+  left: 0;
+
+  width: 100%;
+  height: 100%;
+
+  min-width: 0;
+  min-height: 0;
+
+  display: block;
+
+  z-index: 1;
+
+  pointer-events: none;
+
+  box-sizing: border-box;
+}
+
+.track-overlay {
+  position: absolute;
+  z-index: 5;
+}
+
+.track-frame-info {
+  position: absolute;
+  z-index: 5;
+}
+
+@media (max-width: 1100px) {
+  .track-viewport {
+    min-height: 400px;
+  }
+}
+
+@media (max-width: 700px) {
+  .track-viewport {
+    min-height: 340px;
+  }
+}
+

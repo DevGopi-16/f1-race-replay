@@ -90,3 +90,16 @@ frontend/static/css/_backup
 frontend/static/css/style.css.step7-backup
 frontend/static/css/style.css.backup
 backend/main.py.backup
+frontend/src/features/replay/replay.css.backup
+frontend/src/features/replay/replay.css.backup
+frontend/src/features/replay/replay.css.backup.20260817-182517
+frontend/src/features/replay/ReplayPage.tsx.backup
+frontend/src/features/replay/ReplayPage.tsx.backup
+frontend/src/features/replay/ReplayPage.tsx.backup.before-performance-fix
+frontend/src/features/replay/ReplayPage.tsx.before-deterministic-fix
+frontend/src/features/replay/replay.css.backup
+frontend/src/features/replay/hooks/useReplay.ts.backup.before-fast-load
+frontend/src/features/replay/hooks/useReplay.ts.backup.before-fast-validation
+frontend/src/features/replay/hooks/useReplay.ts.before-deterministic-fix
+frontend/src/features/replay/frontend
+frontend/src/features/replay/replay.css.backup

@@ -20,16 +20,23 @@ import type {
   ReplaySessionType,
 } from "./replay.types";
 
+import "./replay.css";
+
 export default function ReplayPage() {
   const [year, setYear] = useState(2026);
   const [round, setRound] = useState(11);
   const [sessionType, setSessionType] = useState<ReplaySessionType>("R");
-  const [fps, setFps] = useState(2);
+  const [fps, setFps] = useState(8);
   const [frameIndex, setFrameIndex] = useState(0);
   const [playing, setPlaying] = useState(false);
 
-  const animationRef = useRef<number | null>(null);
-  const lastFrameTimeRef = useRef(0);
+  /*
+   * ReplayPage owns the ONLY playback clock.
+   *
+   * A generation token prevents an old animation callback
+   * from changing frameIndex after PAUSE or manual SEEK.
+   */
+  const playbackGenerationRef = useRef(0);
 
   const query = useMemo(
     () => ({
@@ -43,84 +50,123 @@ export default function ReplayPage() {
 
   const { data, loading, error } = useReplay(query);
 
-  const framesCountRef = useRef(0);
-  framesCountRef.current = data?.frames?.length ?? 0;
-
   /*
    * Stop playback when the selected race/session/FPS changes.
    */
   useEffect(() => {
+    playbackGenerationRef.current += 1;
     setFrameIndex(0);
     setPlaying(false);
   }, [year, round, sessionType, fps]);
 
   /*
    * ---------------------------------------------------------
-   * REPLAY ANIMATION LOOP (Fixed: Doesn't restart on chunk load)
+   * REPLAY PLAYBACK CLOCK
    * ---------------------------------------------------------
+   *
+   * Telemetry is sampled at `fps`.
+   *
+   * React should only receive a new frame index when the
+   * telemetry frame actually changes.
+   *
+   * This avoids ~60 React updates/sec for an 8 FPS replay.
    */
+
   useEffect(() => {
-    if (!playing || framesCountRef.current === 0) {
+    if (!playing || !data?.frames?.length) {
       return;
     }
 
+    const generation = ++playbackGenerationRef.current;
+    const total = data.frames.length;
     const frameDuration = 1000 / Math.max(1, fps);
 
-    const animate = (timestamp: number) => {
-      if (lastFrameTimeRef.current === 0) {
-        lastFrameTimeRef.current = timestamp;
+    const startFrame = Math.min(
+      Math.max(0, frameIndex),
+      total - 1,
+    );
+
+    const startTime = performance.now();
+
+    let rafId: number | null = null;
+    let lastFrame = startFrame;
+
+    const animate = (now: number) => {
+      if (
+        playbackGenerationRef.current !== generation
+      ) {
+        return;
       }
 
-      const elapsed = timestamp - lastFrameTimeRef.current;
+      const elapsed = now - startTime;
 
-      if (elapsed >= frameDuration) {
-        const steps = Math.max(
-          1,
-          Math.floor(elapsed / frameDuration),
-        );
+      const offset = Math.floor(
+        elapsed / frameDuration,
+      );
 
-        lastFrameTimeRef.current = timestamp;
+      const nextFrame = startFrame + offset;
 
-        setFrameIndex((current) => {
-          const next = current + steps;
-          const total = framesCountRef.current;
-
-          if (next >= total) {
-            setPlaying(false);
-            return Math.max(0, total - 1);
-          }
-
-          return next;
-        });
+      if (nextFrame >= total - 1) {
+        setFrameIndex(total - 1);
+        setPlaying(false);
+        return;
       }
 
-      animationRef.current = requestAnimationFrame(animate);
+      /*
+       * IMPORTANT:
+       *
+       * Only update React when the telemetry frame
+       * actually changes.
+       */
+      if (nextFrame !== lastFrame) {
+        lastFrame = nextFrame;
+        setFrameIndex(nextFrame);
+      }
+
+      rafId = requestAnimationFrame(animate);
     };
 
-    animationRef.current = requestAnimationFrame(animate);
+    rafId = requestAnimationFrame(animate);
 
     return () => {
-      if (animationRef.current !== null) {
-        cancelAnimationFrame(animationRef.current);
-        animationRef.current = null;
+      if (rafId !== null) {
+        cancelAnimationFrame(rafId);
       }
-      lastFrameTimeRef.current = 0;
+
+      playbackGenerationRef.current += 1;
     };
-  }, [playing, fps]);
+  }, [
+    playing,
+    fps,
+    data?.frames?.length,
+  ]);
 
   const totalFrames = data?.frames?.length ?? 0;
   const currentFrame = data?.frames?.[frameIndex] ?? null;
 
   const handlePlayPause = () => {
-    if (!data || data.frames.length === 0) {
+    if (
+      !data ||
+      data.frames.length === 0
+    ) {
       return;
     }
 
-    if (frameIndex >= data.frames.length - 1) {
+    const lastFrame =
+      data.frames.length - 1;
+
+    /*
+     * If the replay is at the end,
+     * Play starts a new replay from frame 0.
+     */
+    if (frameIndex >= lastFrame) {
+      playbackGenerationRef.current += 1;
       setFrameIndex(0);
       setPlaying(true);
       return;
     }
+
+    playbackGenerationRef.current += 1;
 
     setPlaying((current) => !current);
   };
@@ -193,6 +239,8 @@ export default function ReplayPage() {
               track={data.track}
               frames={data.frames}
               frameIndex={frameIndex}
+              playing={playing}
+              frameRate={data.frame_rate}
               driverColors={data.driver_colors}
             />
           </Reveal>
@@ -205,7 +253,27 @@ export default function ReplayPage() {
               playing={playing}
               onPlayPause={handlePlayPause}
               onFrameChange={(index) => {
-                setFrameIndex(index);
+                /*
+                 * Manual seeking must stop playback first.
+                 *
+                 * Otherwise the requestAnimationFrame loop can
+                 * immediately overwrite the frame selected by
+                 * the slider.
+                 */
+                playbackGenerationRef.current += 1;
+                setPlaying(false);
+                setFrameIndex(
+                  Math.max(
+                    0,
+                    Math.min(
+                      index,
+                      Math.max(
+                        0,
+                        totalFrames - 1,
+                      ),
+                    ),
+                  ),
+                );
               }}
             />
           </Reveal>

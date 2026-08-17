@@ -1,0 +1,1102 @@
+import {
+  useCallback,
+  useEffect,
+  useMemo,
+  useRef,
+} from "react";
+
+import type {
+  ReplayDriverColors,
+  ReplayFrame,
+  ReplayTrack as ReplayTrackData,
+} from "../replay.types";
+
+import "./replay-track.css";
+
+interface ReplayTrackProps {
+  track: ReplayTrackData;
+  frames: ReplayFrame[];
+  frameIndex: number;
+  driverColors: ReplayDriverColors;
+}
+
+interface Point {
+  x: number;
+  y: number;
+}
+
+
+interface DriverBadge {
+  code: string;
+  x: number;
+  y: number;
+  color: string;
+
+  width: number;
+  height: number;
+
+  labelX: number;
+  labelY: number;
+}
+
+function badgesOverlap(
+  a: DriverBadge,
+  b: DriverBadge,
+  gap = 6,
+): boolean {
+  return !(
+    a.labelX + a.width + gap <= b.labelX ||
+    b.labelX + b.width + gap <= a.labelX ||
+    a.labelY + a.height + gap <= b.labelY ||
+    b.labelY + b.height + gap <= a.labelY
+  );
+}
+
+function clampBadge(
+  badge: DriverBadge,
+  width: number,
+  height: number,
+) {
+  badge.labelX = Math.max(
+    6,
+    Math.min(
+      badge.labelX,
+      width - badge.width - 6,
+    ),
+  );
+
+  badge.labelY = Math.max(
+    6,
+    Math.min(
+      badge.labelY,
+      height - badge.height - 6,
+    ),
+  );
+}
+
+/**
+ * Separates labels without changing the actual
+ * telemetry position of the cars.
+ */
+function resolveBadgeCollisions(
+  badges: DriverBadge[],
+  canvasWidth: number,
+  canvasHeight: number,
+) {
+  /*
+   * Stable ordering prevents labels from jumping
+   * randomly between animation frames.
+   */
+  badges.sort((a, b) =>
+    a.code.localeCompare(b.code),
+  );
+
+  const GAP = 8;
+  const CAR_CLEARANCE = 16;
+  const MAX_ITERATIONS = 40;
+
+  /*
+   * Deterministic starting positions around the car.
+   * This is especially important when many cars are
+   * concentrated at the same section of track.
+   */
+  const offsetPattern = [
+    { x: 0, y: -28 },
+    { x: 34, y: -20 },
+    { x: -34, y: -20 },
+    { x: 42, y: 8 },
+    { x: -42, y: 8 },
+    { x: 28, y: 34 },
+    { x: -28, y: 34 },
+    { x: 58, y: -34 },
+    { x: -58, y: -34 },
+    { x: 58, y: 30 },
+    { x: -58, y: 30 },
+  ];
+
+  /*
+   * Spread badges around their actual telemetry point.
+   */
+  for (let i = 0; i < badges.length; i++) {
+    const badge = badges[i];
+
+    const pattern =
+      offsetPattern[i % offsetPattern.length];
+
+    badge.labelX =
+      badge.x -
+      badge.width / 2 +
+      pattern.x;
+
+    badge.labelY =
+      badge.y -
+      badge.height / 2 +
+      pattern.y;
+
+    clampBadge(
+      badge,
+      canvasWidth,
+      canvasHeight,
+    );
+  }
+
+  /*
+   * Iteratively separate overlapping badges.
+   */
+  for (
+    let iteration = 0;
+    iteration < MAX_ITERATIONS;
+    iteration++
+  ) {
+    let changed = false;
+
+    for (let i = 0; i < badges.length; i++) {
+      const a = badges[i];
+
+      for (let j = 0; j < i; j++) {
+        const b = badges[j];
+
+        if (!badgesOverlap(a, b, GAP)) {
+          continue;
+        }
+
+        const aCenterX =
+          a.labelX + a.width / 2;
+
+        const aCenterY =
+          a.labelY + a.height / 2;
+
+        const bCenterX =
+          b.labelX + b.width / 2;
+
+        const bCenterY =
+          b.labelY + b.height / 2;
+
+        let dx =
+          aCenterX - bCenterX;
+
+        let dy =
+          aCenterY - bCenterY;
+
+        /*
+         * Avoid zero-distance collision calculations.
+         */
+        if (
+          Math.abs(dx) < 0.001 &&
+          Math.abs(dy) < 0.001
+        ) {
+          dx = i % 2 === 0 ? 1 : -1;
+          dy = 1;
+        }
+
+        /*
+         * Prefer vertical separation.
+         */
+        if (Math.abs(dy) >= Math.abs(dx)) {
+          const direction =
+            dy >= 0 ? 1 : -1;
+
+          a.labelY +=
+            direction *
+            (a.height + GAP);
+        } else {
+          const direction =
+            dx >= 0 ? 1 : -1;
+
+          a.labelX +=
+            direction *
+            (a.width + GAP);
+        }
+
+        clampBadge(
+          a,
+          canvasWidth,
+          canvasHeight,
+        );
+
+        changed = true;
+      }
+    }
+
+    if (!changed) {
+      break;
+    }
+  }
+
+  /*
+   * Keep labels visually separated from their own car.
+   */
+  for (const badge of badges) {
+    const centerX =
+      badge.labelX + badge.width / 2;
+
+    const centerY =
+      badge.labelY + badge.height / 2;
+
+    const dx =
+      centerX - badge.x;
+
+    const dy =
+      centerY - badge.y;
+
+    const distance =
+      Math.sqrt(dx * dx + dy * dy);
+
+    if (distance < CAR_CLEARANCE) {
+      badge.labelY -= 20;
+
+      clampBadge(
+        badge,
+        canvasWidth,
+        canvasHeight,
+      );
+    }
+  }
+
+  /*
+   * Final safety pass.
+   */
+  for (let i = 0; i < badges.length; i++) {
+    for (let j = 0; j < i; j++) {
+      const a = badges[i];
+      const b = badges[j];
+
+      if (!badgesOverlap(a, b, 4)) {
+        continue;
+      }
+
+      const direction =
+        i % 2 === 0 ? 1 : -1;
+
+      a.labelX +=
+        direction *
+        (a.width + GAP);
+
+      clampBadge(
+        a,
+        canvasWidth,
+        canvasHeight,
+      );
+    }
+  }
+}
+
+interface Bounds {
+  minX: number;
+  maxX: number;
+  minY: number;
+  maxY: number;
+}
+
+function getDriverColor(
+  driverColors: ReplayDriverColors,
+  code: string,
+): string {
+  const value = driverColors[code];
+
+  if (typeof value === "string") {
+    return value;
+  }
+
+  if (
+    value &&
+    typeof value === "object" &&
+    typeof value.color === "string"
+  ) {
+    return value.color;
+  }
+
+  return "#ffffff";
+}
+
+export default function ReplayTrack({
+  track,
+  frames,
+  frameIndex,
+  driverColors,
+}: ReplayTrackProps) {
+  const canvasRef =
+    useRef<HTMLCanvasElement | null>(null);
+
+  const viewportRef =
+    useRef<HTMLDivElement | null>(null);
+
+  const sizeRef = useRef({
+    width: 0,
+    height: 0,
+    dpr: 1,
+  });
+
+  const getTrackPoints = useCallback((): Point[] => {
+    if (
+      Array.isArray(track.centerline) &&
+      track.centerline.length > 1
+    ) {
+      return track.centerline
+        .filter(
+          (point): point is [number, number] =>
+            Array.isArray(point) &&
+            point.length >= 2 &&
+            Number.isFinite(point[0]) &&
+            Number.isFinite(point[1]),
+        )
+        .map(([x, y]) => ({
+          x,
+          y,
+        }));
+    }
+
+    if (
+      Array.isArray(track.points) &&
+      track.points.length > 1
+    ) {
+      return track.points.filter(
+        (point) =>
+          Number.isFinite(point.x) &&
+          Number.isFinite(point.y),
+      );
+    }
+
+    return [];
+  }, [track]);
+
+  const bounds = useMemo<Bounds | null>(() => {
+    const points = getTrackPoints();
+
+    if (points.length < 2) {
+      return null;
+    }
+
+    let minX = Infinity;
+    let maxX = -Infinity;
+    let minY = Infinity;
+    let maxY = -Infinity;
+
+    for (const point of points) {
+      minX = Math.min(minX, point.x);
+      maxX = Math.max(maxX, point.x);
+      minY = Math.min(minY, point.y);
+      maxY = Math.max(maxY, point.y);
+    }
+
+    if (
+      !Number.isFinite(minX) ||
+      !Number.isFinite(maxX) ||
+      !Number.isFinite(minY) ||
+      !Number.isFinite(maxY)
+    ) {
+      return null;
+    }
+
+    return {
+      minX,
+      maxX,
+      minY,
+      maxY,
+    };
+  }, [getTrackPoints]);
+
+  const resizeCanvas = useCallback(() => {
+    const canvas = canvasRef.current;
+    const viewport = viewportRef.current;
+
+    if (!canvas || !viewport) {
+      return;
+    }
+
+    const rect =
+      viewport.getBoundingClientRect();
+
+    const width = Math.max(
+      320,
+      Math.floor(rect.width),
+    );
+
+    const height = Math.max(
+      360,
+      Math.floor(rect.height),
+    );
+
+    const dpr = Math.min(
+      window.devicePixelRatio || 1,
+      2,
+    );
+
+    sizeRef.current = {
+      width,
+      height,
+      dpr,
+    };
+
+    canvas.width =
+      Math.floor(width * dpr);
+
+    canvas.height =
+      Math.floor(height * dpr);
+
+    canvas.style.width =
+      `${width}px`;
+
+    canvas.style.height =
+      `${height}px`;
+
+    const ctx =
+      canvas.getContext("2d");
+
+    if (!ctx) {
+      console.error(
+        "[ReplayTrack] Unable to obtain 2D canvas context",
+      );
+      return;
+    }
+
+    ctx.setTransform(
+      dpr,
+      0,
+      0,
+      dpr,
+      0,
+      0,
+    );
+  }, []);
+
+  useEffect(() => {
+    resizeCanvas();
+
+    const viewport =
+      viewportRef.current;
+
+    if (!viewport) {
+      return;
+    }
+
+    const observer =
+      new ResizeObserver(() => {
+        resizeCanvas();
+      });
+
+    observer.observe(viewport);
+
+    window.addEventListener(
+      "resize",
+      resizeCanvas,
+    );
+
+    return () => {
+      observer.disconnect();
+
+      window.removeEventListener(
+        "resize",
+        resizeCanvas,
+      );
+    };
+  }, [resizeCanvas]);
+
+  const render = useCallback(() => {
+    const canvas =
+      canvasRef.current;
+
+    if (!canvas) {
+      return;
+    }
+
+    const ctx =
+      canvas.getContext("2d");
+
+    if (!ctx) {
+      console.error(
+        "[ReplayTrack] Canvas 2D context unavailable",
+      );
+      return;
+    }
+
+    const {
+      width,
+      height,
+    } = sizeRef.current;
+
+    if (
+      width <= 1 ||
+      height <= 1
+    ) {
+      return;
+    }
+
+    ctx.setTransform(
+      sizeRef.current.dpr,
+      0,
+      0,
+      sizeRef.current.dpr,
+      0,
+      0,
+    );
+
+    ctx.clearRect(
+      0,
+      0,
+      width,
+      height,
+    );
+
+    /*
+     * Background
+     */
+    ctx.fillStyle = "#07090d";
+
+    ctx.fillRect(
+      0,
+      0,
+      width,
+      height,
+    );
+
+    const points =
+      getTrackPoints();
+
+    if (
+      points.length < 2 ||
+      !bounds
+    ) {
+      ctx.fillStyle = "#8b93a1";
+      ctx.font =
+        "600 14px system-ui, sans-serif";
+      ctx.textAlign = "center";
+
+      ctx.fillText(
+        "TRACK DATA UNAVAILABLE",
+        width / 2,
+        height / 2,
+      );
+
+      return;
+    }
+
+    /*
+     * ---------------------------------------------------------
+     * TRACK FITTING
+     * ---------------------------------------------------------
+     *
+     * Use percentage-based padding rather than fixed padding.
+     * This prevents the bottom of the Hungaroring from being
+     * clipped on different viewport sizes.
+     */
+    const paddingX =
+      Math.max(45, width * 0.075);
+
+    const paddingY =
+      Math.max(55, height * 0.12);
+
+    const rangeX =
+      Math.max(
+        1,
+        bounds.maxX - bounds.minX,
+      );
+
+    const rangeY =
+      Math.max(
+        1,
+        bounds.maxY - bounds.minY,
+      );
+
+    const usableWidth =
+      Math.max(
+        1,
+        width - paddingX * 2,
+      );
+
+    const usableHeight =
+      Math.max(
+        1,
+        height - paddingY * 2,
+      );
+
+    const scale =
+      Math.min(
+        usableWidth / rangeX,
+        usableHeight / rangeY,
+      );
+
+    const drawnWidth =
+      rangeX * scale;
+
+    const drawnHeight =
+      rangeY * scale;
+
+    const offsetX =
+      (width - drawnWidth) / 2;
+
+    const offsetY =
+      (height - drawnHeight) / 2;
+
+    const transformPoint =
+      (point: Point): Point => ({
+        x:
+          offsetX +
+          (point.x - bounds.minX) *
+            scale,
+
+        /*
+         * Invert Y because telemetry coordinates
+         * and canvas coordinates normally use
+         * opposite vertical directions.
+         */
+        y:
+          offsetY +
+          (bounds.maxY - point.y) *
+            scale,
+      });
+
+    /*
+     * ---------------------------------------------------------
+     * TRACK GLOW
+     * ---------------------------------------------------------
+     */
+    ctx.save();
+
+    ctx.beginPath();
+
+    for (
+      let i = 0;
+      i < points.length;
+      i++
+    ) {
+      const point =
+        transformPoint(points[i]);
+
+      if (i === 0) {
+        ctx.moveTo(
+          point.x,
+          point.y,
+        );
+      } else {
+        ctx.lineTo(
+          point.x,
+          point.y,
+        );
+      }
+    }
+
+    ctx.strokeStyle =
+      "rgba(255,255,255,0.10)";
+
+    ctx.lineWidth = 9;
+    ctx.lineCap = "round";
+    ctx.lineJoin = "round";
+
+    ctx.shadowBlur = 14;
+    ctx.shadowColor =
+      "rgba(255,255,255,0.15)";
+
+    ctx.stroke();
+
+    ctx.restore();
+
+    /*
+     * ---------------------------------------------------------
+     * TRACK MAIN LINE
+     * ---------------------------------------------------------
+     */
+    ctx.save();
+
+    ctx.beginPath();
+
+    points.forEach(
+      (point, index) => {
+        const transformed =
+          transformPoint(point);
+
+        if (index === 0) {
+          ctx.moveTo(
+            transformed.x,
+            transformed.y,
+          );
+        } else {
+          ctx.lineTo(
+            transformed.x,
+            transformed.y,
+          );
+        }
+      },
+    );
+
+    ctx.strokeStyle =
+      "rgba(255,255,255,0.78)";
+
+    ctx.lineWidth = 2.2;
+    ctx.lineCap = "round";
+    ctx.lineJoin = "round";
+
+    ctx.stroke();
+
+    ctx.restore();
+
+    /*
+     * ---------------------------------------------------------
+     * START / FINISH
+     * ---------------------------------------------------------
+     */
+    if (
+      Array.isArray(track.start_finish) &&
+      track.start_finish.length >= 2
+    ) {
+      const start =
+        track.start_finish[0];
+
+      const end =
+        track.start_finish[1];
+
+      if (
+        Array.isArray(start) &&
+        Array.isArray(end) &&
+        Number.isFinite(start[0]) &&
+        Number.isFinite(start[1]) &&
+        Number.isFinite(end[0]) &&
+        Number.isFinite(end[1])
+      ) {
+        const a =
+          transformPoint({
+            x: start[0],
+            y: start[1],
+          });
+
+        const b =
+          transformPoint({
+            x: end[0],
+            y: end[1],
+          });
+
+        ctx.save();
+
+        ctx.strokeStyle =
+          "rgba(255,255,255,0.9)";
+
+        ctx.lineWidth = 4;
+
+        ctx.beginPath();
+
+        ctx.moveTo(
+          a.x,
+          a.y,
+        );
+
+        ctx.lineTo(
+          b.x,
+          b.y,
+        );
+
+        ctx.stroke();
+
+        ctx.restore();
+      }
+    }
+
+    /*
+     * ---------------------------------------------------------
+     * DRIVER MARKERS
+     * ---------------------------------------------------------
+     */
+    const frame =
+      frames[frameIndex];
+
+    if (!frame?.drivers) {
+      return;
+    }
+
+    const drivers =
+      Object.entries(frame.drivers);
+
+    /*
+     * Draw all cars first.
+     */
+    for (const [code, driver] of drivers) {
+      if (
+        !driver ||
+        typeof driver.x !== "number" ||
+        typeof driver.y !== "number" ||
+        !Number.isFinite(driver.x) ||
+        !Number.isFinite(driver.y)
+      ) {
+        continue;
+      }
+
+      const position =
+        transformPoint({
+          x: driver.x,
+          y: driver.y,
+        });
+
+      const color =
+        getDriverColor(
+          driverColors,
+          code,
+        );
+
+      /*
+       * Glow
+       */
+      ctx.save();
+
+      ctx.beginPath();
+
+      ctx.arc(
+        position.x,
+        position.y,
+        9,
+        0,
+        Math.PI * 2,
+      );
+
+      ctx.fillStyle = color;
+      ctx.globalAlpha = 0.18;
+      ctx.shadowBlur = 16;
+      ctx.shadowColor = color;
+      ctx.fill();
+
+      ctx.restore();
+
+      /*
+       * Outer marker
+       */
+      ctx.save();
+
+      ctx.beginPath();
+
+      ctx.arc(
+        position.x,
+        position.y,
+        5.5,
+        0,
+        Math.PI * 2,
+      );
+
+      ctx.fillStyle = color;
+      ctx.strokeStyle =
+        "rgba(255,255,255,0.95)";
+
+      ctx.lineWidth = 1.5;
+
+      ctx.fill();
+      ctx.stroke();
+
+      ctx.restore();
+    }
+
+    /*
+     * ---------------------------------------------------------
+     * DRIVER LABELS
+     * ---------------------------------------------------------
+     *
+     * Build one badge per driver, then run collision resolution
+     * so labels spread apart instead of stacking when several
+     * cars are close together (e.g. exiting the pits together).
+     */
+    ctx.font = "700 9px system-ui, sans-serif";
+
+    const labelHeight = 16;
+    const badges: DriverBadge[] = [];
+
+    for (const [code, driver] of drivers) {
+      if (
+        !driver ||
+        typeof driver.x !== "number" ||
+        typeof driver.y !== "number" ||
+        !Number.isFinite(driver.x) ||
+        !Number.isFinite(driver.y)
+      ) {
+        continue;
+      }
+
+      const position =
+        transformPoint({
+          x: driver.x,
+          y: driver.y,
+        });
+
+      const textWidth =
+        ctx.measureText(code).width;
+
+      const labelWidth = Math.max(
+        26,
+        Math.ceil(textWidth) + 12,
+      );
+
+      badges.push({
+        code,
+        x: position.x,
+        y: position.y,
+        color: getDriverColor(
+          driverColors,
+          code,
+        ),
+        width: labelWidth,
+        height: labelHeight,
+        labelX: position.x,
+        labelY: position.y,
+      });
+    }
+
+    resolveBadgeCollisions(
+      badges,
+      width,
+      height,
+    );
+
+    /*
+     * Leader lines — drawn first, under the labels, and only
+     * when a label had to move away from its car so it's still
+     * traceable back to the right dot.
+     */
+    for (const badge of badges) {
+      const labelCenterX =
+        badge.labelX + badge.width / 2;
+
+      const labelCenterY =
+        badge.labelY + badge.height / 2;
+
+      const dx = labelCenterX - badge.x;
+      const dy = labelCenterY - badge.y;
+
+      const distance = Math.sqrt(
+        dx * dx + dy * dy,
+      );
+
+      if (distance <= 20) {
+        continue;
+      }
+
+      ctx.save();
+
+      ctx.strokeStyle =
+        "rgba(255,255,255,0.22)";
+
+      ctx.lineWidth = 1;
+
+      ctx.beginPath();
+      ctx.moveTo(badge.x, badge.y);
+      ctx.lineTo(labelCenterX, labelCenterY);
+      ctx.stroke();
+
+      ctx.restore();
+    }
+
+    /*
+     * Draw labels after all markers and leader lines so they
+     * remain the topmost, most readable layer.
+     */
+    for (const badge of badges) {
+      ctx.save();
+
+      /*
+       * Label background
+       */
+      ctx.fillStyle =
+        "rgba(5,7,11,0.90)";
+
+      ctx.strokeStyle = badge.color;
+
+      ctx.lineWidth = 1;
+
+      ctx.beginPath();
+
+      ctx.roundRect(
+        badge.labelX,
+        badge.labelY,
+        badge.width,
+        badge.height,
+        4,
+      );
+
+      ctx.fill();
+      ctx.stroke();
+
+      /*
+       * Label text
+       */
+      ctx.fillStyle = "#ffffff";
+
+      ctx.font =
+        "700 9px system-ui, sans-serif";
+
+      ctx.textAlign = "center";
+      ctx.textBaseline = "middle";
+
+      ctx.fillText(
+        badge.code,
+        badge.labelX +
+          badge.width / 2,
+        badge.labelY +
+          badge.height / 2,
+      );
+
+      ctx.restore();
+    }
+  }, [
+    bounds,
+    driverColors,
+    frameIndex,
+    frames,
+    getTrackPoints,
+    track.start_finish,
+  ]);
+
+  /*
+   * Re-render whenever the active frame,
+   * track or viewport changes.
+   */
+  useEffect(() => {
+    /*
+     * Initial render.
+     */
+    render();
+
+    /*
+     * Second render after browser layout has settled.
+     * This fixes first-load canvas sizing issues.
+     */
+    const frame = requestAnimationFrame(() => {
+      resizeCanvas();
+
+      requestAnimationFrame(() => {
+        render();
+      });
+    });
+
+    return () => {
+      cancelAnimationFrame(frame);
+    };
+  }, [render, resizeCanvas]);
+
+  return (
+    <section className="replay-track-panel">
+      <div
+        ref={viewportRef}
+        className="track-viewport"
+      >
+        <canvas
+          ref={canvasRef}
+          className="replay-track-canvas"
+        />
+
+        <div className="track-overlay">
+          <span>LIVE TRACK</span>
+
+          <strong>
+            {
+              Object.keys(
+                frames[frameIndex]?.drivers ?? {},
+              ).length
+            }{" "}
+            CARS
+          </strong>
+        </div>
+
+        <div className="track-frame-info">
+          FRAME{" "}
+          <strong>
+            {frameIndex + 1}
+          </strong>
+        </div>
+      </div>
+    </section>
+  );
+}

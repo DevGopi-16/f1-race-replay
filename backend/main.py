@@ -146,6 +146,58 @@ def _get_cached_replay_telemetry(
 
     return telemetry
 
+
+def _get_cached_serialized_replay(
+    year,
+    round_number,
+    session_type,
+    fps,
+    raw_frames,
+):
+    """
+    Serialize the replay ONCE for a given session/FPS.
+
+    /api/replay/chunk may be called dozens of times.
+    Never rebuild the complete serialized replay for every chunk.
+    """
+
+    key = (
+        int(year),
+        int(round_number),
+        str(session_type),
+        int(fps),
+    )
+
+    cached = _REPLAY_SERIALIZED_CACHE.get(key)
+
+    if cached is not None:
+        print(
+            f"[ReplayCache] serialized HIT: "
+            f"{len(cached):,} frames @ {fps} FPS"
+        )
+        return cached
+
+    print(
+        f"[ReplayCache] serialized MISS: "
+        f"building replay for {year} R{round_number} "
+        f"{session_type} @ {fps} FPS..."
+    )
+
+    sampled = serialize_replay_frames(
+        raw_frames,
+        source_fps=SOURCE_FPS,
+        target_fps=fps,
+    )
+
+    _REPLAY_SERIALIZED_CACHE[key] = sampled
+
+    print(
+        f"[ReplayCache] serialized READY: "
+        f"{len(sampled):,} frames"
+    )
+
+    return sampled
+
 app = FastAPI(title="F1 Race Replay API")
 
 app.add_middleware(GZipMiddleware, minimum_size=1000)
@@ -734,10 +786,64 @@ def replay_chunk(
 
     all_frames = race_telemetry["frames"]
 
-    sampled_frames = serialize_replay_frames(
+    # ============================================================
+    # REPLAY FRAME ORDER VALIDATION
+    # ============================================================
+    # Validate the raw replay only once per telemetry cache key.
+    # Do NOT scan tens of thousands of frames for every chunk.
+    # ============================================================
+
+    validation_key = _replay_cache_key(
+        year,
+        round,
+        session_type,
+    )
+
+    validation_cache = getattr(
+        replay_chunk,
+        "_frame_validation_cache",
+        None,
+    )
+
+    if validation_cache is None:
+        validation_cache = {}
+        replay_chunk._frame_validation_cache = validation_cache
+
+    if validation_key not in validation_cache:
+        previous_t = None
+        bad_time_indices = []
+
+        for idx, frame in enumerate(all_frames):
+            t = frame.get("t")
+
+            if not isinstance(t, (int, float)):
+                continue
+
+            if previous_t is not None and t < previous_t:
+                bad_time_indices.append(
+                    (idx - 1, previous_t, idx, t)
+                )
+
+            previous_t = t
+
+        validation_cache[validation_key] = bad_time_indices
+
+        if bad_time_indices:
+            print(
+                "[Replay] WARNING: frame time moved backwards:",
+                bad_time_indices[:10],
+            )
+        else:
+            print(
+                f"[Replay] Frame order OK: {len(all_frames)} frames"
+            )
+
+    sampled_frames = _get_cached_serialized_replay(
+        year,
+        round,
+        session_type,
+        fps,
         all_frames,
-        source_fps=SOURCE_FPS,
-        target_fps=fps,
     )
 
     total = len(sampled_frames)

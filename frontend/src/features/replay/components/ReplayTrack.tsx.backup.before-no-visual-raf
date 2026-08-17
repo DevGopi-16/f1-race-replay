@@ -254,6 +254,19 @@ const ReplayTrack = memo(function ReplayTrack({
     useRef(frameIndex);
 
   /*
+   * When a new telemetry frame arrives, this timestamp
+   * becomes the beginning of the visual transition.
+   */
+  const transitionStartRef =
+    useRef(0);
+
+  /*
+   * Prevent stale RAF callbacks.
+   */
+  const rafRef =
+    useRef<number | null>(null);
+
+  /*
    * Cached canvas track path.
    */
   const trackPathRef =
@@ -287,13 +300,32 @@ const ReplayTrack = memo(function ReplayTrack({
    * FRAME INDEX SYNC
    * ---------------------------------------------------------
    *
-   * React frameIndex is the single source of truth.
+   * React remains the source of truth.
    *
-   * ReplayTrack does not advance time and does not
-   * interpolate between telemetry frames.
+   * When playing:
+   *   current frame -> next frame
+   *   visual renderer interpolates between them.
+   *
+   * When seeking:
+   *   exact frame is drawn immediately.
    */
   useEffect(() => {
-    frameIndexRef.current = frameIndex;
+    const previous =
+      frameIndexRef.current;
+
+    frameIndexRef.current =
+      frameIndex;
+
+    /*
+     * A new frame from ReplayPage starts a new
+     * visual transition.
+     */
+    if (
+      previous !== frameIndex
+    ) {
+      transitionStartRef.current =
+        performance.now();
+    }
   }, [frameIndex]);
 
   /*
@@ -1161,35 +1193,125 @@ const ReplayTrack = memo(function ReplayTrack({
 
   /*
    * ---------------------------------------------------------
-   * EXACT FRAME RENDER
+   * RENDER LOOP
    * ---------------------------------------------------------
    *
-   * ReplayPage owns playback timing.
+   * This is a VISUAL renderer only.
    *
-   * ReplayTrack is ONLY a renderer:
+   * ReplayPage still owns playback timing.
    *
-   *   frameIndex 100 -> draw frame 100
-   *   frameIndex 101 -> draw frame 101
+   * When paused:
+   *   draw exact frame once.
    *
-   * There is intentionally:
+   * When seeking:
+   *   draw exact selected frame.
    *
-   *   - no requestAnimationFrame
-   *   - no interpolation
-   *   - no visual playback clock
-   *   - no stale animation callback
-   *
-   * This makes timeline seeking deterministic.
+   * When playing:
+   *   smoothly interpolate between the two telemetry
+   *   frames supplied by ReplayPage.
    */
   useEffect(() => {
     if (!frames.length) {
       return;
     }
 
-    draw(frameIndex, false);
+    /*
+     * Always draw the exact current frame immediately.
+     */
+    draw(
+      frameIndex,
+      false,
+    );
+
+    if (!playing) {
+      return;
+    }
+
+    const frameDuration =
+      1000 /
+      Math.max(
+        1,
+        frameRate,
+      );
+
+    transitionStartRef.current =
+      performance.now();
+
+    const animate =
+      (now: number) => {
+        if (!playing) {
+          return;
+        }
+
+        const current =
+          frameIndexRef.current;
+
+        const elapsed =
+          now -
+          transitionStartRef.current;
+
+        const progress =
+          Math.max(
+            0,
+            Math.min(
+              1,
+              elapsed /
+                frameDuration,
+            ),
+          );
+
+        draw(
+          current + progress,
+          true,
+        );
+
+        rafRef.current =
+          requestAnimationFrame(
+            animate,
+          );
+      };
+
+    rafRef.current =
+      requestAnimationFrame(
+        animate,
+      );
+
+    return () => {
+      if (
+        rafRef.current !== null
+      ) {
+        cancelAnimationFrame(
+          rafRef.current,
+        );
+
+        rafRef.current =
+          null;
+      }
+    };
   }, [
     draw,
     frameIndex,
+    frameRate,
     frames.length,
+    playing,
+  ]);
+
+  /*
+   * If the user seeks while paused, draw immediately.
+   */
+  useEffect(() => {
+    if (playing) {
+      return;
+    }
+
+    draw(
+      frameIndex,
+      false,
+    );
+  }, [
+    draw,
+    frameIndex,
+    playing,
   ]);
 
   return (
