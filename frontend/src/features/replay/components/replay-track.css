@@ -1,0 +1,130 @@
+/* ============================================================
+   F1 RACE REPLAY — TRACK PANEL
+   Clean rewrite. Single definition per rule.
+   ============================================================ */
+
+.replay-track-panel {
+  width: 100%;
+  min-width: 0;
+  margin-top: var(--space-5);
+}
+
+.track-viewport {
+  position: relative;
+  isolation: isolate;
+
+  width: 100%;
+  height: clamp(420px, 62vh, 720px);
+
+  overflow: hidden;
+
+  border: var(--border-subtle);
+  border-radius: var(--radius-lg);
+
+  background:
+    radial-gradient(
+      circle at 50% 45%,
+      rgba(255, 255, 255, 0.03),
+      transparent 60%
+    ),
+    #07090d;
+}
+
+.replay-track-canvas {
+  position: absolute;
+  inset: 0;
+
+  display: block;
+  width: 100%;
+  height: 100%;
+
+  z-index: 1;
+  pointer-events: none;
+}
+
+.track-overlay {
+  position: absolute;
+  top: var(--space-4);
+  left: var(--space-4);
+  z-index: 5;
+
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+
+  padding: var(--space-2) var(--space-3);
+
+  border: var(--border-subtle);
+  border-radius: var(--radius-sm);
+  background: var(--glass-bg);
+  backdrop-filter: var(--glass-blur);
+
+  color: var(--color-white-60);
+  font-size: var(--text-micro);
+  font-weight: var(--weight-bold);
+  letter-spacing: var(--tracking-wide);
+
+  pointer-events: none;
+}
+
+.track-overlay::before {
+  content: "";
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: var(--color-accent);
+  box-shadow: 0 0 6px var(--color-accent-glow);
+}
+
+.track-overlay strong {
+  color: var(--color-white);
+  font-weight: var(--weight-extrabold);
+}
+
+.track-frame-info {
+  position: absolute;
+  right: var(--space-4);
+  bottom: var(--space-4);
+  z-index: 5;
+
+  padding: var(--space-2) var(--space-3);
+
+  border: var(--border-subtle);
+  border-radius: var(--radius-sm);
+  background: var(--glass-bg);
+  backdrop-filter: var(--glass-blur);
+
+  color: var(--color-white-45);
+  font-size: var(--text-micro);
+  font-weight: var(--weight-bold);
+  letter-spacing: var(--tracking-wide);
+
+  pointer-events: none;
+}
+
+.track-frame-info strong {
+  color: var(--color-white);
+}
+
+@media (max-width: 900px) {
+  .track-viewport {
+    height: clamp(360px, 58vh, 560px);
+  }
+}
+
+@media (max-width: 600px) {
+  .track-viewport {
+    height: clamp(320px, 52vh, 460px);
+    border-radius: var(--radius-md);
+  }
+
+  .track-overlay,
+  .track-frame-info {
+    top: var(--space-2);
+    left: var(--space-2);
+    right: var(--space-2);
+    bottom: var(--space-2);
+    padding: var(--space-1) var(--space-2);
+    font-size: 9px;
+  }
+}

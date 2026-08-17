@@ -1,0 +1,247 @@
+:root {
+  /* ============================================================
+     F1 RACE REPLAY — DESIGN TOKENS
+     Premium Motorsport / Cinematic UI
+     ============================================================ */
+
+  /* ------------------------------------------------------------
+     COLORS
+     ------------------------------------------------------------ */
+
+  --color-black: #000000;
+  --color-bg: #050505;
+  --color-bg-soft: #0a0a0a;
+  --color-bg-elevated: #101010;
+  --color-bg-hover: #151515;
+
+  --color-white: #ffffff;
+  --color-white-90: rgba(255, 255, 255, 0.90);
+  --color-white-75: rgba(255, 255, 255, 0.75);
+  --color-white-60: rgba(255, 255, 255, 0.60);
+  --color-white-45: rgba(255, 255, 255, 0.45);
+  --color-white-30: rgba(255, 255, 255, 0.30);
+  --color-white-15: rgba(255, 255, 255, 0.15);
+  --color-white-08: rgba(255, 255, 255, 0.08);
+  --color-white-05: rgba(255, 255, 255, 0.05);
+
+  /* F1-inspired accent */
+  --color-accent: #e10600;
+  --color-accent-hover: #ff1a14;
+  --color-accent-soft: rgba(225, 6, 0, 0.16);
+  --color-accent-glow: rgba(225, 6, 0, 0.35);
+
+  /* Status */
+  --color-success: #38d996;
+  --color-warning: #f5b942;
+  --color-danger: #ff4d4d;
+  --color-info: #4da6ff;
+
+  /* ------------------------------------------------------------
+     TYPOGRAPHY
+     ------------------------------------------------------------ */
+
+  --font-display:
+    "Orbitron",
+    "Inter",
+    system-ui,
+    sans-serif;
+
+  --font-body:
+    "Inter",
+    -apple-system,
+    BlinkMacSystemFont,
+    "Segoe UI",
+    sans-serif;
+
+  --font-mono:
+    "SFMono-Regular",
+    "Cascadia Code",
+    "Roboto Mono",
+    monospace;
+
+  /* Display */
+  --text-display-xl: clamp(4rem, 9vw, 9rem);
+  --text-display-lg: clamp(3rem, 7vw, 7rem);
+  --text-display-md: clamp(2.5rem, 5vw, 5rem);
+
+  /* Headings */
+  --text-heading-xl: clamp(2.5rem, 4vw, 4.5rem);
+  --text-heading-lg: clamp(2rem, 3vw, 3.5rem);
+  --text-heading-md: clamp(1.5rem, 2vw, 2.25rem);
+  --text-heading-sm: 1.25rem;
+
+  /* Body */
+  --text-body-lg: 1.125rem;
+  --text-body-md: 1rem;
+  --text-body-sm: 0.875rem;
+  --text-caption: 0.75rem;
+  --text-micro: 0.625rem;
+
+  /* ------------------------------------------------------------
+     FONT WEIGHTS
+     ------------------------------------------------------------ */
+
+  --weight-light: 300;
+  --weight-regular: 400;
+  --weight-medium: 500;
+  --weight-semibold: 600;
+  --weight-bold: 700;
+  --weight-extrabold: 800;
+  --weight-black: 900;
+
+  /* ------------------------------------------------------------
+     LETTER SPACING
+     ------------------------------------------------------------ */
+
+  --tracking-tight: -0.04em;
+  --tracking-normal: 0;
+  --tracking-wide: 0.08em;
+  --tracking-wider: 0.14em;
+  --tracking-widest: 0.24em;
+
+  /* ------------------------------------------------------------
+     SPACING
+     ------------------------------------------------------------ */
+
+  --space-1: 0.25rem;
+  --space-2: 0.5rem;
+  --space-3: 0.75rem;
+  --space-4: 1rem;
+  --space-5: 1.25rem;
+  --space-6: 1.5rem;
+  --space-8: 2rem;
+  --space-10: 2.5rem;
+  --space-12: 3rem;
+  --space-16: 4rem;
+  --space-20: 5rem;
+  --space-24: 6rem;
+  --space-32: 8rem;
+
+  /* ------------------------------------------------------------
+     LAYOUT
+     ------------------------------------------------------------ */
+
+  --container-sm: 640px;
+  --container-md: 768px;
+  --container-lg: 1024px;
+  --container-xl: 1280px;
+  --container-2xl: 1536px;
+  --container-wide: 1800px;
+
+  --page-padding-desktop: clamp(2rem, 5vw, 6rem);
+  --page-padding-mobile: 1.25rem;
+
+  /* ------------------------------------------------------------
+     RADIUS
+     ------------------------------------------------------------ */
+
+  --radius-xs: 4px;
+  --radius-sm: 8px;
+  --radius-md: 12px;
+  --radius-lg: 18px;
+  --radius-xl: 24px;
+  --radius-2xl: 32px;
+  --radius-pill: 999px;
+
+  /* ------------------------------------------------------------
+     BORDERS
+     ------------------------------------------------------------ */
+
+  --border-subtle: 1px solid var(--color-white-08);
+  --border-light: 1px solid var(--color-white-15);
+  --border-accent: 1px solid rgba(225, 6, 0, 0.45);
+
+  /* ------------------------------------------------------------
+     GLASS
+     ------------------------------------------------------------ */
+
+  --glass-bg: rgba(12, 12, 12, 0.68);
+  --glass-bg-heavy: rgba(8, 8, 8, 0.86);
+  --glass-border: rgba(255, 255, 255, 0.10);
+  --glass-blur: blur(24px);
+  --glass-blur-heavy: blur(40px);
+
+  /* ------------------------------------------------------------
+     SHADOWS
+     ------------------------------------------------------------ */
+
+  --shadow-sm:
+    0 4px 16px rgba(0, 0, 0, 0.20);
+
+  --shadow-md:
+    0 12px 40px rgba(0, 0, 0, 0.35);
+
+  --shadow-lg:
+    0 24px 80px rgba(0, 0, 0, 0.50);
+
+  --shadow-accent:
+    0 0 40px rgba(225, 6, 0, 0.18);
+
+  /* ------------------------------------------------------------
+     MOTION
+     ------------------------------------------------------------ */
+
+  --ease-standard:
+    cubic-bezier(0.22, 1, 0.36, 1);
+
+  --ease-smooth:
+    cubic-bezier(0.16, 1, 0.3, 1);
+
+  --duration-fast: 160ms;
+  --duration-normal: 300ms;
+  --duration-slow: 600ms;
+  --duration-page: 800ms;
+
+  /* ------------------------------------------------------------
+     Z-INDEX
+     ------------------------------------------------------------ */
+
+  --z-base: 0;
+  --z-content: 10;
+  --z-floating: 100;
+  --z-navigation: 500;
+  --z-overlay: 800;
+  --z-modal: 1000;
+  --z-toast: 1200;
+
+  /* ------------------------------------------------------------
+     NAVIGATION
+     ------------------------------------------------------------ */
+
+  --nav-height: 72px;
+  --nav-height-mobile: 60px;
+  --nav-radius: 999px;
+
+  /* ------------------------------------------------------------
+     MEDIA
+     ------------------------------------------------------------ */
+
+  --hero-height: min(900px, 100vh);
+  --hero-min-height: 680px;
+
+  /* ------------------------------------------------------------
+     TRANSITIONS
+     ------------------------------------------------------------ */
+
+  --transition-fast:
+    all var(--duration-fast) var(--ease-standard);
+
+  --transition-normal:
+    all var(--duration-normal) var(--ease-standard);
+
+  --transition-slow:
+    all var(--duration-slow) var(--ease-smooth);
+}
+
+/* ================================================================
+   REDUCED MOTION
+   ================================================================ */
+
+@media (prefers-reduced-motion: reduce) {
+  :root {
+    --duration-fast: 0ms;
+    --duration-normal: 0ms;
+    --duration-slow: 0ms;
+    --duration-page: 0ms;
+  }
+}

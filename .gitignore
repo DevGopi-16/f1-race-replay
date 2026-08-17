@@ -89,3 +89,4 @@ build/
 frontend/static/css/_backup
 frontend/static/css/style.css.step7-backup
 frontend/static/css/style.css.backup
+backend/main.py.backup

@@ -1,0 +1,191 @@
+/* ============================================================
+   F1 RACE REPLAY — MOTION SYSTEM
+   Subtle / Cinematic / Premium
+   ============================================================ */
+
+:root {
+  --motion-fast: 180ms;
+  --motion-standard: 420ms;
+  --motion-slow: 700ms;
+
+  --motion-ease: cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+/* ------------------------------------------------------------
+   PAGE TRANSITION
+   ------------------------------------------------------------ */
+
+.page-transition {
+  min-height: 100%;
+  animation:
+    page-enter
+    520ms
+    var(--motion-ease)
+    both;
+}
+
+@keyframes page-enter {
+  from {
+    opacity: 0;
+    transform: translateY(12px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* ------------------------------------------------------------
+   REVEAL
+   ------------------------------------------------------------ */
+
+.reveal {
+  animation:
+    content-reveal
+    700ms
+    var(--motion-ease)
+    both;
+}
+
+.reveal-delay-none {
+  animation-delay: 0ms;
+}
+
+.reveal-delay-short {
+  animation-delay: 100ms;
+}
+
+.reveal-delay-medium {
+  animation-delay: 180ms;
+}
+
+.reveal-delay-long {
+  animation-delay: 280ms;
+}
+
+@keyframes content-reveal {
+  from {
+    opacity: 0;
+    transform: translateY(22px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* ------------------------------------------------------------
+   HOVER LIFT
+   ------------------------------------------------------------ */
+
+.motion-lift {
+  transition:
+    transform var(--motion-standard) var(--motion-ease),
+    border-color var(--motion-standard) var(--motion-ease),
+    background var(--motion-standard) var(--motion-ease);
+}
+
+.motion-lift:hover {
+  transform: translateY(-4px);
+}
+
+/* ------------------------------------------------------------
+   IMAGE MOTION
+   ------------------------------------------------------------ */
+
+.motion-image {
+  overflow: hidden;
+}
+
+.motion-image img {
+  transition:
+    transform 900ms var(--motion-ease),
+    filter 700ms var(--motion-ease);
+}
+
+.motion-image:hover img {
+  transform: scale(1.035);
+}
+
+/* ------------------------------------------------------------
+   ACCENT LINE
+   ------------------------------------------------------------ */
+
+.motion-accent-line {
+  position: relative;
+}
+
+.motion-accent-line::after {
+  content: "";
+
+  position: absolute;
+
+  left: 0;
+  bottom: -5px;
+
+  width: 100%;
+  height: 1px;
+
+  background: var(--color-accent);
+
+  transform: scaleX(0);
+  transform-origin: left;
+
+  transition:
+    transform 500ms var(--motion-ease);
+}
+
+.motion-accent-line:hover::after {
+  transform: scaleX(1);
+}
+
+/* ------------------------------------------------------------
+   NAVIGATION MOTION
+   ------------------------------------------------------------ */
+
+.floating-nav {
+  transition:
+    transform 450ms var(--motion-ease),
+    opacity 450ms var(--motion-ease);
+}
+
+.floating-nav-link {
+  transition:
+    color var(--motion-fast) ease,
+    background var(--motion-fast) ease,
+    transform var(--motion-fast) var(--motion-ease);
+}
+
+.floating-nav-link:hover {
+  transform: translateY(-1px);
+}
+
+/* ------------------------------------------------------------
+   BUTTON MOTION
+   ------------------------------------------------------------ */
+
+.ui-button {
+  will-change: transform;
+}
+
+/* ------------------------------------------------------------
+   REDUCED MOTION
+   ------------------------------------------------------------ */
+
+@media (prefers-reduced-motion: reduce) {
+  .page-transition,
+  .reveal {
+    animation: none;
+  }
+
+  .motion-lift,
+  .motion-image img,
+  .motion-accent-line::after,
+  .floating-nav,
+  .floating-nav-link,
+  .ui-button {
+    transition: none;
+  }
+}

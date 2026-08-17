@@ -23,6 +23,8 @@ import shutil
 from urllib.parse import urlencode
 from typing import Optional
 
+from starlette.middleware.gzip import GZipMiddleware
+
 from fastapi import FastAPI, HTTPException, Query, Depends, File, UploadFile
 from fastapi.responses import FileResponse, JSONResponse, RedirectResponse, HTMLResponse
 from pydantic import BaseModel
@@ -44,7 +46,7 @@ from src.f1_data import (
 from src.driver_panel import build_driver_panel, get_season_stats_cached, warm_season_stats
 from src.constructors_panel import build_constructors_panel, warm_constructor_history
 from src.next_session import get_next_session
-from src.serialize import serialize_frames, serialize_driver_colors
+from src.serialize import serialize_frames, serialize_replay_frames, serialize_driver_colors
 
 # --- Auth (Racer PRO signup/login) ---
 from src.auth.routes import router as auth_router, get_current_active_user
@@ -99,10 +101,54 @@ def get_circuit_svg_path(location: str, variant: str = "white-outline", style: s
     return f"/static/images/circuits/{style}/{variant}/{slug}.svg"
 
 
-app = FastAPI(title="F1 Race Replay API")
+
+# ============================================================================
+# REPLAY TELEMETRY MEMORY CACHE
+# ============================================================================
+# Prevents /api/replay/chunk from repeatedly loading and rebuilding the same
+# large telemetry dataset for every 500-frame request.
+
+_REPLAY_TELEMETRY_CACHE = {}
+_REPLAY_SERIALIZED_CACHE = {}
 
 
+def _replay_cache_key(year, round_number, session_type):
+    return (
+        int(year),
+        int(round_number),
+        str(session_type),
+    )
+
+
+def _get_cached_replay_telemetry(
+    year,
+    round_number,
+    session_type,
+    session,
+):
+    key = _replay_cache_key(
+        year,
+        round_number,
+        session_type,
+    )
+
+    cached = _REPLAY_TELEMETRY_CACHE.get(key)
+
+    if cached is not None:
+        return cached
+
+    telemetry = get_race_telemetry(
+        session,
+        session_type=session_type,
+    )
+
+    _REPLAY_TELEMETRY_CACHE[key] = telemetry
+
+    return telemetry
+
 app = FastAPI(title="F1 Race Replay API")
+
+app.add_middleware(GZipMiddleware, minimum_size=1000)
 
 app.add_middleware(
     CORSMiddleware,
@@ -118,14 +164,38 @@ app.include_router(auth_router)
 
 
 # --- Directory Config & Static Mounts ---
-FRONTEND_DIR = Path(__file__).resolve().parent.parent / "frontend"
+
+PROJECT_DIR = Path(__file__).resolve().parent.parent
+FRONTEND_DIR = PROJECT_DIR / "frontend"
+
+# New React + Vite production build
+DIST_DIR = FRONTEND_DIR / "dist"
+DIST_ASSETS_DIR = DIST_DIR / "assets"
+
+# Existing F1 static assets
 STATIC_DIR = FRONTEND_DIR / "static"
 UPLOADS_DIR = STATIC_DIR / "uploads"
+
 UPLOADS_DIR.mkdir(parents=True, exist_ok=True)
 
-# Mount static files directory
-app.mount("/static", StaticFiles(directory=STATIC_DIR), name="static")
+# Existing assets:
+# /static/images/...
+# /static/uploads/...
+app.mount(
+    "/static",
+    StaticFiles(directory=STATIC_DIR),
+    name="static",
+)
 
+# Vite production assets:
+# /assets/index-xxxxx.js
+# /assets/index-xxxxx.css
+if DIST_ASSETS_DIR.exists():
+    app.mount(
+        "/assets",
+        StaticFiles(directory=DIST_ASSETS_DIR),
+        name="vite-assets",
+    )
 
 # --- OAuth Routes ---
 
@@ -602,7 +672,7 @@ def replay(
         track["corners"] = []
 
     events = extract_race_events(race_telemetry["frames"], race_telemetry["track_statuses"])
-    frames = serialize_frames(race_telemetry["frames"], source_fps=SOURCE_FPS, target_fps=fps)
+    frames = serialize_replay_frames(race_telemetry["frames"], source_fps=SOURCE_FPS, target_fps=fps)
     event_date = session.event.get("EventDate")
 
     return {
@@ -623,6 +693,164 @@ def replay(
         "frames": frames,
         "frame_rate": fps,
     }
+
+
+@app.get("/api/replay/chunk", response_class=JSONResponse, summary="Replay Telemetry Chunk")
+def replay_chunk(
+    year: int = Query(...),
+    round: int = Query(..., alias="round"),
+    session_type: str = Query("R", pattern="^(R|S|FP1|FP2|FP3)$"),
+    fps: int = Query(8, ge=1, le=25),
+    start: int = Query(0, ge=0),
+    count: int = Query(500, ge=1, le=500),
+):
+    """
+    Return a progressive chunk of replay telemetry.
+
+    The first chunk also returns replay metadata, track geometry,
+    events and driver colors so the frontend can render immediately.
+    """
+
+    try:
+        session = load_session(year, round, session_type)
+    except Exception as e:
+        raise HTTPException(
+            status_code=502,
+            detail=f"Failed to load session: {e}",
+        )
+
+    try:
+        race_telemetry = _get_cached_replay_telemetry(
+            year,
+            round,
+            session_type,
+            session,
+        )
+    except Exception as e:
+        raise HTTPException(
+            status_code=502,
+            detail=f"Failed to build telemetry: {e}",
+        )
+
+    all_frames = race_telemetry["frames"]
+
+    sampled_frames = serialize_replay_frames(
+        all_frames,
+        source_fps=SOURCE_FPS,
+        target_fps=fps,
+    )
+
+    total = len(sampled_frames)
+
+    end = min(
+        start + count,
+        total,
+    )
+
+    response = {
+        "start": start,
+        "end": end,
+        "total": total,
+        "total_frames": total,
+        "frame_rate": fps,
+        "frames": sampled_frames[start:end],
+    }
+
+    # Only send large/static metadata with the first chunk.
+    if start == 0:
+        try:
+            example_lap = _get_example_lap(
+                year,
+                round,
+                session,
+            )
+
+            track = build_track_geometry(example_lap)
+
+            circuit_info = session.get_circuit_info()
+
+            track["corners"] = []
+
+            if (
+                circuit_info is not None
+                and hasattr(circuit_info, "corners")
+                and circuit_info.corners is not None
+            ):
+                for _, corner in circuit_info.corners.iterrows():
+                    corner_pos = point_at_distance(
+                        example_lap,
+                        float(corner["Distance"]),
+                    )
+
+                    track["corners"].append(
+                        {
+                            "number": int(corner["Number"]),
+                            "letter": (
+                                ""
+                                if str(corner["Letter"]) == "nan"
+                                else str(corner["Letter"])
+                            ),
+                            "angle": float(corner["Angle"]),
+                            "distance": float(corner["Distance"]),
+                            "x": corner_pos["x"],
+                            "y": corner_pos["y"],
+                        }
+                    )
+
+        except Exception as e:
+            print("Corner data unavailable:", e)
+
+            track = build_track_geometry(example_lap)
+            track["corners"] = []
+
+        event_date = session.event.get("EventDate")
+
+        response["meta"] = {
+            "event_name": session.event.get(
+                "EventName",
+                "",
+            ),
+            "circuit_name": session.event.get(
+                "Location",
+                "",
+            ),
+            "country": session.event.get(
+                "Country",
+                "",
+            ),
+            "year": year,
+            "round": round,
+            "date": (
+                event_date.strftime("%B %d, %Y")
+                if event_date
+                else ""
+            ),
+            "total_laps": race_telemetry["total_laps"],
+            "session_type": session_type,
+        }
+
+        response["driver_colors"] = (
+            serialize_driver_colors(
+                race_telemetry["driver_colors"]
+            )
+        )
+
+        response["max_tyre_life"] = (
+            race_telemetry.get(
+                "max_tyre_life",
+                {},
+            )
+        )
+
+        response["track"] = track
+
+        response["events"] = extract_race_events(
+            race_telemetry["frames"],
+            race_telemetry["track_statuses"],
+        )
+
+    return response
+
 
 @app.get("/api/quali", summary="Qualifying Results")
 def quali(
@@ -839,22 +1067,56 @@ def timing_tower(
 
 # --- Frontend HTML Page Handlers ---
 
-@app.get("/", response_class=HTMLResponse, summary="Serve Landing Page")
+# --- React/Vite SPA Page Handler ---
+
+@app.get("/", response_class=HTMLResponse, summary="Serve React Application")
 def index():
-    return FileResponse(FRONTEND_DIR / "index.html")
+    index_file = DIST_DIR / "index.html"
 
-@app.get("/profile", response_class=HTMLResponse, summary="Serve Driver Profile Page")
-def serve_profile_page():
-    profile_file = FRONTEND_DIR / "profile.html"
-    if not profile_file.exists():
-        raise HTTPException(status_code=404, detail="profile.html not found")
-    with open(profile_file, "r", encoding="utf-8") as f:
-        return HTMLResponse(content=f.read())
+    if not index_file.exists():
+        raise HTTPException(
+            status_code=404,
+            detail="Vite build not found. Run `npm run build` inside frontend/."
+        )
 
-@app.get("/settings", response_class=HTMLResponse, summary="Serve Settings Page")
-def serve_settings_page():
-    settings_file = FRONTEND_DIR / "settings.html"
-    if not settings_file.exists():
-        raise HTTPException(status_code=404, detail="settings.html not found")
-    with open(settings_file, "r", encoding="utf-8") as f:
-        return HTMLResponse(content=f.read())
+    return FileResponse(index_file)
+
+
+# React Router SPA fallback.
+#
+# All frontend routes such as:
+# /replay
+# /sessions
+# /drivers
+# /constructors
+# /telemetry
+# /timing
+# /settings
+#
+# must return the same Vite index.html.
+#
+# API routes are intentionally excluded because FastAPI routes are
+# matched before this fallback.
+@app.get("/{path:path}", response_class=HTMLResponse, include_in_schema=False)
+def react_spa_fallback(path: str):
+    # Never treat API requests as React routes.
+    if path.startswith("api/"):
+        raise HTTPException(status_code=404, detail="API endpoint not found")
+
+    # Existing static files should be handled by /static.
+    if path.startswith("static/"):
+        raise HTTPException(status_code=404, detail="Static file not found")
+
+    # Vite assets should be handled by /assets.
+    if path.startswith("assets/"):
+        raise HTTPException(status_code=404, detail="Vite asset not found")
+
+    index_file = DIST_DIR / "index.html"
+
+    if not index_file.exists():
+        raise HTTPException(
+            status_code=404,
+            detail="Vite build not found. Run `npm run build` inside frontend/."
+        )
+
+    return FileResponse(index_file)
