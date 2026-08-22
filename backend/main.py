@@ -1,3 +1,5 @@
+import math
+import re
 from dotenv import load_dotenv
 load_dotenv()
 
@@ -12,6 +14,7 @@ uvicorn main:app --reload --port 8000
 """
 
 import json
+import pickle
 import sys
 from pathlib import Path
 import time
@@ -22,6 +25,8 @@ import os
 import shutil
 from urllib.parse import urlencode
 from typing import Optional
+
+from starlette.middleware.gzip import GZipMiddleware
 
 from fastapi import FastAPI, HTTPException, Query, Depends, File, UploadFile
 from fastapi.responses import FileResponse, JSONResponse, RedirectResponse, HTMLResponse
@@ -39,12 +44,16 @@ from src.f1_data import (
     get_quali_telemetry,
     get_tyre_strategy,
     get_session_drivers,
+    get_driver_statuses,
     get_driver_lap_telemetry,
 )
-from src.driver_panel import build_driver_panel, get_season_stats_cached, warm_season_stats
+from src.driver_panel import (
+    build_driver_panel, get_season_stats_cached, warm_season_stats,
+    build_driver_full, warm_racecraft_stats,
+)
 from src.constructors_panel import build_constructors_panel, warm_constructor_history
 from src.next_session import get_next_session
-from src.serialize import serialize_frames, serialize_driver_colors
+from src.serialize import serialize_frames, serialize_replay_frames, serialize_driver_colors
 
 # --- Auth (Racer PRO signup/login) ---
 from src.auth.routes import router as auth_router, get_current_active_user
@@ -99,10 +108,284 @@ def get_circuit_svg_path(location: str, variant: str = "white-outline", style: s
     return f"/static/images/circuits/{style}/{variant}/{slug}.svg"
 
 
-app = FastAPI(title="F1 Race Replay API")
+
+# ============================================================================
+# REPLAY TELEMETRY MEMORY CACHE
+# ============================================================================
+# Prevents /api/replay/chunk from repeatedly loading and rebuilding the same
+# large telemetry dataset for every 500-frame request.
+
+_REPLAY_TELEMETRY_CACHE = {}
+_REPLAY_SERIALIZED_CACHE = {}
 
 
+
+def _find_local_replay_cache(year, round_number, session_type="R"):
+    """
+    Find an existing computed replay telemetry pickle without
+    contacting FastF1 for telemetry.
+    """
+    computed_dir = (
+        Path(__file__).resolve().parent
+        / "computed_data"
+    )
+
+    if not computed_dir.exists():
+        return None
+
+    if session_type == "S":
+        marker = "_sprint_v"
+    elif session_type in ("FP1", "FP2", "FP3"):
+        marker = f"_{session_type.lower()}_v"
+    else:
+        marker = "_race_v"
+
+    prefix = f"{int(year)}_Season_Round_{int(round_number)}:"
+
+    candidates = list(
+        computed_dir.glob(
+            f"{prefix}*{marker}*_telemetry.pkl"
+        )
+    )
+
+    if not candidates:
+        return None
+
+    # Prefer the newest local cache file.
+    candidates.sort(
+        key=lambda path: path.stat().st_mtime,
+        reverse=True,
+    )
+
+    selected = candidates[0]
+
+    print(
+        f"[ReplayCache] LOCAL HIT: {selected.name}"
+    )
+
+    return selected
+
+
+def _replay_cache_key(year, round_number, session_type):
+    return (
+        int(year),
+        int(round_number),
+        str(session_type),
+    )
+
+
+def _get_cached_replay_telemetry(
+    year,
+    round_number,
+    session_type,
+    session=None,
+):
+    """
+    Cache-first replay telemetry loader.
+
+    Priority:
+        1. Memory cache
+        2. Local computed_data replay pickle
+        3. FastF1 fallback
+
+    A local replay pickle is already a complete replay dataset,
+    so FastF1 is NOT loaded when the pickle exists.
+    """
+
+    key = _replay_cache_key(
+        year,
+        round_number,
+        session_type,
+    )
+
+    # ============================================================
+    # 1. MEMORY CACHE
+    # ============================================================
+
+    cached = _REPLAY_TELEMETRY_CACHE.get(key)
+
+    if cached is not None:
+        print(
+            f"[ReplayCache] MEMORY HIT: "
+            f"{year} R{round_number} {session_type}"
+        )
+        return cached
+
+    # ============================================================
+    # 2. LOCAL COMPUTED DATA
+    # ============================================================
+
+    cache_file = _find_local_replay_cache(
+        year,
+        round_number,
+        session_type,
+    )
+
+    if cache_file is not None:
+        print(
+            f"[ReplayCache] LOCAL HIT: "
+            f"{cache_file.name}"
+        )
+
+        try:
+            with cache_file.open("rb") as f:
+                telemetry = pickle.load(f)
+
+            if not isinstance(telemetry, dict):
+                raise ValueError(
+                    "Replay cache is not a dictionary"
+                )
+
+            if "frames" not in telemetry:
+                raise ValueError(
+                    "Replay cache does not contain frames"
+                )
+
+            if not isinstance(telemetry["frames"], list):
+                raise ValueError(
+                    "Replay cache frames is not a list"
+                )
+
+            _REPLAY_TELEMETRY_CACHE[key] = telemetry
+
+            print(
+                f"[ReplayCache] LOCAL READY: "
+                f"{cache_file.stat().st_size / (1024 * 1024):.1f} MB"
+            )
+
+            print(
+                f"[ReplayCache] Frames: "
+                f"{len(telemetry['frames']):,}"
+            )
+
+            print(
+                f"[ReplayCache] Drivers: "
+                f"{len(telemetry.get('driver_colors', {}))}"
+            )
+
+            return telemetry
+
+        except Exception as e:
+            print(
+                f"[ReplayCache] LOCAL LOAD FAILED: {e}"
+            )
+
+    # ============================================================
+    # 3. FASTF1 FALLBACK
+    # ============================================================
+
+    print(
+        f"[ReplayCache] LOCAL MISS: "
+        f"{year} R{round_number} {session_type}"
+    )
+
+    if session is None:
+        print("[ReplayCache] Loading FastF1 session...")
+
+        session = load_session(
+            year,
+            round_number,
+            session_type,
+        )
+
+    # ============================================================
+    # FASTF1 TELEMETRY LOAD
+    # ============================================================
+    # get_race_telemetry() accesses session.laps / car_data /
+    # position_data. Make sure the FastF1 session has actually
+    # loaded telemetry before the replay builder touches it.
+    # ============================================================
+
+    try:
+        print(
+            "[ReplayCache] Ensuring FastF1 session data is loaded..."
+        )
+
+        session.load(
+            telemetry=True,
+            laps=True,
+            weather=False,
+            messages=False,
+            livedata=False,
+        )
+
+        print(
+            "[ReplayCache] FastF1 session data loaded."
+        )
+
+    except Exception as e:
+        raise RuntimeError(
+            f"FastF1 session telemetry load failed: {e}"
+        ) from e
+
+    print(
+        "[ReplayCache] Falling back to FastF1 telemetry build..."
+    )
+
+    telemetry = get_race_telemetry(
+        session,
+        session_type=session_type,
+    )
+
+    _REPLAY_TELEMETRY_CACHE[key] = telemetry
+
+    return telemetry
+
+
+def _get_cached_serialized_replay(
+    year,
+    round_number,
+    session_type,
+    fps,
+    raw_frames,
+):
+    """
+    Serialize the replay ONCE for a given session/FPS.
+
+    /api/replay/chunk may be called dozens of times.
+    Never rebuild the complete serialized replay for every chunk.
+    """
+
+    key = (
+        int(year),
+        int(round_number),
+        str(session_type),
+        int(fps),
+    )
+
+    cached = _REPLAY_SERIALIZED_CACHE.get(key)
+
+    if cached is not None:
+        print(
+            f"[ReplayCache] serialized HIT: "
+            f"{len(cached):,} frames @ {fps} FPS"
+        )
+        return cached
+
+    print(
+        f"[ReplayCache] serialized MISS: "
+        f"building replay for {year} R{round_number} "
+        f"{session_type} @ {fps} FPS..."
+    )
+
+    sampled = serialize_replay_frames(
+        raw_frames,
+        source_fps=SOURCE_FPS,
+        target_fps=fps,
+    )
+
+    _REPLAY_SERIALIZED_CACHE[key] = sampled
+
+    print(
+        f"[ReplayCache] serialized READY: "
+        f"{len(sampled):,} frames"
+    )
+
+    return sampled
+
 app = FastAPI(title="F1 Race Replay API")
+
+app.add_middleware(GZipMiddleware, minimum_size=1000)
 
 app.add_middleware(
     CORSMiddleware,
@@ -118,14 +401,38 @@ app.include_router(auth_router)
 
 
 # --- Directory Config & Static Mounts ---
-FRONTEND_DIR = Path(__file__).resolve().parent.parent / "frontend"
+
+PROJECT_DIR = Path(__file__).resolve().parent.parent
+FRONTEND_DIR = PROJECT_DIR / "frontend"
+
+# New React + Vite production build
+DIST_DIR = FRONTEND_DIR / "dist"
+DIST_ASSETS_DIR = DIST_DIR / "assets"
+
+# Existing F1 static assets
 STATIC_DIR = FRONTEND_DIR / "static"
 UPLOADS_DIR = STATIC_DIR / "uploads"
+
 UPLOADS_DIR.mkdir(parents=True, exist_ok=True)
 
-# Mount static files directory
-app.mount("/static", StaticFiles(directory=STATIC_DIR), name="static")
+# Existing assets:
+# /static/images/...
+# /static/uploads/...
+app.mount(
+    "/static",
+    StaticFiles(directory=STATIC_DIR),
+    name="static",
+)
 
+# Vite production assets:
+# /assets/index-xxxxx.js
+# /assets/index-xxxxx.css
+if DIST_ASSETS_DIR.exists():
+    app.mount(
+        "/assets",
+        StaticFiles(directory=DIST_ASSETS_DIR),
+        name="vite-assets",
+    )
 
 # --- OAuth Routes ---
 
@@ -561,68 +868,898 @@ def get_driver(code: str):
             return driver
     raise HTTPException(status_code=404, detail="Driver not found")
 
+
+
+def _safe_float(value, default=None):
+    try:
+        value = float(value)
+    except (TypeError, ValueError):
+        return default
+
+    if not math.isfinite(value):
+        return default
+
+    return value
+
+
+def _sanitize_replay_json(value):
+    if isinstance(value, dict):
+        return {
+            key: _sanitize_replay_json(item)
+            for key, item in value.items()
+        }
+
+    if isinstance(value, list):
+        return [
+            _sanitize_replay_json(item)
+            for item in value
+        ]
+
+    if isinstance(value, tuple):
+        return [
+            _sanitize_replay_json(item)
+            for item in value
+        ]
+
+    if isinstance(value, float):
+        if not math.isfinite(value):
+            return None
+        return value
+
+    return value
+
+
+def _load_replay_cache_only(
+    year: int,
+    round_number: int,
+    session_type: str,
+):
+    """
+    Replay cache-only loader.
+
+    IMPORTANT:
+    Replay must NEVER try to build telemetry when no local
+    computed_data cache exists.
+
+    This prevents FastF1 from reaching multiprocessing with
+    zero available drivers/processes for future/unpublished
+    sessions.
+    """
+
+    cache_file = _find_local_replay_cache(
+        year,
+        round_number,
+        session_type,
+    )
+
+    if cache_file is None:
+        raise HTTPException(
+            status_code=404,
+            detail=(
+                f"Replay telemetry is not available locally for "
+                f"{year} Round {round_number} {session_type}. "
+                f"No computed replay cache exists yet."
+            ),
+        )
+
+    print(
+        f"[Replay] CACHE-ONLY HIT: "
+        f"{cache_file}"
+    )
+
+    try:
+        race_telemetry = _get_cached_replay_telemetry(
+            year,
+            round_number,
+            session_type,
+            None,
+        )
+    except TypeError:
+        # Some versions of the existing helper expect a loaded
+        # FastF1 session. In that case load the session only after
+        # confirming that a local cache exists.
+        try:
+            session = load_session(
+                year,
+                round_number,
+                session_type,
+                telemetry=False,
+            )
+        except Exception as e:
+            raise HTTPException(
+                status_code=502,
+                detail=f"Failed to load cached replay session: {e}",
+            )
+
+        try:
+            race_telemetry = _get_cached_replay_telemetry(
+                year,
+                round_number,
+                session_type,
+                session,
+            )
+        except Exception as e:
+            raise HTTPException(
+                status_code=502,
+                detail=f"Failed to read replay cache: {e}",
+            )
+    except Exception as e:
+        raise HTTPException(
+            status_code=502,
+            detail=f"Failed to read replay cache: {e}",
+        )
+
+    return race_telemetry
+
+
+
+
+# ============================================================================
+# REPLAY GRAND PRIX RESOLUTION
+# ============================================================================
+#
+# The frontend selects a Grand Prix name.
+# FastF1 internally needs a round number.
+#
+# The round number is therefore resolved ONLY inside the backend.
+# ============================================================================
+
+def _normalise_grand_prix_name(value):
+    if value is None:
+        return ""
+
+    return " ".join(
+        str(value)
+        .strip()
+        .lower()
+        .replace("-", " ")
+        .replace("_", " ")
+        .split()
+    )
+
+
+def _resolve_replay_round(year: int, grand_prix: str) -> int:
+    """
+    Resolve a user-facing Grand Prix name to the actual FastF1
+    round number for the selected season.
+
+    The frontend never needs to know this number.
+    """
+
+    requested = _normalise_grand_prix_name(grand_prix)
+
+    if not requested:
+        raise HTTPException(
+            status_code=400,
+            detail="Grand Prix is required.",
+        )
+
+    try:
+        weekends = get_race_weekends_by_year(year)
+    except Exception as e:
+        raise HTTPException(
+            status_code=502,
+            detail=f"Failed to load {year} Grand Prix calendar: {e}",
+        )
+
+    for index, weekend in enumerate(weekends, start=1):
+
+        if hasattr(weekend, "to_dict"):
+            item = weekend.to_dict()
+
+        elif isinstance(weekend, dict):
+            item = weekend
+
+        else:
+            item = {}
+
+        event_name = (
+            item.get("EventName")
+            or item.get("event_name")
+            or item.get("Name")
+            or item.get("name")
+            or ""
+        )
+
+        official_round = (
+            item.get("RoundNumber")
+            or item.get("round_number")
+            or item.get("round")
+            or item.get("Round")
+            or index
+        )
+
+        candidates = [
+            event_name,
+            item.get("OfficialEventName", ""),
+            item.get("EventFormat", ""),
+            item.get("Location", ""),
+            item.get("location", ""),
+        ]
+
+        for candidate in candidates:
+            if not candidate:
+                continue
+
+            candidate_normalised = _normalise_grand_prix_name(
+                candidate
+            )
+
+            if requested == candidate_normalised:
+                return int(official_round)
+
+            # Allow:
+            # "Miami" -> "Miami Grand Prix"
+            # "Miami Grand Prix" -> "Miami"
+            if (
+                requested in candidate_normalised
+                or candidate_normalised in requested
+            ):
+                return int(official_round)
+
+    raise HTTPException(
+        status_code=404,
+        detail=(
+            f"Grand Prix '{grand_prix}' was not found "
+            f"in the {year} calendar."
+        ),
+    )
+
+
+def _replay_request_round(year: int, grand_prix: str) -> int:
+    """
+    Single resolver used by all replay endpoints.
+    """
+    resolved_round = _resolve_replay_round(
+        year,
+        grand_prix,
+    )
+
+    print(
+        f"[Replay] {year} '{grand_prix}' "
+        f"-> backend round {resolved_round}"
+    )
+
+    return resolved_round
+
+
+
+
+@app.get(
+    "/api/replay/events",
+    response_class=JSONResponse,
+    summary="Replay Grand Prix Calendar",
+)
+def replay_events(
+    year: int = Query(...),
+):
+    """Return Grand Prix options for the selected season."""
+
+    try:
+        weekends = get_race_weekends_by_year(year)
+
+        events = []
+
+        for index, weekend in enumerate(weekends, start=1):
+
+            if hasattr(weekend, "to_dict"):
+                item = weekend.to_dict()
+            elif isinstance(weekend, dict):
+                item = weekend
+            else:
+                item = {}
+
+            round_number = (
+                item.get("RoundNumber")
+                or item.get("round_number")
+                or item.get("round")
+                or item.get("Round")
+                or index
+            )
+
+            event_name = (
+                item.get("EventName")
+                or item.get("event_name")
+                or item.get("Name")
+                or f"Round {round_number}"
+            )
+
+            location = (
+                item.get("Location")
+                or item.get("location")
+                or ""
+            )
+
+            country = (
+                item.get("Country")
+                or item.get("country")
+                or ""
+            )
+
+            events.append({
+                "name": str(event_name),
+                "location": str(location),
+                "country": str(country),
+            })
+
+        return {
+            "year": year,
+            "events": events,
+        }
+
+    except Exception as e:
+        raise HTTPException(
+            status_code=502,
+            detail=f"Failed to load {year} Grand Prix calendar: {e}",
+        )
+
+
 @app.get("/api/replay", response_class=JSONResponse, summary="Race Replay")
 def replay(
     year: int = Query(...),
-    round: int = Query(..., alias="round"),
+    grand_prix: str = Query(...),
     session_type: str = Query("R", pattern="^(R|S|FP1|FP2|FP3)$"),
     fps: int = Query(8, ge=1, le=25),
 ):
-    try:
-        session = load_session(year, round, session_type)
-    except Exception as e:
-        raise HTTPException(status_code=502, detail=f"Failed to load session: {e}")
+    """
+    Load a complete replay.
+
+    This endpoint uses the same cache-first replay system as
+    /api/replay/chunk.
+
+    Priority:
+        1. Memory cache
+        2. computed_data replay pickle
+        3. FastF1 fallback
+    """
+
+    # ============================================================
+    # RESOLVE GRAND PRIX -> INTERNAL FASTF1 ROUND
+    # ============================================================
+
+    round = _replay_request_round(
+        year,
+        grand_prix,
+    )
+
+    # ============================================================
+    # LOAD SESSION METADATA
+    # ============================================================
 
     try:
-        race_telemetry = get_race_telemetry(session, session_type=session_type)
+        session = load_session(
+            year,
+            round,
+            session_type,
+            telemetry=False,
+        )
     except Exception as e:
-        raise HTTPException(status_code=502, detail=f"Failed to build telemetry: {e}")
+        raise HTTPException(
+            status_code=502,
+            detail=f"Failed to load session: {e}",
+        )
 
-    example_lap = _get_example_lap(year, round, session)
-    track = build_track_geometry(example_lap)
+    # ============================================================
+    # LOAD REPLAY TELEMETRY
+    # ============================================================
+
+    cache_file = _find_local_replay_cache(
+        year,
+        round,
+        session_type,
+    )
+
+    if cache_file is None:
+        try:
+            driver_count = len(session.drivers)
+        except Exception:
+            driver_count = 0
+
+        try:
+            result_count = len(session.results)
+        except Exception:
+            result_count = 0
+
+        if driver_count == 0 or result_count == 0:
+            raise HTTPException(
+                status_code=404,
+                detail=(
+                    f"Replay telemetry is not available yet for "
+                    f"{year} Round {round} {session_type}. "
+                    f"FastF1 currently has no timing/driver data "
+                    f"for this session."
+                ),
+            )
+
+    try:
+        race_telemetry = _get_cached_replay_telemetry(
+            year,
+            round,
+            session_type,
+            session,
+        )
+    except Exception as e:
+        raise HTTPException(
+            status_code=502,
+            detail=f"Failed to load replay telemetry: {e}",
+        )
+
+    # ============================================================
+    # OFFICIAL DRIVER RESULT STATUS
+    # ============================================================
+    #
+    # Keep this separate from telemetry. DNS/DNF/DSQ drivers may
+    # have incomplete or missing replay frames, but their official
+    # race-result status is available from session.results.
+    #
+    try:
+        driver_statuses = get_driver_statuses(session)
+    except Exception as e:
+        print(
+            f"[Replay] Failed to build driver statuses: {e}"
+        )
+        driver_statuses = {}
+
+    race_telemetry["driver_statuses"] = driver_statuses
+
+    # ============================================================
+    # TRACK
+    # ============================================================
+
+    try:
+        example_lap = _get_example_lap(
+            year,
+            round,
+            session,
+        )
+
+        track = build_track_geometry(
+            example_lap
+        )
+
+    except Exception as e:
+        raise HTTPException(
+            status_code=502,
+            detail=f"Failed to build track geometry: {e}",
+        )
+
+    # ============================================================
+    # CORNERS
+    # ============================================================
 
     try:
         circuit_info = session.get_circuit_info()
+
         track["corners"] = []
-        if circuit_info is not None and hasattr(circuit_info, "corners") and circuit_info.corners is not None:
+
+        if (
+            circuit_info is not None
+            and hasattr(circuit_info, "corners")
+            and circuit_info.corners is not None
+        ):
             for _, corner in circuit_info.corners.iterrows():
-                corner_pos = point_at_distance(example_lap, float(corner["Distance"]))
+                corner_pos = point_at_distance(
+                    example_lap,
+                    float(corner["Distance"]),
+                )
+
                 track["corners"].append(
                     {
                         "number": int(corner["Number"]),
-                        "letter": "" if str(corner["Letter"]) == "nan" else str(corner["Letter"]),
-                        "angle": float(corner["Angle"]),
-                        "distance": float(corner["Distance"]),
-                        "x": corner_pos["x"],
-                        "y": corner_pos["y"],
+                        "letter": (
+                            ""
+                            if str(corner["Letter"]) == "nan"
+                            else str(corner["Letter"])
+                        ),
+                        "angle": float(
+                            corner["Angle"]
+                        ),
+                        "distance": float(
+                            corner["Distance"]
+                        ),
+                        "x": _safe_float(corner_pos.get("x"), 0.0),
+                        "y": _safe_float(corner_pos.get("y"), 0.0),
                     }
                 )
+
     except Exception as e:
-        print("Corner data unavailable:", e)
+        print(
+            "[Replay] Corner data unavailable:",
+            e,
+        )
         track["corners"] = []
 
-    events = extract_race_events(race_telemetry["frames"], race_telemetry["track_statuses"])
-    frames = serialize_frames(race_telemetry["frames"], source_fps=SOURCE_FPS, target_fps=fps)
-    event_date = session.event.get("EventDate")
+    # ============================================================
+    # SERIALIZED FRAMES
+    # ============================================================
+
+    try:
+        frames = _get_cached_serialized_replay(
+            year,
+            round,
+            session_type,
+            fps,
+            race_telemetry["frames"],
+        )
+    except Exception as e:
+        raise HTTPException(
+            status_code=502,
+            detail=f"Failed to serialize replay: {e}",
+        )
+
+    # ============================================================
+    # EVENTS
+    # ============================================================
+
+    events = extract_race_events(
+        race_telemetry["frames"],
+        race_telemetry["track_statuses"],
+    )
+
+    event_date = session.event.get(
+        "EventDate"
+    )
 
     return {
         "meta": {
-            "event_name": session.event.get("EventName", ""),
-            "circuit_name": session.event.get("Location", ""),
-            "country": session.event.get("Country", ""),
+            "event_name": session.event.get(
+                "EventName",
+                "",
+            ),
+            "circuit_name": session.event.get(
+                "Location",
+                "",
+            ),
+            "country": session.event.get(
+                "Country",
+                "",
+            ),
             "year": year,
             "round": round,
-            "date": event_date.strftime("%B %d, %Y") if event_date else "",
-            "total_laps": race_telemetry["total_laps"],
+            "date": (
+                event_date.strftime(
+                    "%B %d, %Y"
+                )
+                if event_date
+                else ""
+            ),
+            "total_laps": race_telemetry[
+                "total_laps"
+            ],
             "session_type": session_type,
         },
-        "driver_colors": serialize_driver_colors(race_telemetry["driver_colors"]),
-        "max_tyre_life": race_telemetry.get("max_tyre_life", {}),
+
+        "driver_colors": serialize_driver_colors(
+            race_telemetry[
+                "driver_colors"
+            ]
+        ),
+
+        "max_tyre_life": race_telemetry.get(
+            "max_tyre_life",
+            {},
+        ),
+
         "track": track,
+
         "events": events,
+
         "frames": frames,
+
         "frame_rate": fps,
+
+        "total_frames": len(frames),
     }
+
+
+@app.get("/api/replay/chunk", response_class=JSONResponse, summary="Replay Telemetry Chunk")
+def replay_chunk(
+    year: int = Query(...),
+    grand_prix: str = Query(...),
+    session_type: str = Query("R", pattern="^(R|S|FP1|FP2|FP3)$"),
+    fps: int = Query(8, ge=1, le=25),
+    start: int = Query(0, ge=0),
+    count: int = Query(500, ge=1, le=500),
+):
+    """
+    Return a progressive chunk of replay telemetry.
+
+    The first chunk also returns replay metadata, track geometry,
+    events and driver colors so the frontend can render immediately.
+    """
+
+    # ============================================================
+    # RESOLVE GRAND PRIX -> INTERNAL FASTF1 ROUND
+    # ============================================================
+
+    round = _replay_request_round(
+        year,
+        grand_prix,
+    )
+
+    # ============================================================
+    # LOAD SESSION
+    # ============================================================
+
+    try:
+        session = load_session(
+            year,
+            round,
+            session_type,
+            telemetry=False,
+        )
+    except Exception as e:
+        raise HTTPException(
+            status_code=502,
+            detail=f"Failed to load session: {e}",
+        )
+
+    # ============================================================
+    # REPLAY DATA AVAILABILITY CHECK
+    # ============================================================
+    #
+    # A FastF1 session can exist in the calendar while its timing
+    # data has not been published yet. In that situation FastF1
+    # returns zero drivers/results.
+    #
+    # The replay builder now performs driver telemetry extraction
+    # in the current process because FastF1 Session objects should
+    # not be passed through multiprocessing.
+    # ============================================================
+
+    cache_file = _find_local_replay_cache(
+        year,
+        round,
+        session_type,
+    )
+
+    if cache_file is None:
+        try:
+            driver_count = len(session.drivers)
+        except Exception:
+            driver_count = 0
+
+        try:
+            result_count = len(session.results)
+        except Exception:
+            result_count = 0
+
+        if driver_count == 0 or result_count == 0:
+            raise HTTPException(
+                status_code=404,
+                detail=(
+                    f"Replay telemetry is not available yet for "
+                    f"{year} Round {round} {session_type}. "
+                    f"FastF1 currently has no timing/driver data "
+                    f"for this session."
+                ),
+            )
+
+    try:
+        # Cache-first loader:
+        # 1. memory cache
+        # 2. local computed replay cache
+        # 3. FastF1 fallback to BUILD the replay
+        #
+        # This allows a user to select any available
+        # year / Grand Prix / session and generate the
+        # replay cache automatically when it does not
+        # already exist locally.
+        race_telemetry = _get_cached_replay_telemetry(
+            year,
+            round,
+            session_type,
+            session,
+        )
+    except HTTPException:
+        raise
+    except Exception as e:
+        import traceback
+
+        print(
+            "[ReplayCache] FATAL replay telemetry build error:"
+        )
+        traceback.print_exc()
+
+        raise HTTPException(
+            status_code=502,
+            detail=f"Failed to build/load replay telemetry: {e}",
+        )
+
+    # ============================================================
+    # OFFICIAL DRIVER RESULT STATUS
+    # ============================================================
+
+    try:
+        race_telemetry["driver_statuses"] = get_driver_statuses(session)
+    except Exception as e:
+        print(
+            f"[Replay] Failed to build driver statuses: {e}"
+        )
+        race_telemetry["driver_statuses"] = {}
+
+    all_frames = race_telemetry["frames"]
+
+    # ============================================================
+    # REPLAY FRAME ORDER VALIDATION
+    # ============================================================
+    # Validate the raw replay only once per telemetry cache key.
+    # Do NOT scan tens of thousands of frames for every chunk.
+    # ============================================================
+
+    validation_key = _replay_cache_key(
+        year,
+        round,
+        session_type,
+    )
+
+    validation_cache = getattr(
+        replay_chunk,
+        "_frame_validation_cache",
+        None,
+    )
+
+    if validation_cache is None:
+        validation_cache = {}
+        replay_chunk._frame_validation_cache = validation_cache
+
+    if validation_key not in validation_cache:
+        previous_t = None
+        bad_time_indices = []
+
+        for idx, frame in enumerate(all_frames):
+            t = frame.get("t")
+
+            if not isinstance(t, (int, float)):
+                continue
+
+            if previous_t is not None and t < previous_t:
+                bad_time_indices.append(
+                    (idx - 1, previous_t, idx, t)
+                )
+
+            previous_t = t
+
+        validation_cache[validation_key] = bad_time_indices
+
+        if bad_time_indices:
+            print(
+                "[Replay] WARNING: frame time moved backwards:",
+                bad_time_indices[:10],
+            )
+        else:
+            print(
+                f"[Replay] Frame order OK: {len(all_frames)} frames"
+            )
+
+    sampled_frames = _get_cached_serialized_replay(
+        year,
+        round,
+        session_type,
+        fps,
+        all_frames,
+    )
+
+    total = len(sampled_frames)
+
+    end = min(
+        start + count,
+        total,
+    )
+
+    response = {
+        "start": start,
+        "end": end,
+        "total": total,
+        "total_frames": total,
+        "frame_rate": fps,
+        "frames": sampled_frames[start:end],
+    }
+
+    # Only send large/static metadata with the first chunk.
+    if start == 0:
+        try:
+            example_lap = _get_example_lap(
+                year,
+                round,
+                session,
+            )
+
+            track = build_track_geometry(example_lap)
+
+            circuit_info = session.get_circuit_info()
+
+            track["corners"] = []
+
+            if (
+                circuit_info is not None
+                and hasattr(circuit_info, "corners")
+                and circuit_info.corners is not None
+            ):
+                for _, corner in circuit_info.corners.iterrows():
+                    corner_pos = point_at_distance(
+                        example_lap,
+                        float(corner["Distance"]),
+                    )
+
+                    track["corners"].append(
+                        {
+                            "number": int(corner["Number"]),
+                            "letter": (
+                                ""
+                                if str(corner["Letter"]) == "nan"
+                                else str(corner["Letter"])
+                            ),
+                            "angle": _safe_float(corner["Angle"], 0.0),
+                            "distance": _safe_float(corner["Distance"], 0.0),
+                            "x": _safe_float(corner_pos.get("x"), 0.0),
+                            "y": _safe_float(corner_pos.get("y"), 0.0),
+                        }
+                    )
+
+        except Exception as e:
+            print("Corner data unavailable:", e)
+
+            track = build_track_geometry(example_lap)
+            track["corners"] = []
+
+        event_date = session.event.get("EventDate")
+
+        response["meta"] = {
+            "event_name": session.event.get(
+                "EventName",
+                "",
+            ),
+            "circuit_name": session.event.get(
+                "Location",
+                "",
+            ),
+            "country": session.event.get(
+                "Country",
+                "",
+            ),
+            "year": year,
+            "round": round,
+            "date": (
+                event_date.strftime("%B %d, %Y")
+                if event_date
+                else ""
+            ),
+            "total_laps": race_telemetry["total_laps"],
+            "session_type": session_type,
+        }
+
+        response["driver_colors"] = (
+            serialize_driver_colors(
+                race_telemetry["driver_colors"]
+            )
+        )
+
+        response["driver_statuses"] = (
+            race_telemetry.get(
+                "driver_statuses",
+                {}
+            )
+        )
+
+        response["max_tyre_life"] = (
+            race_telemetry.get(
+                "max_tyre_life",
+                {},
+            )
+        )
+
+        response["track"] = track
+
+        response["events"] = extract_race_events(
+            race_telemetry["frames"],
+            race_telemetry["track_statuses"],
+        )
+
+    response = _sanitize_replay_json(response)
+
+    return response
+
 
 @app.get("/api/quali", summary="Qualifying Results")
 def quali(
@@ -839,22 +1976,84 @@ def timing_tower(
 
 # --- Frontend HTML Page Handlers ---
 
-@app.get("/", response_class=HTMLResponse, summary="Serve Landing Page")
+# --- React/Vite SPA Page Handler ---
+
+@app.get("/", response_class=HTMLResponse, summary="Serve React Application")
 def index():
-    return FileResponse(FRONTEND_DIR / "index.html")
+    index_file = DIST_DIR / "index.html"
 
-@app.get("/profile", response_class=HTMLResponse, summary="Serve Driver Profile Page")
-def serve_profile_page():
-    profile_file = FRONTEND_DIR / "profile.html"
-    if not profile_file.exists():
-        raise HTTPException(status_code=404, detail="profile.html not found")
-    with open(profile_file, "r", encoding="utf-8") as f:
-        return HTMLResponse(content=f.read())
+    if not index_file.exists():
+        raise HTTPException(
+            status_code=404,
+            detail="Vite build not found. Run `npm run build` inside frontend/."
+        )
 
-@app.get("/settings", response_class=HTMLResponse, summary="Serve Settings Page")
-def serve_settings_page():
-    settings_file = FRONTEND_DIR / "setting.html"
-    if not settings_file.exists():
-        raise HTTPException(status_code=404, detail="setting.html not found")
-    with open(settings_file, "r", encoding="utf-8") as f:
-        return HTMLResponse(content=f.read())
+    return FileResponse(index_file)
+
+@app.get("/api/drivers/{code}/full", summary="Full Driver Detail Page Data")
+def driver_full(code: str, year: int = Query(default=None)):
+    season = year or datetime.date.today().year
+    try:
+        data = build_driver_full(code.upper(), season, DRIVERS)
+    except requests.RequestException as e:
+        raise HTTPException(status_code=502, detail=f"Couldn't reach Jolpica API: {e}")
+    if not data:
+        raise HTTPException(status_code=404, detail="Driver not found")
+    return data
+
+
+@app.on_event("startup")
+async def warm_historical_seasons_cache():
+    current_year = datetime.date.today().year
+
+    def _compute():
+        for year in range(current_year - 3, current_year + 1):
+            print(f"[startup] Warming historical driver stats for {year} (background)...")
+            try:
+                warm_season_stats(year)
+            except Exception as e:
+                print(f"[startup] Failed to warm {year} stats: {e}")
+        print("[startup] Historical driver stats ready.")
+
+    loop = asyncio.get_event_loop()
+    loop.run_in_executor(None, _compute)
+
+# React Router SPA fallback.
+#
+# All frontend routes such as:
+# /replay
+# /sessions
+# /drivers
+# /constructors
+# /telemetry
+# /timing
+# /settings
+#
+# must return the same Vite index.html.
+#
+# API routes are intentionally excluded because FastAPI routes are
+# matched before this fallback.
+@app.get("/{path:path}", response_class=HTMLResponse, include_in_schema=False)
+def react_spa_fallback(path: str):
+    # Never treat API requests as React routes.
+    if path.startswith("api/"):
+        raise HTTPException(status_code=404, detail="API endpoint not found")
+
+    # Existing static files should be handled by /static.
+    if path.startswith("static/"):
+        raise HTTPException(status_code=404, detail="Static file not found")
+
+    # Vite assets should be handled by /assets.
+    if path.startswith("assets/"):
+        raise HTTPException(status_code=404, detail="Vite asset not found")
+
+    index_file = DIST_DIR / "index.html"
+
+    if not index_file.exists():
+        raise HTTPException(
+            status_code=404,
+            detail="Vite build not found. Run `npm run build` inside frontend/."
+        )
+
+    return FileResponse(index_file)
+

@@ -1,0 +1,56 @@
+.app-shell {
+  position: relative;
+
+  width: 100%;
+  min-height: 100vh;
+  min-height: 100dvh;
+}
+
+.app-shell-content {
+  position: relative;
+  z-index: var(--z-content);
+
+  width: 100%;
+  min-height: 100vh;
+  min-height: 100dvh;
+
+  padding-top: calc(var(--nav-height) + 52px);
+}
+
+.app-shell-content .replay-page {
+  position: relative;
+  z-index: 1;
+}
+
+.app-shell-content .replay-hero {
+  position: relative;
+  z-index: 1;
+}
+
+@media (max-width: 900px) {
+  .app-shell-content {
+    padding-top: 110px;
+  }
+}
+
+@media (max-width: 600px) {
+  .app-shell-content {
+    padding-top: 96px;
+  }
+}
+
+.app-shell-content {
+  padding-top: calc(var(--nav-height, 72px) + 52px);
+}
+
+@media (max-width: 900px) {
+  .app-shell-content {
+    padding-top: 110px;
+  }
+}
+
+@media (max-width: 600px) {
+  .app-shell-content {
+    padding-top: 96px;
+  }
+}

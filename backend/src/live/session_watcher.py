@@ -18,6 +18,7 @@ session that ran late.
 
 import time
 import datetime
+import pandas as pd
 from typing import Optional
 
 import fastf1
@@ -50,28 +51,72 @@ ESTIMATED_DURATION_MINUTES = {
 
 
 def find_live_session(events_df, now: datetime.datetime) -> Optional[dict]:
-    """Pure function (no side effects, no network) so it's testable
-    without a real schedule. Scans every Session1..Session5 slot on
-    every event row and returns the first one whose live window
-    contains `now`, or None.
+    """Return the currently live F1 session, if any.
+
+    All schedule timestamps are normalized to timezone-aware UTC
+    before comparison. This avoids pandas datetime64 / Python datetime
+    and timezone-aware / timezone-naive comparison errors.
     """
+
+    # Normalize `now` to timezone-aware UTC Python datetime.
+    if isinstance(now, pd.Timestamp):
+        if now.tzinfo is None:
+            now = now.tz_localize("UTC")
+        else:
+            now = now.tz_convert("UTC")
+        now = now.to_pydatetime()
+    elif isinstance(now, datetime.datetime):
+        if now.tzinfo is None:
+            now = now.replace(tzinfo=datetime.timezone.utc)
+        else:
+            now = now.astimezone(datetime.timezone.utc)
+    else:
+        now = pd.Timestamp(now, tz="UTC").to_pydatetime()
+
     for _, event in events_df.iterrows():
         for i in range(1, 6):
             name = event.get(f"Session{i}")
             date_utc = event.get(f"Session{i}DateUtc")
-            if not name or date_utc is None or (hasattr(date_utc, "isnull") and date_utc.isnull()):
+
+            if (
+                not name
+                or date_utc is None
+                or (hasattr(date_utc, "isnull") and date_utc.isnull())
+            ):
                 continue
 
             session_type = SESSION_NAME_TO_TYPE.get(str(name))
             if not session_type:
                 continue
 
-            start = date_utc.to_pydatetime() if hasattr(date_utc, "to_pydatetime") else date_utc
-            if start.tzinfo is None:
-                start = start.replace(tzinfo=datetime.timezone.utc)
+            # --------------------------------------------------------
+            # Normalize schedule timestamp to timezone-aware UTC.
+            # --------------------------------------------------------
+            try:
+                start_ts = pd.Timestamp(date_utc)
 
-            duration = ESTIMATED_DURATION_MINUTES.get(session_type, 90)
-            end = start + datetime.timedelta(minutes=duration + END_BUFFER_MINUTES)
+                if start_ts.tzinfo is None:
+                    start_ts = start_ts.tz_localize("UTC")
+                else:
+                    start_ts = start_ts.tz_convert("UTC")
+
+                start = start_ts.to_pydatetime()
+
+            except Exception as e:
+                print(
+                    f"[live-watcher] invalid session datetime "
+                    f"{date_utc!r}: {e}"
+                )
+                continue
+
+            duration = ESTIMATED_DURATION_MINUTES.get(
+                session_type,
+                90,
+            )
+
+            end = start + datetime.timedelta(
+                minutes=duration + END_BUFFER_MINUTES
+            )
 
             if start <= now <= end:
                 return {
@@ -79,10 +124,13 @@ def find_live_session(events_df, now: datetime.datetime) -> Optional[dict]:
                     "round": int(event["RoundNumber"]),
                     "session_type": session_type,
                     "meta": {
-                        "event_name": str(event.get("EventName", "")),
+                        "event_name": str(
+                            event.get("EventName", "")
+                        ),
                         "session_name": str(name),
                     },
                 }
+
     return None
 
 
@@ -97,11 +145,20 @@ def run_forever():
 
 
 def _tick():
-    now = datetime.datetime.now(datetime.timezone.utc)
+    now = pd.Timestamp.now(tz="UTC")
+
     current_snapshot = live_state.snapshot()
 
-    events = fastf1.get_events_remaining(now, include_testing=False)
-    live_session = find_live_session(events, now)
+    # Use the full event schedule directly instead of
+    # fastf1.get_events_remaining(), which can trigger a
+    # pandas datetime64[ns] vs Python datetime comparison error.
+    try:
+        schedule = fastf1.get_event_schedule(now.year)
+        live_session = find_live_session(schedule, now)
+
+    except Exception as e:
+        print(f"[live-watcher] schedule lookup failed: {e}")
+        return
 
     if live_session is None:
         return
@@ -111,15 +168,26 @@ def _tick():
         and current_snapshot["round"] == live_session["round"]
         and current_snapshot["session_type"] == live_session["session_type"]
     )
+
     if already_capturing_this:
         return
 
-    print(f"[live-watcher] Live session detected: {live_session['meta']['event_name']} "
-          f"{live_session['meta']['session_name']} — starting capture.")
+    print(
+        f"[live-watcher] Live session detected: "
+        f"{live_session['meta']['event_name']} "
+        f"{live_session['meta']['session_name']} — starting capture."
+    )
 
     import threading
+
     threading.Thread(
         target=run_capture,
-        args=(live_session["year"], live_session["round"], live_session["session_type"], live_session["meta"]),
+        args=(
+            live_session["year"],
+            live_session["round"],
+            live_session["session_type"],
+            live_session["meta"],
+        ),
         daemon=True,
     ).start()
+

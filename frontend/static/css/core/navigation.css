@@ -1,0 +1,55 @@
+.back-btn {
+    position:
+        absolute;
+
+    top:
+        18px;
+
+    left:
+        20px;
+
+    z-index:
+        100;
+
+    padding:
+        8px 14px;
+
+    border:
+        1px solid var(--glass-border);
+
+    border-radius:
+        var(--radius-md);
+
+    background:
+        var(--glass-bg);
+
+    backdrop-filter:
+        blur(14px);
+
+    -webkit-backdrop-filter:
+        blur(14px);
+
+    color:
+        var(--text-primary);
+
+    cursor:
+        pointer;
+
+    transition:
+        transform var(--transition-fast),
+        background var(--transition-fast);
+}
+
+.back-btn:hover {
+    background:
+        var(--glass-bg-strong);
+
+    transform:
+        translateY(-1px);
+}
+
+
+/* ============================================================
+   12. GLOBAL ANIMATIONS
+   ============================================================ */
+
