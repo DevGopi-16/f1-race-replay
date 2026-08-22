@@ -1,7 +1,3 @@
-/* ============================================================
-   F1 RACE REPLAY — APP SHELL
-   ============================================================ */
-
 .app-shell {
   position: relative;
 
@@ -10,12 +6,6 @@
   min-height: 100dvh;
 }
 
-/*
- * FloatingNav is position: fixed, so normal document flow
- * does not reserve space for it.
- *
- * Reserve enough vertical space before page content begins.
- */
 .app-shell-content {
   position: relative;
   z-index: var(--z-content);
@@ -27,19 +17,11 @@
   padding-top: calc(var(--nav-height) + 52px);
 }
 
-/*
- * Replay page gets slightly more breathing room because
- * the race hero sits immediately below the navigation.
- */
 .app-shell-content .replay-page {
   position: relative;
   z-index: 1;
 }
 
-/*
- * Prevent accidental negative/absolute positioning from
- * pulling replay content underneath the navigation.
- */
 .app-shell-content .replay-hero {
   position: relative;
   z-index: 1;
@@ -56,10 +38,6 @@
     padding-top: 96px;
   }
 }
-
-/* ============================================================
-   FLOATING NAV — CONTENT SAFE AREA
-   ============================================================ */
 
 .app-shell-content {
   padding-top: calc(var(--nav-height, 72px) + 52px);

@@ -12,6 +12,8 @@ import PageTransition from "../components/motion/PageTransition";
 import Reveal from "../components/motion/Reveal";
 import HomePage from "../features/home/HomePage";
 import ReplayPage from "../features/replay/ReplayPage";
+import DriversPage from "../pages/DriversPage";
+import DriverDetailPage from "../pages/DriverDetailPage";
 
 function FoundationPage({
   eyebrow,
@@ -123,15 +125,24 @@ export function AppRouter() {
           }
         />
 
+        {/* <Route
+          path="/drivers"
+          element={<DriversPage />}
+        />
+
+        <Route
+          path="/drivers/:code"
+          element={<DriversPage />}
+        /> */}
+
         <Route
           path="/drivers"
-          element={
-            <FoundationPage
-              eyebrow="03 / Drivers"
-              title="Drivers"
-              description="Explore driver performance, race history and telemetry intelligence."
-            />
-          }
+          element={<DriversPage />}
+        />
+
+        <Route
+          path="/drivers/:code"
+          element={<DriverDetailPage />}
         />
 
         <Route

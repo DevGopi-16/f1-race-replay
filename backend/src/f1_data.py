@@ -34,20 +34,30 @@ DT = 1 / FPS
 # removed, or renamed) — old cache files under a previous version number
 # are simply ignored (treated as "not found") instead of being loaded and
 # causing a KeyError downstream when new code expects a field they don't have.
-CACHE_SCHEMA_VERSION = 5
+CACHE_SCHEMA_VERSION = 7
 
 
 def _process_single_driver(args):
-    """Process telemetry data for a single driver - must be top-level for multiprocessing"""
+    """Extract one driver's telemetry safely for replay generation."""
     driver_no, session, driver_code = args
 
     print(f"Getting telemetry for driver: {driver_code}")
 
-    laps_driver = session.laps.pick_drivers(driver_no)
-    if laps_driver.empty:
+    try:
+        laps_driver = session.laps.pick_drivers(driver_no)
+    except Exception as exc:
+        print(f"[Replay] {driver_code}: failed to select laps: {exc}")
         return None
 
-    driver_max_lap = laps_driver.LapNumber.max() if not laps_driver.empty else 0
+    if laps_driver is None or laps_driver.empty:
+        print(f"[Replay] {driver_code}: no laps")
+        return None
+
+    driver_max_lap = (
+        float(laps_driver["LapNumber"].max())
+        if "LapNumber" in laps_driver.columns
+        else 0
+    )
 
     t_all = []
     x_all = []
@@ -65,94 +75,311 @@ def _process_single_driver(args):
 
     total_dist_so_far = 0.0
 
-    # iterate laps in order
-    total_dist_so_far = 0.0
-
-    # Pit in/out times: FastF1 puts PitInTime on the lap where the driver
-    # enters the pit lane and PitOutTime on the FOLLOWING (out-)lap — they're
-    # rarely on the same lap. Collected here, paired up chronologically below.
     pit_in_times = []
     pit_out_times = []
 
-    # iterate laps in order
     for _, lap in laps_driver.iterlaps():
-        # get telemetry for THIS lap only
-        lap_tel = lap.get_telemetry()
-        lap_number = lap.LapNumber
-        tyre_compund_as_int = get_tyre_compound_int(lap.Compound)
-        tyre_life = lap.TyreLife if pd.notna(lap.TyreLife) else 0
 
-        if pd.notna(lap.PitInTime):
-            pit_in_times.append(lap.PitInTime.total_seconds())
-        if pd.notna(lap.PitOutTime):
-            pit_out_times.append(lap.PitOutTime.total_seconds())
+        try:
+            lap_number = float(lap.get("LapNumber", 0))
 
-        if lap_tel.empty:
+            # --------------------------------------------------------
+            # Telemetry
+            # --------------------------------------------------------
+            lap_tel = lap.get_telemetry()
+
+            if lap_tel is None or lap_tel.empty:
+                continue
+
+            required = [
+                "SessionTime",
+                "X",
+                "Y",
+                "Distance",
+                "RelativeDistance",
+                "Speed",
+                "nGear",
+                "DRS",
+                "Throttle",
+                "Brake",
+            ]
+
+            missing = [c for c in required if c not in lap_tel.columns]
+
+            if missing:
+                print(
+                    f"[Replay] {driver_code} lap {lap_number}: "
+                    f"missing {missing}"
+                )
+                continue
+
+            # --------------------------------------------------------
+            # Convert telemetry to numeric arrays
+            # --------------------------------------------------------
+            t_lap = (
+                lap_tel["SessionTime"]
+                .dt.total_seconds()
+                .to_numpy(dtype=float)
+            )
+
+            x_lap = pd.to_numeric(
+                lap_tel["X"], errors="coerce"
+            ).to_numpy(dtype=float)
+
+            y_lap = pd.to_numeric(
+                lap_tel["Y"], errors="coerce"
+            ).to_numpy(dtype=float)
+
+            d_lap = pd.to_numeric(
+                lap_tel["Distance"], errors="coerce"
+            ).to_numpy(dtype=float)
+
+            rd_lap = pd.to_numeric(
+                lap_tel["RelativeDistance"], errors="coerce"
+            ).to_numpy(dtype=float)
+
+            speed_lap = pd.to_numeric(
+                lap_tel["Speed"], errors="coerce"
+            ).fillna(0).to_numpy(dtype=float)
+
+            gear_lap = pd.to_numeric(
+                lap_tel["nGear"], errors="coerce"
+            ).fillna(0).to_numpy(dtype=float)
+
+            drs_lap = pd.to_numeric(
+                lap_tel["DRS"], errors="coerce"
+            ).fillna(0).to_numpy(dtype=float)
+
+            throttle_lap = pd.to_numeric(
+                lap_tel["Throttle"], errors="coerce"
+            ).fillna(0).to_numpy(dtype=float)
+
+            brake_lap = pd.to_numeric(
+                lap_tel["Brake"], errors="coerce"
+            ).fillna(0).to_numpy(dtype=float)
+
+            # --------------------------------------------------------
+            # Remove invalid distance samples
+            # --------------------------------------------------------
+            valid_distance = np.isfinite(d_lap)
+
+            if not np.any(valid_distance):
+                continue
+
+            first_valid = float(d_lap[valid_distance][0])
+
+            # Use the largest valid distance as the lap endpoint.
+            last_valid = float(
+                d_lap[valid_distance][-1]
+            )
+
+            lap_distance = max(
+                0.0,
+                last_valid - first_valid
+            )
+
+            race_d_lap = (
+                total_dist_so_far
+                + (d_lap - first_valid)
+            )
+
+            race_d_lap = np.nan_to_num(
+                race_d_lap,
+                nan=total_dist_so_far,
+                posinf=total_dist_so_far,
+                neginf=total_dist_so_far,
+            )
+
+            # --------------------------------------------------------
+            # Safe tyre information
+            # --------------------------------------------------------
+            compound_value = lap.get("Compound")
+
+            try:
+                tyre_compound = get_tyre_compound_int(
+                    compound_value
+                )
+            except Exception:
+                tyre_compound = 0
+
+            tyre_life_value = lap.get("TyreLife")
+
+            if pd.notna(tyre_life_value):
+                try:
+                    tyre_life = float(tyre_life_value)
+                except Exception:
+                    tyre_life = 0.0
+            else:
+                tyre_life = 0.0
+
+            # --------------------------------------------------------
+            # Safe pit timestamps
+            # --------------------------------------------------------
+            pit_in = lap.get("PitInTime")
+            pit_out = lap.get("PitOutTime")
+
+            try:
+                if pd.notna(pit_in):
+                    pit_in_times.append(
+                        pit_in.total_seconds()
+                    )
+            except Exception:
+                pass
+
+            try:
+                if pd.notna(pit_out):
+                    pit_out_times.append(
+                        pit_out.total_seconds()
+                    )
+            except Exception:
+                pass
+
+            # --------------------------------------------------------
+            # Append telemetry
+            # --------------------------------------------------------
+            t_all.append(t_lap)
+            x_all.append(x_lap)
+            y_all.append(y_lap)
+            race_dist_all.append(race_d_lap)
+            rel_dist_all.append(
+                np.nan_to_num(
+                    rd_lap,
+                    nan=0.0,
+                    posinf=1.0,
+                    neginf=0.0,
+                )
+            )
+
+            lap_numbers.append(
+                np.full(
+                    len(t_lap),
+                    lap_number,
+                    dtype=float
+                )
+            )
+
+            tyre_compounds.append(
+                np.full(
+                    len(t_lap),
+                    tyre_compound,
+                    dtype=float
+                )
+            )
+
+            tyre_life_all.append(
+                np.full(
+                    len(t_lap),
+                    tyre_life,
+                    dtype=float
+                )
+            )
+
+            speed_all.append(speed_lap)
+            gear_all.append(gear_lap)
+            drs_all.append(drs_lap)
+            throttle_all.append(throttle_lap)
+            brake_all.append(brake_lap)
+
+            total_dist_so_far += lap_distance
+
+        except Exception as exc:
+            print(
+                f"[Replay] {driver_code} lap {lap_number}: "
+                f"telemetry extraction failed: {exc}"
+            )
             continue
-    
 
-        t_lap = lap_tel["SessionTime"].dt.total_seconds().to_numpy()
-        x_lap = lap_tel["X"].to_numpy()
-        y_lap = lap_tel["Y"].to_numpy()
-        d_lap = lap_tel["Distance"].to_numpy()
-        rd_lap = lap_tel["RelativeDistance"].to_numpy()
-        speed_kph_lap = lap_tel["Speed"].to_numpy()
-        gear_lap = lap_tel["nGear"].to_numpy()
-        drs_lap = lap_tel["DRS"].to_numpy()
-        throttle_lap = lap_tel["Throttle"].to_numpy()
-        brake_lap = lap_tel["Brake"].to_numpy().astype(float)
-
-        # race distance = distance before this lap + distance within this lap
-        race_d_lap = total_dist_so_far + d_lap
-
-        t_all.append(t_lap)
-        x_all.append(x_lap)
-        y_all.append(y_lap)
-        race_dist_all.append(race_d_lap)
-        rel_dist_all.append(rd_lap)
-        lap_numbers.append(np.full_like(t_lap, lap_number))
-        tyre_compounds.append(np.full_like(t_lap, tyre_compund_as_int))
-        tyre_life_all.append(np.full_like(t_lap, tyre_life))
-        speed_all.append(speed_kph_lap)
-        gear_all.append(gear_lap)
-        drs_all.append(drs_lap)
-        throttle_all.append(throttle_lap)
-        brake_all.append(brake_lap)
-
+    # ------------------------------------------------------------
+    # No telemetry for this driver
+    # ------------------------------------------------------------
     if not t_all:
+        print(
+            f"[Replay] {driver_code}: NO TELEMETRY EXTRACTED"
+        )
         return None
 
-    # Concatenate all arrays at once for better performance
-    all_arrays = [t_all, x_all, y_all, race_dist_all, rel_dist_all, 
-                  lap_numbers, tyre_compounds, tyre_life_all, speed_all, gear_all, drs_all]
-    
-    t_all, x_all, y_all, race_dist_all, rel_dist_all, lap_numbers, \
-    tyre_compounds, tyre_life_all, speed_all, gear_all, drs_all = [np.concatenate(arr) for arr in all_arrays]
+    # ------------------------------------------------------------
+    # Concatenate
+    # ------------------------------------------------------------
+    t_all = np.concatenate(t_all)
+    x_all = np.concatenate(x_all)
+    y_all = np.concatenate(y_all)
+    race_dist_all = np.concatenate(race_dist_all)
+    rel_dist_all = np.concatenate(rel_dist_all)
+    lap_numbers = np.concatenate(lap_numbers)
+    tyre_compounds = np.concatenate(tyre_compounds)
+    tyre_life_all = np.concatenate(tyre_life_all)
+    speed_all = np.concatenate(speed_all)
+    gear_all = np.concatenate(gear_all)
+    drs_all = np.concatenate(drs_all)
+    throttle_all = np.concatenate(throttle_all)
+    brake_all = np.concatenate(brake_all)
 
-    # Sort all arrays by time in one operation
+    # ------------------------------------------------------------
+    # Sort by session time
+    # ------------------------------------------------------------
+    valid_time = np.isfinite(t_all)
+
+    t_all = t_all[valid_time]
+    x_all = x_all[valid_time]
+    y_all = y_all[valid_time]
+    race_dist_all = race_dist_all[valid_time]
+    rel_dist_all = rel_dist_all[valid_time]
+    lap_numbers = lap_numbers[valid_time]
+    tyre_compounds = tyre_compounds[valid_time]
+    tyre_life_all = tyre_life_all[valid_time]
+    speed_all = speed_all[valid_time]
+    gear_all = gear_all[valid_time]
+    drs_all = drs_all[valid_time]
+    throttle_all = throttle_all[valid_time]
+    brake_all = brake_all[valid_time]
+
+    if len(t_all) == 0:
+        return None
+
     order = np.argsort(t_all)
-    all_data = [t_all, x_all, y_all, race_dist_all, rel_dist_all, 
-                lap_numbers, tyre_compounds, tyre_life_all, speed_all, gear_all, drs_all]
-    
-    t_all, x_all, y_all, race_dist_all, rel_dist_all, lap_numbers, \
-    tyre_compounds, tyre_life_all, speed_all, gear_all, drs_all = [arr[order] for arr in all_data]
 
-    throttle_all = np.concatenate(throttle_all)[order]
-    brake_all = np.concatenate(brake_all)[order]
+    t_all = t_all[order]
+    x_all = x_all[order]
+    y_all = y_all[order]
+    race_dist_all = race_dist_all[order]
+    rel_dist_all = rel_dist_all[order]
+    lap_numbers = lap_numbers[order]
+    tyre_compounds = tyre_compounds[order]
+    tyre_life_all = tyre_life_all[order]
+    speed_all = speed_all[order]
+    gear_all = gear_all[order]
+    drs_all = drs_all[order]
+    throttle_all = throttle_all[order]
+    brake_all = brake_all[order]
 
-    # Pair up pit-in / pit-out timestamps chronologically (i-th in with
-    # i-th out — a car must fully exit one pit stop before starting the
-    # next). If counts don't match (e.g. retires in the pits), the
-    # unmatched trailing entry is dropped via zip() — minor, acceptable.
+    # ------------------------------------------------------------
+    # Pit windows
+    # ------------------------------------------------------------
     pit_in_times.sort()
     pit_out_times.sort()
-    pit_windows = list(zip(pit_in_times, pit_out_times))
 
-    in_pit_all = np.zeros_like(t_all, dtype=float)
+    pit_windows = list(
+        zip(pit_in_times, pit_out_times)
+    )
+
+    in_pit_all = np.zeros(
+        len(t_all),
+        dtype=float
+    )
+
     for pit_in, pit_out in pit_windows:
-        in_pit_all[(t_all >= pit_in) & (t_all <= pit_out)] = 1.0
+        if pit_out >= pit_in:
+            in_pit_all[
+                (t_all >= pit_in)
+                & (t_all <= pit_out)
+            ] = 1.0
 
-    print(f"Completed telemetry for driver: {driver_code}")
+    print(
+        f"Completed telemetry for driver: {driver_code} "
+        f"({len(t_all)} samples, "
+        f"{driver_max_lap:.0f} laps)"
+    )
 
     return {
         "code": driver_code,
@@ -172,8 +399,8 @@ def _process_single_driver(args):
             "brake": brake_all,
             "in_pit": in_pit_all,
         },
-        "t_min": t_all.min(),
-        "t_max": t_all.max(),
+        "t_min": float(t_all.min()),
+        "t_max": float(t_all.max()),
         "max_lap": driver_max_lap,
     }
 
@@ -201,6 +428,84 @@ def get_driver_colors(session):
         rgb = tuple(int(hex_color[i : i + 2], 16) for i in (0, 2, 4))
         rgb_colors[driver] = rgb
     return rgb_colors
+
+def get_driver_statuses(session):
+    """
+    Build official race-result metadata for every driver in the session.
+
+    This is intentionally separate from replay telemetry because DNS,
+    DNF/retirement and DSQ drivers may not have usable telemetry frames.
+    """
+
+    results = session.results
+    statuses = {}
+
+    for _, row in results.iterrows():
+        code = row.get("Abbreviation")
+
+        if not code or pd.isna(code):
+            continue
+
+        code = str(code)
+
+        position_value = row.get("Position")
+        position = (
+            int(position_value)
+            if pd.notna(position_value)
+            else None
+        )
+
+        status_value = row.get("Status")
+        status = (
+            str(status_value).strip()
+            if pd.notna(status_value)
+            else ""
+        )
+
+        laps_value = row.get("Laps")
+        laps_completed = (
+            int(laps_value)
+            if pd.notna(laps_value)
+            else 0
+        )
+
+        # FastF1 normally provides a textual status such as:
+        # Finished, +1 Lap, Retired, Did not start, Disqualified.
+        status_lower = status.lower()
+
+        did_not_start = (
+            "did not start" in status_lower
+            or "dns" == status_lower
+        )
+
+        disqualified = (
+            "disqual" in status_lower
+            or "dsq" == status_lower
+        )
+
+        retired = (
+            "retired" in status_lower
+            or "dnf" == status_lower
+        )
+
+        classified = (
+            not did_not_start
+            and not disqualified
+            and position is not None
+        )
+
+        statuses[code] = {
+            "status": status,
+            "position": position,
+            "laps_completed": laps_completed,
+            "classified": classified,
+            "did_not_start": did_not_start,
+            "retired": retired,
+            "disqualified": disqualified,
+        }
+
+    return statuses
+
 
 # def get_session_drivers(session):
 #     """Lightweight driver list (code, name, color) for populating dropdowns
@@ -427,7 +732,21 @@ def get_race_telemetry(session, session_type="R"):
 
     drivers = session.drivers
 
-    driver_codes = {num: session.get_driver(num)["Abbreviation"] for num in drivers}
+    # ------------------------------------------------------------
+    # SAFETY: FastF1 can occasionally return an empty driver list
+    # when the session was not loaded correctly or telemetry is
+    # unavailable. Never create Pool(processes=0).
+    # ------------------------------------------------------------
+    if drivers is None or len(drivers) == 0:
+        raise ValueError(
+            f"No drivers available in FastF1 session for "
+            f"{session_type}. The replay telemetry could not be built."
+        )
+
+    driver_codes = {
+        num: session.get_driver(num)["Abbreviation"]
+        for num in drivers
+    }
 
     driver_data = {}
 
@@ -436,19 +755,49 @@ def get_race_telemetry(session, session_type="R"):
 
     max_lap_number = 0
 
-    # 1. Get all of the drivers telemetry data using multiprocessing
-    # Prepare arguments for parallel processing
-    print(f"Processing {len(drivers)} drivers in parallel...")
-    driver_args = [
-        (driver_no, session, driver_codes[driver_no]) for driver_no in drivers
-    ]
+    # ============================================================
+    # 1. EXTRACT DRIVER TELEMETRY
+    # ============================================================
+    #
+    # FastF1 Session objects use lazy-loaded data. Passing the
+    # Session object through multiprocessing can cause child
+    # processes to lose access to loaded telemetry/lap data.
+    #
+    # Therefore replay extraction is intentionally performed in
+    # the current process. Once the replay pickle is created,
+    # subsequent requests use the cached replay.
+    # ============================================================
 
-    num_processes = min(cpu_count(), len(drivers))
+    print(
+        f"Processing {len(drivers)} drivers "
+        f"in single process..."
+    )
 
-    with Pool(processes=num_processes) as pool:
-        results = pool.map(_process_single_driver, driver_args)
+    results = []
 
-    # Process results
+    for driver_no in drivers:
+        driver_code = driver_codes[driver_no]
+
+        try:
+            result = _process_single_driver(
+                (driver_no, session, driver_code)
+            )
+
+            if result is not None:
+                results.append(result)
+
+        except Exception as exc:
+            print(
+                f"[Replay] Failed processing "
+                f"{driver_code}: {exc}"
+            )
+
+    if not results:
+        raise ValueError(
+            f"No driver telemetry could be extracted "
+            f"for {session_type}."
+        )
+
     # Process results
     latest_first_sample = None  # the LAST driver's first telemetry timestamp
     for result in results:
@@ -581,7 +930,13 @@ def get_race_telemetry(session, session_type="R"):
 
     # 4.1. Resample weather data onto the same timeline for playback
     weather_resampled = None
-    weather_df = getattr(session, "weather_data", None)
+    # Weather is optional for replay. FastF1 raises DataNotLoadedError
+    # when weather was not requested during Session.load(), so never let
+    # optional weather data break the replay build.
+    try:
+        weather_df = session.weather_data
+    except Exception:
+        weather_df = None
     if weather_df is not None and not weather_df.empty:
         try:
             weather_times = (
@@ -660,81 +1015,163 @@ def get_race_telemetry(session, session_type="R"):
         if not snapshot:
             continue
 
-        # 5b. Sort by race distance to get POSITIONS (1–20)
-        # Leader = largest race distance covered
-        snapshot.sort(key=lambda r: (r.get("lap", 0), r["dist"]), reverse=True)
-
-        # -------------------------------------------------
-        # Calculate gap to leader (meters)
-        # -------------------------------------------------
-
-        leader = snapshot[0]
+        # 5b. Race distance
+        #
+        # _process_single_driver() already converts FastF1's
+        # per-lap Distance into a continuous cumulative distance.
+        #
+        # Therefore use dist directly here.
+        #
+        # Do NOT add lap * track_length here.
+        # Do NOT use rel_dist as the primary ordering value.
 
         for car in snapshot:
+            car["race_dist"] = float(car["dist"])
 
-            car["gap_m"] = round(
-                leader["dist"] - car["dist"],
-                1
-            )
+        # -------------------------------------------------
+        # Determine physical race order
+        # -------------------------------------------------
+
+        snapshot.sort(
+            key=lambda r: (
+                r["race_dist"],
+                -float(r["rel_dist"]),
+            ),
+            reverse=True,
+        )
+
+        # -------------------------------------------------
+        # Build replay leaderboard data
+        #
+        # position = physical replay order
+        # gap_m    = physical distance estimate
+        #
+        # L / I are NOT fabricated from distance / speed.
+        # They will be connected to actual timing data separately.
+        # -------------------------------------------------
 
         leader = snapshot[0]
-        leader_lap = leader["lap"]
 
-        # TODO: This 5c. step seems futile currently as we are not using gaps anywhere, and it doesn't even comput the gaps. I think I left this in when removing the "gaps" feature that was half-finished during the initial development.
-
-        # 5c. Compute gap to car in front in SECONDS
         frame_data = {}
+
         for idx, car in enumerate(snapshot):
+
             code = car["code"]
             position = idx + 1
 
-            #driver ahead
+            # ---------------------------------------------
+            # Physical distance to leader
+            # ---------------------------------------------
+
+            gap_m = max(
+                0.0,
+                leader["race_dist"] - car["race_dist"],
+            )
+
+            # ---------------------------------------------
+            # Car immediately ahead
+            # ---------------------------------------------
 
             if idx == 0:
+
                 ahead = None
+                interval_distance = 0.0
+
             else:
+
                 front = snapshot[idx - 1]
+
+                interval_distance = max(
+                    0.0,
+                    front["race_dist"] - car["race_dist"],
+                )
+
                 ahead = {
                     "driver": front["code"],
-                    "distance": round(front["dist"] - car["dist"], 1),
-                    "gap": round((front["dist"] - car["dist"]) / 75.0, 2)
+                    "distance": round(
+                        interval_distance,
+                        1,
+                    ),
+                    "gap": None,
                 }
 
-            #driver behind 
+            # ---------------------------------------------
+            # Car immediately behind
+            # ---------------------------------------------
+
             if idx == len(snapshot) - 1:
+
                 behind = None
+
             else:
+
                 back = snapshot[idx + 1]
+
+                behind_distance = max(
+                    0.0,
+                    car["race_dist"] - back["race_dist"],
+                )
 
                 behind = {
                     "driver": back["code"],
-                    "distance": round(car["dist"] - back["dist"], 1),
-                    "gap": round((car["dist"] - back["dist"]) / 75.0, 2)
+                    "distance": round(
+                        behind_distance,
+                        1,
+                    ),
+                    "gap": None,
                 }
 
-            frame_data[code] = {
+            # ---------------------------------------------
+            # Frame data
+            # ---------------------------------------------
 
+            frame_data[code] = {
                 "x": car["x"],
                 "y": car["y"],
 
                 "dist": car["dist"],
+                "race_dist": car["race_dist"],
                 "lap": car["lap"],
 
-                "rel_dist": round(car["rel_dist"], 4),
+                "rel_dist": round(
+                    car["rel_dist"],
+                    4,
+                ),
 
                 "position": position,
+
                 "speed": car["speed"],
                 "gear": car["gear"],
                 "drs": car["drs"],
                 "throttle": car["throttle"],
                 "brake": car["brake"],
+
                 "tyre": car["tyre"],
-                "tyre_life": int(car["tyre_life"]),
+                "tyre_life": int(
+                    car["tyre_life"]
+                ),
+
+                "gap_m": round(
+                    gap_m,
+                    1,
+                ),
+
+                # -------------------------------------------------
+                # Timing values
+                #
+                # Do NOT manufacture these using distance / speed.
+                # Actual timing data will be connected separately.
+                # -------------------------------------------------
+
+                "gap_to_leader": None,
+                "interval": None,
+
                 "ahead": ahead,
                 "behind": behind,
+
                 "in_pit": car["in_pit"],
             }
-            
+
         weather_snapshot = {}
         if weather_resampled:
             try:
@@ -761,9 +1198,56 @@ def get_race_telemetry(session, session_type="R"):
             except Exception as e:
                 print(f"Failed to attach weather data to frame {i}: {e}")
 
+        # -------------------------------------------------------------
+        # Leader lap
+        # -------------------------------------------------------------
+        # Use the first-place driver's already-resampled lap value.
+        # This keeps the global frame lap synchronized with the actual
+        # replay ordering and avoids relying on an undefined variable.
+        leader_lap = 0
+
+        if frame_data:
+            leader_code = None
+
+            for code, driver in frame_data.items():
+                try:
+                    if int(round(float(driver.get("position", 999)))) == 1:
+                        leader_code = code
+                        break
+                except (TypeError, ValueError):
+                    continue
+
+            if leader_code is not None:
+                try:
+                    leader_lap = int(
+                        round(
+                            float(
+                                frame_data[leader_code].get("lap", 0)
+                            )
+                        )
+                    )
+                except (TypeError, ValueError):
+                    leader_lap = 0
+
+            # Fallback: use the highest valid lap if no P1 driver is
+            # available in this frame.
+            if leader_lap <= 0:
+                laps = []
+
+                for driver in frame_data.values():
+                    try:
+                        lap_value = float(driver.get("lap", 0))
+                        if np.isfinite(lap_value):
+                            laps.append(lap_value)
+                    except (TypeError, ValueError):
+                        continue
+
+                if laps:
+                    leader_lap = int(round(max(laps)))
+
         frame_payload = {
             "t": round(t, 3),
-            "lap": leader_lap,  # leader's lap at this time
+            "lap": leader_lap,
             "drivers": frame_data,
         }
         if weather_snapshot:

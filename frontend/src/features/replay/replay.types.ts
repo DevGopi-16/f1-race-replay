@@ -104,8 +104,20 @@ export interface ReplayEvent {
   [key: string]: unknown;
 }
 
+export interface ReplayDriverStatus {
+  status: string;
+  position: number | null;
+  laps_completed: number;
+  classified: boolean;
+  did_not_start: boolean;
+  retired: boolean;
+  disqualified: boolean;
+}
+
 export interface ReplayResponse {
   meta: ReplayMeta;
+
+  driver_statuses?: Record<string, ReplayDriverStatus>;
 
   driver_colors: ReplayDriverColors;
 

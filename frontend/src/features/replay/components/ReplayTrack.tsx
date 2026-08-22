@@ -4,6 +4,7 @@ import {
   useEffect,
   useMemo,
   useRef,
+  useState,
 } from "react";
 
 import type {
@@ -227,6 +228,128 @@ function getStartFinish(
   ];
 }
 
+
+const SECTOR_COLORS = {
+  1: "#ff3344",
+  2: "#3b82f6",
+  3: "#ffd23f",
+};
+
+function getNumericValue(value: unknown): number | null {
+  return typeof value === "number" && Number.isFinite(value)
+    ? value
+    : null;
+}
+
+function findNearestPointIndex(
+  points: Point[],
+  target: Point,
+): number {
+  let nearestIndex = 0;
+  let nearestDistance = Infinity;
+
+  for (let i = 0; i < points.length; i++) {
+    const dx = points[i].x - target.x;
+    const dy = points[i].y - target.y;
+
+    const distance = dx * dx + dy * dy;
+
+    if (distance < nearestDistance) {
+      nearestDistance = distance;
+      nearestIndex = i;
+    }
+  }
+
+  return nearestIndex;
+}
+
+function getSectorIndex(
+  track: ReplayTrackData,
+  pointIndex: number,
+  totalPoints: number,
+): 1 | 2 | 3 {
+  const segments = track.sector_segments;
+
+  if (Array.isArray(segments) && segments.length >= 3) {
+    const progress = pointIndex / Math.max(1, totalPoints - 1);
+
+    for (let i = 0; i < segments.length; i++) {
+      const segment = segments[i];
+
+      if (!segment || typeof segment !== "object") continue;
+
+      const obj = segment as Record<string, unknown>;
+
+      const start = getNumericValue(
+        obj.start ?? obj.start_index ?? obj.from ?? obj.start_dist,
+      );
+
+      const end = getNumericValue(
+        obj.end ?? obj.end_index ?? obj.to ?? obj.end_dist,
+      );
+
+      if (start !== null && end !== null) {
+        if (pointIndex >= start && pointIndex <= end) {
+          return (i + 1) as 1 | 2 | 3;
+        }
+      }
+
+      if (
+        start !== null &&
+        end !== null &&
+        start <= 1 &&
+        end <= 1 &&
+        progress >= start &&
+        progress <= end
+      ) {
+        return (i + 1) as 1 | 2 | 3;
+      }
+    }
+  }
+
+  if (pointIndex < totalPoints / 3) return 1;
+  if (pointIndex < (totalPoints * 2) / 3) return 2;
+  return 3;
+}
+
+function getTrackDistanceIndex(
+  track: ReplayTrackData,
+  driver: { dist?: number; rel_dist?: number },
+  totalPoints: number,
+): number {
+  const dist = getNumericValue(driver.dist);
+
+  if (dist !== null) {
+    const maxDist = getNumericValue(
+      (track as Record<string, unknown>).length,
+    );
+
+    if (maxDist && maxDist > 0) {
+      return Math.max(
+        0,
+        Math.min(
+          totalPoints - 1,
+          Math.round((dist / maxDist) * (totalPoints - 1)),
+        ),
+      );
+    }
+  }
+
+  const rel = getNumericValue(driver.rel_dist);
+
+  if (rel !== null) {
+    return Math.max(
+      0,
+      Math.min(
+        totalPoints - 1,
+        Math.round(rel * (totalPoints - 1)),
+      ),
+    );
+  }
+
+  return 0;
+}
+
 const ReplayTrack = memo(function ReplayTrack({
   track,
   frames,
@@ -235,6 +358,9 @@ const ReplayTrack = memo(function ReplayTrack({
   frameRate,
   driverColors,
 }: ReplayTrackProps) {
+  const [showSectors, setShowSectors] = useState(true);
+  const [showDRS, setShowDRS] = useState(true);
+
   const canvasRef =
     useRef<HTMLCanvasElement | null>(null);
 
@@ -656,6 +782,178 @@ const ReplayTrack = memo(function ReplayTrack({
 
       /*
        * -------------------------------------------------------
+       * SECTORS + DRS
+       * -------------------------------------------------------
+       */
+
+      const drawColoredTrack = (
+        color: string,
+        start: number,
+        end: number,
+      ) => {
+        if (points.length < 2) return;
+
+        const safeStart = Math.max(
+          0,
+          Math.min(points.length - 1, Math.floor(start)),
+        );
+
+        const safeEnd = Math.max(
+          safeStart + 1,
+          Math.min(points.length - 1, Math.ceil(end)),
+        );
+
+        ctx.save();
+
+        ctx.strokeStyle = color;
+        ctx.lineWidth = 4.5;
+        ctx.lineCap = "round";
+        ctx.lineJoin = "round";
+        ctx.globalAlpha = 0.95;
+
+        ctx.beginPath();
+
+        for (let i = safeStart; i <= safeEnd; i++) {
+          const p = transformPoint(
+            points[i],
+            transform,
+          );
+
+          if (i === safeStart) {
+            ctx.moveTo(p.x, p.y);
+          } else {
+            ctx.lineTo(p.x, p.y);
+          }
+        }
+
+        ctx.stroke();
+        ctx.restore();
+      };
+
+      /*
+       * Sector colours are painted ON the circuit.
+       * Cars remain completely independent dots.
+       */
+      if (showSectors) {
+        const total = points.length;
+
+        drawColoredTrack(
+          SECTOR_COLORS[1],
+          0,
+          total / 3,
+        );
+
+        drawColoredTrack(
+          SECTOR_COLORS[2],
+          total / 3,
+          (total * 2) / 3,
+        );
+
+        drawColoredTrack(
+          SECTOR_COLORS[3],
+          (total * 2) / 3,
+          total - 1,
+        );
+      }
+
+      /*
+       * DRS zones.
+       *
+       * Supports common backend formats:
+       * [
+       *   {start: 100, end: 180},
+       *   {start: 400, end: 470}
+       * ]
+       */
+      if (showDRS) {
+        const rawDRS = track.drs_zones;
+
+        if (Array.isArray(rawDRS)) {
+          for (const zone of rawDRS) {
+            if (
+              !zone ||
+              typeof zone !== "object"
+            ) {
+              continue;
+            }
+
+            const z =
+              zone as Record<string, unknown>;
+
+            const rawStart = z.start;
+            const rawEnd = z.end;
+
+            /*
+             * Backend track_geometry.py sends:
+             *
+             * {
+             *   start: {x: ..., y: ...},
+             *   end:   {x: ..., y: ...}
+             * }
+             *
+             * Convert those coordinates to the
+             * nearest points on the rendered track.
+             */
+
+            if (
+              !rawStart ||
+              !rawEnd ||
+              typeof rawStart !== "object" ||
+              typeof rawEnd !== "object"
+            ) {
+              continue;
+            }
+
+            const startObj =
+              rawStart as Record<string, unknown>;
+
+            const endObj =
+              rawEnd as Record<string, unknown>;
+
+            if (
+              typeof startObj.x !== "number" ||
+              typeof startObj.y !== "number" ||
+              typeof endObj.x !== "number" ||
+              typeof endObj.y !== "number"
+            ) {
+              continue;
+            }
+
+            const startIndex =
+              findNearestPointIndex(
+                points,
+                {
+                  x: startObj.x,
+                  y: startObj.y,
+                },
+              );
+
+            const endIndex =
+              findNearestPointIndex(
+                points,
+                {
+                  x: endObj.x,
+                  y: endObj.y,
+                },
+              );
+
+            drawColoredTrack(
+              "#00e5ff",
+              Math.min(
+                startIndex,
+                endIndex,
+              ),
+              Math.max(
+                startIndex,
+                endIndex,
+              ),
+            );
+          }
+        }
+      }
+
+      /*
+       * -------------------------------------------------------
        * TRACK
        * -------------------------------------------------------
        */
@@ -927,31 +1225,49 @@ const ReplayTrack = memo(function ReplayTrack({
         ctx.restore();
 
         /*
-         * Car marker
+         * Driver dot marker
+         *
+         * Simple, clean circuit-map marker:
+         * - team/driver colour
+         * - white outer ring
+         * - no car silhouette
+         * - same exact track position
          */
         ctx.save();
 
+        const markerRadius = 4.5;
+
+        /*
+         * White outer ring.
+         */
         ctx.beginPath();
 
         ctx.arc(
           position.x,
           position.y,
-          5,
+          markerRadius + 1.5,
           0,
           Math.PI * 2,
         );
 
-        ctx.fillStyle =
-          color;
-
-        ctx.strokeStyle =
-          "rgba(255,255,255,0.95)";
-
-        ctx.lineWidth = 1.4;
-
+        ctx.fillStyle = "rgba(255,255,255,0.95)";
         ctx.fill();
 
-        ctx.stroke();
+        /*
+         * Coloured driver dot.
+         */
+        ctx.beginPath();
+
+        ctx.arc(
+          position.x,
+          position.y,
+          markerRadius,
+          0,
+          Math.PI * 2,
+        );
+
+        ctx.fillStyle = color;
+        ctx.fill();
 
         ctx.restore();
       }

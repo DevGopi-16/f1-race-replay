@@ -976,3 +976,178 @@
     }
 }
 
+
+
+/* ============================================================
+   F1 LEADERBOARD COLUMN FIX
+   Prevents RET / DNS / gap values from overlapping
+   ============================================================ */
+
+.leaderboard-row {
+    display: grid !important;
+    grid-template-columns:
+        32px
+        54px
+        50px
+        minmax(70px, 1fr)
+        34px
+        44px !important;
+    align-items: center;
+    column-gap: 8px;
+    width: 100%;
+    min-width: 0;
+}
+
+.leaderboard-row > * {
+    min-width: 0;
+}
+
+.leaderboard-row .lb-position,
+.leaderboard-row .position {
+    width: 32px;
+    min-width: 32px;
+    text-align: center;
+    white-space: nowrap;
+}
+
+.leaderboard-row .lb-driver,
+.leaderboard-row .driver {
+    width: 54px;
+    min-width: 54px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.leaderboard-row .lb-status,
+.leaderboard-row .status {
+    width: 50px;
+    min-width: 50px;
+    text-align: center;
+    white-space: nowrap;
+    overflow: hidden;
+}
+
+.leaderboard-row .lb-gap,
+.leaderboard-row .gap {
+    min-width: 70px;
+    text-align: right;
+    white-space: nowrap;
+    font-variant-numeric: tabular-nums;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.leaderboard-row .lb-lap,
+.leaderboard-row .lap {
+    width: 34px;
+    min-width: 34px;
+    text-align: center;
+    white-space: nowrap;
+}
+
+.leaderboard-row .lb-pos,
+.leaderboard-row .race-position {
+    width: 44px;
+    min-width: 44px;
+    text-align: right;
+    white-space: nowrap;
+}
+
+.lb-badge {
+    display: inline-flex !important;
+    align-items: center;
+    justify-content: center;
+    white-space: nowrap;
+    flex-shrink: 0;
+}
+
+/* RET / DNS must never consume the gap column */
+.lb-badge.ret,
+.lb-badge.dns,
+.lb-status.ret,
+.lb-status.dns {
+    position: static !important;
+    transform: none !important;
+    margin: 0 !important;
+}
+
+/* Retired / DNS rows */
+.leaderboard-row.retired,
+.leaderboard-row.dns {
+    grid-template-columns:
+        32px
+        54px
+        50px
+        minmax(70px, 1fr)
+        34px
+        44px !important;
+}
+
+/* Prevent long delta values from pushing other columns */
+.leaderboard-row .delta,
+.leaderboard-row .time-gap,
+.leaderboard-row .relative-gap {
+    min-width: 70px;
+    max-width: 100%;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    text-align: right;
+}
+
+/* Mobile */
+@media (max-width: 700px) {
+    .leaderboard-row {
+        grid-template-columns:
+            28px
+            48px
+            42px
+            minmax(58px, 1fr)
+            30px
+            38px !important;
+        column-gap: 5px;
+    }
+
+    .leaderboard-row .lb-position,
+    .leaderboard-row .position {
+        width: 28px;
+        min-width: 28px;
+    }
+
+    .leaderboard-row .lb-driver,
+    .leaderboard-row .driver {
+        width: 48px;
+        min-width: 48px;
+    }
+
+    .leaderboard-row .lb-status,
+    .leaderboard-row .status {
+        width: 42px;
+        min-width: 42px;
+    }
+
+    .leaderboard-row .lb-gap,
+    .leaderboard-row .gap,
+    .leaderboard-row .delta,
+    .leaderboard-row .time-gap,
+    .leaderboard-row .relative-gap {
+        min-width: 58px;
+    }
+
+    .leaderboard-row .lb-lap,
+    .leaderboard-row .lap {
+        width: 30px;
+        min-width: 30px;
+    }
+
+    .leaderboard-row .lb-pos,
+    .leaderboard-row .race-position {
+        width: 38px;
+        min-width: 38px;
+    }
+}
+
+/* ============================================================
+   END LEADERBOARD COLUMN FIX
+   ============================================================ */

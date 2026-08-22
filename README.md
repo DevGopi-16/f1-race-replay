@@ -145,84 +145,280 @@ Telemetry is fetched once per session via FastF1 (with standings/points pulled l
 
 ```text
 F1-RACE-REPLAY-WEB/
+│
+├── .git/
+├── .gitignore
+├── .fastf1-cache/
+├── README.md
 ├── assets/
-│   ├── banners/
-│   ├── dividers/
-│   ├── file_headers/
-│   ├── headers/
-│   ├── icons/
-│   ├── loadings/
-│   ├── progress_bars/
-│   └── visuals/
+├── computed_data/
 │
 ├── backend/
-│   ├── .env.example
-│   ├── data/
+│   ├── .env
+│   ├── .fastf1-cache/
+│   ├── __pycache__/
+│   ├── cache/
 │   ├── computed_data/
+│   ├── data/
+│   │   └── drivers.json
+│   │
 │   ├── main.py
+│   ├── requirements.txt
+│   ├── test_telemetry_debug.py
+│   │
 │   └── src/
-│       ├── __init__.py
-│       ├── f1_data.py
-│       ├── serialize.py
-│       ├── driver_panel.py
+│       ├── __pycache__/
+│       │
+│       ├── auth/
+│       │   ├── __init__.py
+│       │   ├── __pycache__/
+│       │   ├── database.py
+│       │   ├── dependencies.py
+│       │   ├── models.py
+│       │   ├── routes.py
+│       │   ├── schemas.py
+│       │   └── security.py
+│       │
+│       ├── config/
+│       │   └── __pycache__/
+│       │
 │       ├── constructors_panel.py
-│       ├── session_panel.py
+│       ├── driver_panel.py
+│       ├── f1_data.py
+│       │
+│       ├── f1/
+│       │   └── __pycache__/
+│       │
+│       ├── lib/
+│       │   ├── __init__.py
+│       │   ├── __pycache__/
+│       │   ├── settings.py
+│       │   ├── time.py
+│       │   └── tyres.py
+│       │
+│       ├── live/
+│       │   ├── __init__.py
+│       │   ├── capture.py
+│       │   ├── parse_timing.py
+│       │   ├── recordings/
+│       │   ├── session_watcher.py
+│       │   └── state.py
+│       │
+│       ├── minisectors.py
+│       ├── next_session.py
+│       ├── race_control.py
+│       ├── serialize.py
 │       ├── timing_tower.py
-│       ├── track_map.py
-│       ├── replay.py
-│       ├── telemetry.py
-│       └── ...
+│       ├── track_geometry.py
+│       │
+│       └── utils/
+│           └── __pycache__/
+│
 │
 ├── frontend/
+│   │
+│   ├── node_modules/
+│   ├── dist/
+│   │
+│   ├── package.json
+│   ├── package-lock.json
+│   │
+│   ├── tsconfig.json
+│   ├── tsconfig.node.json
+│   ├── vite.config.ts
+│   ├── vite.config.js
+│   ├── vite.config.d.ts
+│   │
 │   ├── index.html
+│   ├── index.legacy.html
 │   ├── profile.html
 │   ├── settings.html
 │   │
+│   ├── public/
+│   │
+│   │
+│   ├── src/
+│   │   │
+│   │   ├── main.tsx
+│   │   ├── index.css
+│   │   ├── vite-env.d.ts
+│   │   │
+│   │   │
+│   │   ├── api/
+│   │   │   ├── client.ts
+│   │   │   └── drivers.ts
+│   │   │
+│   │   │
+│   │   ├── app/
+│   │   │   ├── App.tsx
+│   │   │   ├── providers.tsx
+│   │   │   └── router.tsx
+│   │   │
+│   │   │
+│   │   ├── components/
+│   │   │   │
+│   │   │   ├── layout/
+│   │   │   │   ├── AppShell.tsx
+│   │   │   │   ├── AppShell.css
+│   │   │   │   ├── PageContainer.tsx
+│   │   │   │   ├── PageHeader.tsx
+│   │   │   │   └── page-layout.css
+│   │   │   │
+│   │   │   ├── motion/
+│   │   │   │   ├── PageTransition.tsx
+│   │   │   │   ├── Reveal.tsx
+│   │   │   │   └── motion.css
+│   │   │   │
+│   │   │   ├── navigation/
+│   │   │   │   ├── FloatingNav.tsx
+│   │   │   │   ├── FloatingNav.css
+│   │   │   │   └── navigation.config.ts
+│   │   │   │
+│   │   │   └── ui/
+│   │   │       ├── Button.tsx
+│   │   │       ├── Divider.tsx
+│   │   │       ├── SectionLabel.tsx
+│   │   │       └── ui.css
+│   │   │
+│   │   │
+│   │   ├── features/
+│   │   │   │
+│   │   │   ├── home/
+│   │   │   │   ├── HomePage.tsx
+│   │   │   │   ├── home.api.ts
+│   │   │   │   ├── home.css
+│   │   │   │   ├── home.types.ts
+│   │   │   │   │
+│   │   │   │   └── components/
+│   │   │   │       ├── FeaturedRace.tsx
+│   │   │   │       └── HomeHero.tsx
+│   │   │   │
+│   │   │   │
+│   │   │   └── replay/
+│   │   │       ├── ReplayPage.tsx
+│   │   │       ├── replay.api.ts
+│   │   │       ├── replay.css
+│   │   │       ├── replay.types.ts
+│   │   │       ├── replay_cleaned.css
+│   │   │       │
+│   │   │       ├── hooks/
+│   │   │       │   └── useReplay.ts
+│   │   │       │
+│   │   │       └── components/
+│   │   │           ├── ReplayControls.tsx
+│   │   │           ├── ReplayDriverFocus.tsx
+│   │   │           ├── ReplayHero.tsx
+│   │   │           ├── ReplayLeaderboard.tsx
+│   │   │           ├── ReplayRaceInfo.tsx
+│   │   │           ├── ReplaySelector.tsx
+│   │   │           ├── ReplayStatus.tsx
+│   │   │           ├── ReplayTimeline.tsx
+│   │   │           ├── ReplayTrack.tsx
+│   │   │           └── replay-track.css
+│   │   │
+│   │   │
+│   │   ├── pages/
+│   │   │   ├── DriversPage.tsx
+│   │   │   ├── DriverDetailPage.tsx
+│   │   │   └── DriversPage.tsx.step2-broken
+│   │   │
+│   │   │
+│   │   └── styles/
+│   │       ├── background.css
+│   │       ├── driver-detail.css
+│   │       ├── drivers.css
+│   │       ├── globals.css
+│   │       ├── tokens.css
+│   │       └── typography.css
+│   │
+│   │
+│   ├── replay-archive/
+│   │   │
+│   │   ├── components/
+│   │   │   ├── ReplayControls.phase1.tsx
+│   │   │   ├── ReplayHero.phase1.tsx
+│   │   │   ├── ReplayLeaderboard.pre-status-layout-fix.tsx
+│   │   │   └── ReplayTrack.phase1.tsx
+│   │   │
+│   │   ├── hooks/
+│   │   │
+│   │   ├── replay.css.phase0
+│   │   ├── replay.css.phase1
+│   │   └── replay.css.phase1-before-phase2
+│   │
+│   │
 │   └── static/
+│       │
 │       ├── css/
-│       │   ├── style.css
 │       │   ├── auth.css
-│       │   ├── profile.css
-│       │   ├── settings.css
-│       │   ├── driver-panel.css
 │       │   ├── constructors-panel.css
+│       │   ├── core.css
+│       │   ├── driver-panel.css
 │       │   ├── home-dashboard.css
+│       │   ├── profile.css
 │       │   ├── replay.css
 │       │   ├── session-panel.css
+│       │   ├── settings.css
+│       │   ├── style.css
+│       │   ├── telemetry.css
 │       │   ├── timing-tower.css
-│       │   └── track-map.css
+│       │   ├── track-map.css
+│       │   │
+│       │   ├── components/
+│       │   │   ├── dashboard.css
+│       │   │   └── weather.css
+│       │   │
+│       │   ├── core/
+│       │   │   ├── animations.css
+│       │   │   ├── badges.css
+│       │   │   ├── base.css
+│       │   │   ├── buttons.css
+│       │   │   ├── glass.css
+│       │   │   ├── inputs.css
+│       │   │   ├── navigation.css
+│       │   │   ├── reset.css
+│       │   │   └── tokens.css
+│       │   │
+│       │   ├── pages/
+│       │   │   ├── home.css
+│       │   │   ├── picker.css
+│       │   │   ├── profile.css
+│       │   │   ├── qualifying.css
+│       │   │   ├── strategy.css
+│       │   │   └── telemetry.css
+│       │   │
+│       │   └── utilities/
+│       │       └── utilities.css
+│       │
+│       ├── images/
+│       │   ├── drivers/
+│       │   ├── banners/
+│       │   ├── newbanners/
+│       │   ├── teambanner/
+│       │   ├── icons/
+│       │   ├── headers/
+│       │   ├── dividers/
+│       │   ├── loadings/
+│       │   ├── progress_bars/
+│       │   └── visuals/
 │       │
 │       ├── js/
 │       │   ├── app.js
 │       │   ├── auth.js
-│       │   ├── profile.js
-│       │   ├── settings.js
-│       │   ├── settings_applier.js
-│       │   ├── driver-panel.js
 │       │   ├── constructors-panel.js
+│       │   ├── driver-panel.js
+│       │   ├── profile.js
 │       │   ├── replay.js
 │       │   ├── session-panel.js
+│       │   ├── settings.js
+│       │   ├── settings_applier.js
 │       │   ├── telemetry.js
 │       │   ├── timing-tower.js
 │       │   └── track-map.js
 │       │
-│       └── images/
-│           ├── banners/
-│           ├── car/
-│           ├── circuits/
-│           ├── constructors/
-│           ├── controls/
-│           ├── drivers/
-│           ├── teams/
-│           ├── tracks/
-│           ├── weather/
-│           └── ...
+│       └── uploads/
 │
-├── .gitignore
-├── README.md
-├── requirements.txt
-├── roadmap.md
-└── telemetry.md
+└── venv/
 ```
 
 </details>

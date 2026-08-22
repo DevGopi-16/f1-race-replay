@@ -1386,3 +1386,207 @@
 .tel-strategy-code { font-weight: 800; font-size: 12px; }
 .tel-strategy-bar { display: flex; height: 14px; border-radius: 4px; overflow: hidden; background: rgba(255,255,255,0.06); }
 .tel-strategy-seg { height: 100%; }
+/* ============================================================
+   DRIVER HERO — FINAL BODY + BANNER COMPOSITION FIX
+   ============================================================ */
+
+/* Hero frame */
+.dp-hero-banner-frame {
+  position: relative;
+  width: 100%;
+  height: 320px;
+  overflow: hidden;
+  isolation: isolate;
+}
+
+/* Background banner */
+.dp-hero-banner-img {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: center center;
+  display: block;
+  z-index: 0;
+}
+
+/* Cinematic dark left-side gradient */
+.dp-hero-scrim {
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  pointer-events: none;
+
+  background:
+    linear-gradient(
+      90deg,
+      rgba(0,0,0,0.98) 0%,
+      rgba(0,0,0,0.94) 18%,
+      rgba(0,0,0,0.78) 34%,
+      rgba(0,0,0,0.48) 52%,
+      rgba(0,0,0,0.16) 72%,
+      rgba(0,0,0,0.02) 100%
+    ),
+    linear-gradient(
+      0deg,
+      rgba(0,0,0,0.72) 0%,
+      rgba(0,0,0,0.18) 42%,
+      transparent 75%
+    );
+}
+
+/* FULL DRIVER CUTOUT
+   Important: contain instead of cover */
+.dp-hero-driverimg {
+  position: absolute;
+
+  right: 30px;
+  bottom: 0;
+
+  width: 290px;
+  height: 320px;
+
+  object-fit: contain;
+  object-position: bottom center;
+
+  display: block;
+
+  z-index: 3;
+
+  filter:
+    drop-shadow(0 12px 22px rgba(0,0,0,0.55))
+    drop-shadow(0 0 18px rgba(0,0,0,0.18));
+
+  transform-origin: bottom center;
+
+  animation: dp-float 5s ease-in-out infinite;
+
+  transition:
+    transform .35s cubic-bezier(.2,.8,.2,1),
+    filter .35s ease;
+}
+
+/* Slightly larger driver on wide screens */
+@media (min-width: 768px) {
+  .dp-hero-driverimg {
+    right: 40px;
+    width: 320px;
+    height: 350px;
+  }
+}
+
+/* Large desktop */
+@media (min-width: 1200px) {
+  .dp-hero-driverimg {
+    right: 55px;
+    width: 350px;
+    height: 370px;
+  }
+}
+
+/* Driver lifts slightly when hero is hovered */
+.dp-hero-clickable:hover .dp-hero-driverimg {
+  transform: translateY(-4px) scale(1.015);
+  filter:
+    drop-shadow(0 18px 30px rgba(0,0,0,0.62))
+    drop-shadow(0 0 22px rgba(255,255,255,0.08));
+}
+
+/* Text must remain ABOVE the driver/banner */
+.dp-hero-scrim-content {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0;
+
+  padding: 24px 32px;
+
+  z-index: 5;
+}
+
+/* Keep text comfortably inside the black region */
+#dp-hero-trigger .dp-hero-scrim-content {
+  left: 0;
+  right: auto;
+  width: min(52%, 600px);
+  padding-left: 48px;
+  padding-right: 20px;
+}
+
+/* Profile page text */
+.dp-profile-hero .dp-hero-scrim-content {
+  z-index: 5;
+}
+
+/* Banner wipe stays behind driver and text */
+.dp-hero-banner-frame::before {
+  z-index: 2;
+}
+
+/* Don't let the wipe pseudo-element interfere with driver */
+.dp-hero-banner-frame::after {
+  pointer-events: none;
+}
+
+/* Mobile */
+@media (max-width: 767px) {
+
+  .dp-hero-banner-frame {
+    height: 360px;
+  }
+
+  .dp-hero-driverimg {
+    right: -10px;
+    width: 230px;
+    height: 290px;
+    opacity: 0.96;
+  }
+
+  #dp-hero-trigger .dp-hero-scrim-content {
+    width: 68%;
+    padding-left: 22px;
+    padding-right: 10px;
+  }
+
+  .dp-hero-name {
+    font-size: 32px;
+  }
+
+  .dp-hero-scrim {
+    background:
+      linear-gradient(
+        90deg,
+        rgba(0,0,0,0.98) 0%,
+        rgba(0,0,0,0.88) 35%,
+        rgba(0,0,0,0.42) 65%,
+        rgba(0,0,0,0.08) 100%
+      ),
+      linear-gradient(
+        0deg,
+        rgba(0,0,0,0.72),
+        transparent 70%
+      );
+  }
+}
+
+/* Very small screens */
+@media (max-width: 480px) {
+
+  .dp-hero-banner-frame {
+    height: 340px;
+  }
+
+  .dp-hero-driverimg {
+    right: -28px;
+    width: 210px;
+    height: 275px;
+  }
+
+  #dp-hero-trigger .dp-hero-scrim-content {
+    width: 72%;
+    padding-left: 18px;
+  }
+}
+
+

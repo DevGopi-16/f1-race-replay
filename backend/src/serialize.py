@@ -1,6 +1,22 @@
 FRAME_FIELDS_FOR_CLIENT = (
     "x",
     "y",
+    "lap",
+    "position",
+    "dist",
+    "rel_dist",
+    "speed",
+    "gear",
+    "drs",
+    "throttle",
+    "brake",
+    "tyre",
+    "tyre_life",
+    "in_pit",
+    "ahead",
+    "behind",
+    "gap_to_leader",
+    "interval",
 )
 
 
@@ -9,13 +25,6 @@ def downsample_frames(
     source_fps: int = 25,
     target_fps: int = 8,
 ) -> list:
-    """
-    Downsample telemetry frames for the replay animation.
-
-    The replay frontend only needs car positions, so keeping the
-    payload small is much more important than sending full telemetry
-    for every frame.
-    """
     if not frames:
         return []
 
@@ -28,10 +37,6 @@ def downsample_frames(
 
 
 def serialize_frame(frame: dict) -> dict:
-    """
-    Serialize only the data required by the replay track animation.
-    """
-
     drivers_out = {}
 
     for code, driver in frame.get("drivers", {}).items():
@@ -73,32 +78,15 @@ def serialize_frames(
 
 
 def serialize_replay_frame(frame: dict) -> dict:
-    """
-    Compact payload used by the visual replay.
-
-    Replay only needs:
-    - timestamp
-    - lap
-    - driver position on track
-    - race position
-    - tyre information
-
-    Detailed telemetry is intentionally excluded.
-    Detailed telemetry can be requested separately.
-    """
     drivers_out = {}
 
     for code, d in frame.get("drivers", {}).items():
+        if not isinstance(d, dict):
+            continue
+
         drivers_out[code] = {
             key: d[key]
-            for key in (
-                "x",
-                "y",
-                "lap",
-                "position",
-                "tyre",
-                "tyre_life",
-            )
+            for key in FRAME_FIELDS_FOR_CLIENT
             if key in d
         }
 
@@ -129,11 +117,46 @@ def serialize_replay_frames(
 def rgb_tuple_to_hex(rgb) -> str:
     r, g, b = rgb[0], rgb[1], rgb[2]
 
-    return f"#{r:02x}{g:02x}{b:02x}"
+    return "#{:02x}{:02x}{:02x}".format(
+        int(r),
+        int(g),
+        int(b),
+    )
 
 
 def serialize_driver_colors(driver_colors: dict) -> dict:
-    return {
-        code: rgb_tuple_to_hex(rgb)
-        for code, rgb in driver_colors.items()
-    }
+    """
+    Serialize driver color metadata for the replay frontend.
+    Supports both simple string colors and structured metadata.
+    """
+    if not isinstance(driver_colors, dict):
+        return {}
+
+    output = {}
+
+    for code, value in driver_colors.items():
+        code = str(code).upper()
+
+        if isinstance(value, str):
+            output[code] = value
+
+        elif isinstance(value, dict):
+            output[code] = {
+                key: value[key]
+                for key in ("color", "name", "abbreviation")
+                if key in value
+            }
+
+        elif isinstance(value, (tuple, list)) and len(value) >= 3:
+            try:
+                output[code] = (
+                    "#{:02x}{:02x}{:02x}".format(
+                        int(value[0]),
+                        int(value[1]),
+                        int(value[2]),
+                    )
+                )
+            except (TypeError, ValueError):
+                continue
+
+    return output

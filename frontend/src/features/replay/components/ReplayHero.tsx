@@ -15,43 +15,57 @@ export default function ReplayHero({
   const lap = frame?.lap ?? 0;
 
   return (
-    <section className="session-info-overlay">
-      <div className="replay-hero">
+    <section className="replay-race-header">
 
-        <div className="replay-hero-copy">
-          <span className="replay-kicker">
-            {meta.year} · ROUND {meta.round}
-          </span>
+      <div className="replay-race-heading">
 
-          <h2>{meta.event_name}</h2>
-
-          <p>
-            {meta.circuit_name}
-            {meta.country
-              ? ` · ${meta.country}`
-              : ""}
-          </p>
+        <div className="replay-race-kicker">
+          <span className="replay-live-dot" />
+          F1 RACE REPLAY
         </div>
 
-        <div className="replay-hero-stat">
+        <h1>
+          {meta.event_name || "RACE REPLAY"}
+        </h1>
+
+        <p>
+          {meta.circuit_name || "SELECT A SESSION"}
+          {meta.country
+            ? ` · ${meta.country}`
+            : ""}
+        </p>
+
+      </div>
+
+      <div className="replay-race-meta">
+
+        <div className="replay-meta-item">
+          <span>SEASON</span>
+          <strong>{meta.year}</strong>
+        </div>
+
+        <div className="replay-meta-divider" />
+
+        <div className="replay-meta-item">
+          <span>ROUND</span>
+          <strong>{meta.round}</strong>
+        </div>
+
+        <div className="replay-meta-divider" />
+
+        <div className="replay-meta-item replay-lap-meta">
           <span>LAP</span>
 
-          <strong className="replay-lap-value">
-            <span className="replay-lap-current">
-              {lap || "—"}
-            </span>
-
-            <span className="replay-lap-separator">
-              /
-            </span>
-
-            <span className="replay-lap-total">
-              {meta.total_laps || "—"}
-            </span>
+          <strong>
+            {lap || "—"}
+            <small>
+              / {meta.total_laps || "—"}
+            </small>
           </strong>
         </div>
 
       </div>
+
     </section>
   );
 }

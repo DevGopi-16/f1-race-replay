@@ -1,436 +1,632 @@
-import { useEffect, useState } from "react";
-
 import {
-  getReplayChunk,
-  type ReplayQuery,
-} from "../replay.api";
+  useCallback,
+  useEffect,
+  useRef,
+  useState,
+} from "react";
 
-import type { ReplayResponse } from "../replay.types";
+import { getReplayChunk } from "../replay.api";
 
-interface ReplayState {
-  data: ReplayResponse | null;
-  loading: boolean;
-  error: string | null;
-}
+import type {
+  ReplayDriverStatus,
+} from "../replay.types";
+
 
 const CHUNK_SIZE = 500;
 
-/*
- * Number of replay chunks allowed to load at the same time.
- *
- * We still assemble the final frame array in exact backend order.
- * Parallel loading only removes the unnecessary network wait.
- */
-const PARALLEL_CHUNKS = 8;
+type ReplayQueryLike = {
+  year: number;
+  grandPrix?: string;
+  grand_prix?: string;
+  grandPrixName?: string;
 
-export function useReplay(
-  query: ReplayQuery | null,
-): ReplayState {
-  const [state, setState] = useState<ReplayState>({
-    data: null,
-    loading: false,
-    error: null,
-  });
+  sessionType?: string;
+  session_type?: string;
+
+  fps?: number;
+};
+
+export function useReplay(query?: ReplayQueryLike | null) {
+  const [data, setData] = useState<any>(null);
+
+  const [frames, setFrames] = useState<any[]>([]);
+  const [meta, setMeta] = useState<any>(null);
+  const [track, setTrack] = useState<any>(null);
+  const [events, setEvents] = useState<any[]>([]);
+
+  const [driverColors, setDriverColors] =
+    useState<Record<string, any>>({});
+
+  const [maxTyreLife, setMaxTyreLife] =
+    useState<Record<string, any>>({});
+
+  const [driverStatuses, setDriverStatuses] =
+    useState<Record<string, ReplayDriverStatus>>({});
+
+  const [totalFrames, setTotalFrames] =
+    useState(0);
+
+  const [loadedFrames, setLoadedFrames] =
+    useState(0);
+
+  const [frameRate, setFrameRate] =
+    useState(8);
+
+  const [loading, setLoading] =
+    useState(false);
+
+  const [error, setError] =
+    useState<string | null>(null);
+
+  /* REFS */
+
+  const loadingRef =
+    useRef(false);
+
+  const mountedRef =
+    useRef(true);
+
+  const framesRef =
+    useRef<any[]>([]);
+
+  const loadedStartsRef =
+    useRef<Set<number>>(new Set());
+
+  const queryGenerationRef =
+    useRef(0);
+
+  /* MOUNT / UNMOUNT */
 
   useEffect(() => {
-    if (!query) {
-      setState({
-        data: null,
-        loading: false,
-        error: null,
-      });
-      return;
-    }
+    mountedRef.current = true;
 
-    const replayQuery = query;
-    let cancelled = false;
+    return () => {
+      mountedRef.current = false;
+      queryGenerationRef.current += 1;
+    };
+  }, []);
 
-    setState({
-      data: null,
-      loading: true,
-      error: null,
-    });
+  /* RESET INTERNAL STATE */
+  const resetInternalState = useCallback(() => {
+    framesRef.current = [];
+    loadedStartsRef.current.clear();
 
-    async function loadReplay() {
+    setData(null);
+    setFrames([]);
+    setMeta(null);
+    setTrack(null);
+    setEvents([]);
+    setDriverColors({});
+    setMaxTyreLife({});
+    setDriverStatuses({});
+    setTotalFrames(0);
+    setLoadedFrames(0);
+    setFrameRate(8);
+    setLoading(false);
+    setError(null);
+  }, []);
+
+  /* LOAD ONE CHUNK */
+  const loadChunk = useCallback(
+    async (
+      year: number,
+      grandPrix: string,
+      sessionType: string,
+      fps: number,
+      start: number,
+      generation: number,
+    ) => {
+
+      /* Do not load the same chunk twice.*/
+      if (
+        loadedStartsRef.current.has(start)
+      ) {
+        return null;
+      }
+
+      /* if this request belongs to an old replay, silently abandon it.*/
+      if (
+        generation !==
+        queryGenerationRef.current
+      ) {
+        return null;
+      }
+
+      loadedStartsRef.current.add(start);
+
       try {
         console.log(
-          "[Replay] Loading replay...",
-          replayQuery,
+          `[Replay] Loading frames ${start} - ${start + CHUNK_SIZE}`,
         );
+
+        const chunk =
+          await getReplayChunk(
+            {
+              year,
+              grandPrix,
+              sessionType:
+                sessionType as
+                  | "R"
+                  | "S"
+                  | "FP1"
+                  | "FP2"
+                  | "FP3",
+              fps,
+            },
+            start,
+            CHUNK_SIZE,
+          );
 
         /*
-         * ---------------------------------------------------------
-         * FIRST CHUNK
-         * ---------------------------------------------------------
-         *
-         * The first request gives us:
-         *
-         *   - metadata
-         *   - track
-         *   - driver colors
-         *   - total frame count
-         *   - first 500 frames
-         *
-         * Nothing is exposed to ReplayPage yet.
+         * Ignore stale requests.
          */
 
-        const first = await getReplayChunk(
-          replayQuery,
-          0,
-          CHUNK_SIZE,
-        );
-
-        if (cancelled) {
-          return;
+        if (
+          generation !==
+          queryGenerationRef.current
+        ) {
+          return null;
         }
 
         if (
-          !first.meta ||
-          !first.track ||
-          !first.driver_colors
+          !chunk ||
+          !Array.isArray(chunk.frames)
         ) {
           throw new Error(
-            "Replay metadata is missing from the server.",
+            "Invalid replay chunk received from server.",
           );
         }
 
-        if (!Array.isArray(first.frames)) {
-          throw new Error(
-            "Replay first chunk returned invalid frame data.",
+        return chunk;
+      } catch (err) {
+        /*
+         * Allow retry if this chunk failed.
+         */
+
+        loadedStartsRef.current.delete(
+          start,
+        );
+
+        throw err;
+      }
+    },
+    [],
+  );
+
+  /* APPEND CHUNK */
+
+  const appendChunk = useCallback(
+    (
+      chunk: any,
+      firstChunk: boolean,
+    ) => {
+      if (!mountedRef.current) {
+        return;
+      }
+
+      const nextFrames = [
+        ...framesRef.current,
+        ...chunk.frames,
+      ];
+
+      framesRef.current =
+        nextFrames;
+
+      if (firstChunk) {
+        setMeta(
+          chunk.meta ?? null,
+        );
+
+        setTrack(
+          chunk.track ?? null,
+        );
+
+        setEvents(
+          chunk.events ?? [],
+        );
+
+        setDriverColors(
+          chunk.driver_colors ?? {},
+        );
+
+        setMaxTyreLife(
+          chunk.max_tyre_life ?? {},
+        );
+
+        setDriverStatuses(
+          chunk.driver_statuses ?? {},
+        );
+
+        const backendFrameRate =
+          Number(
+            chunk.frame_rate,
           );
+
+        if (
+          Number.isFinite(
+            backendFrameRate,
+          ) &&
+          backendFrameRate > 0
+        ) {
+          setFrameRate(
+            backendFrameRate,
+          );
+        }
+      }
+      setFrames(
+        nextFrames,
+      );
+
+      setLoadedFrames(
+        nextFrames.length,
+      );
+      setData(
+        (previous: any) => ({
+          ...(previous ?? chunk),
+
+          frames:
+            nextFrames,
+          frame_rate:
+            Number(
+              chunk.frame_rate ??
+                previous?.frame_rate ??
+                8,
+            ),
+
+          meta:
+            chunk.meta ??
+            previous?.meta,
+
+          track:
+            chunk.track ??
+            previous?.track,
+
+          events:
+            chunk.events ??
+            previous?.events ??
+            [],
+
+          driver_colors:
+            chunk.driver_colors ??
+            previous?.driver_colors ??
+            {},
+
+          max_tyre_life:
+            chunk.max_tyre_life ??
+            previous?.max_tyre_life ??
+            {},
+
+          driver_statuses:
+            chunk.driver_statuses ??
+            previous?.driver_statuses ??
+            {},
+        }),
+      );
+    },
+    [],
+  );
+
+  /* LOAD COMPLETE REPLAY */
+  const loadReplay = useCallback(
+    async (
+      year: number,
+      grandPrix: string,
+      sessionType = "R",
+      requestedFps = 8,
+    ) => {
+
+
+      if (loadingRef.current) {
+        console.log(
+          "[Replay] Load already running.",
+        );
+
+        return;
+      }
+      const generation =
+        ++queryGenerationRef.current;
+
+      loadingRef.current = true;
+
+      if (mountedRef.current) {
+        setLoading(true);
+        setError(null);
+      }
+
+      framesRef.current = [];
+      loadedStartsRef.current.clear();
+
+      if (mountedRef.current) {
+        setData(null);
+        setFrames([]);
+        setMeta(null);
+        setTrack(null);
+        setEvents([]);
+        setDriverColors({});
+        setMaxTyreLife({});
+        setDriverStatuses({});
+        setTotalFrames(0);
+        setLoadedFrames(0);
+      }
+
+      const fps = Math.max(
+        1,
+        Number(requestedFps) || 8,
+      );
+
+      try {
+        console.log(
+          "[Replay] Loading first chunk...",
+        );
+
+        const first =
+          await loadChunk(
+            year,
+            grandPrix,
+            sessionType,
+            fps,
+            0,
+            generation,
+          );
+
+        if (
+          !first ||
+          generation !==
+            queryGenerationRef.current
+        ) {
+          return;
         }
 
         const total =
-          Number.isFinite(first.total)
-            ? first.total
-            : first.total_frames;
+          Number(
+            first.total_frames ??
+              first.total ??
+              first.frames.length,
+          );
+
+        console.log(
+          `[Replay] First chunk loaded: ${first.frames.length}/${total}`,
+        );
+
+        if (mountedRef.current) {
+          setTotalFrames(
+            total,
+          );
+        }
+        appendChunk(
+          first,
+          true,
+        );
+
+        if (mountedRef.current) {
+          setLoading(false);
+        }
+
+        /* BACKGROUND LOADING */
+        for (
+          let start =
+            CHUNK_SIZE;
+          start < total;
+          start += CHUNK_SIZE
+        ) {
+          if (
+            !mountedRef.current ||
+            generation !==
+              queryGenerationRef.current
+          ) {
+            return;
+          }
+
+          try {
+            const chunk =
+              await loadChunk(
+                year,
+                grandPrix,
+                sessionType,
+                fps,
+                start,
+                generation,
+              );
+
+            if (
+              !chunk ||
+              generation !==
+                queryGenerationRef.current
+            ) {
+              return;
+            }
+
+            appendChunk(
+              chunk,
+              false,
+            );
+
+            console.log(
+              `[Replay] Loaded ${framesRef.current.length}/${total}`,
+            );
+            await new Promise<void>(
+              (resolve) =>
+                setTimeout(
+                  resolve,
+                  0,
+                ),
+            );
+          } catch (chunkError) {
+            console.error(
+              `[Replay] Background chunk ${start} failed:`,
+              chunkError,
+            );
+            continue;
+          }
+        }
 
         if (
-          !Number.isFinite(total) ||
-          total <= 0
+          mountedRef.current &&
+          generation ===
+            queryGenerationRef.current
         ) {
-          throw new Error(
-            "Replay returned an invalid total frame count.",
-          );
-        }
-
-        console.log(
-          `[Replay] Replay contains ${total.toLocaleString()} frames.`,
-        );
-
-        /*
-         * ---------------------------------------------------------
-         * CHUNK STORAGE
-         * ---------------------------------------------------------
-         *
-         * IMPORTANT:
-         *
-         * We do NOT append chunks as they arrive.
-         *
-         * Network responses can finish in any order.
-         *
-         * Example:
-         *
-         *   request 500
-         *   request 1000
-         *   request 1500
-         *
-         * could finish as:
-         *
-         *   1500
-         *   500
-         *   1000
-         *
-         * Therefore every chunk is stored using its exact
-         * backend start index.
-         */
-
-        const chunks = new Map<
-          number,
-          typeof first.frames
-        >();
-
-        chunks.set(0, first.frames);
-
-        const starts: number[] = [];
-
-        for (
-          let start = CHUNK_SIZE;
-          start < total;
-          start += CHUNK_SIZE
-        ) {
-          starts.push(start);
-        }
-
-        console.log(
-          `[Replay] ${starts.length + 1} total chunks required.`,
-        );
-
-        /*
-         * ---------------------------------------------------------
-         * PARALLEL CHUNK LOADING
-         * ---------------------------------------------------------
-         *
-         * Only a limited number of requests run at once.
-         *
-         * This avoids:
-         *
-         *   - 70+ sequential network waits
-         *   - browser connection flooding
-         *   - unnecessary server pressure
-         *
-         * But is dramatically faster than the old loader.
-         */
-
-        for (
-          let batchStart = 0;
-          batchStart < starts.length;
-          batchStart += PARALLEL_CHUNKS
-        ) {
-          if (cancelled) {
-            return;
-          }
-
-          const batch =
-            starts.slice(
-              batchStart,
-              batchStart + PARALLEL_CHUNKS,
-            );
-
           console.log(
-            `[Replay] Loading chunks: ${batch
-              .map((value) => `${value}-${Math.min(value + CHUNK_SIZE, total)}`)
-              .join(", ")}`,
-          );
-
-          const results =
-            await Promise.all(
-              batch.map(async (start) => {
-                const chunk =
-                  await getReplayChunk(
-                    replayQuery,
-                    start,
-                    CHUNK_SIZE,
-                  );
-
-                return {
-                  start,
-                  chunk,
-                };
-              }),
-            );
-
-          if (cancelled) {
-            return;
-          }
-
-          /*
-           * Store each response using its requested start.
-           *
-           * Arrival order is irrelevant.
-           */
-          for (const {
-            start,
-            chunk,
-          } of results) {
-            if (!Array.isArray(chunk.frames)) {
-              throw new Error(
-                `Replay chunk ${start} returned invalid frame data.`,
-              );
-            }
-
-            chunks.set(
-              start,
-              chunk.frames,
-            );
-          }
-
-          const loaded =
-            Array.from(chunks.values())
-              .reduce(
-                (sum, frames) =>
-                  sum + frames.length,
-                0,
-              );
-
-          console.log(
-            `[Replay] Chunks loaded: ${loaded.toLocaleString()}/${total.toLocaleString()} frames`,
+            `[Replay] Replay fully loaded: ${framesRef.current.length}/${total}`,
           );
         }
-
-        if (cancelled) {
-          return;
-        }
-
-        /*
-         * ---------------------------------------------------------
-         * ASSEMBLE EXACT FRAME ORDER
-         * ---------------------------------------------------------
-         *
-         * This is the critical part.
-         *
-         * We reconstruct:
-         *
-         *   chunk 0
-         *   chunk 500
-         *   chunk 1000
-         *   chunk 1500
-         *   ...
-         *
-         * regardless of which network request completed first.
-         */
-
-        const allFrames: typeof first.frames = [];
-
-        for (
-          let start = 0;
-          start < total;
-          start += CHUNK_SIZE
-        ) {
-          const chunk =
-            chunks.get(start);
-
-          if (!chunk) {
-            throw new Error(
-              `Replay chunk ${start} is missing.`,
-            );
-          }
-
-          allFrames.push(...chunk);
-        }
-
-        /*
-         * ---------------------------------------------------------
-         * FRAME COUNT VALIDATION
-         * ---------------------------------------------------------
-         */
-
-        if (allFrames.length !== total) {
-          throw new Error(
-            `Replay frame count mismatch: ` +
-            `loaded ${allFrames.length}, expected ${total}`,
-          );
-        }
-
-        /*
-         * ---------------------------------------------------------
-         * FAST TIMESTAMP SANITY CHECK
-         * ---------------------------------------------------------
-         *
-         * Chunks are already assembled in exact backend order.
-         *
-         * Do NOT scan all 50,000+ frames here.
-         * A small sample is enough to detect an obvious
-         * timestamp ordering problem without delaying replay start.
-         */
-
-        const validationStep = Math.max(
-          1,
-          Math.floor(allFrames.length / 100),
-        );
-
-        let timestampWarnings = 0;
-
-        for (
-          let i = validationStep;
-          i < allFrames.length;
-          i += validationStep
-        ) {
-          const previous = allFrames[i - 1]?.t;
-          const current = allFrames[i]?.t;
-
-          if (
-            typeof previous === "number" &&
-            typeof current === "number" &&
-            current < previous
-          ) {
-            timestampWarnings += 1;
-
-            if (timestampWarnings <= 3) {
-              console.warn(
-                "[Replay] Timestamp order warning:",
-                {
-                  index: i,
-                  previous,
-                  current,
-                },
-              );
-            }
-          }
-        }
-
-        /*
-         * ---------------------------------------------------------
-         * FINAL IMMUTABLE REPLAY DATA
-         * ---------------------------------------------------------
-         *
-         * ReplayPage receives frames exactly once.
-         *
-         * After this point:
-         *
-         *   frames.length === total_frames
-         *
-         * and the array order never changes.
-         */
-
-        const completeData: ReplayResponse = {
-          meta: first.meta,
-          driver_colors:
-            first.driver_colors,
-          max_tyre_life:
-            first.max_tyre_life ?? {},
-          track: first.track,
-          events:
-            first.events ?? [],
-          frames: allFrames,
-          frame_rate:
-            first.frame_rate,
-          total_frames: total,
-        };
-
-        console.log(
-          `[Replay] COMPLETE replay loaded: ${allFrames.length.toLocaleString()} frames`,
-        );
-
-        setState({
-          data: completeData,
-          loading: false,
-          error: null,
-        });
-      } catch (error: unknown) {
-        if (cancelled) {
-          return;
-        }
-
+      } catch (err) {
         console.error(
-          "[Replay] Failed to load replay:",
-          error,
+          "[Replay] Load failed:",
+          err,
         );
+
+        if (
+          !mountedRef.current ||
+          generation !==
+            queryGenerationRef.current
+        ) {
+          return;
+        }
 
         const message =
-          error instanceof Error
-            ? error.message
-            : "Unable to load replay data.";
+          err instanceof Error
+            ? err.message
+            : "Failed to load replay.";
 
-        setState({
-          data: null,
-          loading: false,
-          error: message,
-        });
+        setError(message);
+        setLoading(false);
+      } finally {
+
+        if (
+          generation ===
+          queryGenerationRef.current
+        ) {
+          loadingRef.current =
+            false;
+
+          if (mountedRef.current) {
+            setLoading(false);
+          }
+        }
       }
+    },
+    [
+      appendChunk,
+      loadChunk,
+    ],
+  );
+
+  /* RESET REPLAY */
+
+  const resetReplay =
+    useCallback(() => {
+      queryGenerationRef.current += 1;
+
+      loadingRef.current = false;
+
+      resetInternalState();
+    }, [
+      resetInternalState,
+    ]);
+
+  /*AUTOMATIC LOAD */
+  const queryKey =
+    query
+      ? JSON.stringify(query)
+      : "";
+
+  const previousQueryRef =
+    useRef("");
+
+  useEffect(() => {
+    if (!query) {
+      return;
     }
 
-    loadReplay();
+    if (
+      queryKey ===
+      previousQueryRef.current
+    ) {
+      return;
+    }
 
-    return () => {
-      cancelled = true;
-    };
+    previousQueryRef.current =
+      queryKey;
+
+    const year =
+      Number(
+        query.year,
+      );
+
+    const grandPrix =
+      query.grandPrix ??
+      query.grand_prix ??
+      query.grandPrixName ??
+      "";
+
+    const sessionType =
+      query.sessionType ??
+      query.session_type ??
+      "R";
+
+    const fps =
+      Number(
+        query.fps ?? 8,
+      );
+
+    if (
+      !year ||
+      !grandPrix
+    ) {
+      return;
+    }
+    void loadReplay(
+      year,
+      grandPrix,
+      sessionType,
+      fps,
+    );
   }, [
-    query?.year,
-    query?.round,
-    query?.sessionType,
-    query?.fps,
+    query,
+    queryKey,
+    loadReplay,
   ]);
 
-  return state;
+  return {
+    data,
+    frames,
+    meta,
+    track,
+    events,
+
+    driverColors,
+    maxTyreLife,
+    driverStatuses,
+
+    frameRate,
+
+
+    totalFrames,
+    loadedFrames,
+
+    loading,
+    isLoading: loading,
+
+
+    isLoaded:
+      totalFrames > 0 &&
+      loadedFrames >= totalFrames,
+
+
+
+    progress:
+      totalFrames > 0
+        ? Math.min(
+            100,
+            (loadedFrames /
+              totalFrames) *
+              100,
+          )
+        : 0,
+    error,
+    loadReplay,
+    resetReplay,
+  };
 }
+
+export default useReplay;

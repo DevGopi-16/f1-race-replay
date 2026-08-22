@@ -5,46 +5,48 @@
 *.pem
 *.key
 
-
 # Python
 venv/
 env/
 ENV/
-
 __pycache__/
 **/__pycache__/
-
 *.py[cod]
 *$py.class
 *.egg-info/
-
 .pytest_cache/
 .mypy_cache/
 .ruff_cache/
 
-
 # FastF1 / Generated Data
 backend/.fastf1-cache/
 .fastf1-cache/
-
+backend/cache/
 backend/computed_data/
 computed_data/
-
 *.pkl
 *.cache
-
 
 # Live / Recording Data
 backend/src/live/recordings/
 
-
 # Node.js
 node_modules/
+frontend/node_modules/
 npm-debug.log*
 yarn-debug.log*
 yarn-error.log*
 pnpm-debug.log*
 
+# Vite / Frontend Build
+dist/
+build/
+frontend/dist/
+.vite/
+*.tsbuildinfo
+
+# Build / Distribution
+*.egg
 
 # macOS
 .DS_Store
@@ -53,53 +55,34 @@ pnpm-debug.log*
 .Spotlight-V100
 .Trashes
 
-
 # Windows
 Thumbs.db
 desktop.ini
 
-
 # Editors / IDE
 .vscode/
 .idea/
-
 *.swp
 *.swo
 *~
 
-
 # Logs
 *.log
 logs/
-
-
-# Build / Distribution
-dist/
-build/
-*.egg
-
-
 
 # Temporary / Backup Files
 *.save
 *.bak
 *.tmp
 
-#backups
-frontend/static/css/_backup
-frontend/static/css/style.css.step7-backup
-frontend/static/css/style.css.backup
-backend/main.py.backup
-frontend/src/features/replay/replay.css.backup
-frontend/src/features/replay/replay.css.backup
-frontend/src/features/replay/replay.css.backup.20260817-182517
-frontend/src/features/replay/ReplayPage.tsx.backup
-frontend/src/features/replay/ReplayPage.tsx.backup
-frontend/src/features/replay/ReplayPage.tsx.backup.before-performance-fix
-frontend/src/features/replay/ReplayPage.tsx.before-deterministic-fix
-frontend/src/features/replay/replay.css.backup
-frontend/src/features/replay/hooks/useReplay.ts.backup.before-fast-load
-frontend/src/features/replay/hooks/useReplay.ts.backup.before-fast-validation
-frontend/src/features/replay/hooks/useReplay.ts.before-deterministic-fix
-frontend/src/features/replay/frontend
-frontend/src/features/replay/replay.css.backup
+# Replay Backups / Archives
+frontend/replay-archive/
+frontend/src/features/replay/replay_cleaned.css
+.replay-snapshot-20260818
+
+# Old / Legacy Frontend Files
+frontend/static/
+frontend/replay-archive/
+frontend/index.legacy.html
+frontend/profile.html
+frontend/settings.html

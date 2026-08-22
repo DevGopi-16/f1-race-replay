@@ -957,17 +957,47 @@ function updateLeaderboard(frame) {
 
     let gapText = "";
     if (mode === "leader") {
-      gapText = i === 0 ? "-" : `+${computeGapSeconds(rows[0][1].dist, d.dist)?.toFixed(1) ?? "?"}s`;
+      gapText = i == 0
+      ? "LEADER"
+      : `+${computeGapSeconds(rows[0][1].dist, d.dist)?.toFixed(4) ?? "?"}`;
     } else if (mode === "interval") {
-      gapText = i === 0 ? "-" : `+${computeGapSeconds(rows[i - 1][1].dist, d.dist)?.toFixed(1) ?? "?"}s`;
+      gapText = i === 0
+        ? "-"
+        : `+${computeGapSeconds(rows[i - 1][1].dist, d.dist)?.toFixed(4) ?? "?"}`;
     }
+
+    const sector = Number(
+      d.sector ??
+      d.current_sector ??
+      d.sector_number ??
+      0
+    );
+
+    const sectorClass =
+      sector === 1 ? "sector-1" :
+      sector === 2 ? "sector-2" :
+      sector === 3 ? "sector-3" :
+      "";
 
     html += `
       <div class="lb-row ${selected}" data-code="${code}">
-        <span class="lb-pos">${d.position}.</span>
-        <span class="lb-code" style="color:${selected ? "#000" : colors[code] || "#fff"}">${code}</span>
-        ${mode !== "off" ? `<span class="lb-gap">${gapText}</span>` : ""}
+        <span class="lb-pos">${String(d.position).padStart(2, "0")}</span>
+
+        <span class="lb-code"
+          style="color:${selected ? "#000" : colors[code] || "#fff"}">
+          ${code}
+        </span>
+
+        <span class="lb-gap">${gapText}</span>
+
+        ${
+          sector
+            ? `<span class="lb-sector ${sectorClass}">${sector}</span>`
+            : ""
+        }
+
         ${buildTyreBadge(d)}
+
         <span class="lb-status">${buildStatusBadges(d)}</span>
       </div>`;
   }

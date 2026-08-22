@@ -1,19 +1,25 @@
-import type {
-  ReplaySessionType,
-} from "../replay.types";
+import { useEffect, useState } from "react";
+import type { ReplaySessionType } from "../replay.types";
+
+interface ReplayEvent {
+  name: string;
+  location?: string;
+  country?: string;
+}
 
 interface Props {
   year: number;
-  round: number;
+  grandPrix: string;
   sessionType: ReplaySessionType;
   fps: number;
 
   onYearChange: (value: number) => void;
-  onRoundChange: (value: number) => void;
-  onSessionChange: (
-    value: ReplaySessionType,
-  ) => void;
+  onGrandPrixChange: (value: string) => void;
+  onSessionChange: (value: ReplaySessionType) => void;
   onFpsChange: (value: number) => void;
+
+  onLoadReplay?: () => void;
+  loading?: boolean;
 }
 
 const sessions: ReplaySessionType[] = [
@@ -24,49 +30,169 @@ const sessions: ReplaySessionType[] = [
   "FP3",
 ];
 
+const years = [
+  2026,
+  2025,
+  2024,
+  2023,
+  2022,
+  2021,
+  2020,
+  2019,
+];
+
 export default function ReplaySelector({
   year,
-  round,
+  grandPrix,
   sessionType,
   fps,
   onYearChange,
-  onRoundChange,
+  onGrandPrixChange,
   onSessionChange,
   onFpsChange,
+  onLoadReplay,
+  loading = false,
 }: Props) {
+  const [events, setEvents] = useState<ReplayEvent[]>([]);
+  const [eventsLoading, setEventsLoading] = useState(false);
+  const [eventsError, setEventsError] = useState("");
+
+  useEffect(() => {
+    let cancelled = false;
+
+    async function loadEvents() {
+      setEventsLoading(true);
+      setEventsError("");
+
+      try {
+        const response = await fetch(
+          `/api/replay/events?year=${year}`,
+        );
+
+        if (!response.ok) {
+          throw new Error(
+            `Failed to load ${year} Grand Prix calendar`,
+          );
+        }
+
+        const data = await response.json();
+
+        if (cancelled) return;
+
+        const nextEvents: ReplayEvent[] =
+          Array.isArray(data.events)
+            ? data.events
+            : [];
+
+        setEvents(nextEvents);
+
+        if (nextEvents.length > 0) {
+          const exists = nextEvents.some(
+            (event) =>
+              event.name.trim().toLowerCase() ===
+              grandPrix.trim().toLowerCase(),
+          );
+
+          if (!exists) {
+            onGrandPrixChange(nextEvents[0].name);
+          }
+        }
+      } catch (error) {
+        if (cancelled) return;
+
+        console.error(
+          "[ReplaySelector] Failed to load events:",
+          error,
+        );
+
+        setEvents([]);
+        setEventsError(
+          "Unable to load Grand Prix calendar.",
+        );
+      } finally {
+        if (!cancelled) {
+          setEventsLoading(false);
+        }
+      }
+    }
+
+    loadEvents();
+
+    return () => {
+      cancelled = true;
+    };
+  }, [year]);
+
   return (
     <section className="replay-selector">
+
       <label>
         <span>YEAR</span>
 
         <select
           value={year}
+          disabled={loading}
           onChange={(event) =>
             onYearChange(
               Number(event.target.value),
             )
           }
         >
-          <option value={2026}>2026</option>
-          <option value={2025}>2025</option>
-          <option value={2024}>2024</option>
+          {years.map((season) => (
+            <option
+              key={season}
+              value={season}
+            >
+              {season}
+            </option>
+          ))}
         </select>
       </label>
 
       <label>
-        <span>ROUND</span>
+        <span>GRAND PRIX</span>
 
-        <input
-          type="number"
-          min={1}
-          max={30}
-          value={round}
+        <select
+          value={grandPrix}
+          disabled={
+            loading ||
+            eventsLoading ||
+            events.length === 0
+          }
           onChange={(event) =>
-            onRoundChange(
-              Number(event.target.value),
+            onGrandPrixChange(
+              event.target.value,
             )
           }
-        />
+        >
+          {eventsLoading && (
+            <option value={grandPrix}>
+              LOADING GRAND PRIX...
+            </option>
+          )}
+
+          {!eventsLoading &&
+            events.length === 0 && (
+              <option value={grandPrix}>
+                NO EVENTS
+              </option>
+            )}
+
+          {events.map((event) => (
+            <option
+              key={event.name}
+              value={event.name}
+            >
+              {event.name}
+            </option>
+          ))}
+        </select>
+
+        {eventsError && (
+          <small className="replay-selector-error">
+            {eventsError}
+          </small>
+        )}
       </label>
 
       <label>
@@ -74,10 +200,10 @@ export default function ReplaySelector({
 
         <select
           value={sessionType}
+          disabled={loading}
           onChange={(event) =>
             onSessionChange(
-              event.target
-                .value as ReplaySessionType,
+              event.target.value as ReplaySessionType,
             )
           }
         >
@@ -86,7 +212,11 @@ export default function ReplaySelector({
               key={session}
               value={session}
             >
-              {session}
+              {session === "R"
+                ? "RACE"
+                : session === "S"
+                  ? "SPRINT"
+                  : session}
             </option>
           ))}
         </select>
@@ -97,6 +227,7 @@ export default function ReplaySelector({
 
         <select
           value={fps}
+          disabled={loading}
           onChange={(event) =>
             onFpsChange(
               Number(event.target.value),
@@ -109,6 +240,21 @@ export default function ReplaySelector({
           <option value={8}>8 FPS</option>
         </select>
       </label>
+
+      <button
+        type="button"
+        className="replay-load-button"
+        disabled={
+          loading ||
+          eventsLoading ||
+          events.length === 0 ||
+          !grandPrix
+        }
+        onClick={onLoadReplay}
+      >
+        {loading ? "LOADING..." : "LOAD REPLAY"}
+      </button>
+
     </section>
   );
 }

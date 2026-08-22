@@ -1,7 +1,3 @@
-/* ============================================================
-   F1 RACE REPLAY — TRACK CANVAS
-   ============================================================ */
-
 .track-viewport {
   position: relative;
 
@@ -163,10 +159,6 @@
   }
 }
 
-/* ============================================================
-   FINAL TRACK VISIBILITY FIX
-   ============================================================ */
-
 .replay-track-panel {
   position: relative;
 
@@ -273,4 +265,310 @@
     min-height: 340px;
   }
 }
+
+.replay-track-panel {
+  background:
+    radial-gradient(
+      ellipse at 50% 48%,
+      rgba(255,255,255,.055) 0%,
+      rgba(15,18,24,.96) 48%,
+      rgba(4,6,9,1) 100%
+    );
+
+  box-shadow:
+    inset 0 0 120px rgba(0,0,0,.55),
+    inset 0 0 35px rgba(255,255,255,.025),
+    0 30px 90px rgba(0,0,0,.35);
+}
+
+.track-viewport::before {
+  background-image:
+    linear-gradient(
+      rgba(255,255,255,.028) 1px,
+      transparent 1px
+    ),
+    linear-gradient(
+      90deg,
+      rgba(255,255,255,.028) 1px,
+      transparent 1px
+    );
+
+  background-size: 42px 42px;
+
+  opacity: .65;
+}
+
+.track-viewport::after {
+  background:
+    radial-gradient(
+      ellipse at center,
+      transparent 35%,
+      rgba(0,0,0,.18) 70%,
+      rgba(0,0,0,.62) 100%
+    );
+}
+.track-overlay,
+.track-frame-info {
+  border:
+    1px solid rgba(255,255,255,.12);
+
+  background:
+    rgba(4,6,9,.78);
+
+  box-shadow:
+    0 8px 30px rgba(0,0,0,.28);
+
+  backdrop-filter: blur(14px);
+}
+
+.track-overlay {
+  padding:
+    8px 12px;
+}
+
+.track-overlay span::before {
+  width: 6px;
+  height: 6px;
+
+  box-shadow:
+    0 0 8px var(--color-accent-glow),
+    0 0 16px var(--color-accent-glow);
+}
+
+.track-frame-info {
+  padding:
+    8px 12px;
+}
+
+.replay-track-canvas {
+  image-rendering: auto;
+
+  filter:
+    drop-shadow(
+      0 0 12px rgba(255,255,255,.025)
+    );
+}
+
+.replay-track-panel::before {
+  content: "RACE REPLAY";
+
+  position: absolute;
+
+  left: 50%;
+
+  top: 18px;
+
+  z-index: 4;
+
+  transform: translateX(-50%);
+
+  padding:
+    5px 9px;
+
+  border:
+    1px solid rgba(255,255,255,.07);
+
+  border-radius: 4px;
+
+  background:
+    rgba(4,6,9,.55);
+
+  color:
+    rgba(255,255,255,.25);
+
+  font-family:
+    var(--font-mono);
+
+  font-size: 6px;
+
+  font-weight: 800;
+
+  letter-spacing: .18em;
+
+  pointer-events: none;
+}
+
+@media (max-width: 800px) {
+  .replay-track-panel::before {
+    display: none;
+  }
+}
+
+@media (max-width: 600px) {
+  .track-overlay {
+    padding:
+      6px 9px;
+  }
+
+  .track-frame-info {
+    padding:
+      6px 9px;
+  }
+}
+
+.leaderboard-row {
+    display: grid !important;
+    grid-template-columns:
+        32px
+        54px
+        50px
+        minmax(70px, 1fr)
+        34px
+        44px !important;
+    align-items: center;
+    column-gap: 8px;
+    width: 100%;
+    min-width: 0;
+}
+
+.leaderboard-row > * {
+    min-width: 0;
+}
+
+.leaderboard-row .lb-position,
+.leaderboard-row .position {
+    width: 32px;
+    min-width: 32px;
+    text-align: center;
+    white-space: nowrap;
+}
+
+.leaderboard-row .lb-driver,
+.leaderboard-row .driver {
+    width: 54px;
+    min-width: 54px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.leaderboard-row .lb-status,
+.leaderboard-row .status {
+    width: 50px;
+    min-width: 50px;
+    text-align: center;
+    white-space: nowrap;
+    overflow: hidden;
+}
+
+.leaderboard-row .lb-gap,
+.leaderboard-row .gap {
+    min-width: 70px;
+    text-align: right;
+    white-space: nowrap;
+    font-variant-numeric: tabular-nums;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.leaderboard-row .lb-lap,
+.leaderboard-row .lap {
+    width: 34px;
+    min-width: 34px;
+    text-align: center;
+    white-space: nowrap;
+}
+
+.leaderboard-row .lb-pos,
+.leaderboard-row .race-position {
+    width: 44px;
+    min-width: 44px;
+    text-align: right;
+    white-space: nowrap;
+}
+
+.lb-badge {
+    display: inline-flex !important;
+    align-items: center;
+    justify-content: center;
+    white-space: nowrap;
+    flex-shrink: 0;
+}
+
+/* RET / DNS must never consume the gap column */
+.lb-badge.ret,
+.lb-badge.dns,
+.lb-status.ret,
+.lb-status.dns {
+    position: static !important;
+    transform: none !important;
+    margin: 0 !important;
+}
+
+/* Retired / DNS rows */
+.leaderboard-row.retired,
+.leaderboard-row.dns {
+    grid-template-columns:
+        32px
+        54px
+        50px
+        minmax(70px, 1fr)
+        34px
+        44px !important;
+}
+
+/* Prevent long delta values from pushing other columns */
+.leaderboard-row .delta,
+.leaderboard-row .time-gap,
+.leaderboard-row .relative-gap {
+    min-width: 70px;
+    max-width: 100%;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    text-align: right;
+}
+
+/* Mobile */
+@media (max-width: 700px) {
+    .leaderboard-row {
+        grid-template-columns:
+            28px
+            48px
+            42px
+            minmax(58px, 1fr)
+            30px
+            38px !important;
+        column-gap: 5px;
+    }
+
+    .leaderboard-row .lb-position,
+    .leaderboard-row .position {
+        width: 28px;
+        min-width: 28px;
+    }
+
+    .leaderboard-row .lb-driver,
+    .leaderboard-row .driver {
+        width: 48px;
+        min-width: 48px;
+    }
+
+    .leaderboard-row .lb-status,
+    .leaderboard-row .status {
+        width: 42px;
+        min-width: 42px;
+    }
+
+    .leaderboard-row .lb-gap,
+    .leaderboard-row .gap,
+    .leaderboard-row .delta,
+    .leaderboard-row .time-gap,
+    .leaderboard-row .relative-gap {
+        min-width: 58px;
+    }
+
+    .leaderboard-row .lb-lap,
+    .leaderboard-row .lap {
+        width: 30px;
+        min-width: 30px;
+    }
+
+    .leaderboard-row .lb-pos,
+    .leaderboard-row .race-position {
+        width: 38px;
+        min-width: 38px;
+    }
+}
+
 
