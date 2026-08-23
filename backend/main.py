@@ -782,7 +782,12 @@ def home_overview():
         return _HOME_OVERVIEW_CACHE[cache_key]
 
     try:
-        session = load_session(year, round_number, "R", telemetry=True)
+        session = load_session(
+            year,
+            round_number,
+            "R",
+            telemetry=False,
+        )
     except Exception as e:
         raise HTTPException(status_code=502, detail=f"Failed to load latest race session: {e}")
 

@@ -509,6 +509,12 @@ def build_driver_panel(season: int, static_drivers: list, round_: int | None = N
             or ""
         )
 
+        car_name = (
+            static_entry.get("carName")
+            or static_entry.get("car_name")
+            or ""
+        )
+
         merged.append({
             # Static metadata / assets
             **static_entry,
@@ -522,6 +528,7 @@ def build_driver_panel(season: int, static_drivers: list, round_: int | None = N
             "team": team_name,
             "color": team_color,
             "teamLogo": team_logo,
+            "carName": car_name,
 
             # Assets
             "image": driver_image,

@@ -173,7 +173,7 @@ function getDriverCountry(driver: DriverPanelData): string {
     PIA: "Australia",
     RUS: "United Kingdom",
     HAM: "United Kingdom",
-    ANT: "Italy",
+    ANT: "Italian",
     ALO: "Spain",
     GAS: "France",
     STR: "Canada",
@@ -480,7 +480,7 @@ export default function DriversPage() {
                       </span>
 
                       <span>
-                        {driverTeam(featured)}
+                        {driverTeam(featured).toUpperCase()}
                       </span>
                     </div>
 
