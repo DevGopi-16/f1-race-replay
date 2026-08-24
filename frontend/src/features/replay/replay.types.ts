@@ -114,10 +114,14 @@ export interface ReplayDriverStatus {
   disqualified: boolean;
 }
 
+
 export interface ReplayResponse {
   meta: ReplayMeta;
 
-  driver_statuses?: Record<string, ReplayDriverStatus>;
+  driver_statuses?: Record<
+    string,
+    ReplayDriverStatus
+  >;
 
   driver_colors: ReplayDriverColors;
 
@@ -131,10 +135,7 @@ export interface ReplayResponse {
 
   frame_rate: number;
 
-  /*
-   * Total number of sampled frames available on the backend.
-   * This is different from frames.length because replay data
-   * is loaded progressively in chunks.
-   */
   total_frames?: number;
+
+  total?: number;
 }

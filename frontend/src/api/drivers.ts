@@ -21,7 +21,7 @@ export async function getDriversPanel(
   }
 
   return apiGet<DriverPanelData[]>(
-    `/drivers/panel?${params.toString()}`,
+    `/api/drivers/panel?${params.toString()}`,
   );
 }
 
@@ -38,7 +38,7 @@ export async function getSessionDrivers(
   }
 
   return apiGet<DriverListItem[]>(
-    `/drivers?${params.toString()}`,
+    `/api/drivers?${params.toString()}`,
   );
 }
 
@@ -46,7 +46,7 @@ export async function getDriver(
   code: string,
 ): Promise<DriverPanelData> {
   return apiGet<DriverPanelData>(
-    `/driver/${encodeURIComponent(code)}`,
+    `/api/driver/${encodeURIComponent(code)}`,
   );
 }
 
@@ -54,9 +54,11 @@ export async function getDriverFull(
   code: string,
   year: number,
 ): Promise<DriverPanelData> {
-  const params = new URLSearchParams({ year: String(year) });
+  const params = new URLSearchParams({
+    year: String(year),
+  });
+
   return apiGet<DriverPanelData>(
-    `/drivers/${encodeURIComponent(code)}/full?${params.toString()}`,
+    `/api/drivers/${encodeURIComponent(code)}/full?${params.toString()}`,
   );
 }
-

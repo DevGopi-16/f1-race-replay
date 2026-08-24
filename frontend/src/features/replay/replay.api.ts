@@ -3,86 +3,168 @@ import { apiGet } from "../../api/client";
 import type {
   ReplayResponse,
   ReplaySessionType,
-  ReplayDriverStatus,
 } from "./replay.types";
 
-export interface ReplayQuery {
+/* =========================================================
+   TYPES
+========================================================= */
+
+export interface ReplayRequest {
   year: number;
+
+  /**
+   * Frontend uses camelCase.
+   *
+   * Converted to backend:
+   * grand_prix
+   */
   grandPrix: string;
-  sessionType?: ReplaySessionType;
+
+  /**
+   * Frontend uses camelCase.
+   *
+   * Converted to backend:
+   * session_type
+   */
+  sessionType: ReplaySessionType;
+
   fps?: number;
 }
 
-export interface ReplayChunkResponse {
-  start: number;
-  end: number;
-  total: number;
-  total_frames: number;
-  frame_rate: number;
-
-  frames: ReplayResponse["frames"];
-
-  meta?: ReplayResponse["meta"];
-  driver_colors?: ReplayResponse["driver_colors"];
-  max_tyre_life?: ReplayResponse["max_tyre_life"];
-  track?: ReplayResponse["track"];
-  events?: ReplayResponse["events"];
-  driver_statuses?: Record<string, ReplayDriverStatus>;
+export interface ReplayEvent {
+  name: string;
+  location?: string;
+  country?: string;
 }
 
-function buildReplayParams({
-  year,
-  grandPrix,
-  sessionType = "R",
-  fps = 8,
-}: ReplayQuery) {
-  return new URLSearchParams({
-    year: String(year),
-    grand_prix: grandPrix,
-    session_type: sessionType,
-    fps: String(fps),
-  });
+export interface ReplayEventsResponse {
+  year: number;
+  events: ReplayEvent[];
 }
 
-export function getReplay({
-  year,
-  grandPrix,
-  sessionType = "R",
-  fps = 8,
-}: ReplayQuery) {
-  const params = buildReplayParams({
-    year,
-    grandPrix,
-    sessionType,
-    fps,
-  });
+export interface ReplayChunkResponse
+  extends ReplayResponse {
+  total?: number;
+  total_frames?: number;
+  start?: number;
+  count?: number;
+}
 
-  return apiGet<ReplayResponse>(
-    `/replay?${params.toString()}`,
+/* =========================================================
+   GET REPLAY EVENTS
+========================================================= */
+
+/**
+ * Backend:
+ *
+ * GET /api/replay/events?year=2026
+ */
+export function getReplayEvents(
+  year: number,
+) {
+  const searchParams =
+    new URLSearchParams({
+      year: String(year),
+    });
+
+  return apiGet<ReplayEventsResponse>(
+    `/api/replay/events?${searchParams.toString()}`,
   );
 }
 
-export function getReplayChunk(
-  {
-    year,
-    grandPrix,
-    sessionType = "R",
-    fps = 8,
-  }: ReplayQuery,
-  start: number,
-  count = 500,
-) {
-  const params = buildReplayParams({
-    year,
-    grandPrix,
-    sessionType,
-    fps,
-  });
+/* =========================================================
+   GET INITIAL REPLAY
+========================================================= */
 
-  params.set("start", String(start));
-  params.set("count", String(count));
+/**
+ * Backend:
+ *
+ * GET /api/replay
+ *
+ * Example:
+ *
+ * /api/replay
+ *   ?year=2026
+ *   &grand_prix=Dutch%20Grand%20Prix
+ *   &session_type=R
+ *   &fps=8
+ */
+export function getReplay(
+  params: ReplayRequest,
+) {
+  const searchParams =
+    new URLSearchParams({
+      year: String(params.year),
+
+      grand_prix:
+        params.grandPrix,
+
+      session_type:
+        params.sessionType,
+    });
+
+  if (params.fps !== undefined) {
+    searchParams.set(
+      "fps",
+      String(params.fps),
+    );
+  }
+
+  return apiGet<ReplayResponse>(
+    `/api/replay?${searchParams.toString()}`,
+  );
+}
+
+/* =========================================================
+   GET REPLAY CHUNK
+========================================================= */
+
+/**
+ * Backend:
+ *
+ * GET /api/replay/chunk
+ *
+ * Example:
+ *
+ * /api/replay/chunk
+ *   ?year=2026
+ *   &grand_prix=Dutch%20Grand%20Prix
+ *   &session_type=R
+ *   &start=0
+ *   &count=500
+ *   &fps=8
+ */
+export function getReplayChunk(
+  params: ReplayRequest & {
+    start: number;
+    count: number;
+  },
+) {
+  const searchParams =
+    new URLSearchParams({
+      year: String(params.year),
+
+      grand_prix:
+        params.grandPrix,
+
+      session_type:
+        params.sessionType,
+
+      start:
+        String(params.start),
+
+      count:
+        String(params.count),
+    });
+
+  if (params.fps !== undefined) {
+    searchParams.set(
+      "fps",
+      String(params.fps),
+    );
+  }
 
   return apiGet<ReplayChunkResponse>(
-    `/replay/chunk?${params.toString()}`,
+    `/api/replay/chunk?${searchParams.toString()}`,
   );
 }

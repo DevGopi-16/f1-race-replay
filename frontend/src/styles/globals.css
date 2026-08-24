@@ -7,6 +7,8 @@
 @import "../components/ui/ui.css";
 @import "../components/layout/page-layout.css";
 @import "../components/motion/motion.css";
+@import "../features/auth/auth.css";
+@import "../components/auth/UserMenu.css";
 
 :root {
   font-family: var(--font-body);

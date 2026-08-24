@@ -7,6 +7,8 @@ import {
   secondaryNavigation,
 } from "./navigation.config";
 
+import UserMenu from "../auth/UserMenu";
+
 function NavigationLink({
   label,
   path,
@@ -24,18 +26,26 @@ function NavigationLink({
       end={path === "/"}
       onClick={onNavigate}
       className={({ isActive }) =>
-        `floating-nav-link ${isActive ? "is-active" : ""}`
+        `floating-nav-link ${
+          isActive ? "is-active" : ""
+        }`
       }
     >
-      <Icon size={15} strokeWidth={1.8} />
+      <Icon
+        size={15}
+        strokeWidth={1.8}
+      />
       <span>{label}</span>
     </NavLink>
   );
 }
 
 export default function FloatingNav() {
-  const [scrolled, setScrolled] = useState(false);
-  const [mobileOpen, setMobileOpen] = useState(false);
+  const [scrolled, setScrolled] =
+    useState(false);
+
+  const [mobileOpen, setMobileOpen] =
+    useState(false);
 
   useEffect(() => {
     const handleScroll = () => {
@@ -44,17 +54,25 @@ export default function FloatingNav() {
 
     handleScroll();
 
-    window.addEventListener("scroll", handleScroll, {
-      passive: true,
-    });
+    window.addEventListener(
+      "scroll",
+      handleScroll,
+      {
+        passive: true,
+      },
+    );
 
     return () => {
-      window.removeEventListener("scroll", handleScroll);
+      window.removeEventListener(
+        "scroll",
+        handleScroll,
+      );
     };
   }, []);
 
   useEffect(() => {
-    document.body.style.overflow = mobileOpen ? "hidden" : "";
+    document.body.style.overflow =
+      mobileOpen ? "hidden" : "";
 
     return () => {
       document.body.style.overflow = "";
@@ -72,7 +90,10 @@ export default function FloatingNav() {
           scrolled ? "is-scrolled" : ""
         }`}
       >
-        <nav className="floating-nav" aria-label="Primary navigation">
+        <nav
+          className="floating-nav"
+          aria-label="Primary navigation"
+        >
           <NavLink
             to="/"
             end
@@ -80,7 +101,10 @@ export default function FloatingNav() {
             onClick={closeMobile}
             aria-label="F1 Race Replay home"
           >
-            <span className="brand-f1">F1</span>
+            <span className="brand-f1">
+              F1
+            </span>
+
             <span className="brand-name">
               RACE REPLAY
             </span>
@@ -88,7 +112,10 @@ export default function FloatingNav() {
 
           <div className="floating-nav-links">
             {primaryNavigation
-              .filter((item) => item.path !== "/")
+              .filter(
+                (item) =>
+                  item.path !== "/",
+              )
               .map((item) => (
                 <NavigationLink
                   key={item.path}
@@ -98,21 +125,32 @@ export default function FloatingNav() {
           </div>
 
           <div className="floating-nav-actions">
-            {secondaryNavigation.map((item) => (
-              <NavigationLink
-                key={item.path}
-                {...item}
-              />
-            ))}
+            {secondaryNavigation.map(
+              (item) => (
+                <NavigationLink
+                  key={item.path}
+                  {...item}
+                />
+              ),
+            )}
+
+            <div className="floating-nav-user">
+              <UserMenu />
+            </div>
 
             <button
               type="button"
               className="floating-nav-menu-button"
-              onClick={() => setMobileOpen(true)}
+              onClick={() =>
+                setMobileOpen(true)
+              }
               aria-label="Open navigation"
               aria-expanded={mobileOpen}
             >
-              <Menu size={20} strokeWidth={1.8} />
+              <Menu
+                size={20}
+                strokeWidth={1.8}
+              />
             </button>
           </div>
         </nav>
@@ -120,7 +158,9 @@ export default function FloatingNav() {
 
       <div
         className={`mobile-nav-overlay ${
-          mobileOpen ? "is-open" : ""
+          mobileOpen
+            ? "is-open"
+            : ""
         }`}
         aria-hidden={!mobileOpen}
       >
@@ -132,7 +172,10 @@ export default function FloatingNav() {
               className="floating-nav-brand"
               onClick={closeMobile}
             >
-              <span className="brand-f1">F1</span>
+              <span className="brand-f1">
+                F1
+              </span>
+
               <span className="brand-name">
                 RACE REPLAY
               </span>
@@ -144,33 +187,58 @@ export default function FloatingNav() {
               onClick={closeMobile}
               aria-label="Close navigation"
             >
-              <X size={22} strokeWidth={1.8} />
+              <X
+                size={22}
+                strokeWidth={1.8}
+              />
             </button>
           </div>
 
           <div className="mobile-nav-content">
-            {primaryNavigation.map((item) => (
-              <NavigationLink
-                key={item.path}
-                {...item}
-                onNavigate={closeMobile}
-              />
-            ))}
+            {primaryNavigation.map(
+              (item) => (
+                <NavigationLink
+                  key={item.path}
+                  {...item}
+                  onNavigate={
+                    closeMobile
+                  }
+                />
+              ),
+            )}
 
             <div className="mobile-nav-divider" />
 
-            {secondaryNavigation.map((item) => (
-              <NavigationLink
-                key={item.path}
-                {...item}
-                onNavigate={closeMobile}
-              />
-            ))}
+            {secondaryNavigation.map(
+              (item) => (
+                <NavigationLink
+                  key={item.path}
+                  {...item}
+                  onNavigate={
+                    closeMobile
+                  }
+                />
+              ),
+            )}
+
+            <div className="mobile-nav-divider" />
+
+            <div
+              className="mobile-nav-user"
+              onClick={closeMobile}
+            >
+              <UserMenu />
+            </div>
           </div>
 
           <div className="mobile-nav-footer">
-            <span>F1 RACE REPLAY</span>
-            <span>EVERY LAP. EVERY DETAIL.</span>
+            <span>
+              F1 RACE REPLAY
+            </span>
+
+            <span>
+              EVERY LAP. EVERY DETAIL.
+            </span>
           </div>
         </div>
       </div>

@@ -1,6 +1,7 @@
 import { useQuery } from "@tanstack/react-query";
 
 import { apiGet } from "../../api/client";
+
 import type { HomeOverview } from "./home.types";
 
 export function useHomeOverview() {
@@ -8,7 +9,9 @@ export function useHomeOverview() {
     queryKey: ["home-overview"],
 
     queryFn: () =>
-      apiGet<HomeOverview>("/home-overview"),
+      apiGet<HomeOverview>(
+        "/api/home-overview",
+      ),
 
     staleTime: 60_000,
 
