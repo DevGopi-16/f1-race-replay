@@ -4,7 +4,7 @@ import { useNavigate } from "react-router-dom";
 
 import { useAuthStore } from "./auth.store";
 
-export default function DiscordCallbackPage() {
+export default function XCallbackPage() {
   const navigate = useNavigate();
 
   const restoreSession = useAuthStore(
@@ -16,83 +16,57 @@ export default function DiscordCallbackPage() {
   useEffect(() => {
     let cancelled = false;
 
-    async function completeDiscordLogin() {
+    async function completeXLogin() {
       try {
-        /*
-         * Discord backend redirects with:
-         *
-         * /auth/discord/callback#access_token=JWT
-         *
-         * Therefore we must read window.location.hash.
-         *
-         * We also support query parameters in case the
-         * callback format is changed later.
-         */
+        const hashParams = new URLSearchParams(
+          window.location.hash.replace(
+            /^#/,
+            "",
+          ),
+        );
 
-        const searchParams = new URLSearchParams(
+        const queryParams = new URLSearchParams(
           window.location.search,
         );
 
-        const hashParams = new URLSearchParams(
-          window.location.hash.replace(/^#/, ""),
-        );
-
         const accessToken =
-          hashParams.get("access_token") ??
-          searchParams.get("access_token");
+          hashParams.get("access_token");
 
         const oauthError =
-          searchParams.get("error") ??
-          hashParams.get("error");
+        queryParams.get("error");
+
+        const oauthErrorDescription =
+        queryParams.get("error_description");
 
         if (oauthError) {
-          throw new Error(
-            "Discord authorization was cancelled.",
-          );
+        throw new Error(
+            oauthErrorDescription
+            ? `${oauthError}: ${oauthErrorDescription}`
+            : `X OAuth error: ${oauthError}`,
+        );
         }
 
         if (!accessToken) {
           throw new Error(
-            "Discord did not return an access token.",
+            "X did not return an access token.",
           );
         }
-
-        /*
-         * Store the JWT so the normal auth system can
-         * restore the logged-in user.
-         */
 
         localStorage.setItem(
           "f1_access_token",
           accessToken,
         );
 
-        /*
-         * restoreSession() reads f1_access_token,
-         * calls /auth/me, and updates the Zustand store.
-         */
-
         await restoreSession();
 
         if (!cancelled) {
-          /*
-           * Remove the token from the browser URL after
-           * successful authentication.
-           */
-
-          window.history.replaceState(
-            null,
-            "",
-            window.location.pathname,
-          );
-
           navigate("/", {
             replace: true,
           });
         }
       } catch (err) {
         console.error(
-          "[Auth] Discord callback failed:",
+          "[Auth] X callback failed:",
           err,
         );
 
@@ -104,13 +78,13 @@ export default function DiscordCallbackPage() {
           setError(
             err instanceof Error
               ? err.message
-              : "Unable to complete Discord login.",
+              : "Unable to complete X login.",
           );
         }
       }
     }
 
-    void completeDiscordLogin();
+    void completeXLogin();
 
     return () => {
       cancelled = true;
@@ -148,7 +122,7 @@ export default function DiscordCallbackPage() {
               marginBottom: "16px",
             }}
           >
-            DISCORD AUTHENTICATION
+            X AUTHENTICATION
           </div>
 
           <h1
@@ -219,11 +193,11 @@ export default function DiscordCallbackPage() {
             width: "42px",
             height: "42px",
             border: "2px solid #333",
-            borderTopColor: "#e10600",
+            borderTopColor: "#fff",
             borderRadius: "50%",
             margin: "0 auto 24px",
             animation:
-              "discord-auth-spin 0.8s linear infinite",
+              "x-auth-spin 0.8s linear infinite",
           }}
         />
 
@@ -234,7 +208,7 @@ export default function DiscordCallbackPage() {
             color: "#888",
           }}
         >
-          DISCORD AUTHENTICATION
+          X AUTHENTICATION
         </div>
 
         <h1
@@ -257,7 +231,7 @@ export default function DiscordCallbackPage() {
 
       <style>
         {`
-          @keyframes discord-auth-spin {
+          @keyframes x-auth-spin {
             to {
               transform: rotate(360deg);
             }

@@ -436,9 +436,15 @@
 }
 
 .discord-icon {
-  background: #5865f2;
-  color: #fff;
-  font-size: 13px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.discord-icon svg {
+  width: 20px;
+  height: 20px;
+  display: block;
 }
 
 .x-icon {

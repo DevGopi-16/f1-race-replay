@@ -43,6 +43,13 @@ class User(Base):
         index=True,
         nullable=True,
     )
+    
+    x_id = Column(
+        String,
+        unique=True,
+        index=True,
+        nullable=True,
+    )
 
     picture_url = Column(
         String,

@@ -27,14 +27,21 @@ declare global {
             parent: HTMLElement,
             options: {
               type?: "standard" | "icon";
-              theme?: "outline" | "filled_blue" | "filled_black";
+              theme?:
+                | "outline"
+                | "filled_blue"
+                | "filled_black";
               size?: "large" | "medium" | "small";
               text?:
                 | "signin_with"
                 | "signup_with"
                 | "continue_with"
                 | "signin";
-              shape?: "rectangular" | "pill" | "circle" | "square";
+              shape?:
+                | "rectangular"
+                | "pill"
+                | "circle"
+                | "square";
               width?: number;
               logo_alignment?: "left" | "center";
             },
@@ -48,15 +55,13 @@ declare global {
 const GOOGLE_CLIENT_ID =
   "3151390342-jd4omku90qolovv44dsjph7a5v7sj2b7.apps.googleusercontent.com";
 
+let googleInitialized = false;
+
 export default function LoginPage() {
   const navigate = useNavigate();
 
   const login = useAuthStore(
     (state) => state.login,
-  );
-
-  const googleLogin = useAuthStore(
-    (state) => state.googleLogin,
   );
 
   const isLoading = useAuthStore(
@@ -79,11 +84,14 @@ export default function LoginPage() {
     useState("");
 
   useEffect(() => {
+    if (showEmailLogin) {
+      return;
+    }
+
     if (!window.google) {
       console.warn(
         "[Auth] Google Identity Services has not loaded.",
       );
-
       return;
     }
 
@@ -91,42 +99,55 @@ export default function LoginPage() {
       return;
     }
 
-    googleButtonRef.current.innerHTML = "";
+    const buttonElement =
+      googleButtonRef.current;
 
-    window.google.accounts.id.initialize({
-      client_id: GOOGLE_CLIENT_ID,
+    buttonElement.innerHTML = "";
 
-      callback: async (response) => {
-        setError("");
+    if (!googleInitialized) {
+      window.google.accounts.id.initialize({
+        client_id: GOOGLE_CLIENT_ID,
 
-        if (!response.credential) {
-          setError(
-            "Google did not return a valid credential.",
-          );
+        callback: async (response) => {
+          setError("");
 
-          return;
-        }
+          if (!response.credential) {
+            setError(
+              "Google did not return a valid credential.",
+            );
+            return;
+          }
 
-        try {
-          await googleLogin({
-            credential: response.credential,
-          });
+          try {
+            const googleLogin =
+              useAuthStore.getState().googleLogin;
 
-          navigate("/", {
-            replace: true,
-          });
-        } catch (err) {
-          setError(
-            err instanceof Error
-              ? err.message
-              : "Unable to sign in with Google.",
-          );
-        }
-      },
-    });
+            await googleLogin({
+              credential: response.credential,
+            });
+
+            navigate("/", {
+              replace: true,
+            });
+          } catch (err) {
+            setError(
+              err instanceof Error
+                ? err.message
+                : "Unable to sign in with Google.",
+            );
+          }
+        },
+      });
+
+      googleInitialized = true;
+
+      console.log(
+        "[Auth] Google Sign-In initialized.",
+      );
+    }
 
     window.google.accounts.id.renderButton(
-      googleButtonRef.current,
+      buttonElement,
       {
         type: "standard",
         theme: "outline",
@@ -139,9 +160,9 @@ export default function LoginPage() {
     );
 
     console.log(
-      "[Auth] Google Sign-In button initialized.",
+      "[Auth] Google Sign-In button rendered.",
     );
-  }, [googleLogin, navigate]);
+  }, [showEmailLogin, navigate]);
 
   async function handleSubmit(
     event: FormEvent<HTMLFormElement>,
@@ -186,9 +207,7 @@ export default function LoginPage() {
       >
         <div className="auth-glow auth-glow-one" />
         <div className="auth-glow auth-glow-two" />
-
         <div className="auth-grid" />
-
         <div className="auth-light auth-light-one" />
         <div className="auth-light auth-light-two" />
       </div>
@@ -261,6 +280,7 @@ export default function LoginPage() {
                   />
                 </span>
               </div>
+
               <button
                 type="button"
                 className="auth-provider"
@@ -270,7 +290,16 @@ export default function LoginPage() {
                 }}
               >
                 <span className="auth-provider-icon discord-icon">
-                  ◉
+                  <svg
+                    viewBox="0 0 24 24"
+                    aria-hidden="true"
+                    focusable="false"
+                  >
+                    <path
+                      fill="currentColor"
+                      d="M19.54 0c1.1 0 2 .9 2 2v20c0 1.1-.9 2-2 2H4.46c-1.1 0-2-.9-2-2V2c0-1.1.9-2 2-2h15.08ZM17.8 15.3c.02-.03.03-.05.04-.08 1.2-.89 2.1-2.08 2.58-3.46-.32-2.35-1.3-4.68-2.87-6.76a10.25 10.25 0 0 0-2.9-.88l-.4.82a10.9 10.9 0 0 0-4.5 0l-.4-.82a10.25 10.25 0 0 0-2.9.88C4.88 7.08 3.9 9.41 3.58 11.76c.48 1.38 1.38 2.57 2.58 3.46.01.03.02.05.04.08.73.55 1.55.98 2.43 1.27l.6-.82c-.7-.25-1.36-.6-1.95-1.03l.48-.36c1.84 1.36 4.28 1.36 6.12 0l.48.36c-.59.43-1.25.78-1.95 1.03l.6.82c.88-.29 1.7-.72 2.43-1.27ZM9.1 11.2c-.67 0-1.2-.62-1.2-1.38s.54-1.38 1.2-1.38 1.2.62 1.2 1.38-.54 1.38-1.2 1.38Zm5.8 0c-.67 0-1.2-.62-1.2-1.38s.54-1.38 1.2-1.38 1.2.62 1.2 1.38-.54 1.38-1.2 1.38Z"
+                    />
+                  </svg>
                 </span>
 
                 <span>
@@ -285,8 +314,10 @@ export default function LoginPage() {
               <button
                 type="button"
                 className="auth-provider"
-                disabled
-                title="X login will be connected next"
+                onClick={() => {
+                  window.location.href =
+                    "http://127.0.0.1:8000/auth/x/login";
+                }}
               >
                 <span className="auth-provider-icon x-icon">
                   𝕏
@@ -296,8 +327,8 @@ export default function LoginPage() {
                   Continue with X
                 </span>
 
-                <span className="auth-provider-status">
-                  SOON
+                <span className="auth-provider-arrow">
+                  →
                 </span>
               </button>
 
@@ -344,8 +375,8 @@ export default function LoginPage() {
               By signing in, you agree to our{" "}
               <a href="#terms">
                 Terms
-              </a>
-              {" "}and{" "}
+              </a>{" "}
+              and{" "}
               <a href="#privacy">
                 Privacy Policy
               </a>

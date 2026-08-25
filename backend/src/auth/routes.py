@@ -1,5 +1,7 @@
 import os
 import secrets
+import hashlib
+import base64
 from urllib.parse import urlencode
 
 import requests
@@ -44,8 +46,28 @@ FRONTEND_DISCORD_CALLBACK = os.getenv(
     "http://localhost:5173/auth/discord/callback",
 )
 
+X_CLIENT_ID = os.getenv(
+    "X_CLIENT_ID"
+)
+
+X_CLIENT_SECRET = os.getenv(
+    "X_CLIENT_SECRET"
+)
+
+X_REDIRECT_URI = os.getenv(
+    "X_REDIRECT_URI",
+    "http://127.0.0.1:8000/auth/x/callback",
+)
+
+FRONTEND_X_CALLBACK = os.getenv(
+    "FRONTEND_X_CALLBACK",
+    "http://localhost:5173/auth/x/callback",
+)
+
 
 _DISCORD_OAUTH_STATES: set[str] = set()
+
+_X_OAUTH_STATES: dict[str, str] = {}
 
 
 @router.post(
@@ -228,6 +250,277 @@ def google_login(
     return schemas.Token(
         access_token=token,
         user=user,
+    )
+
+
+@router.get("/x/login")
+def x_login():
+    if not X_CLIENT_ID:
+        raise HTTPException(
+            status_code=500,
+            detail="X sign-in is not configured on the server",
+        )
+
+    code_verifier = secrets.token_urlsafe(64)
+
+    state = secrets.token_urlsafe(32)
+
+    digest = hashlib.sha256(
+        code_verifier.encode("ascii")
+    ).digest()
+
+    code_challenge = (
+        base64.urlsafe_b64encode(digest)
+        .rstrip(b"=")
+        .decode("ascii")
+    )
+
+    _X_OAUTH_STATES[state] = code_verifier
+
+    params = {
+        "response_type": "code",
+        "client_id": X_CLIENT_ID,
+        "redirect_uri": X_REDIRECT_URI,
+        "scope": "users.read tweet.read offline.access",
+        "state": state,
+        "code_challenge": code_challenge,
+        "code_challenge_method": "S256",
+    }
+
+    authorization_url = (
+        "https://twitter.com/i/oauth2/authorize?"
+        + urlencode(params)
+    )
+
+    return RedirectResponse(
+        url=authorization_url,
+        status_code=302,
+    )
+
+
+@router.get("/x/callback")
+def x_callback(
+    code: str | None = None,
+    state: str | None = None,
+    error: str | None = None,
+    db: Session = Depends(get_db),
+):
+    if error:
+        return RedirectResponse(
+            url=(
+                f"{FRONTEND_X_CALLBACK}"
+                f"?error={error}"
+            ),
+            status_code=302,
+        )
+
+    if not code:
+        return RedirectResponse(
+            url=(
+                f"{FRONTEND_X_CALLBACK}"
+                "?error=missing_x_code"
+            ),
+            status_code=302,
+        )
+
+    if not state:
+        return RedirectResponse(
+            url=(
+                f"{FRONTEND_X_CALLBACK}"
+                "?error=missing_x_state"
+            ),
+            status_code=302,
+        )
+
+    code_verifier = _X_OAUTH_STATES.pop(
+        state,
+        None,
+    )
+
+    if not code_verifier:
+        return RedirectResponse(
+            url=(
+                f"{FRONTEND_X_CALLBACK}"
+                "?error=invalid_x_state"
+            ),
+            status_code=302,
+        )
+
+    if not X_CLIENT_ID:
+        return RedirectResponse(
+            url=(
+                f"{FRONTEND_X_CALLBACK}"
+                "?error=x_not_configured"
+            ),
+            status_code=302,
+        )
+
+    try:
+        token_response = requests.post(
+            "https://api.x.com/2/oauth2/token",
+            data={
+                "code": code,
+                "grant_type": "authorization_code",
+                "client_id": X_CLIENT_ID,
+                "redirect_uri": X_REDIRECT_URI,
+                "code_verifier": code_verifier,
+            },
+            auth=(
+                X_CLIENT_ID,
+                X_CLIENT_SECRET,
+            ) if X_CLIENT_SECRET else None,
+            headers={
+                "Content-Type": (
+                    "application/x-www-form-urlencoded"
+                ),
+            },
+            timeout=10,
+        )
+    except requests.RequestException:
+        return RedirectResponse(
+            url=(
+                f"{FRONTEND_X_CALLBACK}"
+                "?error=x_token_request_failed"
+            ),
+            status_code=302,
+        )
+
+    if not token_response.ok:
+        return RedirectResponse(
+            url=(
+                f"{FRONTEND_X_CALLBACK}"
+                "?error=x_token_exchange_failed"
+            ),
+            status_code=302,
+        )
+
+    try:
+        token_data = token_response.json()
+    except ValueError:
+        return RedirectResponse(
+            url=(
+                f"{FRONTEND_X_CALLBACK}"
+                "?error=invalid_x_token_response"
+            ),
+            status_code=302,
+        )
+
+    x_access_token = token_data.get(
+        "access_token"
+    )
+
+    if not x_access_token:
+        return RedirectResponse(
+            url=(
+                f"{FRONTEND_X_CALLBACK}"
+                "?error=missing_x_access_token"
+            ),
+            status_code=302,
+        )
+
+    try:
+        x_user_response = requests.get(
+            "https://api.x.com/2/users/me",
+            headers={
+                "Authorization":
+                    f"Bearer {x_access_token}",
+            },
+            timeout=10,
+        )
+    except requests.RequestException:
+        return RedirectResponse(
+            url=(
+                f"{FRONTEND_X_CALLBACK}"
+                "?error=x_user_request_failed"
+            ),
+            status_code=302,
+        )
+
+    if not x_user_response.ok:
+        return RedirectResponse(
+            url=(
+                f"{FRONTEND_X_CALLBACK}"
+                "?error=x_user_fetch_failed"
+            ),
+            status_code=302,
+        )
+
+    try:
+        x_response_data = x_user_response.json()
+    except ValueError:
+        return RedirectResponse(
+            url=(
+                f"{FRONTEND_X_CALLBACK}"
+                "?error=invalid_x_user_response"
+            ),
+            status_code=302,
+        )
+
+    x_user = x_response_data.get(
+        "data"
+    ) or {}
+
+    x_id = x_user.get("id")
+
+    if not x_id:
+        return RedirectResponse(
+            url=(
+                f"{FRONTEND_X_CALLBACK}"
+                "?error=missing_x_id"
+            ),
+            status_code=302,
+        )
+
+    username = (
+        x_user.get("username")
+        or "racer"
+    )
+
+    name = (
+        x_user.get("name")
+        or username
+        or "racer"
+    )
+
+    user = (
+        db.query(models.User)
+        .filter(
+            models.User.x_id == x_id
+        )
+        .first()
+    )
+
+    if user is None:
+        user = models.User(
+            username=_unique_username(
+                db,
+                name,
+            ),
+            email=None,
+            hashed_password=None,
+            x_id=x_id,
+        )
+
+        db.add(user)
+
+    else:
+        user.x_id = x_id
+
+    db.commit()
+    db.refresh(user)
+
+    access_token = security.create_access_token(
+        {"sub": str(user.id)}
+    )
+
+    redirect_url = (
+        f"{FRONTEND_X_CALLBACK}"
+        f"#access_token={access_token}"
+    )
+
+    return RedirectResponse(
+        url=redirect_url,
+        status_code=302,
     )
 
 
@@ -423,7 +716,9 @@ def discord_callback(
         )
 
     try:
-        discord_user = discord_user_response.json()
+        discord_user = (
+            discord_user_response.json()
+        )
     except ValueError:
         return RedirectResponse(
             url=(
@@ -433,7 +728,9 @@ def discord_callback(
             status_code=302,
         )
 
-    discord_id = discord_user.get("id")
+    discord_id = discord_user.get(
+        "id"
+    )
 
     if not discord_id:
         return RedirectResponse(
@@ -444,7 +741,9 @@ def discord_callback(
             status_code=302,
         )
 
-    email = discord_user.get("email")
+    email = discord_user.get(
+        "email"
+    )
 
     username = (
         discord_user.get("global_name")

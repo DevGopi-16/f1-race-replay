@@ -1,39 +1,26 @@
 import { Navigate, Route, Routes } from "react-router-dom";
 
 import AppShell from "../components/layout/AppShell";
-
 import PageContainer from "../components/layout/PageContainer";
-
 import PageHeader from "../components/layout/PageHeader";
-
 import Button from "../components/ui/Button";
-
 import Divider from "../components/ui/Divider";
-
 import SectionLabel from "../components/ui/SectionLabel";
-
 import PageTransition from "../components/motion/PageTransition";
-
 import Reveal from "../components/motion/Reveal";
 
 import HomePage from "../features/home/HomePage";
-
 import ReplayPage from "../features/replay/ReplayPage";
 
 import LoginPage from "../features/auth/LoginPage";
-
 import RegisterPage from "../features/auth/RegisterPage";
-
 import ProfilePage from "../features/auth/ProfilePage";
-
 import ProtectedRoute from "../features/auth/ProtectedRoute";
-
 import DiscordCallbackPage from "../features/auth/DiscordCallbackPage";
+import XCallbackPage from "../features/auth/XCallbackPage";
 
 import DriversPage from "../pages/DriversPage";
-
 import DriverDetailPage from "../pages/DriverDetailPage";
-
 import AnalyticsPage from "../pages/AnalyticsPage";
 
 function FoundationPage({
@@ -135,8 +122,13 @@ export function AppRouter() {
       />
 
       <Route
-        path="/auth/discord/callback"
+        path="/discord/callback"
         element={<DiscordCallbackPage />}
+      />
+
+      <Route
+        path="/x/callback"
+        element={<XCallbackPage />}
       />
 
       <Route element={<AppShell />}>
