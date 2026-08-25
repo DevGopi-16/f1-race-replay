@@ -24,9 +24,17 @@ import LoginPage from "../features/auth/LoginPage";
 
 import RegisterPage from "../features/auth/RegisterPage";
 
+import ProfilePage from "../features/auth/ProfilePage";
+
+import ProtectedRoute from "../features/auth/ProtectedRoute";
+
+import DiscordCallbackPage from "../features/auth/DiscordCallbackPage";
+
 import DriversPage from "../pages/DriversPage";
 
 import DriverDetailPage from "../pages/DriverDetailPage";
+
+import AnalyticsPage from "../pages/AnalyticsPage";
 
 function FoundationPage({
   eyebrow,
@@ -126,15 +134,15 @@ export function AppRouter() {
         element={<RegisterPage />}
       />
 
+      <Route
+        path="/auth/discord/callback"
+        element={<DiscordCallbackPage />}
+      />
+
       <Route element={<AppShell />}>
         <Route
           path="/"
           element={<HomePage />}
-        />
-
-        <Route
-          path="/replay"
-          element={<ReplayPage />}
         />
 
         <Route
@@ -146,16 +154,6 @@ export function AppRouter() {
               description="Explore every practice, qualifying, sprint and race session."
             />
           }
-        />
-
-        <Route
-          path="/drivers"
-          element={<DriversPage />}
-        />
-
-        <Route
-          path="/drivers/:code"
-          element={<DriverDetailPage />}
         />
 
         <Route
@@ -192,20 +190,52 @@ export function AppRouter() {
         />
 
         <Route
-          path="/settings"
-          element={
-            <FoundationPage
-              eyebrow="07 / Settings"
-              title="Settings"
-              description="Configure your F1 Race Replay experience."
-            />
-          }
+          path="/analytics"
+          element={<AnalyticsPage />}
         />
+
+        <Route element={<ProtectedRoute />}>
+          <Route
+            path="/replay"
+            element={<ReplayPage />}
+          />
+
+          <Route
+            path="/drivers"
+            element={<DriversPage />}
+          />
+
+          <Route
+            path="/drivers/:code"
+            element={<DriverDetailPage />}
+          />
+
+          <Route
+            path="/profile"
+            element={<ProfilePage />}
+          />
+
+          <Route
+            path="/settings"
+            element={
+              <FoundationPage
+                eyebrow="07 / Settings"
+                title="Settings"
+                description="Configure your F1 Race Replay experience."
+              />
+            }
+          />
+        </Route>
       </Route>
 
       <Route
         path="*"
-        element={<Navigate to="/" replace />}
+        element={
+          <Navigate
+            to="/"
+            replace
+          />
+        }
       />
     </Routes>
   );

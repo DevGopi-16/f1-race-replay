@@ -5,12 +5,14 @@ import {
   login as loginApi,
   logout as logoutApi,
   signup as signupApi,
+  googleLogin as googleLoginApi,
 } from "./auth.api";
 
 import type {
   AuthUser,
   LoginPayload,
   SignupPayload,
+  GooglePayload,
 } from "./auth.types";
 
 const ACCESS_TOKEN_KEY = "f1_access_token";
@@ -29,6 +31,10 @@ interface AuthState {
     payload: SignupPayload,
   ) => Promise<AuthUser>;
 
+  googleLogin: (
+    payload: GooglePayload,
+  ) => Promise<AuthUser>;
+
   restoreSession: () => Promise<void>;
 
   logout: () => Promise<void>;
@@ -37,11 +43,14 @@ interface AuthState {
 export const useAuthStore = create<AuthState>(
   (set) => ({
     user: null,
+
     accessToken:
       localStorage.getItem(
         ACCESS_TOKEN_KEY,
       ),
+
     isLoading: false,
+
     isInitialized: false,
 
     login: async (payload) => {
@@ -84,6 +93,38 @@ export const useAuthStore = create<AuthState>(
       try {
         const response =
           await signupApi(payload);
+
+        localStorage.setItem(
+          ACCESS_TOKEN_KEY,
+          response.access_token,
+        );
+
+        set({
+          user: response.user,
+          accessToken:
+            response.access_token,
+          isLoading: false,
+          isInitialized: true,
+        });
+
+        return response.user;
+      } catch (error) {
+        set({
+          isLoading: false,
+        });
+
+        throw error;
+      }
+    },
+
+    googleLogin: async (payload) => {
+      set({
+        isLoading: true,
+      });
+
+      try {
+        const response =
+          await googleLoginApi(payload);
 
         localStorage.setItem(
           ACCESS_TOKEN_KEY,
@@ -160,8 +201,6 @@ export const useAuthStore = create<AuthState>(
       try {
         await logoutApi();
       } catch {
-        // Even if the backend logout fails,
-        // clear the local authentication state.
       } finally {
         localStorage.removeItem(
           ACCESS_TOKEN_KEY,

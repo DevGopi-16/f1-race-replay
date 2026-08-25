@@ -51,6 +51,8 @@ from src.driver_panel import (
     build_driver_panel, get_season_stats_cached, warm_season_stats,
     build_driver_full, warm_racecraft_stats,
 )
+from src.analytics import build_analytics
+
 from src.constructors_panel import build_constructors_panel, warm_constructor_history
 from src.next_session import get_next_session
 from src.serialize import serialize_frames, serialize_replay_frames, serialize_driver_colors
@@ -1846,6 +1848,29 @@ def drivers_panel(year: int = Query(...), round: Optional[int] = Query(None, ali
     except requests.RequestException as e:
         raise HTTPException(status_code=502, detail=f"Couldn't reach Jolpica API: {e}")
 
+@app.get("/api/analytics", summary="Season Analytics")
+def analytics(
+    year: int = Query(...),
+    round: Optional[int] = Query(None, alias="round"),
+):
+    try:
+        return build_analytics(
+            year,
+            DRIVERS,
+            round_=round,
+        )
+    except requests.RequestException as e:
+        raise HTTPException(
+            status_code=502,
+            detail=f"Couldn't reach Jolpica API: {e}",
+        )
+    except Exception as e:
+        raise HTTPException(
+            status_code=500,
+            detail=f"Failed to build analytics: {e}",
+        )
+    
+    
 @app.get("/api/constructors/panel", summary="Constructors Panel")
 def constructors_panel(year: int = Query(...), round: Optional[int] = Query(None, alias="round")):
     try:

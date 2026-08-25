@@ -12,16 +12,25 @@ class UserCreate(BaseModel):
     @classmethod
     def username_valid(cls, v: str) -> str:
         if not (3 <= len(v) <= 50):
-            raise ValueError("Username must be 3-50 characters")
+            raise ValueError(
+                "Username must be 3-50 characters"
+            )
+
         if not v.replace("_", "").isalnum():
-            raise ValueError("Username can only contain letters, numbers, underscores")
+            raise ValueError(
+                "Username can only contain letters, numbers, underscores"
+            )
+
         return v
 
     @field_validator("password")
     @classmethod
     def password_valid(cls, v: str) -> str:
         if len(v) < 8:
-            raise ValueError("Password must be at least 8 characters")
+            raise ValueError(
+                "Password must be at least 8 characters"
+            )
+
         return v
 
 
@@ -48,4 +57,8 @@ class Token(BaseModel):
 
 
 class GoogleAuthPayload(BaseModel):
-    credential: str  # the ID token JWT returned by Google Identity Services
+    credential: str
+
+
+class DiscordCallbackResponse(BaseModel):
+    code: str

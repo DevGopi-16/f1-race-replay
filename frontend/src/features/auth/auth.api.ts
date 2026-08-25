@@ -9,6 +9,31 @@ import type {
 const AUTH_BASE = "/auth";
 const ACCESS_TOKEN_KEY = "f1_access_token";
 
+/* =========================================================
+   PROFILE TYPES
+========================================================= */
+
+export interface UserProfile {
+  id: number;
+  username: string;
+  email: string | null;
+  picture_url: string | null;
+  is_pro: boolean;
+  favorite_driver: string;
+  favorite_team: string;
+  replays_watched: number;
+}
+
+export interface UpdateProfilePayload {
+  username?: string;
+  favorite_driver?: string;
+  favorite_team?: string;
+}
+
+/* =========================================================
+   AUTH REQUEST
+========================================================= */
+
 async function authRequest<T>(
   endpoint: string,
   options: RequestInit = {},
@@ -64,6 +89,10 @@ async function authRequest<T>(
   return data as T;
 }
 
+/* =========================================================
+   SIGN UP
+========================================================= */
+
 export function signup(
   payload: SignupPayload,
 ) {
@@ -79,6 +108,10 @@ export function signup(
     },
   );
 }
+
+/* =========================================================
+   LOGIN
+========================================================= */
 
 export function login(
   payload: LoginPayload,
@@ -96,6 +129,10 @@ export function login(
   );
 }
 
+/* =========================================================
+   GOOGLE LOGIN
+========================================================= */
+
 export function googleLogin(
   payload: GooglePayload,
 ) {
@@ -112,15 +149,52 @@ export function googleLogin(
   );
 }
 
+/* =========================================================
+   CURRENT USER
+========================================================= */
+
 export function getCurrentUser() {
   return authRequest<AuthUser>("/me");
 }
+
+/* =========================================================
+   LOGOUT
+========================================================= */
 
 export function logout() {
   return authRequest<{ detail: string }>(
     "/logout",
     {
       method: "POST",
+    },
+  );
+}
+
+/* =========================================================
+   PROFILE
+========================================================= */
+
+export function getProfile() {
+  return authRequest<UserProfile>(
+    "/profile",
+  );
+}
+
+export function updateProfile(
+  payload: UpdateProfilePayload,
+) {
+  return authRequest<{
+    message: string;
+    username: string;
+  }>(
+    "/profile",
+    {
+      method: "PUT",
+      headers: {
+        "Content-Type":
+          "application/json",
+      },
+      body: JSON.stringify(payload),
     },
   );
 }
