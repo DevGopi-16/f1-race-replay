@@ -1,8 +1,14 @@
 import {
-  useEffect,
-  useState,
-  type FormEvent,
-} from "react";
+  CheckCircle2,
+  CircleOff,
+  Crown,
+  Flag,
+  LoaderCircle,
+  Mail,
+  Save,
+  ShieldCheck,
+  UserRound,
+} from "lucide-react";
 
 import {
   getProfile,
@@ -10,13 +16,15 @@ import {
   type UserProfile,
 } from "./auth.api";
 
-import "./auth.css";
+import "./profile.css";
+
+import {
+  useEffect,
+  useState,
+  type FormEvent,
+} from "react";
 
 export default function ProfilePage() {
-  /* =========================================================
-     STATE
-  ========================================================= */
-
   const [profile, setProfile] =
     useState<UserProfile | null>(null);
 
@@ -41,10 +49,6 @@ export default function ProfilePage() {
   const [message, setMessage] =
     useState("");
 
-  /* =========================================================
-     LOAD PROFILE
-  ========================================================= */
-
   useEffect(() => {
     async function loadProfile() {
       try {
@@ -54,15 +58,12 @@ export default function ProfilePage() {
         const data = await getProfile();
 
         setProfile(data);
-
         setUsername(data.username);
-
         setFavoriteDriver(
-          data.favorite_driver,
+          data.favorite_driver ?? "",
         );
-
         setFavoriteTeam(
-          data.favorite_team,
+          data.favorite_team ?? "",
         );
       } catch (err) {
         setError(
@@ -77,10 +78,6 @@ export default function ProfilePage() {
 
     loadProfile();
   }, []);
-
-  /* =========================================================
-     SAVE PROFILE
-  ========================================================= */
 
   async function handleSubmit(
     event: FormEvent<HTMLFormElement>,
@@ -101,37 +98,47 @@ export default function ProfilePage() {
       const cleanFavoriteTeam =
         favoriteTeam.trim();
 
+      if (!cleanUsername) {
+        setError("Username cannot be empty.");
+        setSaving(false);
+        return;
+      }
+
       await updateProfile({
         username: cleanUsername,
-        favorite_driver:
-          cleanFavoriteDriver,
-        favorite_team:
-          cleanFavoriteTeam,
+        ...(cleanFavoriteDriver
+          ? {
+              favorite_driver:
+                cleanFavoriteDriver,
+            }
+          : {}),
+        ...(cleanFavoriteTeam
+          ? {
+              favorite_team:
+                cleanFavoriteTeam,
+            }
+          : {}),
       });
 
       setProfile((current) =>
         current
           ? {
               ...current,
-
-              username:
-                cleanUsername,
-
+              username: cleanUsername,
               favorite_driver:
-                cleanFavoriteDriver,
-
+                cleanFavoriteDriver ||
+                current.favorite_driver,
               favorite_team:
-                cleanFavoriteTeam,
+                cleanFavoriteTeam ||
+                current.favorite_team,
             }
           : current,
       );
 
       setUsername(cleanUsername);
-
       setFavoriteDriver(
         cleanFavoriteDriver,
       );
-
       setFavoriteTeam(
         cleanFavoriteTeam,
       );
@@ -150,345 +157,536 @@ export default function ProfilePage() {
     }
   }
 
-  /* =========================================================
-     LOADING
-  ========================================================= */
-
   if (loading) {
     return (
-      <main className="auth-page">
-        <div className="auth-page-glow" />
+      <main className="profile-page">
+        <div className="profile-page-glow" />
 
-        <section className="auth-card">
-          <div className="auth-heading">
-            <span className="auth-eyebrow">
-              ACCOUNT / PROFILE
-            </span>
+        <section className="profile-loading">
+          <LoaderCircle
+            className="profile-spinner"
+            size={30}
+          />
 
-            <h1>
-              Loading profile...
-            </h1>
+          <span className="profile-section-label">
+            ACCOUNT / PROFILE
+          </span>
 
-            <p>
-              Retrieving your F1 Race Replay
-              account.
-            </p>
-          </div>
+          <h1>Loading profile...</h1>
+
+          <p>
+            Retrieving your F1 Race Replay
+            account.
+          </p>
         </section>
       </main>
     );
   }
-
-  /* =========================================================
-     PROFILE ERROR
-  ========================================================= */
 
   if (!profile) {
     return (
-      <main className="auth-page">
-        <div className="auth-page-glow" />
+      <main className="profile-page">
+        <div className="profile-page-glow" />
 
-        <section className="auth-card">
-          <div className="auth-heading">
-            <span className="auth-eyebrow">
-              ACCOUNT / PROFILE
-            </span>
+        <section className="profile-error-state">
+          <CircleOff size={34} />
 
-            <h1>
-              Profile unavailable.
-            </h1>
+          <span className="profile-section-label">
+            ACCOUNT / PROFILE
+          </span>
 
-            <p>
-              {error ||
-                "Unable to load your profile."}
-            </p>
-          </div>
+          <h1>Profile unavailable.</h1>
+
+          <p>
+            {error ||
+              "Unable to load your profile."}
+          </p>
         </section>
       </main>
     );
   }
 
-  /* =========================================================
-     DISPLAY DATA
-  ========================================================= */
-
   const displayName =
-    profile.username || "Driver";
+    profile.username?.trim() || "Driver";
 
   const initials =
     displayName
-      .trim()
       .split(/\s+/)
+      .filter(Boolean)
       .map((part) => part[0])
       .join("")
       .slice(0, 2)
       .toUpperCase() || "U";
 
-  /* =========================================================
-     PAGE
-  ========================================================= */
-
   return (
-    <main className="auth-page">
-      <div className="auth-page-glow" />
+    <main className="profile-page">
+      <div className="profile-page-glow" />
 
-      <section className="auth-card auth-card-register">
+      <div className="profile-shell">
 
-        {/* =================================================
-            BRAND
-        ================================================= */}
+        {/* PAGE HEADER */}
 
-        <div className="auth-brand">
-          <span className="auth-brand-mark">
-            F1
-          </span>
+        <header className="profile-header">
+          <div>
+            <span className="profile-kicker">
+              ACCOUNT / PROFILE
+            </span>
 
-          <span className="auth-brand-name">
-            RACE REPLAY
-          </span>
-        </div>
+            <h1>
+              {displayName}
+              <span>.</span>
+            </h1>
 
-        {/* =================================================
-            HEADER
-        ================================================= */}
+            <p>
+              Your F1 Race Replay identity,
+              preferences and account details.
+            </p>
+          </div>
+        </header>
 
-        <div className="auth-heading">
-          <span className="auth-eyebrow">
-            ACCOUNT / PROFILE
-          </span>
 
-          <h1>
-            {displayName}.
-          </h1>
+        {/* PROFILE HERO */}
 
-          <p>
-            Manage your F1 Race Replay
-            driver profile.
-          </p>
-        </div>
+        <section className="profile-card profile-hero">
+          <div className="profile-hero-main">
 
-        {/* =================================================
-            AVATAR
-        ================================================= */}
-
-        <div
-          style={{
-            display: "flex",
-            justifyContent: "center",
-            marginBottom: "28px",
-          }}
-        >
-          {profile.picture_url ? (
-            <img
-              src={profile.picture_url}
-              alt=""
-              style={{
-                width: "88px",
-                height: "88px",
-                borderRadius: "50%",
-                objectFit: "cover",
-              }}
-            />
-          ) : (
-            <div
-              style={{
-                width: "88px",
-                height: "88px",
-                borderRadius: "50%",
-                display: "flex",
-                alignItems: "center",
-                justifyContent: "center",
-                fontSize: "28px",
-                fontWeight: 700,
-                background: "#151515",
-                border: "1px solid #333",
-              }}
-            >
-              {initials}
+            <div className="profile-avatar">
+              {profile.picture_url ? (
+                <img
+                  src={profile.picture_url}
+                  alt=""
+                />
+              ) : (
+                <span>
+                  {initials}
+                </span>
+              )}
             </div>
-          )}
-        </div>
 
-        {/* =================================================
-            STATS
-        ================================================= */}
+            <div className="profile-identity">
+              <span className="profile-card-label">
+                DRIVER PROFILE
+              </span>
 
-        <div
-          style={{
-            display: "grid",
-            gridTemplateColumns:
-              "repeat(2, minmax(0, 1fr))",
-            gap: "12px",
-            marginBottom: "28px",
-          }}
-        >
-          <div
-            style={{
-              padding: "16px",
-              background: "#111",
-              border: "1px solid #252525",
-            }}
-          >
-            <small>
-              REPLAYS WATCHED
-            </small>
+              <h2>
+                {displayName}
+              </h2>
 
-            <strong
-              style={{
-                display: "block",
-                marginTop: "6px",
-                fontSize: "24px",
-              }}
-            >
-              {profile.replays_watched}
-            </strong>
+              {profile.email && (
+                <div className="profile-email">
+                  <Mail size={15} />
+                  <span>
+                    {profile.email}
+                  </span>
+                </div>
+              )}
+            </div>
+
           </div>
 
-          <div
-            style={{
-              padding: "16px",
-              background: "#111",
-              border: "1px solid #252525",
-            }}
-          >
-            <small>
-              MEMBERSHIP
-            </small>
-
-            <strong
-              style={{
-                display: "block",
-                marginTop: "6px",
-                fontSize: "24px",
-              }}
-            >
-              {profile.is_pro
-                ? "PRO"
-                : "FREE"}
-            </strong>
+          <div className="profile-membership">
+            {profile.is_pro ? (
+              <>
+                <Crown size={17} />
+                <span>PRO MEMBER</span>
+              </>
+            ) : (
+              <>
+                <UserRound size={17} />
+                <span>FREE MEMBER</span>
+              </>
+            )}
           </div>
-        </div>
+        </section>
 
-        {/* =================================================
-            FORM
-        ================================================= */}
 
-        <form
-          className="auth-form"
-          onSubmit={handleSubmit}
-        >
-          {/* USERNAME */}
+        {/* ACCOUNT OVERVIEW */}
 
-          <label className="auth-field">
-            <span>
-              Username
-            </span>
+        <section className="profile-section">
 
-            <input
-              type="text"
-              value={username}
-              onChange={(event) =>
-                setUsername(
-                  event.target.value,
-                )
-              }
-              autoComplete="username"
-              required
-            />
-          </label>
+          <div className="profile-section-heading">
+            <div>
+              <span className="profile-section-label">
+                ACCOUNT OVERVIEW
+              </span>
 
-          {/* EMAIL */}
-
-          <label className="auth-field">
-            <span>
-              Email
-            </span>
-
-            <input
-              type="email"
-              value={
-                profile.email ?? ""
-              }
-              disabled
-            />
-          </label>
-
-          {/* FAVORITE DRIVER */}
-
-          <label className="auth-field">
-            <span>
-              Favorite Driver
-            </span>
-
-            <input
-              type="text"
-              value={favoriteDriver}
-              onChange={(event) =>
-                setFavoriteDriver(
-                  event.target.value,
-                )
-              }
-              placeholder="e.g. Lando Norris"
-            />
-          </label>
-
-          {/* FAVORITE TEAM */}
-
-          <label className="auth-field">
-            <span>
-              Favorite Team
-            </span>
-
-            <input
-              type="text"
-              value={favoriteTeam}
-              onChange={(event) =>
-                setFavoriteTeam(
-                  event.target.value,
-                )
-              }
-              placeholder="e.g. McLaren"
-            />
-          </label>
-
-          {/* ERROR */}
-
-          {error && (
-            <div className="auth-error">
-              {error}
+              <h2>
+                Your account
+              </h2>
             </div>
-          )}
 
-          {/* SUCCESS */}
+            <ShieldCheck size={20} />
+          </div>
 
-          {message && (
-            <div
-              style={{
-                padding: "12px 14px",
-                border:
-                  "1px solid #263d2b",
-                background: "#101a12",
-                color: "#8ee59d",
-                fontSize: "13px",
-              }}
-            >
-              {message}
+          <div className="profile-stat-grid">
+
+            <div className="profile-stat-card">
+              <span>
+                REPLAYS WATCHED
+              </span>
+
+              <strong>
+                {profile.replays_watched}
+              </strong>
+
+              <small>
+                Recorded on your account
+              </small>
             </div>
-          )}
 
-          {/* SAVE */}
+            <div className="profile-stat-card">
+              <span>
+                MEMBERSHIP
+              </span>
 
-          <button
-            type="submit"
-            className="auth-submit"
-            disabled={saving}
+              <strong>
+                {profile.is_pro
+                  ? "PRO"
+                  : "FREE"}
+              </strong>
+
+              <small>
+                Current account status
+              </small>
+            </div>
+
+          </div>
+        </section>
+
+
+        {/* F1 IDENTITY */}
+
+        <section className="profile-section">
+
+          <div className="profile-section-heading">
+            <div>
+              <span className="profile-section-label">
+                F1 IDENTITY
+              </span>
+
+              <h2>
+                Your preferences
+              </h2>
+            </div>
+
+            <Flag size={20} />
+          </div>
+
+          <div className="profile-identity-grid">
+
+            <div className="profile-preference-card">
+              <span>
+                FAVORITE DRIVER
+              </span>
+
+              <strong>
+                {profile.favorite_driver ||
+                  "Not set"}
+              </strong>
+            </div>
+
+            <div className="profile-preference-card">
+              <span>
+                FAVORITE TEAM
+              </span>
+
+              <strong>
+                {profile.favorite_team ||
+                  "Not set"}
+              </strong>
+            </div>
+
+          </div>
+        </section>
+
+
+        {/* CONNECTED ACCOUNTS */}
+
+        <section className="profile-section">
+
+          <div className="profile-section-heading">
+            <div>
+              <span className="profile-section-label">
+                CONNECTIONS
+              </span>
+
+              <h2>
+                Connected accounts
+              </h2>
+            </div>
+          </div>
+
+          <div className="profile-connections">
+
+            <ConnectionRow
+              name="Google"
+              connected={
+                profile.connected_accounts
+                  .google
+              }
+            />
+
+            <ConnectionRow
+              name="Discord"
+              connected={
+                profile.connected_accounts
+                  .discord
+              }
+            />
+
+            <ConnectionRow
+              name="X"
+              connected={
+                profile.connected_accounts
+                  .x
+              }
+            />
+
+          </div>
+        </section>
+
+
+        {/* EDIT PROFILE */}
+
+        <section className="profile-section">
+
+          <div className="profile-section-heading">
+            <div>
+              <span className="profile-section-label">
+                PROFILE SETTINGS
+              </span>
+
+              <h2>
+                Edit profile
+              </h2>
+            </div>
+          </div>
+
+          <form
+            className="profile-form"
+            onSubmit={handleSubmit}
           >
-            {saving
-              ? "SAVING..."
-              : "SAVE PROFILE"}
-          </button>
-        </form>
-      </section>
+
+            <label className="profile-field">
+              <span>
+                USERNAME
+              </span>
+
+              <input
+                type="text"
+                value={username}
+                onChange={(event) =>
+                  setUsername(
+                    event.target.value,
+                  )
+                }
+                autoComplete="username"
+                required
+              />
+            </label>
+
+
+            <label className="profile-field">
+              <span>
+                EMAIL
+              </span>
+
+              <input
+                type="email"
+                value={profile.email ?? ""}
+                disabled
+              />
+
+              <small>
+                Email is managed by your
+                authentication provider.
+              </small>
+            </label>
+
+
+            <div className="profile-form-grid">
+
+              <label className="profile-field">
+                <span>
+                  FAVORITE DRIVER
+                </span>
+
+                <input
+                  type="text"
+                  value={favoriteDriver}
+                  onChange={(event) =>
+                    setFavoriteDriver(
+                      event.target.value,
+                    )
+                  }
+                />
+              </label>
+
+
+              <label className="profile-field">
+                <span>
+                  FAVORITE TEAM
+                </span>
+
+                <input
+                  type="text"
+                  value={favoriteTeam}
+                  onChange={(event) =>
+                    setFavoriteTeam(
+                      event.target.value,
+                    )
+                  }
+                />
+              </label>
+
+            </div>
+
+
+            {error && (
+              <div className="profile-form-error">
+                {error}
+              </div>
+            )}
+
+
+            {message && (
+              <div className="profile-form-success">
+                <CheckCircle2 size={16} />
+                <span>
+                  {message}
+                </span>
+              </div>
+            )}
+
+
+            <div className="profile-form-actions">
+
+              <button
+                type="submit"
+                className="profile-save-button"
+                disabled={saving}
+              >
+                {saving ? (
+                  <>
+                    <LoaderCircle
+                      size={17}
+                      className="profile-button-spinner"
+                    />
+
+                    SAVING...
+                  </>
+                ) : (
+                  <>
+                    <Save size={17} />
+
+                    SAVE PROFILE
+                  </>
+                )}
+              </button>
+
+            </div>
+
+          </form>
+        </section>
+
+
+        {/* SECURITY */}
+
+        <section className="profile-section">
+
+          <div className="profile-section-heading">
+            <div>
+              <span className="profile-section-label">
+                ACCOUNT SECURITY
+              </span>
+
+              <h2>
+                Authentication
+              </h2>
+            </div>
+
+            <ShieldCheck size={20} />
+          </div>
+
+          <div className="profile-security-card">
+
+            <div>
+              <strong>
+                Account protection
+              </strong>
+
+              <p>
+                Your account uses the
+                authentication methods connected
+                above.
+              </p>
+            </div>
+
+            <ShieldCheck size={22} />
+
+          </div>
+        </section>
+
+
+        <footer className="profile-footer">
+          <span>
+            F1 RACE REPLAY
+          </span>
+
+          <span>
+            PROFILE
+          </span>
+        </footer>
+
+      </div>
     </main>
+  );
+}
+
+
+type ConnectionRowProps = {
+  name: string;
+  connected: boolean;
+};
+
+
+function ConnectionRow({
+  name,
+  connected,
+}: ConnectionRowProps) {
+  return (
+    <div className="profile-connection-row">
+
+      <div className="profile-connection-name">
+        <span className="profile-connection-icon">
+          {name.slice(0, 1)}
+        </span>
+
+        <span>
+          {name}
+        </span>
+      </div>
+
+      <div
+        className={
+          connected
+            ? "profile-connection-status is-connected"
+            : "profile-connection-status"
+        }
+      >
+        {connected ? (
+          <>
+            <CheckCircle2 size={15} />
+            CONNECTED
+          </>
+        ) : (
+          <>
+            <CircleOff size={15} />
+            NOT CONNECTED
+          </>
+        )}
+      </div>
+
+    </div>
   );
 }

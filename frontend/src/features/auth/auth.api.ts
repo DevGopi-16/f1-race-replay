@@ -19,9 +19,14 @@ export interface UserProfile {
   email: string | null;
   picture_url: string | null;
   is_pro: boolean;
-  favorite_driver: string;
-  favorite_team: string;
+  favorite_driver: string | null;
+  favorite_team: string | null;
   replays_watched: number;
+  connected_accounts: {
+    google: boolean;
+    discord: boolean;
+    x: boolean;
+  };
 }
 
 export interface UpdateProfilePayload {

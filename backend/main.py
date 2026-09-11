@@ -61,6 +61,8 @@ from src.serialize import serialize_frames, serialize_replay_frames, serialize_d
 from src.auth.routes import router as auth_router, get_current_active_user
 from src.auth.database import Base, engine, SessionLocal
 from src.auth.models import User
+from src.auth.replay_history_routes import router as replay_history_router
+from src.auth.replay_history import ReplayHistory
 from src.timing_tower import build_timing_tower
 from src.race_control import build_race_control_feed
 from src.minisectors import build_minisectors
@@ -400,6 +402,7 @@ app.add_middleware(
 Base.metadata.create_all(bind=engine)
 
 app.include_router(auth_router)
+app.include_router(replay_history_router)
 
 
 # --- Directory Config & Static Mounts ---
@@ -491,11 +494,16 @@ def get_user_profile(current_user: User = Depends(get_current_active_user)):
         "id": current_user.id,
         "username": current_user.username,
         "email": current_user.email,
-        "picture_url": getattr(current_user, "picture_url", None),
-        "is_pro": getattr(current_user, "is_pro", True),
-        "favorite_driver": getattr(current_user, "favorite_driver", "Lewis Hamilton"),
-        "favorite_team": getattr(current_user, "favorite_team", "Scuderia Ferrari"),
-        "replays_watched": getattr(current_user, "replays_watched", 24),
+        "picture_url": current_user.picture_url,
+        "is_pro": bool(current_user.is_pro),
+        "favorite_driver": current_user.favorite_driver,
+        "favorite_team": current_user.favorite_team,
+        "replays_watched": current_user.replays_watched or 0,
+        "connected_accounts": {
+            "google": current_user.google_id is not None,
+            "discord": current_user.discord_id is not None,
+            "x": current_user.x_id is not None,
+        },
     }
 
 @app.put("/auth/profile", summary="Update User Profile Details")
