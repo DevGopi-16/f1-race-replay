@@ -10,8 +10,9 @@ from fastapi import APIRouter, Depends, HTTPException, status
 from fastapi.responses import RedirectResponse
 from sqlalchemy.orm import Session
 
-from google.oauth2 import id_token as google_id_token
-from google.auth.transport import requests as google_requests
+from firebase_admin import auth as firebase_auth
+
+from .firebase_admin import firebase_app
 
 from . import models, schemas, security
 from .database import get_db
@@ -23,10 +24,6 @@ router = APIRouter(
     tags=["auth"],
 )
 
-
-GOOGLE_CLIENT_ID = os.getenv(
-    "GOOGLE_CLIENT_ID"
-)
 
 DISCORD_CLIENT_ID = os.getenv(
     "DISCORD_CLIENT_ID"
@@ -170,29 +167,28 @@ def google_login(
     payload: schemas.GoogleAuthPayload,
     db: Session = Depends(get_db),
 ):
-    if not GOOGLE_CLIENT_ID:
-        raise HTTPException(
-            status_code=500,
-            detail="Google sign-in is not configured on the server",
-        )
-
     try:
-        idinfo = google_id_token.verify_oauth2_token(
-            payload.credential,
-            google_requests.Request(),
-            GOOGLE_CLIENT_ID,
+        decoded_token = firebase_auth.verify_id_token(
+            payload.id_token,
+            app=firebase_app,
         )
-    except ValueError:
+    except Exception:
         raise HTTPException(
             status_code=401,
-            detail="Invalid Google token",
+            detail="Invalid Firebase ID token",
         )
 
-    google_id = idinfo["sub"]
+    google_id = decoded_token.get("uid")
 
-    email = idinfo.get("email")
+    if not google_id:
+        raise HTTPException(
+            status_code=401,
+            detail="Invalid Firebase user",
+        )
 
-    name = idinfo.get("name")
+    email = decoded_token.get("email")
+
+    name = decoded_token.get("name")
 
     if not name:
         name = (
@@ -201,7 +197,7 @@ def google_login(
             else "racer"
         )
 
-    picture = idinfo.get("picture")
+    picture = decoded_token.get("picture")
 
     user = (
         db.query(models.User)

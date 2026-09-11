@@ -1,168 +1,41 @@
 import {
   FormEvent,
-  useEffect,
-  useRef,
   useState,
 } from "react";
 
 import { useNavigate } from "react-router-dom";
-
 import { useAuthStore } from "./auth.store";
-
 import "./auth.css";
-
-declare global {
-  interface Window {
-    google?: {
-      accounts: {
-        id: {
-          initialize: (config: {
-            client_id: string;
-            callback: (response: {
-              credential: string;
-            }) => void;
-          }) => void;
-
-          renderButton: (
-            parent: HTMLElement,
-            options: {
-              type?: "standard" | "icon";
-              theme?:
-                | "outline"
-                | "filled_blue"
-                | "filled_black";
-              size?: "large" | "medium" | "small";
-              text?:
-                | "signin_with"
-                | "signup_with"
-                | "continue_with"
-                | "signin";
-              shape?:
-                | "rectangular"
-                | "pill"
-                | "circle"
-                | "square";
-              width?: number;
-              logo_alignment?: "left" | "center";
-            },
-          ) => void;
-        };
-      };
-    };
-  }
-}
-
-const GOOGLE_CLIENT_ID =
-  "3151390342-jd4omku90qolovv44dsjph7a5v7sj2b7.apps.googleusercontent.com";
-
-let googleInitialized = false;
 
 export default function LoginPage() {
   const navigate = useNavigate();
 
-  const login = useAuthStore(
-    (state) => state.login,
-  );
+  const login = useAuthStore((state) => state.login);
+  const googleLogin = useAuthStore((state) => state.googleLogin);
+  const isLoading = useAuthStore((state) => state.isLoading);
 
-  const isLoading = useAuthStore(
-    (state) => state.isLoading,
-  );
+  const [showEmailLogin, setShowEmailLogin] = useState(false);
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  const [error, setError] = useState("");
 
-  const googleButtonRef =
-    useRef<HTMLDivElement | null>(null);
+  const handleGoogleLogin = async () => {
+    setError("");
 
-  const [showEmailLogin, setShowEmailLogin] =
-    useState(false);
+    try {
+      await googleLogin();
 
-  const [email, setEmail] =
-    useState("");
-
-  const [password, setPassword] =
-    useState("");
-
-  const [error, setError] =
-    useState("");
-
-  useEffect(() => {
-    if (showEmailLogin) {
-      return;
-    }
-
-    if (!window.google) {
-      console.warn(
-        "[Auth] Google Identity Services has not loaded.",
-      );
-      return;
-    }
-
-    if (!googleButtonRef.current) {
-      return;
-    }
-
-    const buttonElement =
-      googleButtonRef.current;
-
-    buttonElement.innerHTML = "";
-
-    if (!googleInitialized) {
-      window.google.accounts.id.initialize({
-        client_id: GOOGLE_CLIENT_ID,
-
-        callback: async (response) => {
-          setError("");
-
-          if (!response.credential) {
-            setError(
-              "Google did not return a valid credential.",
-            );
-            return;
-          }
-
-          try {
-            const googleLogin =
-              useAuthStore.getState().googleLogin;
-
-            await googleLogin({
-              credential: response.credential,
-            });
-
-            navigate("/", {
-              replace: true,
-            });
-          } catch (err) {
-            setError(
-              err instanceof Error
-                ? err.message
-                : "Unable to sign in with Google.",
-            );
-          }
-        },
+      navigate("/", {
+        replace: true,
       });
-
-      googleInitialized = true;
-
-      console.log(
-        "[Auth] Google Sign-In initialized.",
+    } catch (err) {
+      setError(
+        err instanceof Error
+          ? err.message
+          : "Unable to sign in with Google.",
       );
     }
-
-    window.google.accounts.id.renderButton(
-      buttonElement,
-      {
-        type: "standard",
-        theme: "outline",
-        size: "large",
-        text: "continue_with",
-        shape: "rectangular",
-        width: 360,
-        logo_alignment: "left",
-      },
-    );
-
-    console.log(
-      "[Auth] Google Sign-In button rendered.",
-    );
-  }, [showEmailLogin, navigate]);
+  };
 
   async function handleSubmit(
     event: FormEvent<HTMLFormElement>,
@@ -217,23 +90,13 @@ export default function LoginPage() {
           className="auth-logo"
           aria-label="F1 Race Replay"
         >
-          <span className="auth-logo-f">
-            F
-          </span>
-
-          <span className="auth-logo-plus">
-            +
-          </span>
+          <span className="auth-logo-f">F</span>
+          <span className="auth-logo-plus">+</span>
         </div>
 
         <div className="auth-brand-text">
-          <strong>
-            RACE REPLAY
-          </strong>
-
-          <span>
-            F1 RACING ANALYTICS
-          </span>
+          <strong>RACE REPLAY</strong>
+          <span>F1 RACING ANALYTICS</span>
         </div>
       </header>
 
@@ -252,9 +115,7 @@ export default function LoginPage() {
                 RACE REPLAY / ACCOUNT
               </span>
 
-              <h1>
-                AUTHENTICATE
-              </h1>
+              <h1>AUTHENTICATE</h1>
 
               <p>
                 Secure your access to race data,
@@ -268,18 +129,45 @@ export default function LoginPage() {
             </div>
 
             <div className="auth-provider-list">
-              <div className="auth-provider auth-provider-google">
+              <button
+                type="button"
+                className="auth-provider"
+                onClick={handleGoogleLogin}
+                disabled={isLoading}
+              >
                 <span className="auth-provider-icon google-icon">
-                  G
+                  <svg
+                    viewBox="0 0 24 24"
+                    aria-hidden="true"
+                    focusable="false"
+                  >
+                    <path
+                      fill="#4285F4"
+                      d="M21.35 12.23c0-.79-.07-1.55-.2-2.27H12v4.3h5.24a4.48 4.48 0 0 1-1.94 2.94v2.45h3.14c1.84-1.69 2.91-4.18 2.91-7.42Z"
+                    />
+                    <path
+                      fill="#34A853"
+                      d="M12 21.5c2.63 0 4.84-.87 6.45-2.35l-3.14-2.45c-.87.58-1.98.92-3.31.92-2.54 0-4.69-1.72-5.46-4.03H3.3v2.53A9.75 9.75 0 0 0 12 21.5Z"
+                    />
+                    <path
+                      fill="#FBBC05"
+                      d="M6.54 13.59A5.86 5.86 0 0 1 6.23 12c0-.55.11-1.09.31-1.59V7.88H3.3A9.75 9.75 0 0 0 2.25 12c0 1.57.38 3.05 1.05 4.12l3.24-2.53Z"
+                    />
+                    <path
+                      fill="#EA4335"
+                      d="M12 6.38c1.43 0 2.72.49 3.73 1.46l2.8-2.8C16.84 3.51 14.63 2.5 12 2.5a9.75 9.75 0 0 0-8.7 5.38l3.24 2.53C7.31 8.1 9.46 6.38 12 6.38Z"
+                    />
+                  </svg>
                 </span>
 
-                <span className="auth-google-button-area">
-                  <span
-                    ref={googleButtonRef}
-                    className="auth-google-render"
-                  />
+                <span>
+                  Continue with Google
                 </span>
-              </div>
+
+                <span className="auth-provider-arrow">
+                  →
+                </span>
+              </button>
 
               <button
                 type="button"
@@ -363,19 +251,13 @@ export default function LoginPage() {
 
             <div className="auth-divider">
               <span />
-
-              <small>
-                SECURE ACCESS
-              </small>
-
+              <small>SECURE ACCESS</small>
               <span />
             </div>
 
             <div className="auth-terms">
               By signing in, you agree to our{" "}
-              <a href="#terms">
-                Terms
-              </a>{" "}
+              <a href="#terms">Terms</a>{" "}
               and{" "}
               <a href="#privacy">
                 Privacy Policy
@@ -394,9 +276,7 @@ export default function LoginPage() {
                 RACE REPLAY / EMAIL
               </span>
 
-              <h1>
-                SIGN IN
-              </h1>
+              <h1>SIGN IN</h1>
 
               <p>
                 Enter your credentials to access
@@ -409,9 +289,7 @@ export default function LoginPage() {
               onSubmit={handleSubmit}
             >
               <label className="auth-field">
-                <span>
-                  Email
-                </span>
+                <span>Email</span>
 
                 <div className="auth-input-wrap">
                   <span className="auth-input-icon">
@@ -422,9 +300,7 @@ export default function LoginPage() {
                     type="email"
                     value={email}
                     onChange={(event) =>
-                      setEmail(
-                        event.target.value,
-                      )
+                      setEmail(event.target.value)
                     }
                     placeholder="you@example.com"
                     autoComplete="email"
@@ -435,9 +311,7 @@ export default function LoginPage() {
               </label>
 
               <label className="auth-field">
-                <span>
-                  Password
-                </span>
+                <span>Password</span>
 
                 <div className="auth-input-wrap">
                   <span className="auth-input-icon">
@@ -448,9 +322,7 @@ export default function LoginPage() {
                     type="password"
                     value={password}
                     onChange={(event) =>
-                      setPassword(
-                        event.target.value,
-                      )
+                      setPassword(event.target.value)
                     }
                     placeholder="Enter your password"
                     autoComplete="current-password"
@@ -479,11 +351,7 @@ export default function LoginPage() {
                     : "AUTHENTICATE"}
                 </span>
 
-                {!isLoading && (
-                  <b>
-                    →
-                  </b>
-                )}
+                {!isLoading && <b>→</b>}
               </button>
             </form>
 

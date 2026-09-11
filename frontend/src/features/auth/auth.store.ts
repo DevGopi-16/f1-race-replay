@@ -8,12 +8,13 @@ import {
   googleLogin as googleLoginApi,
 } from "./auth.api";
 
+import { signInWithGoogleFirebase } from "./firebase.auth";
+
 import type {
   AuthUser,
   LoginPayload,
   SignupPayload,
-  GooglePayload,
-} from "./auth.types";
+ } from "./auth.types";
 
 const ACCESS_TOKEN_KEY = "f1_access_token";
 
@@ -31,9 +32,7 @@ interface AuthState {
     payload: SignupPayload,
   ) => Promise<AuthUser>;
 
-  googleLogin: (
-    payload: GooglePayload,
-  ) => Promise<AuthUser>;
+  googleLogin: () => Promise<AuthUser>;
 
   restoreSession: () => Promise<void>;
 
@@ -117,14 +116,19 @@ export const useAuthStore = create<AuthState>(
       }
     },
 
-    googleLogin: async (payload) => {
+    googleLogin: async () => {
       set({
         isLoading: true,
       });
 
       try {
+        const { idToken } =
+          await signInWithGoogleFirebase();
+
         const response =
-          await googleLoginApi(payload);
+          await googleLoginApi({
+            id_token: idToken,
+          });
 
         localStorage.setItem(
           ACCESS_TOKEN_KEY,

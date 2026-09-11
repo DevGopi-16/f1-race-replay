@@ -3,12 +3,13 @@ import { Link, useNavigate } from "react-router-dom";
 import { useAuthStore } from "./auth.store";
 import "./auth.css";
 
-export default function LoginPage() {
+export default function RegisterPage() {
   const navigate = useNavigate();
 
-  const login = useAuthStore((state) => state.login);
+  const signup = useAuthStore((state) => state.signup);
   const isLoading = useAuthStore((state) => state.isLoading);
 
+  const [username, setUsername] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
@@ -18,7 +19,8 @@ export default function LoginPage() {
     setError("");
 
     try {
-      await login({
+      await signup({
+        username: username.trim(),
         email: email.trim(),
         password,
       });
@@ -30,7 +32,7 @@ export default function LoginPage() {
       setError(
         err instanceof Error
           ? err.message
-          : "Unable to sign in.",
+          : "Unable to create your account.",
       );
     }
   }
@@ -62,14 +64,14 @@ export default function LoginPage() {
 
         <div className="auth-status">
           <span className="auth-status-dot" />
-          ACCESS TERMINAL
+          NEW DRIVER REGISTRATION
         </div>
 
         <div className="auth-heading">
-          <h1>AUTHENTICATE</h1>
+          <h1>CREATE ACCOUNT</h1>
 
           <p>
-            Secure your access to live data,
+            Join the race and unlock live data,
             predictions, and private leagues.
           </p>
 
@@ -82,6 +84,25 @@ export default function LoginPage() {
           className="auth-form"
           onSubmit={handleSubmit}
         >
+          <label className="auth-field">
+            <span>Username</span>
+
+            <div className="auth-input-wrap">
+              <span className="auth-input-icon">@</span>
+
+              <input
+                type="text"
+                value={username}
+                onChange={(event) =>
+                  setUsername(event.target.value)
+                }
+                placeholder="Choose your username"
+                autoComplete="username"
+                required
+              />
+            </div>
+          </label>
+
           <label className="auth-field">
             <span>Email</span>
 
@@ -113,8 +134,8 @@ export default function LoginPage() {
                 onChange={(event) =>
                   setPassword(event.target.value)
                 }
-                placeholder="Enter your password"
-                autoComplete="current-password"
+                placeholder="Create a password"
+                autoComplete="new-password"
                 required
               />
             </div>
@@ -133,8 +154,8 @@ export default function LoginPage() {
           >
             <span>
               {isLoading
-                ? "AUTHENTICATING..."
-                : "SIGN IN"}
+                ? "CREATING ACCOUNT..."
+                : "CREATE ACCOUNT"}
             </span>
 
             <b>→</b>
@@ -147,20 +168,10 @@ export default function LoginPage() {
           <span />
         </div>
 
-        <button
-          type="button"
-          className="auth-google"
-          disabled
-          title="Google login will be connected next"
-        >
-          <span className="google-icon">G</span>
-          <span>CONTINUE WITH GOOGLE</span>
-        </button>
-
         <p className="auth-switch">
-          Don't have an account?{" "}
-          <Link to="/register">
-            Create one
+          Already have an account?{" "}
+          <Link to="/login">
+            Sign in
           </Link>
         </p>
 

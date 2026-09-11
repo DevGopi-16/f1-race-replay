@@ -57,7 +57,7 @@ class Token(BaseModel):
 
 
 class GoogleAuthPayload(BaseModel):
-    credential: str
+    id_token: str
 
 
 class DiscordCallbackResponse(BaseModel):

@@ -141,10 +141,11 @@ export function googleLogin(
     {
       method: "POST",
       headers: {
-        "Content-Type":
-          "application/json",
+        "Content-Type": "application/json",
       },
-      body: JSON.stringify(payload),
+      body: JSON.stringify({
+        id_token: payload.id_token,
+      }),
     },
   );
 }

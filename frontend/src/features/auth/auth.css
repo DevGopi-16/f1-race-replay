@@ -280,8 +280,7 @@
   font-size: 8px;
   font-weight: 800;
   letter-spacing: 0.16em;
-  animation:
-    authStatusEnter 700ms 180ms both;
+  animation: authStatusEnter 700ms 180ms both;
 }
 
 .auth-status-dot {
@@ -309,8 +308,7 @@
   font-size: 8px;
   font-weight: 800;
   letter-spacing: 0.18em;
-  animation:
-    authHeadingEnter 650ms 210ms both;
+  animation: authHeadingEnter 650ms 210ms both;
 }
 
 .auth-heading h1 {
@@ -321,8 +319,7 @@
   font-weight: 900;
   line-height: 0.95;
   letter-spacing: -0.04em;
-  animation:
-    authHeadingEnter 700ms 250ms both;
+  animation: authHeadingEnter 700ms 250ms both;
 }
 
 .auth-heading p {
@@ -331,8 +328,7 @@
   color: rgba(255, 255, 255, 0.52);
   font-size: 13px;
   line-height: 1.55;
-  animation:
-    authHeadingEnter 700ms 340ms both;
+  animation: authHeadingEnter 700ms 340ms both;
 }
 
 .auth-subline {
@@ -340,8 +336,7 @@
   margin-top: 8px;
   color: rgba(255, 255, 255, 0.25);
   font-size: 9px;
-  animation:
-    authHeadingEnter 700ms 430ms both;
+  animation: authHeadingEnter 700ms 430ms both;
 }
 
 .auth-provider-list {
@@ -430,15 +425,13 @@
 
 .google-icon {
   background: #fff;
-  color: #4285f4;
-  font-family: Arial, sans-serif;
-  border-radius: 50%;
+  border-radius: 8px;
 }
 
-.discord-icon {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
+.google-icon svg {
+  width: 20px;
+  height: 20px;
+  display: block;
 }
 
 .discord-icon svg {
@@ -460,13 +453,9 @@
   color: #e10600;
 }
 
-.auth-provider-status {
-  margin-left: auto;
-  color: rgba(255, 255, 255, 0.2);
-  font-family: var(--font-display);
-  font-size: 7px;
-  font-weight: 800;
-  letter-spacing: 0.12em;
+.auth-provider-label {
+  position: relative;
+  z-index: 1;
 }
 
 .auth-provider-arrow {
@@ -476,8 +465,60 @@
   transition: transform 180ms ease;
 }
 
-.auth-provider-email:hover .auth-provider-arrow {
+.auth-provider:hover .auth-provider-arrow {
   transform: translateX(4px);
+}
+
+.auth-provider-google {
+  overflow: hidden;
+}
+
+.auth-provider-google:hover {
+  transform: translateY(-2px);
+}
+
+.auth-provider-google .auth-provider-arrow {
+  position: relative;
+  z-index: 1;
+}
+
+.auth-google-render {
+  position: absolute;
+  inset: 0;
+  z-index: 10;
+  width: 100%;
+  height: 100%;
+  overflow: hidden;
+  opacity: 0.001;
+  cursor: pointer;
+}
+
+.auth-google-render > div {
+  position: absolute !important;
+  inset: 0 !important;
+  width: 100% !important;
+  height: 100% !important;
+  min-width: 100% !important;
+  max-width: none !important;
+  margin: 0 !important;
+  padding: 0 !important;
+  overflow: hidden !important;
+}
+
+.auth-google-render iframe {
+  position: absolute !important;
+  top: 0 !important;
+  left: 0 !important;
+  width: 100% !important;
+  height: 100% !important;
+  min-width: 100% !important;
+  max-width: none !important;
+  min-height: 100% !important;
+  margin: 0 !important;
+  padding: 0 !important;
+  border: 0 !important;
+  opacity: 1 !important;
+  visibility: visible !important;
 }
 
 .auth-divider {
@@ -593,9 +634,7 @@
 
 .auth-input-wrap:focus-within .auth-input-icon {
   color: #e10600;
-  transform:
-    translateY(-50%)
-    scale(1.1);
+  transform: translateY(-50%) scale(1.1);
 }
 
 .auth-error {
@@ -696,8 +735,7 @@
   font-size: 8px;
   font-weight: 700;
   letter-spacing: 0.13em;
-  transition:
-    color 180ms ease;
+  transition: color 180ms ease;
 }
 
 .auth-home:hover {
@@ -756,32 +794,24 @@
 @keyframes authCardEnter {
   from {
     opacity: 0;
-    transform:
-      translateY(24px)
-      scale(0.97);
+    transform: translateY(24px) scale(0.97);
   }
 
   to {
     opacity: 1;
-    transform:
-      translateY(0)
-      scale(1);
+    transform: translateY(0) scale(1);
   }
 }
 
 @keyframes authBrandEnter {
   from {
     opacity: 0;
-    transform:
-      translateX(-50%)
-      translateY(-14px);
+    transform: translateX(-50%) translateY(-14px);
   }
 
   to {
     opacity: 1;
-    transform:
-      translateX(-50%)
-      translateY(0);
+    transform: translateX(-50%) translateY(0);
   }
 }
 
@@ -812,16 +842,12 @@
 @keyframes authProviderEnter {
   from {
     opacity: 0;
-    transform:
-      translateY(12px)
-      scale(0.98);
+    transform: translateY(12px) scale(0.98);
   }
 
   to {
     opacity: 1;
-    transform:
-      translateY(0)
-      scale(1);
+    transform: translateY(0) scale(1);
   }
 }
 
@@ -841,16 +867,12 @@
   0%,
   100% {
     opacity: 0.45;
-    transform:
-      translate(-50%, -50%)
-      scale(0.95);
+    transform: translate(-50%, -50%) scale(0.95);
   }
 
   50% {
     opacity: 0.7;
-    transform:
-      translate(-50%, -50%)
-      scale(1.08);
+    transform: translate(-50%, -50%) scale(1.08);
   }
 }
 
@@ -878,9 +900,7 @@
 @keyframes authLightMove {
   0% {
     opacity: 0;
-    transform:
-      translateX(0)
-      rotate(-12deg);
+    transform: translateX(0) rotate(-12deg);
   }
 
   15% {
@@ -893,9 +913,7 @@
 
   100% {
     opacity: 0;
-    transform:
-      translateX(170vw)
-      rotate(-12deg);
+    transform: translateX(170vw) rotate(-12deg);
   }
 }
 
@@ -1030,31 +1048,71 @@
   }
 }
 
-.auth-google-button {
-  width: 100%;
-  min-height: 44px;
+/* REGISTER FOOTER LINKS */
+
+.auth-switch {
+  margin: 22px 0 0;
+  color: rgba(255, 255, 255, 0.58);
+  font-size: 13px;
+  line-height: 1.5;
+  text-align: left;
+}
+
+.auth-switch a {
+  display: inline-block;
+  color: #fff;
+  text-decoration: none;
+  font-weight: 700;
+  transition:
+    color 180ms ease,
+    transform 180ms ease,
+    text-shadow 180ms ease;
+}
+
+.auth-switch a:hover {
+  color: #e10600;
+  transform: translateX(2px);
+  text-shadow: 0 0 12px rgba(225, 6, 0, 0.45);
+}
+
+.auth-back {
   display: flex;
   justify-content: center;
-  align-items: center;
-  overflow: hidden;
+  text-align: center;
+  margin-top: 10px;
+  text-align: left;
 }
 
-.auth-google-button-area {
+.auth-back a {
+  display: inline-flex;
+  align-items: center;
+  color: rgba(255, 255, 255, 0.42);
+  text-decoration: none;
+  font-family: var(--font-display);
+  font-size: 9px;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  transition:
+    color 180ms ease,
+    transform 180ms ease,
+    text-shadow 180ms ease;
+}
+
+.auth-back a:hover {
+  color: rgba(255, 255, 255, 0.72);
+  transform: translateX(-2px);
+  text-shadow: 0 0 12px rgba(225, 6, 0, 0.35);
+}
+
+@media (max-width: 520px) {
+  .auth-switch {
+    font-size: 11px;
+  }
+
+  .auth-back {
   display: flex;
-  align-items: center;
-  flex: 1;
-  min-width: 0;
-}
-
-.auth-google-render {
-  display: block;
-  min-height: 40px;
-}
-
-.auth-provider-google {
-  overflow: hidden;
-}
-
-.auth-provider-google .auth-provider-icon {
-  flex-shrink: 0;
+  justify-content: center;
+  text-align: center;
+    margin-top: 20px;
+  }
 }

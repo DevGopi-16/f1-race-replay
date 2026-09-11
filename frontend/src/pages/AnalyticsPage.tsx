@@ -1,9 +1,17 @@
-import { useEffect, useMemo, useState } from "react";
+import {
+  useEffect,
+  useMemo,
+  useState,
+  type CSSProperties,
+} from "react";
+
 import { useNavigate } from "react-router-dom";
+
 import PageTransition from "../components/motion/PageTransition";
 import PageContainer from "../components/layout/PageContainer";
 import PageHeader from "../components/layout/PageHeader";
 import SectionLabel from "../components/ui/SectionLabel";
+
 import "../styles/analytics.css";
 
 const API_ORIGIN = "http://127.0.0.1:8000";
@@ -86,6 +94,69 @@ function getTeamLogo(team: string | null) {
   return TEAM_LOGOS[normalized] ?? null;
 }
 
+function getTeamColor(team: string | null) {
+  if (!team) return "rgba(255, 255, 255, 0.45)";
+
+  const normalized = team.toLowerCase().trim();
+
+  if (normalized.includes("ferrari")) {
+    return "#E80020";
+  }
+
+  if (normalized.includes("mercedes")) {
+    return "#00A19C";
+  }
+
+  if (normalized.includes("mclaren")) {
+    return "#FF8000";
+  }
+
+  if (
+    normalized.includes("red bull") ||
+    normalized.includes("redbull")
+  ) {
+    return "#3671C6";
+  }
+
+  if (normalized.includes("aston martin")) {
+    return "#229971";
+  }
+
+  if (normalized.includes("alpine")) {
+    return "#FF87BC";
+  }
+
+  if (normalized.includes("williams")) {
+    return "#64C4FF";
+  }
+
+  if (
+    normalized.includes("racing bulls") ||
+    normalized === "rb" ||
+    normalized.includes(" rb")
+  ) {
+    return "#6692FF";
+  }
+
+  if (
+    normalized.includes("sauber") ||
+    normalized.includes("kick sauber") ||
+    normalized.includes("audi")
+  ) {
+    return "#52E252";
+  }
+
+  if (normalized.includes("haas")) {
+    return "#B6BABD";
+  }
+
+  if (normalized.includes("cadillac")) {
+    return "#D0D0D0";
+  }
+
+  return "rgba(255, 255, 255, 0.45)";
+}
+
 type Standing = {
   code: string;
   name: string;
@@ -99,17 +170,13 @@ type Standing = {
 };
 
 type Performance = {
-  overall?: number | null;
-  score?: number | null;
-  performance_index?: number | null;
-  index?: number | null;
-  rating?: number | null;
-  race_pace?: number | null;
-  qualifying?: number | null;
-  consistency?: number | null;
-  racecraft?: number | null;
-  overtaking?: number | null;
-  tyre_mgmt?: number | null;
+  overall: number;
+  race_pace: number;
+  qualifying: number;
+  consistency: number;
+  racecraft: number;
+  overtaking: number;
+  tyre_mgmt: number | null;
 };
 
 type Racecraft = {
@@ -144,22 +211,24 @@ type AnalyticsDriver = {
   history: HistoryEntry[];
 };
 
+type TeammateBattleDriver = {
+  code: string;
+  name: string;
+  team: string | null;
+  country: string | null;
+  position: number | null;
+  points: number;
+  wins: number;
+  podiums: number;
+  poles: number;
+  fastest_laps: number;
+  avg_finish: number | null;
+};
+
 type TeammateBattle = {
-  driver: {
-    code: string;
-    name: string;
-    points: number;
-    podiums: number;
-    poles: number;
-  };
-  teammate: {
-    code: string;
-    name: string;
-    points: number;
-    podiums: number;
-    poles: number;
-  };
-  leader: string;
+  driver: TeammateBattleDriver;
+  teammate: TeammateBattleDriver;
+  leader: string | null;
 };
 
 type AnalyticsResponse = {
@@ -180,24 +249,24 @@ type AnalyticsResponse = {
 };
 
 function formatNumber(value: number) {
-  return Number.isInteger(value) ? value.toString() : value.toFixed(1);
+  return Number.isInteger(value)
+    ? value.toString()
+    : value.toFixed(1);
+}
+
+function formatAverageFinish(value: number | null) {
+  if (value === null || !Number.isFinite(value)) {
+    return "—";
+  }
+
+  return value.toFixed(1);
 }
 
 function getPerformanceScore(performance: Performance) {
-  const candidates = [
-    performance.overall,
-    performance.score,
-    performance.performance_index,
-    performance.index,
-    performance.rating,
-  ];
-
-  const value = candidates.find(
-    (item): item is number =>
-      typeof item === "number" && Number.isFinite(item),
-  );
-
-  return typeof value === "number" ? value : null;
+  return typeof performance.overall === "number" &&
+    Number.isFinite(performance.overall)
+    ? performance.overall
+    : null;
 }
 
 function DriverImage({
@@ -266,7 +335,9 @@ function TeamLogo({
   }
 
   return (
-    <div className={`analytics-team-logo analytics-team-logo-${size}`}>
+    <div
+      className={`analytics-team-logo analytics-team-logo-${size}`}
+    >
       <img
         src={logo}
         alt={`${team} logo`}
@@ -277,10 +348,205 @@ function TeamLogo({
   );
 }
 
+function getCountryFlag(country: string | null) {
+  if (!country) return "";
+
+  const normalized = country.trim().toLowerCase();
+
+  const flags: Record<string, string> = {
+    uk: "🇬🇧",
+    "united kingdom": "🇬🇧",
+    england: "🇬🇧",
+    monaco: "🇲🇨",
+    italy: "🇮🇹",
+    netherlands: "🇳🇱",
+    australia: "🇦🇺",
+    spain: "🇪🇸",
+    germany: "🇩🇪",
+    france: "🇫🇷",
+    canada: "🇨🇦",
+    japan: "🇯🇵",
+    thailand: "🇹🇭",
+    mexico: "🇲🇽",
+    brazil: "🇧🇷",
+    finland: "🇫🇮",
+    denmark: "🇩🇰",
+    china: "🇨🇳",
+    newzealand: "🇳🇿",
+    "new zealand": "🇳🇿",
+    unitedstates: "🇺🇸",
+    "united states": "🇺🇸",
+    usa: "🇺🇸",
+    switzerland: "🇨🇭",
+    belgium: "🇧🇪",
+    argentina: "🇦🇷",
+    "south africa": "🇿🇦",
+  };
+
+  return flags[normalized] ?? "";
+}
+
+function TeammateStat({
+  left,
+  label,
+  right,
+  leftColor,
+  rightColor,
+}: {
+  left: string | number;
+  label: string;
+  right: string | number;
+  leftColor: string;
+  rightColor: string;
+}) {
+  const leftNumber = Number(left);
+  const rightNumber = Number(right);
+
+  const maxValue = Math.max(
+    Number.isFinite(leftNumber) ? leftNumber : 0,
+    Number.isFinite(rightNumber) ? rightNumber : 0,
+    1,
+  );
+
+  const leftWidth = Number.isFinite(leftNumber)
+    ? Math.max(4, (leftNumber / maxValue) * 100)
+    : 0;
+
+  const rightWidth = Number.isFinite(rightNumber)
+    ? Math.max(4, (rightNumber / maxValue) * 100)
+    : 0;
+
+  return (
+    <div className="teammate-stat-row">
+      <div className="teammate-stat-side teammate-stat-side-left">
+        <strong style={{ color: leftColor }}>
+          {left}
+        </strong>
+
+        <div
+          className="teammate-stat-bar teammate-stat-bar-left"
+          style={{
+            borderColor: `${leftColor}55`,
+          }}
+        >
+          <span
+            style={{
+              width: `${leftWidth}%`,
+              backgroundColor: leftColor,
+              boxShadow: `0 0 14px ${leftColor}66`,
+            }}
+          />
+        </div>
+      </div>
+
+      <span className="teammate-stat-label">
+        {label}
+      </span>
+
+      <div className="teammate-stat-side teammate-stat-side-right">
+        <div
+          className="teammate-stat-bar teammate-stat-bar-right"
+          style={{
+            borderColor: `${rightColor}55`,
+          }}
+        >
+          <span
+            style={{
+              width: `${rightWidth}%`,
+              backgroundColor: rightColor,
+              boxShadow: `0 0 14px ${rightColor}66`,
+            }}
+          />
+        </div>
+
+        <strong style={{ color: rightColor }}>
+          {right}
+        </strong>
+      </div>
+    </div>
+  );
+}
+
+function TeammateDriverHeader({
+  driver,
+  side,
+  leader,
+  onClick,
+}: {
+  driver: TeammateBattleDriver;
+  side: "left" | "right";
+  leader: boolean;
+  onClick: () => void;
+}) {
+  const flag = getCountryFlag(driver.country);
+  const accent = getTeamColor(driver.team);
+
+  const style = {
+    "--teammate-accent": accent,
+  } as CSSProperties;
+
+  return (
+    <button
+      type="button"
+      className={`teammate-driver-header teammate-driver-header-${side}`}
+      style={style}
+      onClick={onClick}
+    >
+      <DriverImage
+        code={driver.code}
+        name={driver.name}
+        size="normal"
+      />
+
+      <div className="teammate-driver-header-copy">
+        <div className="teammate-driver-name-line">
+          {side === "left" && (
+            <span className="teammate-driver-flag">
+              {flag}
+            </span>
+          )}
+
+          <span className="teammate-driver-full-name">
+            {driver.name}
+          </span>
+
+          {side === "right" && (
+            <span className="teammate-driver-flag">
+              {flag}
+            </span>
+          )}
+        </div>
+
+        <div
+          className="teammate-driver-code"
+          style={{ color: accent }}
+        >
+          {driver.code}
+        </div>
+
+        {leader && (
+          <span
+            className="teammate-driver-leader"
+            style={{
+              color: accent,
+              borderColor: `${accent}66`,
+              background: `${accent}14`,
+            }}
+          >
+            LEADER
+          </span>
+        )}
+      </div>
+    </button>
+  );
+}
+
 export default function AnalyticsPage() {
   const navigate = useNavigate();
 
-  const [data, setData] = useState<AnalyticsResponse | null>(null);
+  const [data, setData] =
+    useState<AnalyticsResponse | null>(null);
+
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
 
@@ -302,7 +568,8 @@ export default function AnalyticsPage() {
           );
         }
 
-        const payload = (await response.json()) as AnalyticsResponse;
+        const payload =
+          (await response.json()) as AnalyticsResponse;
 
         if (!cancelled) {
           setData(payload);
@@ -338,8 +605,11 @@ export default function AnalyticsPage() {
         score: getPerformanceScore(driver.performance),
       }))
       .filter(
-        (driver): driver is AnalyticsDriver & { score: number } =>
-          driver.score !== null,
+        (
+          driver,
+        ): driver is AnalyticsDriver & {
+          score: number;
+        } => driver.score !== null,
       )
       .sort((a, b) => b.score - a.score);
   }, [data]);
@@ -361,7 +631,9 @@ export default function AnalyticsPage() {
 
     return Math.max(
       ...journeyDrivers.flatMap((driver) =>
-        driver.history.map((item) => item.cumulative_points ?? 0),
+        driver.history.map(
+          (item) => item.cumulative_points ?? 0,
+        ),
       ),
       1,
     );
@@ -376,8 +648,12 @@ export default function AnalyticsPage() {
               <span className="analytics-loading-kicker">
                 F1 RACE REPLAY
               </span>
+
               <div className="analytics-loader" />
-              <span>Loading season analytics...</span>
+
+              <span>
+                Loading season analytics...
+              </span>
             </div>
           </div>
         </PageContainer>
@@ -391,7 +667,11 @@ export default function AnalyticsPage() {
         <PageContainer>
           <div className="analytics-error">
             <span>ANALYTICS</span>
-            <h2>Unable to load season data.</h2>
+
+            <h2>
+              Unable to load season data.
+            </h2>
+
             <p>
               {error || "No analytics data available."}
             </p>
@@ -416,7 +696,11 @@ export default function AnalyticsPage() {
               <span className="analytics-stat-label">
                 Drivers
               </span>
-              <strong>{data.overview.drivers}</strong>
+
+              <strong>
+                {data.overview.drivers}
+              </strong>
+
               <span className="analytics-stat-meta">
                 Championship field
               </span>
@@ -426,9 +710,13 @@ export default function AnalyticsPage() {
               <span className="analytics-stat-label">
                 Total Points
               </span>
+
               <strong>
-                {formatNumber(data.overview.total_points)}
+                {formatNumber(
+                  data.overview.total_points,
+                )}
               </strong>
+
               <span className="analytics-stat-meta">
                 Season points scored
               </span>
@@ -438,7 +726,11 @@ export default function AnalyticsPage() {
               <span className="analytics-stat-label">
                 Wins
               </span>
-              <strong>{data.overview.total_wins}</strong>
+
+              <strong>
+                {data.overview.total_wins}
+              </strong>
+
               <span className="analytics-stat-meta">
                 Race victories
               </span>
@@ -448,7 +740,11 @@ export default function AnalyticsPage() {
               <span className="analytics-stat-label">
                 Podiums
               </span>
-              <strong>{data.overview.total_podiums}</strong>
+
+              <strong>
+                {data.overview.total_podiums}
+              </strong>
+
               <span className="analytics-stat-meta">
                 Top-three finishes
               </span>
@@ -458,7 +754,11 @@ export default function AnalyticsPage() {
               <span className="analytics-stat-label">
                 Poles
               </span>
-              <strong>{data.overview.total_poles}</strong>
+
+              <strong>
+                {data.overview.total_poles}
+              </strong>
+
               <span className="analytics-stat-meta">
                 Pole positions
               </span>
@@ -473,6 +773,7 @@ export default function AnalyticsPage() {
             <div className="analytics-section-heading">
               <div>
                 <h2>Driver standings.</h2>
+
                 <p>
                   The championship picture after Round{" "}
                   {data.meta.round ?? "—"}.
@@ -500,7 +801,9 @@ export default function AnalyticsPage() {
                       key={driver.code}
                       className="analytics-driver-row"
                       onClick={() =>
-                        navigate(`/drivers/${driver.code}`)
+                        navigate(
+                          `/drivers/${driver.code}`,
+                        )
                       }
                       tabIndex={0}
                       role="link"
@@ -510,6 +813,7 @@ export default function AnalyticsPage() {
                           event.key === " "
                         ) {
                           event.preventDefault();
+
                           navigate(
                             `/drivers/${driver.code}`,
                           );
@@ -529,8 +833,13 @@ export default function AnalyticsPage() {
                           />
 
                           <div className="analytics-driver-identity">
-                            <span>{driver.code}</span>
-                            <strong>{driver.name}</strong>
+                            <span>
+                              {driver.code}
+                            </span>
+
+                            <strong>
+                              {driver.name}
+                            </strong>
                           </div>
                         </div>
                       </td>
@@ -541,6 +850,7 @@ export default function AnalyticsPage() {
                             team={driver.team}
                             size="normal"
                           />
+
                           <span>
                             {driver.team || "—"}
                           </span>
@@ -552,7 +862,9 @@ export default function AnalyticsPage() {
                       </td>
 
                       <td>{driver.wins}</td>
+
                       <td>{driver.podiums}</td>
+
                       <td>{driver.poles}</td>
                     </tr>
                   ))}
@@ -569,6 +881,7 @@ export default function AnalyticsPage() {
             <div className="analytics-section-heading">
               <div>
                 <h2>Who&apos;s performing?</h2>
+
                 <p>
                   Composite driver performance based on
                   the existing season model.
@@ -579,112 +892,131 @@ export default function AnalyticsPage() {
             <div className="performance-list">
               {performanceDrivers.length === 0 && (
                 <div className="analytics-empty">
-                  Performance index data is not available yet.
+                  Performance index data is not available
+                  yet.
                 </div>
               )}
 
-              {performanceDrivers.map((driver, index) => {
-                const rank = index + 1;
-                const score = driver.score;
-                const normalizedScore = Math.min(
-                  100,
-                  Math.max(0, score),
-                );
+              {performanceDrivers.map(
+                (driver, index) => {
+                  const rank = index + 1;
+                  const score = driver.score;
 
-                const isTopThree = rank <= 3;
+                  const normalizedScore = Math.min(
+                    100,
+                    Math.max(0, score),
+                  );
 
-                return (
-                  <article
-                    className={[
-                      "performance-row",
-                      isTopThree
-                        ? "performance-row-top"
-                        : "",
-                      rank === 1
-                        ? "performance-row-p1"
-                        : "",
-                      rank === 2
-                        ? "performance-row-p2"
-                        : "",
-                      rank === 3
-                        ? "performance-row-p3"
-                        : "",
-                    ]
-                      .filter(Boolean)
-                      .join(" ")}
-                    key={driver.code}
-                    onClick={() =>
-                      navigate(`/drivers/${driver.code}`)
-                    }
-                  >
-                    <div className="performance-rank-number">
-                      {String(rank).padStart(2, "0")}
-                    </div>
+                  const isTopThree = rank <= 3;
 
-                    <div className="performance-driver">
-                      <DriverImage
-                        code={driver.code}
-                        name={driver.name}
-                        size={
-                          isTopThree
-                            ? "normal"
-                            : "small"
-                        }
-                      />
+                  return (
+                    <article
+                      className={[
+                        "performance-row",
+                        isTopThree
+                          ? "performance-row-top"
+                          : "",
+                        rank === 1
+                          ? "performance-row-p1"
+                          : "",
+                        rank === 2
+                          ? "performance-row-p2"
+                          : "",
+                        rank === 3
+                          ? "performance-row-p3"
+                          : "",
+                      ]
+                        .filter(Boolean)
+                        .join(" ")}
+                      key={driver.code}
+                      onClick={() =>
+                        navigate(
+                          `/drivers/${driver.code}`,
+                        )
+                      }
+                    >
+                      <div className="performance-rank-number">
+                        {String(rank).padStart(2, "0")}
+                      </div>
 
-                      <div className="performance-driver-identity">
-                        <strong>{driver.code}</strong>
+                      <div className="performance-driver">
+                        <DriverImage
+                          code={driver.code}
+                          name={driver.name}
+                          size={
+                            isTopThree
+                              ? "normal"
+                              : "small"
+                          }
+                        />
 
-                        <span>{driver.name}</span>
-
-                        <div className="performance-team">
-                          <TeamLogo
-                            team={driver.team}
-                            size="small"
-                          />
+                        <div className="performance-driver-identity">
+                          <strong>
+                            {driver.code}
+                          </strong>
 
                           <span>
-                            {driver.team ||
-                              "Unknown Team"}
+                            {driver.name}
                           </span>
+
+                          <div className="performance-team">
+                            <TeamLogo
+                              team={driver.team}
+                              size="small"
+                            />
+
+                            <span>
+                              {driver.team ||
+                                "Unknown Team"}
+                            </span>
+                          </div>
                         </div>
                       </div>
-                    </div>
 
-                    <div className="performance-visual">
-                      <div className="performance-bar-header">
-                        <span>PERFORMANCE</span>
-
-                        {isTopThree && (
-                          <span className="performance-status">
-                            {rank === 1
-                              ? "LEADER"
-                              : `P${rank}`}
+                      <div className="performance-visual">
+                        <div className="performance-bar-header">
+                          <span>
+                            PERFORMANCE
                           </span>
-                        )}
-                      </div>
 
-                      <div className="performance-track">
-                        <div
-                          className="performance-track-grid"
-                          aria-hidden="true"
-                        />
+                          {isTopThree && (
+                            <span className="performance-status">
+                              {rank === 1
+                                ? "LEADER"
+                                : `P${rank}`}
+                            </span>
+                          )}
+                        </div>
 
                         <div
-                          className="performance-fill"
+                          className="performance-track"
                           style={{
-                            width: `${normalizedScore}%`,
+                            borderColor: `${getTeamColor(driver.team)}33`,
                           }}
-                        />
-                      </div>
-                    </div>
+                        >
+                          <div
+                            className="performance-track-grid"
+                            aria-hidden="true"
+                          />
 
-                    <strong className="performance-score">
-                      {score.toFixed(1)}
-                    </strong>
-                  </article>
-                );
-              })}
+                          <div
+                            className="performance-fill"
+                            style={{
+                              width: `${normalizedScore}%`,
+                              background: getTeamColor(driver.team),
+                              boxShadow: `0 0 10px ${getTeamColor(driver.team)}55`,
+                            }}
+                          />
+                        </div>
+                      </div>
+
+                      <strong className="performance-score">
+                        {score.toFixed(1)}
+                      </strong>
+                    </article>
+                  );
+                },
+              )}
             </div>
           </section>
 
@@ -696,6 +1028,7 @@ export default function AnalyticsPage() {
             <div className="analytics-section-heading">
               <div>
                 <h2>On-track movement.</h2>
+
                 <p>
                   Overtakes, position movement and
                   pit-stop activity.
@@ -718,6 +1051,7 @@ export default function AnalyticsPage() {
 
                     <div>
                       <strong>{driver.code}</strong>
+
                       <span>{driver.name}</span>
                     </div>
                   </div>
@@ -725,6 +1059,7 @@ export default function AnalyticsPage() {
                   <div className="racecraft-metrics">
                     <div>
                       <span>OVERTAKES</span>
+
                       <strong>
                         {driver.racecraft.overtakes}
                       </strong>
@@ -732,6 +1067,7 @@ export default function AnalyticsPage() {
 
                     <div>
                       <span>GAINED</span>
+
                       <strong
                         className={
                           driver.racecraft
@@ -744,6 +1080,7 @@ export default function AnalyticsPage() {
                           .positions_gained >= 0
                           ? "+"
                           : ""}
+
                         {
                           driver.racecraft
                             .positions_gained
@@ -753,6 +1090,7 @@ export default function AnalyticsPage() {
 
                     <div>
                       <span>LOST</span>
+
                       <strong className="metric-negative">
                         -{driver.racecraft.positions_lost}
                       </strong>
@@ -760,6 +1098,7 @@ export default function AnalyticsPage() {
 
                     <div>
                       <span>PIT STOPS</span>
+
                       <strong>
                         {driver.racecraft.pit_stops}
                       </strong>
@@ -777,7 +1116,8 @@ export default function AnalyticsPage() {
 
             <div className="analytics-section-heading">
               <div>
-                <h2>Inside the garage.</h2>
+                <h2>Head to head.</h2>
+
                 <p>
                   Championship comparison between
                   teammates.
@@ -786,57 +1126,139 @@ export default function AnalyticsPage() {
             </div>
 
             <div className="teammate-grid">
-              {data.teammate_battles.map((battle) => (
-                <article
-                  className="teammate-card"
-                  key={`${battle.driver.code}-${battle.teammate.code}`}
-                >
-                  <div className="teammate-driver">
-                    <DriverImage
-                      code={battle.driver.code}
-                      name={battle.driver.name}
-                      size="large"
-                    />
+              {data.teammate_battles.map((battle) => {
+                const left = battle.driver;
+                const right = battle.teammate;
 
-                    <strong>{battle.driver.code}</strong>
+                const leftColor = getTeamColor(
+                  left.team,
+                );
 
-                    <span>
-                      {formatNumber(
-                        battle.driver.points,
-                      )}{" "}
-                      PTS
-                    </span>
-                  </div>
+                const rightColor = getTeamColor(
+                  right.team,
+                );
 
-                  <div className="teammate-vs">
-                    VS
-                  </div>
+                const leftLeader =
+                  battle.leader === left.code;
 
-                  <div className="teammate-driver teammate-driver-right">
-                    <DriverImage
-                      code={battle.teammate.code}
-                      name={battle.teammate.name}
-                      size="large"
-                    />
+                const rightLeader =
+                  battle.leader === right.code;
 
-                    <strong>
-                      {battle.teammate.code}
-                    </strong>
+                return (
+                  <article
+                    className="teammate-card"
+                    key={`${left.code}-${right.code}`}
+                    style={
+                      {
+                        "--teammate-left-color":
+                          leftColor,
+                        "--teammate-right-color":
+                          rightColor,
+                      } as CSSProperties
+                    }
+                  >
+                    <div className="teammate-card-header">
+                      <TeammateDriverHeader
+                        driver={left}
+                        side="left"
+                        leader={leftLeader}
+                        onClick={() =>
+                          navigate(
+                            `/drivers/${left.code}`,
+                          )
+                        }
+                      />
 
-                    <span>
-                      {formatNumber(
-                        battle.teammate.points,
-                      )}{" "}
-                      PTS
-                    </span>
-                  </div>
+                      <div className="teammate-vs">
+                        VS
+                      </div>
 
-                  <div className="teammate-leader">
-                    LEADER{" "}
-                    <strong>{battle.leader}</strong>
-                  </div>
-                </article>
-              ))}
+                      <TeammateDriverHeader
+                        driver={right}
+                        side="right"
+                        leader={rightLeader}
+                        onClick={() =>
+                          navigate(
+                            `/drivers/${right.code}`,
+                          )
+                        }
+                      />
+                    </div>
+
+                    <div className="teammate-statistics">
+                      <TeammateStat
+                        left={left.position ?? "—"}
+                        label="STANDING"
+                        right={right.position ?? "—"}
+                        leftColor={leftColor}
+                        rightColor={rightColor}
+                      />
+
+                      <TeammateStat
+                        left={formatNumber(
+                          left.points,
+                        )}
+                        label="PTS"
+                        right={formatNumber(
+                          right.points,
+                        )}
+                        leftColor={leftColor}
+                        rightColor={rightColor}
+                      />
+
+                      <TeammateStat
+                        left={left.wins}
+                        label="WINS"
+                        right={right.wins}
+                        leftColor={leftColor}
+                        rightColor={rightColor}
+                      />
+
+                      <TeammateStat
+                        left={left.podiums}
+                        label="PODIUMS"
+                        right={right.podiums}
+                        leftColor={leftColor}
+                        rightColor={rightColor}
+                      />
+
+                      <TeammateStat
+                        left={left.poles}
+                        label="POLES"
+                        right={right.poles}
+                        leftColor={leftColor}
+                        rightColor={rightColor}
+                      />
+
+                      <TeammateStat
+                        left={left.fastest_laps}
+                        label="FASTEST LAPS"
+                        right={right.fastest_laps}
+                        leftColor={leftColor}
+                        rightColor={rightColor}
+                      />
+
+                      <TeammateStat
+                        left={formatAverageFinish(
+                          left.avg_finish,
+                        )}
+                        label="AVG FINISH"
+                        right={formatAverageFinish(
+                          right.avg_finish,
+                        )}
+                        leftColor={leftColor}
+                        rightColor={rightColor}
+                      />
+                    </div>
+                  </article>
+                );
+              })}
+
+              {data.teammate_battles.length === 0 && (
+                <div className="analytics-empty">
+                  No teammate battle data is available.
+                </div>
+              )}
             </div>
           </section>
 
@@ -848,6 +1270,7 @@ export default function AnalyticsPage() {
             <div className="analytics-section-heading">
               <div>
                 <h2>Points progression.</h2>
+
                 <p>
                   Championship points accumulated
                   across the season.
@@ -860,8 +1283,9 @@ export default function AnalyticsPage() {
                 const history = driver.history;
 
                 const latest =
-                  history[history.length - 1]
-                    ?.cumulative_points ?? 0;
+                  history[
+                    history.length - 1
+                  ]?.cumulative_points ?? 0;
 
                 const width =
                   (latest / journeyMaxPoints) * 100;
@@ -879,7 +1303,9 @@ export default function AnalyticsPage() {
                           size="small"
                         />
 
-                        <strong>{driver.code}</strong>
+                        <strong>
+                          {driver.code}
+                        </strong>
                       </div>
 
                       <span>
@@ -887,11 +1313,18 @@ export default function AnalyticsPage() {
                       </span>
                     </div>
 
-                    <div className="journey-track">
+                    <div
+                      className="journey-track"
+                      style={{
+                        borderColor: `${getTeamColor(driver.team)}33`,
+                      }}
+                    >
                       <div
                         className="journey-fill"
                         style={{
                           width: `${width}%`,
+                          background: getTeamColor(driver.team),
+                          boxShadow: `0 0 10px ${getTeamColor(driver.team)}55`,
                         }}
                       />
                     </div>
