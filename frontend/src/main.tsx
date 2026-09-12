@@ -6,7 +6,14 @@ import App from "./app/App";
 import { useAuthStore } from "./features/auth/auth.store";
 
 import "./styles/globals.css";
+import { initializeAppearance } from "./features/auth/appearance";
+
+
 import "./styles/drivers.css";
+
+initializeAppearance();
+
+
 
 
 class F1ErrorBoundary extends React.Component<

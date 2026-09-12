@@ -29,6 +29,9 @@ from typing import Optional
 from starlette.middleware.gzip import GZipMiddleware
 
 from fastapi import FastAPI, HTTPException, Query, Depends, File, UploadFile
+from sqlalchemy.orm import Session
+from src.auth.database import get_db
+from src.auth.dependencies import get_current_user
 from fastapi.responses import FileResponse, JSONResponse, RedirectResponse, HTMLResponse
 from pydantic import BaseModel
 from fastapi.middleware.cors import CORSMiddleware
@@ -63,6 +66,7 @@ from src.auth.database import Base, engine, SessionLocal
 from src.auth.models import User
 from src.auth.replay_history_routes import router as replay_history_router
 from src.auth.replay_history import ReplayHistory
+from src.auth.profile_routes import router as profile_router
 from src.timing_tower import build_timing_tower
 from src.race_control import build_race_control_feed
 from src.minisectors import build_minisectors
@@ -403,6 +407,7 @@ Base.metadata.create_all(bind=engine)
 
 app.include_router(auth_router)
 app.include_router(replay_history_router)
+app.include_router(profile_router)
 
 
 # --- Directory Config & Static Mounts ---
@@ -489,41 +494,240 @@ class UserProfileUpdate(BaseModel):
     favorite_team: Optional[str] = None
 
 @app.get("/auth/profile", summary="Get User Profile Details")
-def get_user_profile(current_user: User = Depends(get_current_active_user)):
-    return {
-        "id": current_user.id,
-        "username": current_user.username,
-        "email": current_user.email,
-        "picture_url": current_user.picture_url,
-        "is_pro": bool(current_user.is_pro),
-        "favorite_driver": current_user.favorite_driver,
-        "favorite_team": current_user.favorite_team,
-        "replays_watched": current_user.replays_watched or 0,
-        "connected_accounts": {
-            "google": current_user.google_id is not None,
-            "discord": current_user.discord_id is not None,
-            "x": current_user.x_id is not None,
-        },
-    }
+def get_user_profile(
+    current_user: User = Depends(get_current_active_user),
+):
+    # Replay history is the source of truth for watched replays.
+    db = SessionLocal()
+    try:
+        histories = (
+            db.query(ReplayHistory)
+            .filter(ReplayHistory.user_id == current_user.id)
+            .all()
+        )
+
+        replays_watched = sum(
+            1
+            for history in histories
+            if history.completed_at is not None
+            or float(history.progress or 0.0) >= 0.999
+        )
+
+        return {
+            "id": current_user.id,
+            "username": current_user.username,
+            "email": current_user.email,
+            "picture_url": current_user.picture_url,
+            "is_pro": bool(current_user.is_pro),
+            "favorite_driver": current_user.favorite_driver,
+            "favorite_team": current_user.favorite_team,
+            "replays_watched": replays_watched,
+            "connected_accounts": {
+                "google": current_user.google_id is not None,
+                "discord": current_user.discord_id is not None,
+                "x": current_user.x_id is not None,
+            },
+        }
+    finally:
+        db.close()
+
 
 @app.put("/auth/profile", summary="Update User Profile Details")
-def update_user_profile(payload: UserProfileUpdate, current_user: User = Depends(get_current_active_user)):
+def update_user_profile(
+    payload: UserProfileUpdate,
+    current_user: User = Depends(get_current_active_user),
+):
     db = SessionLocal()
     try:
         user = db.query(User).filter(User.id == current_user.id).first()
+
         if not user:
             raise HTTPException(status_code=404, detail="User not found")
-            
-        if payload.username:
-            user.username = payload.username
-        if payload.favorite_driver:
-            user.favorite_driver = payload.favorite_driver
-        if payload.favorite_team:
-            user.favorite_team = payload.favorite_team
-        
+
+        if payload.username is not None:
+            username = payload.username.strip()
+
+            if not username:
+                raise HTTPException(
+                    status_code=400,
+                    detail="Username cannot be empty",
+                )
+
+            existing_user = (
+                db.query(User)
+                .filter(
+                    User.username == username,
+                    User.id != current_user.id,
+                )
+                .first()
+            )
+
+            if existing_user:
+                raise HTTPException(
+                    status_code=409,
+                    detail="Username is already taken",
+                )
+
+            user.username = username
+
+        if payload.favorite_driver is not None:
+            user.favorite_driver = (
+                payload.favorite_driver.strip() or None
+            )
+
+        if payload.favorite_team is not None:
+            user.favorite_team = (
+                payload.favorite_team.strip() or None
+            )
+
         db.commit()
         db.refresh(user)
-        return {"message": "Profile updated successfully", "username": user.username}
+
+        return {
+            "message": "Profile updated successfully",
+            "username": user.username,
+        }
+    finally:
+        db.close()
+
+
+@app.get("/auth/profile/season-summary", summary="Get 2026 Season Summary")
+def get_profile_season_summary(
+    current_user: User = Depends(get_current_active_user),
+):
+    db = SessionLocal()
+    try:
+        histories = (
+            db.query(ReplayHistory)
+            .filter(
+                ReplayHistory.user_id == current_user.id,
+                ReplayHistory.year == 2026,
+            )
+            .order_by(ReplayHistory.last_watched_at.desc())
+            .all()
+        )
+
+        total_sessions = len(histories)
+
+        completed_sessions = sum(
+            1
+            for history in histories
+            if history.completed_at is not None
+            or float(history.progress or 0.0) >= 0.999
+        )
+
+        unique_races = len({
+            (history.year, history.round)
+            for history in histories
+        })
+
+        watch_time_seconds = sum(
+            float(history.duration_seconds or 0.0)
+            for history in histories
+        )
+
+        completion_rate = (
+            (completed_sessions / total_sessions) * 100
+            if total_sessions
+            else 0.0
+        )
+
+        # 2026 currently has 24 scheduled Grands Prix.
+        season_progress = min(
+            (unique_races / 24) * 100,
+            100.0,
+        )
+
+        race_watch_times = {}
+
+        for history in histories:
+            race_key = (history.year, history.round)
+            race_watch_times[race_key] = (
+                race_watch_times.get(race_key, 0.0)
+                + float(history.duration_seconds or 0.0)
+            )
+
+        most_watched = None
+
+        if race_watch_times:
+            race_key = max(
+                race_watch_times,
+                key=race_watch_times.get,
+            )
+
+            most_watched = {
+                "year": race_key[0],
+                "round": race_key[1],
+                "watch_time_seconds": race_watch_times[race_key],
+            }
+
+        latest_replay = None
+
+        if histories:
+            latest = histories[0]
+
+            latest_replay = {
+                "year": latest.year,
+                "round": latest.round,
+                "session_type": latest.session_type,
+                "progress": float(latest.progress or 0.0),
+                "last_watched_at": latest.last_watched_at,
+            }
+
+        return {
+            "year": 2026,
+            "total_sessions": total_sessions,
+            "completed_sessions": completed_sessions,
+            "unique_races": unique_races,
+            "watch_time_seconds": watch_time_seconds,
+            "completion_rate": round(completion_rate, 1),
+            "season_progress": round(season_progress, 1),
+            "most_watched": most_watched,
+            "latest_replay": latest_replay,
+        }
+
+    finally:
+        db.close()
+
+
+@app.get("/auth/profile/stats", summary="Get Real Profile Statistics")
+def get_profile_stats(
+    current_user: User = Depends(get_current_active_user),
+):
+    db = SessionLocal()
+    try:
+        histories = (
+            db.query(ReplayHistory)
+            .filter(ReplayHistory.user_id == current_user.id)
+            .all()
+        )
+
+        replays_started = len(histories)
+
+        replays_watched = sum(
+            1
+            for history in histories
+            if history.completed_at is not None
+            or float(history.progress or 0.0) >= 0.999
+        )
+
+        watch_time_seconds = sum(
+            float(history.duration_seconds or 0.0)
+            for history in histories
+        )
+
+        completion_rate = (
+            (replays_watched / replays_started) * 100
+            if replays_started
+            else 0.0
+        )
+
+        return {
+            "replays_watched": replays_watched,
+            "replays_started": replays_started,
+            "watch_time_seconds": watch_time_seconds,
+            "completion_rate": round(completion_rate, 1),
+        }
     finally:
         db.close()
 
@@ -2051,6 +2255,152 @@ async def warm_historical_seasons_cache():
     loop = asyncio.get_event_loop()
     loop.run_in_executor(None, _compute)
 
+
+
+# ============================================================
+# ACHIEVEMENTS
+# Derived entirely from ReplayHistory — no separate table.
+# ============================================================
+
+@app.get("/auth/achievements")
+def get_achievements(
+    db: Session = Depends(get_db),
+    current_user=Depends(get_current_user),
+):
+    histories = (
+        db.query(ReplayHistory)
+        .filter(ReplayHistory.user_id == current_user.id)
+        .all()
+    )
+
+    def is_completed(history):
+        return (
+            history.completed_at is not None
+            or float(history.progress or 0.0) >= 0.999
+        )
+
+    completed = [
+        history
+        for history in histories
+        if is_completed(history)
+    ]
+
+    distinct_races = {
+        (history.year, history.round)
+        for history in histories
+    }
+
+    race_session_types = {}
+
+    for history in histories:
+        race_key = (history.year, history.round)
+
+        race_session_types.setdefault(
+            race_key,
+            set(),
+        ).add(history.session_type)
+
+    race_weekends = sum(
+        1
+        for session_types in race_session_types.values()
+        if len(session_types) >= 2
+    )
+
+    watch_time_seconds = sum(
+        float(history.duration_seconds or 0.0)
+        for history in histories
+    )
+
+    achievements = [
+        {
+            "key": "first_replay",
+            "title": "FIRST REPLAY",
+            "description": "Start your first replay session.",
+            "icon": "play",
+            "progress": min(len(histories), 1),
+            "target": 1,
+            "unlocked": len(histories) >= 1,
+            "progress_label": f"{min(len(histories), 1)} / 1",
+        },
+        {
+            "key": "first_finish",
+            "title": "FIRST FINISH",
+            "description": "Complete your first replay from start to finish.",
+            "icon": "trophy",
+            "progress": min(len(completed), 1),
+            "target": 1,
+            "unlocked": len(completed) >= 1,
+            "progress_label": f"{min(len(completed), 1)} / 1",
+        },
+        {
+            "key": "three_finishes",
+            "title": "THREE FINISHES",
+            "description": "Complete three replay sessions.",
+            "icon": "medal",
+            "progress": min(len(completed), 3),
+            "target": 3,
+            "unlocked": len(completed) >= 3,
+            "progress_label": f"{min(len(completed), 3)} / 3",
+        },
+        {
+            "key": "race_explorer",
+            "title": "RACE EXPLORER",
+            "description": "Watch five different races.",
+            "icon": "flag",
+            "progress": min(len(distinct_races), 5),
+            "target": 5,
+            "unlocked": len(distinct_races) >= 5,
+            "progress_label": f"{min(len(distinct_races), 5)} / 5",
+        },
+        {
+            "key": "time_served",
+            "title": "TIME SERVED",
+            "description": "Spend one hour watching F1 replays.",
+            "icon": "clock",
+            "progress": min(watch_time_seconds, 3600),
+            "target": 3600,
+            "unlocked": watch_time_seconds >= 3600,
+            "progress_label": (
+                f"{int(min(watch_time_seconds, 3600) // 60)} / 60 min"
+            ),
+        },
+        {
+            "key": "replay_addict",
+            "title": "REPLAY ADDICT",
+            "description": "Spend five hours watching F1 replays.",
+            "icon": "flame",
+            "progress": min(watch_time_seconds, 18000),
+            "target": 18000,
+            "unlocked": watch_time_seconds >= 18000,
+            "progress_label": (
+                f"{int(min(watch_time_seconds, 18000) // 60)} / 300 min"
+            ),
+        },
+        {
+            "key": "race_weekend",
+            "title": "RACE WEEKEND",
+            "description": "Watch at least two session types from one race weekend.",
+            "icon": "calendar",
+            "progress": min(race_weekends, 1),
+            "target": 1,
+            "unlocked": race_weekends >= 1,
+            "progress_label": f"{min(race_weekends, 1)} / 1",
+        },
+        {
+            "key": "completionist",
+            "title": "COMPLETIONIST",
+            "description": "Complete ten replay sessions.",
+            "icon": "crown",
+            "progress": min(len(completed), 10),
+            "target": 10,
+            "unlocked": len(completed) >= 10,
+            "progress_label": f"{min(len(completed), 10)} / 10",
+        },
+    ]
+
+    return achievements
+
+
 # React Router SPA fallback.
 #
 # All frontend routes such as:
@@ -2089,4 +2439,3 @@ def react_spa_fallback(path: str):
         )
 
     return FileResponse(index_file)
-

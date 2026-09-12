@@ -422,6 +422,66 @@
   color: #7fd48b;
 }
 
+.profile-password-form {
+  display: grid;
+  gap: 18px;
+}
+
+.profile-password-input {
+  position: relative;
+  display: flex;
+  align-items: center;
+}
+
+.profile-password-input input {
+  width: 100%;
+  padding-right: 48px;
+}
+
+.profile-password-toggle {
+  position: absolute;
+  right: 9px;
+  top: 50%;
+  width: 32px;
+  height: 32px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transform: translateY(-50%);
+  border: 0;
+  border-radius: 7px;
+  background: transparent;
+  color: #666666;
+  cursor: pointer;
+  transition:
+    color 160ms ease,
+    background 160ms ease;
+}
+
+.profile-password-toggle:hover {
+  color: #ffffff;
+  background: rgba(255, 255, 255, 0.06);
+}
+
+.profile-password-toggle:focus-visible {
+  outline: 1px solid rgba(225, 6, 0, 0.7);
+  outline-offset: 2px;
+}
+
+.profile-password-hint {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  color: #666666;
+  font-size: 11px;
+  line-height: 1.5;
+}
+
+.profile-password-hint svg {
+  flex: 0 0 auto;
+  color: #e10600;
+}
+
 .profile-footer {
   display: flex;
   justify-content: space-between;
@@ -535,5 +595,539 @@
 
   .profile-footer {
     flex-direction: column;
+  }
+}
+
+
+/* ============================================================
+   PHASE 6 — ACHIEVEMENTS
+   ============================================================ */
+
+.profile-achievements-section {
+  overflow: hidden;
+}
+
+.profile-achievements-loading {
+  min-height: 120px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  color: #555555;
+  font-size: 10px;
+  font-weight: 800;
+  letter-spacing: 0.16em;
+}
+
+.profile-achievements-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 12px;
+}
+
+.profile-achievement-card {
+  position: relative;
+  min-width: 0;
+  padding: 18px;
+  border: 1px solid rgba(255, 255, 255, 0.055);
+  background:
+    linear-gradient(
+      135deg,
+      rgba(255, 255, 255, 0.035),
+      rgba(0, 0, 0, 0.22)
+    );
+  transition:
+    border-color 180ms ease,
+    transform 180ms ease,
+    background 180ms ease;
+}
+
+.profile-achievement-card:hover {
+  transform: translateY(-2px);
+  border-color: rgba(225, 6, 0, 0.28);
+}
+
+.profile-achievement-card.is-unlocked {
+  border-color: rgba(225, 6, 0, 0.2);
+  background:
+    linear-gradient(
+      135deg,
+      rgba(225, 6, 0, 0.055),
+      rgba(0, 0, 0, 0.24)
+    );
+}
+
+.profile-achievement-card.is-locked {
+  opacity: 0.72;
+}
+
+.profile-achievement-top {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.profile-achievement-icon {
+  width: 42px;
+  height: 42px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  background: rgba(255, 255, 255, 0.025);
+  color: #777777;
+}
+
+.profile-achievement-card.is-unlocked
+  .profile-achievement-icon {
+  color: #e10600;
+  border-color: rgba(225, 6, 0, 0.25);
+  background: rgba(225, 6, 0, 0.08);
+}
+
+.profile-achievement-status {
+  font-size: 8px;
+  font-weight: 900;
+  letter-spacing: 0.16em;
+}
+
+.profile-achievement-status.is-unlocked {
+  color: #e10600;
+}
+
+.profile-achievement-status.is-locked {
+  color: #4d4d4d;
+}
+
+.profile-achievement-body {
+  margin-top: 18px;
+}
+
+.profile-achievement-body strong {
+  display: block;
+  color: #e6e6e6;
+  font-size: 13px;
+  font-weight: 900;
+  letter-spacing: 0.07em;
+}
+
+.profile-achievement-body p {
+  min-height: 38px;
+  margin: 7px 0 0;
+  color: #666666;
+  font-size: 11px;
+  line-height: 1.6;
+}
+
+.profile-achievement-progress {
+  margin-top: 18px;
+}
+
+.profile-achievement-progress-meta {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  margin-bottom: 7px;
+}
+
+.profile-achievement-progress-meta span {
+  color: #444444;
+  font-size: 8px;
+  font-weight: 900;
+  letter-spacing: 0.14em;
+}
+
+.profile-achievement-progress-meta strong {
+  color: #777777;
+  font-size: 9px;
+  font-weight: 800;
+}
+
+.profile-achievement-progress-track {
+  height: 3px;
+  overflow: hidden;
+  background: rgba(255, 255, 255, 0.055);
+}
+
+.profile-achievement-progress-track span {
+  display: block;
+  height: 100%;
+  background: #e10600;
+  transition: width 300ms ease;
+}
+
+.profile-achievement-card.is-locked
+  .profile-achievement-progress-track span {
+  background: #555555;
+}
+
+@media (max-width: 700px) {
+  .profile-achievements-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .profile-achievement-card {
+    padding: 16px;
+  }
+}
+
+/* ============================================================
+   PHASE 7 — 2026 SEASON SUMMARY
+   ============================================================ */
+
+.profile-season-section {
+  overflow: hidden;
+}
+
+.profile-season-summary {
+  position: relative;
+  overflow: hidden;
+  padding: 28px;
+  border: 1px solid rgba(255, 255, 255, 0.07);
+  background:
+    radial-gradient(
+      circle at 100% 0%,
+      rgba(225, 6, 0, 0.12),
+      transparent 42%
+    ),
+    linear-gradient(
+      135deg,
+      rgba(255, 255, 255, 0.025),
+      rgba(255, 255, 255, 0.008)
+    );
+}
+
+.profile-season-summary::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 3px;
+  height: 100%;
+  background: #e10600;
+}
+
+.profile-season-summary-header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 24px;
+}
+
+.profile-season-summary-kicker {
+  margin: 0 0 8px;
+  color: #e10600;
+  font-size: 9px;
+  font-weight: 900;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+}
+
+.profile-season-summary-title {
+  margin: 0;
+  color: #f0f0f0;
+  font-size: 26px;
+  font-weight: 900;
+  letter-spacing: -0.04em;
+  line-height: 1;
+}
+
+.profile-season-summary-year {
+  flex-shrink: 0;
+  color: rgba(255, 255, 255, 0.08);
+  font-size: 52px;
+  font-weight: 900;
+  letter-spacing: -0.08em;
+  line-height: 0.8;
+}
+
+.profile-season-progress {
+  margin-top: 30px;
+}
+
+.profile-season-progress-meta {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  margin-bottom: 9px;
+}
+
+.profile-season-progress-label {
+  color: #5b5b5b;
+  font-size: 8px;
+  font-weight: 900;
+  letter-spacing: 0.17em;
+  text-transform: uppercase;
+}
+
+.profile-season-progress-value {
+  color: #e6e6e6;
+  font-size: 10px;
+  font-weight: 900;
+  letter-spacing: 0.08em;
+}
+
+.profile-season-progress-track {
+  position: relative;
+  width: 100%;
+  height: 5px;
+  overflow: hidden;
+  background: rgba(255, 255, 255, 0.06);
+}
+
+.profile-season-progress-track span {
+  display: block;
+  height: 100%;
+  min-width: 3px;
+  background: #e10600;
+  box-shadow: 0 0 16px rgba(225, 6, 0, 0.35);
+  transition: width 500ms ease;
+}
+
+.profile-season-stats {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  margin-top: 28px;
+  border-top: 1px solid rgba(255, 255, 255, 0.06);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+}
+
+.profile-season-stat {
+  min-width: 0;
+  padding: 20px 18px;
+  border-right: 1px solid rgba(255, 255, 255, 0.06);
+}
+
+.profile-season-stat:first-child {
+  padding-left: 0;
+}
+
+.profile-season-stat:last-child {
+  padding-right: 0;
+  border-right: 0;
+}
+
+.profile-season-stat-value {
+  display: block;
+  color: #e8e8e8;
+  font-size: 25px;
+  font-weight: 900;
+  letter-spacing: -0.04em;
+  line-height: 1;
+}
+
+.profile-season-stat-label {
+  display: block;
+  margin-top: 8px;
+  color: #505050;
+  font-size: 8px;
+  font-weight: 900;
+  letter-spacing: 0.13em;
+  line-height: 1.4;
+  text-transform: uppercase;
+}
+
+.profile-season-highlights {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 12px;
+  margin-top: 12px;
+}
+
+.profile-season-highlight {
+  min-width: 0;
+  padding: 18px;
+  border: 1px solid rgba(255, 255, 255, 0.055);
+  background: rgba(0, 0, 0, 0.16);
+}
+
+.profile-season-highlight-label {
+  margin: 0;
+  color: #4d4d4d;
+  font-size: 8px;
+  font-weight: 900;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+}
+
+.profile-season-highlight-main {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 16px;
+  margin-top: 11px;
+}
+
+.profile-season-highlight-main strong {
+  min-width: 0;
+  overflow: hidden;
+  color: #dedede;
+  font-size: 15px;
+  font-weight: 900;
+  letter-spacing: 0.03em;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.profile-season-highlight-main span {
+  flex-shrink: 0;
+  color: #e10600;
+  font-size: 9px;
+  font-weight: 900;
+  letter-spacing: 0.08em;
+}
+
+.profile-season-highlight-meta {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-top: 7px;
+  color: #505050;
+  font-size: 8px;
+  font-weight: 800;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+}
+
+.profile-season-highlight-meta span {
+  color: #3f3f3f;
+}
+
+.profile-season-summary-loading {
+  min-height: 190px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #4d4d4d;
+  font-size: 9px;
+  font-weight: 900;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+}
+
+@media (max-width: 800px) {
+  .profile-season-stats {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .profile-season-stat:nth-child(2) {
+    border-right: 0;
+  }
+
+  .profile-season-stat:nth-child(-n + 2) {
+    border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+  }
+
+  .profile-season-stat:nth-child(3) {
+    padding-left: 0;
+  }
+
+  .profile-season-stat:nth-child(4) {
+    padding-right: 0;
+  }
+}
+
+@media (max-width: 600px) {
+  .profile-season-summary {
+    padding: 22px 18px;
+  }
+
+  .profile-season-summary-header {
+    gap: 12px;
+  }
+
+  .profile-season-summary-title {
+    font-size: 22px;
+  }
+
+  .profile-season-summary-year {
+    font-size: 38px;
+  }
+
+  .profile-season-stats {
+    grid-template-columns: 1fr 1fr;
+  }
+
+  .profile-season-stat {
+    padding: 17px 12px;
+  }
+
+  .profile-season-stat-value {
+    font-size: 21px;
+  }
+
+  .profile-season-highlights {
+    grid-template-columns: 1fr;
+  }
+}
+
+/* =========================================================
+   PHASE 9 — ACCOUNT SETTINGS
+========================================================= */
+
+.profile-field select {
+  width: 100%;
+  min-height: 48px;
+  padding: 0 14px;
+  border: 1px solid rgba(255, 255, 255, 0.10);
+  border-radius: 10px;
+  background: rgba(255, 255, 255, 0.035);
+  color: inherit;
+  font: inherit;
+  outline: none;
+  cursor: pointer;
+}
+
+.profile-field select:focus {
+  border-color: rgba(225, 6, 0, 0.65);
+  box-shadow: 0 0 0 3px rgba(225, 6, 0, 0.10);
+}
+
+.profile-field select option {
+  background: #111;
+  color: #fff;
+}
+
+.profile-settings-toggle {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 24px;
+  padding: 16px 18px;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 12px;
+  background: rgba(255, 255, 255, 0.025);
+}
+
+.profile-settings-toggle > span {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+}
+
+.profile-settings-toggle strong {
+  font-size: 12px;
+  letter-spacing: 0.08em;
+}
+
+.profile-settings-toggle small {
+  opacity: 0.58;
+  line-height: 1.5;
+}
+
+.profile-settings-toggle input[type="checkbox"] {
+  width: 20px;
+  height: 20px;
+  flex: 0 0 auto;
+  accent-color: #e10600;
+  cursor: pointer;
+}
+
+@media (max-width: 700px) {
+  .profile-settings-toggle {
+    align-items: flex-start;
   }
 }

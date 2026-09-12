@@ -198,3 +198,122 @@
     --duration-page: 0ms;
   }
 }
+
+/* =========================================================
+   APPEARANCE THEMES
+========================================================= */
+
+:root,
+:root[data-theme="dark"] {
+  color-scheme: dark;
+}
+
+:root[data-theme="light"] {
+  color-scheme: light;
+
+  --color-black: #ffffff;
+  --color-bg: #f4f4f5;
+  --color-bg-soft: #eeeeef;
+  --color-bg-elevated: #ffffff;
+  --color-bg-hover: #e7e7e9;
+
+  --color-white: #111111;
+  --color-white-90: rgba(17, 17, 17, 0.90);
+  --color-white-75: rgba(17, 17, 17, 0.75);
+  --color-white-60: rgba(17, 17, 17, 0.60);
+  --color-white-45: rgba(17, 17, 17, 0.45);
+  --color-white-30: rgba(17, 17, 17, 0.30);
+  --color-white-15: rgba(17, 17, 17, 0.15);
+  --color-white-08: rgba(17, 17, 17, 0.08);
+  --color-white-05: rgba(17, 17, 17, 0.05);
+
+  --glass-bg: rgba(255, 255, 255, 0.72);
+  --glass-bg-heavy: rgba(255, 255, 255, 0.88);
+  --glass-border: rgba(17, 17, 17, 0.10);
+
+  --shadow-sm:
+    0 4px 16px rgba(0, 0, 0, 0.08);
+
+  --shadow-md:
+    0 12px 40px rgba(0, 0, 0, 0.12);
+
+  --shadow-lg:
+    0 24px 80px rgba(0, 0, 0, 0.16);
+}
+
+:root[data-theme="dark"] body {
+  background:
+    radial-gradient(
+      ellipse 80% 45% at 50% -10%,
+      var(--color-accent-soft),
+      transparent 65%
+    ),
+    var(--color-bg);
+}
+
+:root[data-theme="light"] body {
+  background:
+    radial-gradient(
+      ellipse 80% 45% at 50% -10%,
+      var(--color-accent-soft),
+      transparent 65%
+    ),
+    var(--color-bg);
+}
+
+/* =========================================================
+   APPEARANCE OVERRIDES
+   ========================================================= */
+
+:root,
+:root[data-theme="dark"] {
+  color-scheme: dark;
+}
+
+:root[data-theme="light"] {
+  color-scheme: light;
+
+  --color-black: #ffffff;
+  --color-bg: #f4f4f5;
+  --color-bg-soft: #eeeeef;
+  --color-bg-elevated: #ffffff;
+  --color-bg-hover: #e7e7e9;
+
+  --color-white: #111111;
+  --color-white-90: rgba(17, 17, 17, 0.90);
+  --color-white-75: rgba(17, 17, 17, 0.75);
+  --color-white-60: rgba(17, 17, 17, 0.60);
+  --color-white-45: rgba(17, 17, 17, 0.45);
+  --color-white-30: rgba(17, 17, 17, 0.30);
+  --color-white-15: rgba(17, 17, 17, 0.15);
+  --color-white-08: rgba(17, 17, 17, 0.08);
+  --color-white-05: rgba(17, 17, 17, 0.05);
+
+  --glass-bg: rgba(255, 255, 255, 0.72);
+  --glass-bg-heavy: rgba(255, 255, 255, 0.88);
+  --glass-border: rgba(17, 17, 17, 0.10);
+
+  --shadow-sm: 0 4px 16px rgba(0, 0, 0, 0.08);
+  --shadow-md: 0 12px 40px rgba(0, 0, 0, 0.12);
+  --shadow-lg: 0 24px 80px rgba(0, 0, 0, 0.16);
+}
+
+:root[data-theme="dark"] body {
+  background:
+    radial-gradient(
+      ellipse 80% 45% at 50% -10%,
+      var(--color-accent-soft),
+      transparent 65%
+    ),
+    var(--color-bg);
+}
+
+:root[data-theme="light"] body {
+  background:
+    radial-gradient(
+      ellipse 80% 45% at 50% -10%,
+      var(--color-accent-soft),
+      transparent 65%
+    ),
+    var(--color-bg);
+}
