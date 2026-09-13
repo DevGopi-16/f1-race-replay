@@ -29,6 +29,25 @@
   --color-danger: #ff4d4d;
   --color-info: #4da6ff;
 
+  /* SEMANTIC SURFACES */
+  --surface-page: var(--color-bg);
+  --surface-header: rgba(20, 20, 20, 0.78);
+  --surface-section: var(--color-bg-soft);
+  --surface-card: var(--color-bg-elevated);
+  --surface-card-elevated: #141414;
+  --surface-input: var(--color-bg);
+  --surface-hover: var(--color-bg-hover);
+
+  /* SEMANTIC TEXT */
+  --text-primary: #ffffff;
+  --text-secondary: var(--color-white-60);
+  --text-muted: var(--color-white-45);
+  --text-faint: var(--color-white-30);
+
+  --border-default: rgba(255, 255, 255, 0.10);
+  --border-strong: rgba(255, 255, 255, 0.18);
+  --shadow-card: 0 24px 70px rgba(0, 0, 0, 0.38);
+
   /* TYPOGRAPHY */
 
   --font-display:
@@ -230,6 +249,25 @@
   --glass-bg: rgba(255, 255, 255, 0.72);
   --glass-bg-heavy: rgba(255, 255, 255, 0.88);
   --glass-border: rgba(17, 17, 17, 0.10);
+
+  /* SEMANTIC SURFACES - LIGHT THEME */
+  --surface-page: #f4f4f5;
+  --surface-header: rgba(255, 255, 255, 0.85);
+  --surface-section: #eeeeef;
+  --surface-card: #ffffff;
+  --surface-card-elevated: #ffffff;
+  --surface-input: #ffffff;
+  --surface-hover: #e7e7e9;
+
+  /* SEMANTIC TEXT - LIGHT THEME */
+  --text-primary: #111111;
+  --text-secondary: rgba(17, 17, 17, 0.60);
+  --text-muted: rgba(17, 17, 17, 0.45);
+  --text-faint: rgba(17, 17, 17, 0.30);
+
+  --border-default: rgba(17, 17, 17, 0.10);
+  --border-strong: rgba(17, 17, 17, 0.18);
+  --shadow-card: 0 12px 32px rgba(17, 17, 17, 0.12);
 
   --shadow-sm:
     0 4px 16px rgba(0, 0, 0, 0.08);

@@ -10,6 +10,7 @@ import PageTransition from "../components/motion/PageTransition";
 import Reveal from "../components/motion/Reveal";
 
 import HomePage from "../features/home/HomePage";
+import ConstructorsPage from "../features/constructors/ConstructorsPage";
 import ReplayPage from "../features/replay/ReplayPage";
 
 import LoginPage from "../features/auth/LoginPage";
@@ -150,13 +151,7 @@ export function AppRouter() {
 
         <Route
           path="/constructors"
-          element={
-            <FoundationPage
-              eyebrow="04 / Teams"
-              title="Constructors"
-              description="Compare constructor performance, strategy and season progression."
-            />
-          }
+          element={<ConstructorsPage />}
         />
 
         <Route

@@ -9,7 +9,7 @@
       rgba(225, 6, 0, 0.09),
       transparent 34%
     ),
-    #070707;
+    var(--color-bg);
 }
 
 .profile-page-glow {
@@ -40,7 +40,7 @@
 .profile-section-label,
 .profile-card-label {
   display: block;
-  color: #e10600;
+  color: var(--color-accent);
   font-size: 11px;
   font-weight: 700;
   letter-spacing: 0.18em;
@@ -56,21 +56,21 @@
 }
 
 .profile-header h1 span {
-  color: #e10600;
+  color: var(--color-accent);
 }
 
 .profile-header p {
   max-width: 620px;
   margin: 0;
-  color: #858585;
+  color: var(--color-white-60);
   font-size: 14px;
   line-height: 1.7;
 }
 
 .profile-card,
 .profile-section {
-  border: 1px solid rgba(255, 255, 255, 0.08);
-  background: rgba(17, 17, 17, 0.78);
+  border: var(--border-subtle);
+  background: var(--glass-bg);
   backdrop-filter: blur(18px);
 }
 
@@ -104,7 +104,7 @@
   overflow: hidden;
   border-radius: 50%;
   border: 2px solid rgba(225, 6, 0, 0.7);
-  background: #151515;
+  background: var(--color-bg-hover);
   box-shadow: 0 0 0 5px rgba(225, 6, 0, 0.06);
 }
 
@@ -115,7 +115,7 @@
 }
 
 .profile-avatar span {
-  color: #ffffff;
+  color: var(--color-white);
   font-size: 27px;
   font-weight: 800;
 }
@@ -126,7 +126,7 @@
 
 .profile-identity h2 {
   margin: 5px 0 8px;
-  color: #ffffff;
+  color: var(--color-white);
   font-size: 28px;
   line-height: 1.1;
   overflow-wrap: anywhere;
@@ -136,7 +136,7 @@
   display: flex;
   align-items: center;
   gap: 7px;
-  color: #777777;
+  color: var(--color-white-60);
   font-size: 13px;
   overflow-wrap: anywhere;
 }
@@ -149,7 +149,7 @@
   padding: 9px 12px;
   border: 1px solid rgba(225, 6, 0, 0.25);
   background: rgba(225, 6, 0, 0.06);
-  color: #e10600;
+  color: var(--color-accent);
   font-size: 11px;
   font-weight: 800;
   letter-spacing: 0.12em;
@@ -171,12 +171,12 @@
 
 .profile-section-heading > svg {
   flex: 0 0 auto;
-  color: #555555;
+  color: var(--color-white-45);
 }
 
 .profile-section-heading h2 {
   margin: 6px 0 0;
-  color: #ffffff;
+  color: var(--color-white);
   font-size: 23px;
   letter-spacing: -0.02em;
 }
@@ -191,14 +191,14 @@
 .profile-stat-card,
 .profile-preference-card {
   padding: 20px;
-  border: 1px solid rgba(255, 255, 255, 0.06);
+  border: var(--border-subtle);
   background: rgba(0, 0, 0, 0.22);
 }
 
 .profile-stat-card > span,
 .profile-preference-card > span {
   display: block;
-  color: #6f6f6f;
+  color: var(--color-white-45);
   font-size: 10px;
   font-weight: 700;
   letter-spacing: 0.15em;
@@ -207,7 +207,7 @@
 .profile-stat-card strong {
   display: block;
   margin-top: 8px;
-  color: #ffffff;
+  color: var(--color-white);
   font-size: 30px;
   line-height: 1;
 }
@@ -215,14 +215,14 @@
 .profile-stat-card small {
   display: block;
   margin-top: 10px;
-  color: #5f5f5f;
+  color: var(--color-white-45);
   font-size: 11px;
 }
 
 .profile-preference-card strong {
   display: block;
   margin-top: 10px;
-  color: #ffffff;
+  color: var(--color-white);
   font-size: 19px;
 }
 
@@ -237,7 +237,7 @@
   justify-content: space-between;
   gap: 18px;
   padding: 15px 16px;
-  border: 1px solid rgba(255, 255, 255, 0.06);
+  border: var(--border-subtle);
   background: rgba(0, 0, 0, 0.2);
 }
 
@@ -245,7 +245,7 @@
   display: flex;
   align-items: center;
   gap: 11px;
-  color: #dddddd;
+  color: var(--color-white-75);
   font-size: 14px;
   font-weight: 600;
 }
@@ -258,8 +258,8 @@
   justify-content: center;
   border: 1px solid rgba(255, 255, 255, 0.1);
   border-radius: 7px;
-  color: #ffffff;
-  background: #161616;
+  color: var(--color-white);
+  background: var(--color-bg-hover);
   font-size: 12px;
   font-weight: 800;
 }
@@ -268,14 +268,14 @@
   display: flex;
   align-items: center;
   gap: 6px;
-  color: #666666;
+  color: var(--color-white-45);
   font-size: 10px;
   font-weight: 800;
   letter-spacing: 0.08em;
 }
 
 .profile-connection-status.is-connected {
-  color: #7fd48b;
+  color: var(--color-success);
 }
 
 .profile-form {
@@ -295,7 +295,7 @@
 }
 
 .profile-field > span {
-  color: #8b8b8b;
+  color: var(--color-white-60);
   font-size: 10px;
   font-weight: 700;
   letter-spacing: 0.14em;
@@ -308,8 +308,8 @@
   border: 1px solid rgba(255, 255, 255, 0.09);
   outline: none;
   border-radius: 8px;
-  background: #0c0c0c;
-  color: #ffffff;
+  background: var(--color-bg);
+  color: var(--color-white);
   font: inherit;
   transition:
     border-color 160ms ease,
@@ -318,16 +318,16 @@
 
 .profile-field input:focus {
   border-color: rgba(225, 6, 0, 0.65);
-  background: #101010;
+  background: var(--color-bg-elevated);
 }
 
 .profile-field input:disabled {
-  color: #666666;
+  color: var(--color-white-45);
   cursor: not-allowed;
 }
 
 .profile-field small {
-  color: #555555;
+  color: var(--color-white-45);
   font-size: 11px;
   line-height: 1.5;
 }
@@ -344,13 +344,13 @@
 .profile-form-error {
   border: 1px solid rgba(225, 6, 0, 0.25);
   background: rgba(225, 6, 0, 0.06);
-  color: #ff7770;
+  color: var(--color-danger);
 }
 
 .profile-form-success {
   border: 1px solid rgba(100, 190, 115, 0.2);
   background: rgba(100, 190, 115, 0.06);
-  color: #8ee59d;
+  color: var(--color-success);
 }
 
 .profile-form-actions {
@@ -368,8 +368,8 @@
   padding: 0 20px;
   border: 0;
   border-radius: 7px;
-  background: #e10600;
-  color: #ffffff;
+  background: var(--color-accent);
+  color: var(--color-white);
   font: inherit;
   font-size: 11px;
   font-weight: 800;
@@ -382,7 +382,7 @@
 }
 
 .profile-save-button:hover:not(:disabled) {
-  background: #ff180f;
+  background: var(--color-accent-hover);
   transform: translateY(-1px);
 }
 
@@ -401,25 +401,25 @@
   justify-content: space-between;
   gap: 20px;
   padding: 18px;
-  border: 1px solid rgba(255, 255, 255, 0.06);
+  border: var(--border-subtle);
   background: rgba(0, 0, 0, 0.2);
 }
 
 .profile-security-card strong {
-  color: #dddddd;
+  color: var(--color-white-75);
   font-size: 14px;
 }
 
 .profile-security-card p {
   margin: 5px 0 0;
-  color: #666666;
+  color: var(--color-white-45);
   font-size: 12px;
   line-height: 1.6;
 }
 
 .profile-security-card > svg {
   flex: 0 0 auto;
-  color: #7fd48b;
+  color: var(--color-success);
 }
 
 .profile-password-form {
@@ -451,7 +451,7 @@
   border: 0;
   border-radius: 7px;
   background: transparent;
-  color: #666666;
+  color: var(--color-white-45);
   cursor: pointer;
   transition:
     color 160ms ease,
@@ -459,7 +459,7 @@
 }
 
 .profile-password-toggle:hover {
-  color: #ffffff;
+  color: var(--color-white);
   background: rgba(255, 255, 255, 0.06);
 }
 
@@ -472,14 +472,14 @@
   display: flex;
   align-items: center;
   gap: 8px;
-  color: #666666;
+  color: var(--color-white-45);
   font-size: 11px;
   line-height: 1.5;
 }
 
 .profile-password-hint svg {
   flex: 0 0 auto;
-  color: #e10600;
+  color: var(--color-accent);
 }
 
 .profile-footer {
@@ -487,7 +487,7 @@
   justify-content: space-between;
   gap: 20px;
   padding: 18px 2px 0;
-  color: #3f3f3f;
+  color: var(--color-white-30);
   font-size: 9px;
   font-weight: 700;
   letter-spacing: 0.16em;
@@ -501,36 +501,36 @@
   margin: 12vh auto 0;
   padding: 42px 30px;
   text-align: center;
-  border: 1px solid rgba(255, 255, 255, 0.08);
+  border: var(--border-subtle);
   border-radius: 16px;
-  background: rgba(17, 17, 17, 0.8);
+  background: var(--glass-bg-heavy);
   backdrop-filter: blur(18px);
 }
 
 .profile-loading h1,
 .profile-error-state h1 {
   margin: 12px 0 8px;
-  color: #ffffff;
+  color: var(--color-white);
   font-size: 25px;
 }
 
 .profile-loading p,
 .profile-error-state p {
   margin: 0;
-  color: #707070;
+  color: var(--color-white-60);
   font-size: 13px;
   line-height: 1.6;
 }
 
 .profile-loading > .profile-spinner {
   margin: 0 auto 20px;
-  color: #e10600;
+  color: var(--color-accent);
   animation: profile-spin 800ms linear infinite;
 }
 
 .profile-error-state > svg {
   margin-bottom: 18px;
-  color: #e10600;
+  color: var(--color-accent);
 }
 
 @keyframes profile-spin {
@@ -613,7 +613,7 @@
   align-items: center;
   justify-content: center;
   gap: 10px;
-  color: #555555;
+  color: var(--color-white-45);
   font-size: 10px;
   font-weight: 800;
   letter-spacing: 0.16em;
@@ -629,11 +629,11 @@
   position: relative;
   min-width: 0;
   padding: 18px;
-  border: 1px solid rgba(255, 255, 255, 0.055);
+  border: 1px solid var(--color-white-08);
   background:
     linear-gradient(
       135deg,
-      rgba(255, 255, 255, 0.035),
+      var(--color-white-05),
       rgba(0, 0, 0, 0.22)
     );
   transition:
@@ -674,14 +674,14 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  border: 1px solid rgba(255, 255, 255, 0.08);
-  background: rgba(255, 255, 255, 0.025);
-  color: #777777;
+  border: 1px solid var(--color-white-08);
+  background: var(--color-white-05);
+  color: var(--color-white-60);
 }
 
 .profile-achievement-card.is-unlocked
   .profile-achievement-icon {
-  color: #e10600;
+  color: var(--color-accent);
   border-color: rgba(225, 6, 0, 0.25);
   background: rgba(225, 6, 0, 0.08);
 }
@@ -693,11 +693,11 @@
 }
 
 .profile-achievement-status.is-unlocked {
-  color: #e10600;
+  color: var(--color-accent);
 }
 
 .profile-achievement-status.is-locked {
-  color: #4d4d4d;
+  color: var(--color-white-45);
 }
 
 .profile-achievement-body {
@@ -706,7 +706,7 @@
 
 .profile-achievement-body strong {
   display: block;
-  color: #e6e6e6;
+  color: var(--color-white-90);
   font-size: 13px;
   font-weight: 900;
   letter-spacing: 0.07em;
@@ -715,7 +715,7 @@
 .profile-achievement-body p {
   min-height: 38px;
   margin: 7px 0 0;
-  color: #666666;
+  color: var(--color-white-45);
   font-size: 11px;
   line-height: 1.6;
 }
@@ -733,14 +733,14 @@
 }
 
 .profile-achievement-progress-meta span {
-  color: #444444;
+  color: var(--color-white-45);
   font-size: 8px;
   font-weight: 900;
   letter-spacing: 0.14em;
 }
 
 .profile-achievement-progress-meta strong {
-  color: #777777;
+  color: var(--color-white-60);
   font-size: 9px;
   font-weight: 800;
 }
@@ -748,19 +748,19 @@
 .profile-achievement-progress-track {
   height: 3px;
   overflow: hidden;
-  background: rgba(255, 255, 255, 0.055);
+  background: var(--color-white-08);
 }
 
 .profile-achievement-progress-track span {
   display: block;
   height: 100%;
-  background: #e10600;
+  background: var(--color-accent);
   transition: width 300ms ease;
 }
 
 .profile-achievement-card.is-locked
   .profile-achievement-progress-track span {
-  background: #555555;
+  background: var(--color-white-45);
 }
 
 @media (max-width: 700px) {
@@ -785,7 +785,7 @@
   position: relative;
   overflow: hidden;
   padding: 28px;
-  border: 1px solid rgba(255, 255, 255, 0.07);
+  border: var(--border-subtle);
   background:
     radial-gradient(
       circle at 100% 0%,
@@ -794,8 +794,8 @@
     ),
     linear-gradient(
       135deg,
-      rgba(255, 255, 255, 0.025),
-      rgba(255, 255, 255, 0.008)
+      var(--color-white-05),
+      var(--color-white-08)
     );
 }
 
@@ -806,7 +806,7 @@
   left: 0;
   width: 3px;
   height: 100%;
-  background: #e10600;
+  background: var(--color-accent);
 }
 
 .profile-season-summary-header {
@@ -818,7 +818,7 @@
 
 .profile-season-summary-kicker {
   margin: 0 0 8px;
-  color: #e10600;
+  color: var(--color-accent);
   font-size: 9px;
   font-weight: 900;
   letter-spacing: 0.2em;
@@ -827,7 +827,7 @@
 
 .profile-season-summary-title {
   margin: 0;
-  color: #f0f0f0;
+  color: var(--color-white-90);
   font-size: 26px;
   font-weight: 900;
   letter-spacing: -0.04em;
@@ -836,7 +836,7 @@
 
 .profile-season-summary-year {
   flex-shrink: 0;
-  color: rgba(255, 255, 255, 0.08);
+  color: var(--color-white-15);
   font-size: 52px;
   font-weight: 900;
   letter-spacing: -0.08em;
@@ -856,7 +856,7 @@
 }
 
 .profile-season-progress-label {
-  color: #5b5b5b;
+  color: var(--color-white-45);
   font-size: 8px;
   font-weight: 900;
   letter-spacing: 0.17em;
@@ -864,7 +864,7 @@
 }
 
 .profile-season-progress-value {
-  color: #e6e6e6;
+  color: var(--color-white-90);
   font-size: 10px;
   font-weight: 900;
   letter-spacing: 0.08em;
@@ -875,14 +875,14 @@
   width: 100%;
   height: 5px;
   overflow: hidden;
-  background: rgba(255, 255, 255, 0.06);
+  background: var(--color-white-08);
 }
 
 .profile-season-progress-track span {
   display: block;
   height: 100%;
   min-width: 3px;
-  background: #e10600;
+  background: var(--color-accent);
   box-shadow: 0 0 16px rgba(225, 6, 0, 0.35);
   transition: width 500ms ease;
 }
@@ -891,8 +891,8 @@
   display: grid;
   grid-template-columns: repeat(4, minmax(0, 1fr));
   margin-top: 28px;
-  border-top: 1px solid rgba(255, 255, 255, 0.06);
-  border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+  border-top: 1px solid var(--color-white-08);
+  border-bottom: 1px solid var(--color-white-08);
 }
 
 .profile-season-stat {
@@ -912,7 +912,7 @@
 
 .profile-season-stat-value {
   display: block;
-  color: #e8e8e8;
+  color: var(--color-white-90);
   font-size: 25px;
   font-weight: 900;
   letter-spacing: -0.04em;
@@ -922,7 +922,7 @@
 .profile-season-stat-label {
   display: block;
   margin-top: 8px;
-  color: #505050;
+  color: var(--color-white-45);
   font-size: 8px;
   font-weight: 900;
   letter-spacing: 0.13em;
@@ -946,7 +946,7 @@
 
 .profile-season-highlight-label {
   margin: 0;
-  color: #4d4d4d;
+  color: var(--color-white-45);
   font-size: 8px;
   font-weight: 900;
   letter-spacing: 0.16em;
@@ -964,7 +964,7 @@
 .profile-season-highlight-main strong {
   min-width: 0;
   overflow: hidden;
-  color: #dedede;
+  color: var(--color-white-75);
   font-size: 15px;
   font-weight: 900;
   letter-spacing: 0.03em;
@@ -974,7 +974,7 @@
 
 .profile-season-highlight-main span {
   flex-shrink: 0;
-  color: #e10600;
+  color: var(--color-accent);
   font-size: 9px;
   font-weight: 900;
   letter-spacing: 0.08em;
@@ -985,7 +985,7 @@
   align-items: center;
   gap: 8px;
   margin-top: 7px;
-  color: #505050;
+  color: var(--color-white-45);
   font-size: 8px;
   font-weight: 800;
   letter-spacing: 0.1em;
@@ -993,7 +993,7 @@
 }
 
 .profile-season-highlight-meta span {
-  color: #3f3f3f;
+  color: var(--color-white-30);
 }
 
 .profile-season-summary-loading {
@@ -1001,7 +1001,7 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  color: #4d4d4d;
+  color: var(--color-white-45);
   font-size: 9px;
   font-weight: 900;
   letter-spacing: 0.16em;
@@ -1087,8 +1087,8 @@
 }
 
 .profile-field select option {
-  background: #111;
-  color: #fff;
+  background: var(--color-bg-elevated);
+  color: var(--color-white);
 }
 
 .profile-settings-toggle {
@@ -1122,7 +1122,7 @@
   width: 20px;
   height: 20px;
   flex: 0 0 auto;
-  accent-color: #e10600;
+  accent-color: var(--color-accent);
   cursor: pointer;
 }
 

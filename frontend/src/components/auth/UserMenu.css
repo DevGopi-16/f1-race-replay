@@ -313,6 +313,43 @@
   cursor: wait;
 }
 
+:root[data-theme="light"] .user-menu-dropdown {
+  background: var(--surface-card-elevated);
+  border-color: var(--border-default);
+  box-shadow: var(--shadow-card);
+}
+
+:root[data-theme="light"] .user-menu-trigger,
+:root[data-theme="light"] .user-menu-login {
+  color: var(--text-secondary);
+}
+
+:root[data-theme="light"] .user-menu-trigger {
+  background: var(--surface-input);
+  border-color: var(--border-default);
+}
+
+:root[data-theme="light"] .user-menu-trigger:hover,
+:root[data-theme="light"] .user-menu-trigger.is-open,
+:root[data-theme="light"] .user-menu-item:hover {
+  color: var(--text-primary);
+  background: var(--surface-hover);
+  border-color: var(--border-strong);
+}
+
+:root[data-theme="light"] .user-menu-profile-info strong,
+:root[data-theme="light"] .user-menu-item {
+  color: var(--text-primary);
+}
+
+:root[data-theme="light"] .user-menu-profile-info span {
+  color: var(--text-secondary);
+}
+
+:root[data-theme="light"] .user-menu-divider {
+  background: var(--border-default);
+}
+
 @keyframes user-menu-enter {
   from {
     opacity: 0;

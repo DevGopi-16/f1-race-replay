@@ -18,7 +18,7 @@
       rgba(255, 255, 255, 0.025),
       transparent 30%
     ),
-    #050507;
+    var(--surface-page);
 }
 
 .auth-background {
@@ -441,9 +441,9 @@
 }
 
 .x-icon {
-  background: #050507;
-  border: 1px solid rgba(255, 255, 255, 0.12);
-  color: #fff;
+  background: var(--surface-card);
+  border: 1px solid var(--color-white-15);
+  color: var(--text-primary);
   font-size: 12px;
 }
 

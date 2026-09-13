@@ -1,0 +1,118 @@
+.constructor-performance {
+  position: relative;
+  overflow: hidden;
+}
+
+.constructor-performance-label {
+  color: rgba(255, 255, 255, 0.28);
+  font-size: 8px;
+  font-weight: 800;
+  letter-spacing: 0.1em;
+}
+
+.constructor-performance-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 10px;
+  margin-top: 8px;
+}
+
+.constructor-performance-metric {
+  position: relative;
+  min-width: 0;
+  padding: 15px;
+  border: 1px solid rgba(255, 255, 255, 0.055);
+  border-radius: 12px;
+  background:
+    linear-gradient(
+      135deg,
+      rgba(255, 255, 255, 0.035),
+      rgba(255, 255, 255, 0.012)
+    );
+  overflow: hidden;
+}
+
+.constructor-performance-metric-top {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.constructor-performance-icon {
+  width: 30px;
+  height: 30px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border: 1px solid
+    color-mix(
+      in srgb,
+      var(--team-color) 25%,
+      rgba(255, 255, 255, 0.07)
+    );
+  border-radius: 8px;
+  color: var(--team-color);
+  background: color-mix(
+    in srgb,
+    var(--team-color) 7%,
+    transparent
+  );
+}
+
+.constructor-performance-value {
+  color: #fff;
+  font-size: 18px;
+  font-weight: 850;
+  line-height: 1;
+  font-variant-numeric: tabular-nums;
+}
+
+.constructor-performance-copy {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  margin-top: 13px;
+}
+
+.constructor-performance-copy strong {
+  color: rgba(255, 255, 255, 0.84);
+  font-size: 11px;
+  font-weight: 800;
+}
+
+.constructor-performance-copy span {
+  min-height: 14px;
+  color: rgba(255, 255, 255, 0.3);
+  font-size: 8px;
+  font-weight: 600;
+  letter-spacing: 0.02em;
+}
+
+.constructor-performance-track {
+  width: 100%;
+  height: 5px;
+  margin-top: 14px;
+  overflow: hidden;
+  border-radius: 99px;
+  background: rgba(255, 255, 255, 0.055);
+}
+
+.constructor-performance-track span {
+  display: block;
+  height: 100%;
+  border-radius: inherit;
+  opacity: 0.85;
+  transition:
+    width 700ms cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+@media (max-width: 650px) {
+  .constructor-performance-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .constructor-performance-label {
+    display: none;
+  }
+}

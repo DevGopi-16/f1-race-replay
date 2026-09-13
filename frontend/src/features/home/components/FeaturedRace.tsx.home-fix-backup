@@ -62,12 +62,12 @@ export default function FeaturedRace({
           <span>CIRCUIT</span>
 
           <strong>
-            {track_overview.length_km == null ? "—" : track_overview.length_km.toFixed(3)}
+            {track_overview.length_km.toFixed(3)}
             <small> KM</small>
           </strong>
 
           <small>
-            {track_overview.turns == null ? "—" : track_overview.turns} TURNS
+            {track_overview.turns} TURNS
           </small>
         </div>
 
@@ -75,7 +75,7 @@ export default function FeaturedRace({
           <span>LONGEST STRAIGHT</span>
 
           <strong>
-            {track_overview.longest_straight_km == null ? "—" : track_overview.longest_straight_km.toFixed(3)}
+            {track_overview.longest_straight_km.toFixed(3)}
             <small> KM</small>
           </strong>
 

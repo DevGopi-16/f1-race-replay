@@ -966,7 +966,7 @@ def _find_latest_completed_weekend():
     except Exception:
         weekends = []
 
-    past = [w for w in weekends if w["date"] < today_str]
+    past = [w for w in weekends if w["date"] <= today_str]
 
     if not past:
         year -= 1
@@ -996,23 +996,14 @@ def home_overview():
         return _HOME_OVERVIEW_CACHE[cache_key]
 
     try:
-        # Homepage only needs race laps/results initially.
-        # Full telemetry/weather is unnecessary here and can make the
-        # homepage fail when FastF1 telemetry resources are unavailable.
-        session = load_session(year, round_number, "R", telemetry=False)
+        session = load_session(year, round_number, "R", telemetry=True)
     except Exception as e:
         raise HTTPException(status_code=502, detail=f"Failed to load latest race session: {e}")
 
-    fastest_lap = None
+    fastest_lap = session.laps.pick_fastest()
     fastest_driver = None
     fastest_time_str = None
     fastest_compound = None
-
-    try:
-        if session.laps is not None and not session.laps.empty:
-            fastest_lap = session.laps.pick_fastest()
-    except Exception as e:
-        print(f"[home-overview] fastest lap unavailable: {e}")
 
     if fastest_lap is not None:
         try:

@@ -85,10 +85,10 @@
   min-height: 100vh;
   padding: 42px 42px 100px;
   box-sizing: border-box;
-  color: #fff;
+  color: var(--text-primary);
   background:
     radial-gradient(circle at 80% 10%, rgba(255, 255, 255, 0.035), transparent 30%),
-    #070709;
+    var(--surface-page);
   animation: dd-fade-in 0.4s ease both;
 }
 
@@ -1665,6 +1665,218 @@
   background: color-mix(in srgb, var(--team-color, #4fa9c9) 18%, transparent);
   border-color: var(--team-color, #4fa9c9);
   transform: translateY(-2px);
+}
+
+/* LIGHT THEME — preserve the dark presentation above and retune only the
+   Driver Detail surfaces, text, overlays, and controls for light contrast. */
+
+:root[data-theme="light"] .driver-detail-page {
+  background:
+    radial-gradient(circle at 80% 10%, rgba(255, 255, 255, 0.72), transparent 30%),
+    var(--surface-page);
+}
+
+:root[data-theme="light"] .drivers-step1-loading,
+:root[data-theme="light"] .driver-ticker,
+:root[data-theme="light"] .performance-index,
+:root[data-theme="light"] .performance-index-score,
+:root[data-theme="light"] .driver-form-item,
+:root[data-theme="light"] .quali-race-row,
+:root[data-theme="light"] .teammate-comparison,
+:root[data-theme="light"] .racecraft-stat,
+:root[data-theme="light"] .season-journey-item,
+:root[data-theme="light"] .race-timeline-row,
+:root[data-theme="light"] .driver-next-race,
+:root[data-theme="light"] .points-trajectory,
+:root[data-theme="light"] .analytics-card,
+:root[data-theme="light"] .analytics-tab,
+:root[data-theme="light"] .driver-bio-card,
+:root[data-theme="light"] .driver-team-card,
+:root[data-theme="light"] .driver-social-link {
+  border-color: var(--border-default);
+  background-color: var(--surface-card);
+}
+
+:root[data-theme="light"] .driver-hero {
+  border-color: var(--border-default);
+  background-color: var(--surface-card);
+  box-shadow: var(--shadow-card);
+}
+
+:root[data-theme="light"] .driver-hero-scrim {
+  position: absolute;
+  inset: 0 0 100px;
+  z-index: 1;
+  pointer-events: none;
+  background:
+    linear-gradient(
+      90deg,
+      rgba(255, 255, 255, 0.94) 0%,
+      rgba(255, 255, 255, 0.78) 38%,
+      rgba(255, 255, 255, 0.20) 72%,
+      rgba(255, 255, 255, 0.04) 100%
+    ),
+    linear-gradient(0deg, rgba(255, 255, 255, 0.12), transparent 55%);
+}
+
+:root[data-theme="light"] .driver-hero-back,
+:root[data-theme="light"] .driver-hero-meta,
+:root[data-theme="light"] .driver-hero-championship,
+:root[data-theme="light"] .driver-hero-name span {
+  color: var(--text-primary);
+  text-shadow: 0 2px 8px rgba(255, 255, 255, 0.9);
+}
+
+:root[data-theme="light"] .driver-hero-back:hover {
+  color: var(--color-accent);
+}
+
+:root[data-theme="light"] .driver-hero-name h1 {
+  text-shadow: 0 2px 4px rgba(255, 255, 255, 0.85), 0 8px 24px rgba(17, 17, 17, 0.12);
+}
+
+:root[data-theme="light"] .driver-hero-meta-divider,
+:root[data-theme="light"] .driver-hero-stat span,
+:root[data-theme="light"] .driver-ticker-item,
+:root[data-theme="light"] .driver-section-heading > span,
+:root[data-theme="light"] .driver-section-footnote,
+:root[data-theme="light"] .performance-index-score span,
+:root[data-theme="light"] .performance-index-bar-row > span,
+:root[data-theme="light"] .driver-form-round,
+:root[data-theme="light"] .teammate-driver-code,
+:root[data-theme="light"] .teammate-comparison-vs,
+:root[data-theme="light"] .teammate-comparison-value,
+:root[data-theme="light"] .teammate-comparison-label,
+:root[data-theme="light"] .racecraft-stat span,
+:root[data-theme="light"] .circuit-dna-row > span,
+:root[data-theme="light"] .season-journey-item > span:first-child,
+:root[data-theme="light"] .season-journey-item > span:last-child,
+:root[data-theme="light"] .race-timeline-row,
+:root[data-theme="light"] .driver-next-race > span,
+:root[data-theme="light"] .driver-next-race p,
+:root[data-theme="light"] .points-trajectory-labels,
+:root[data-theme="light"] .analytics-labels,
+:root[data-theme="light"] .analytics-legend-item,
+:root[data-theme="light"] .analytics-tab,
+:root[data-theme="light"] .driver-bio-fact span,
+:root[data-theme="light"] .driver-team-card-label,
+:root[data-theme="light"] .driver-team-card-car-label {
+  color: var(--text-secondary);
+}
+
+:root[data-theme="light"] .driver-hero-championship,
+:root[data-theme="light"] .driver-hero-stats {
+  border-color: var(--border-default);
+}
+
+:root[data-theme="light"] .driver-hero-championship {
+  background: rgba(255, 255, 255, 0.82);
+}
+
+:root[data-theme="light"] .driver-hero-championship strong,
+:root[data-theme="light"] .driver-hero-stat strong,
+:root[data-theme="light"] .driver-ticker-item strong,
+:root[data-theme="light"] .driver-section-heading h2,
+:root[data-theme="light"] .performance-index-score strong,
+:root[data-theme="light"] .performance-index-bar-row > strong,
+:root[data-theme="light"] .driver-form-item strong,
+:root[data-theme="light"] .quali-race-row strong,
+:root[data-theme="light"] .teammate-comparison-section .driver-section-heading h2,
+:root[data-theme="light"] .racecraft-stat strong,
+:root[data-theme="light"] .circuit-dna-row > strong,
+:root[data-theme="light"] .season-journey-item strong,
+:root[data-theme="light"] .race-timeline-row strong,
+:root[data-theme="light"] .driver-next-race h2,
+:root[data-theme="light"] .driver-next-race button,
+:root[data-theme="light"] .analytics-tab-active,
+:root[data-theme="light"] .driver-bio-fact strong,
+:root[data-theme="light"] .driver-team-card-name,
+:root[data-theme="light"] .driver-team-card-car-name,
+:root[data-theme="light"] .driver-social-link {
+  color: var(--text-primary);
+}
+
+:root[data-theme="light"] .driver-hero-stats {
+  background: rgba(255, 255, 255, 0.94);
+}
+
+:root[data-theme="light"] .driver-hero-stat {
+  border-right-color: var(--border-default);
+}
+
+:root[data-theme="light"] .driver-hero-stat:hover,
+:root[data-theme="light"] .driver-form-item:hover,
+:root[data-theme="light"] .quali-race-row:hover,
+:root[data-theme="light"] .racecraft-stat:hover,
+:root[data-theme="light"] .season-journey-item:hover,
+:root[data-theme="light"] .race-timeline-row:hover,
+:root[data-theme="light"] .analytics-tab:hover,
+:root[data-theme="light"] .driver-next-race button:hover {
+  background: var(--surface-hover);
+}
+
+:root[data-theme="light"] .driver-bio-text {
+  color: var(--text-secondary);
+}
+
+:root[data-theme="light"] .driver-bio-facts {
+  border-top-color: var(--border-default);
+}
+
+:root[data-theme="light"] .performance-index-bar-track,
+:root[data-theme="light"] .teammate-comparison-bar,
+:root[data-theme="light"] .circuit-dna-bar-track {
+  background: rgba(17, 17, 17, 0.10);
+}
+
+:root[data-theme="light"] .performance-index-bar-fill,
+:root[data-theme="light"] .circuit-dna-bar-fill {
+  background: linear-gradient(90deg, var(--team-color, #4fa9c9), rgba(17, 17, 17, 0.24));
+}
+
+:root[data-theme="light"] .teammate-comparison-label {
+  background: rgba(255, 255, 255, 0.92);
+}
+
+:root[data-theme="light"] .teammate-comparison,
+:root[data-theme="light"] .driver-next-race {
+  box-shadow: var(--shadow-card);
+}
+
+:root[data-theme="light"] .race-timeline-row::before,
+:root[data-theme="light"] .race-timeline-row.race-timeline-win::before {
+  box-shadow: 0 0 0 3px var(--surface-card), 0 0 8px color-mix(in srgb, var(--team-color, #4fa9c9) 55%, transparent);
+}
+
+:root[data-theme="light"] .race-timeline-row.race-timeline-win {
+  background: linear-gradient(90deg, color-mix(in srgb, #f5b942 10%, transparent), var(--surface-card));
+}
+
+:root[data-theme="light"] .points-trajectory-dot,
+:root[data-theme="light"] .analytics-dot {
+  fill: var(--surface-card);
+}
+
+:root[data-theme="light"] .analytics-line-secondary,
+:root[data-theme="light"] .analytics-legend-item-secondary .analytics-legend-dot {
+  stroke: rgba(17, 17, 17, 0.35);
+  background: rgba(17, 17, 17, 0.35);
+}
+
+:root[data-theme="light"] .driver-next-race button,
+:root[data-theme="light"] .driver-social-link {
+  border-color: var(--border-strong);
+  background: var(--surface-card);
+}
+
+:root[data-theme="light"] .driver-next-race button:hover,
+:root[data-theme="light"] .driver-social-link:hover {
+  border-color: var(--team-color, var(--color-accent));
+  background: color-mix(in srgb, var(--team-color, var(--color-accent)) 10%, var(--surface-card));
+}
+
+:root[data-theme="light"] .driver-team-card-logo {
+  filter: drop-shadow(0 5px 10px rgba(17, 17, 17, 0.16));
 }
 
 @media (max-width: 900px) {
