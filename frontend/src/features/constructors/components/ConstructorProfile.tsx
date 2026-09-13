@@ -1,4 +1,5 @@
 import type { CSSProperties } from "react";
+import { useNavigate } from "react-router-dom";
 import {
   ArrowLeft,
   Award,
@@ -21,6 +22,28 @@ import ConstructorTeamStatistics from "./ConstructorTeamStatistics";
 import ConstructorReliability from "./ConstructorReliability";
 import ConstructorEngineeringInsights from "./ConstructorEngineeringInsights";
 import type { ConstructorTeam } from "../constructors.types";
+import "./ConstructorProfile.css";
+import { getTeamColor } from "../constructors.colors";
+
+const TEAM_BANNER_FILES: Record<string, string> = {
+  alpine: "alpine.png",
+  "aston martin": "AstonMartin.png",
+  audi: "audi.png",
+  cadillac: "cadillac.png",
+  ferrari: "ferrari.png",
+  haas: "haas.png",
+  mclaren: "mclaren.png",
+  mercedes: "mercedes.png",
+  "racing bulls": "racingbulls.png",
+  "red bull": "redbull.png",
+  williams: "Williams.png",
+};
+
+function getTeamBannerUrl(team: ConstructorTeam) {
+  const key = team.name.trim().toLowerCase();
+  const file = TEAM_BANNER_FILES[key];
+  return file ? `/images/teambanner/${file}` : null;
+}
 
 interface ConstructorProfileProps {
   team: ConstructorTeam;
@@ -122,6 +145,8 @@ function ConstructorProfile({
   racesCompleted,
   onBack,
 }: ConstructorProfileProps) {
+  const navigate = useNavigate();
+
   const leader = getLeader(teams);
   const gapToLeader = getGapToLeader(
     team,
@@ -144,7 +169,7 @@ function ConstructorProfile({
       : 0;
 
   const style = {
-    "--team-color": team.color,
+    "--team-color": getTeamColor(team),
   } as CSSProperties;
 
   return (
@@ -167,54 +192,26 @@ function ConstructorProfile({
         </span>
       </div>
 
-      <header className="constructor-profile-hero">
+            <header
+        className="constructor-profile-hero"
+        style={
+          getTeamBannerUrl(team)
+            ? ({
+                "--hero-banner": `url(${getTeamBannerUrl(team)})`,
+              } as CSSProperties)
+            : undefined
+        }
+      >
+        <div className="constructor-profile-hero-bg" />
         <div className="constructor-profile-hero-glow" />
-
-        <div className="constructor-profile-brand">
-          <div className="constructor-profile-logo">
-            {team.teamLogo && (
-              <img
-                src={assetUrl(team.teamLogo)}
-                alt=""
-                onError={(event) => {
-                  event.currentTarget.style.display =
-                    "none";
-                }}
-              />
-            )}
-          </div>
-
-          <div className="constructor-profile-heading">
-            <span>
-              {team.nationality} · CONSTRUCTOR
-            </span>
-
-            <h1>{team.name}</h1>
-
-            <div className="constructor-profile-drivers">
-              {team.drivers.map((driver) => (
-                <span key={driver.code}>
-                  {driver.code}
-                </span>
-              ))}
-            </div>
-          </div>
-        </div>
-
-        <div className="constructor-profile-championship">
-          <span>CHAMPIONSHIP</span>
-
-          <strong>
-            #{team.position}
-          </strong>
-
-          <small>
-            {gapToLeader > 0
-              ? `−${formatNumber(gapToLeader)} PTS`
-              : "LEADER"}
-          </small>
-        </div>
       </header>
+
+      <div className="constructor-profile-meta-row">
+        <span>CONSTRUCTOR PERFORMANCE PROFILE</span>
+        <span>
+          {racesCompleted} / {team.history?.length ?? racesCompleted} ROUNDS COMPLETE
+        </span>
+      </div>
 
       <div className="constructor-profile-kpis">
         <div className="constructor-profile-kpi featured">
@@ -316,7 +313,21 @@ function ConstructorProfile({
               <article
                 className="constructor-profile-driver"
                 key={driver.code}
+                role="button"
+                tabIndex={0}
+                onClick={() =>
+                  navigate(`/drivers/${driver.code}`)
+                }
+                onKeyDown={(event) => {
+                  if (
+                    event.key === "Enter" ||
+                    event.key === " "
+                  ) {
+                    navigate(`/drivers/${driver.code}`);
+                  }
+                }}
               >
+
                 <div className="constructor-profile-driver-image">
                   {driver.image && (
                     <img
@@ -454,7 +465,7 @@ function ConstructorProfile({
 
         <ConstructorProgression
           history={team.history}
-          teamColor={team.color}
+          teamColor={getTeamColor(team)}
         />
       </section>
 

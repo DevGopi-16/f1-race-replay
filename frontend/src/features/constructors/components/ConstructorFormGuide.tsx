@@ -1,5 +1,6 @@
 import { Flag, Trophy } from "lucide-react";
 
+import { getTeamColor } from "../constructors.colors";
 import type {
   ConstructorDriver,
   ConstructorDriverHistory,
@@ -169,8 +170,7 @@ function ConstructorFormGuide({
                           4,
                           (racePoints / maxPoints) * 100,
                         )}%`,
-                        background:
-                          team.color || undefined,
+                        background: getTeamColor(team),
                       }}
                     />
                   </div>

@@ -1,11 +1,52 @@
 import { Flag, Trophy } from "lucide-react";
 
+import { assetUrl } from "../constructors.api";
+import { getTeamColor } from "../constructors.colors";
 import type {
   ConstructorDriver,
   ConstructorDriverHistory,
   ConstructorHistory,
   ConstructorTeam,
 } from "../constructors.types";
+import "./ConstructorRaceResults.css";
+
+const COUNTRY_CODES: Record<string, string> = {
+  Australia: "AU",
+  China: "CN",
+  Japan: "JP",
+  "United States": "US",
+  Canada: "CA",
+  Monaco: "MC",
+  Spain: "ES",
+  Austria: "AT",
+  "United Kingdom": "GB",
+  Belgium: "BE",
+  Hungary: "HU",
+  Netherlands: "NL",
+  Italy: "IT",
+  Azerbaijan: "AZ",
+  Singapore: "SG",
+  Mexico: "MX",
+  Brazil: "BR",
+  "United Arab Emirates": "AE",
+  Qatar: "QA",
+  "Saudi Arabia": "SA",
+  Bahrain: "BH",
+};
+
+function countryToFlagEmoji(country?: string) {
+  if (!country) return null;
+
+  const code = COUNTRY_CODES[country];
+
+  if (!code) return null;
+
+  return code
+    .toUpperCase()
+    .replace(/./g, (char) =>
+      String.fromCodePoint(127397 + char.charCodeAt(0)),
+    );
+}
 
 interface ConstructorRaceResultsProps {
   team: ConstructorTeam;
@@ -141,10 +182,11 @@ function ConstructorRaceResults({
                   <div className="constructor-race-round">
                     <span>R{String(race.round).padStart(2, "0")}</span>
                   </div>
-
-                  <div className="constructor-race-event">
+                    <div className="constructor-race-event">
                     <span className="constructor-race-event-flag">
-                      <Flag size={13} />
+                      {countryToFlagEmoji(race.country) ?? (
+                        <Flag size={13} />
+                      )}
                     </span>
 
                     <div>
@@ -173,14 +215,33 @@ function ConstructorRaceResults({
                         const position =
                           result?.position ?? null;
 
+
+
+
+
                         return (
                           <div
                             className="constructor-race-driver"
                             key={driver.code}
                           >
-                            <span className="constructor-race-driver-code">
-                              {driver.code}
-                            </span>
+                            <div className="constructor-race-driver-identity">
+                              {driver.image && (
+                                <img
+                                  className="constructor-race-driver-avatar"
+                                  src={assetUrl(driver.image)}
+                                  alt=""
+                                  loading="lazy"
+                                  onError={(event) => {
+                                    event.currentTarget.style.display =
+                                      "none";
+                                  }}
+                                />
+                              )}
+
+                              <span className="constructor-race-driver-code">
+                                {driver.code}
+                              </span>
+                            </div>
 
                             <span
                               className={`constructor-race-driver-position ${getPositionClass(
@@ -205,7 +266,7 @@ function ConstructorRaceResults({
 
                     <div className="constructor-race-points-track">
                       <span
-                        style={{
+                                              style={{
                           width: `${Math.max(
                             race.teamPoints > 0
                               ? pointsWidth
@@ -214,7 +275,7 @@ function ConstructorRaceResults({
                               ? 4
                               : 0,
                           )}%`,
-                          backgroundColor: team.color,
+                          backgroundColor: getTeamColor(team),
                         }}
                       />
                     </div>

@@ -19,20 +19,7 @@ const YEAR = 2026;
 
 const API_ORIGIN = "http://127.0.0.1:8000";
 
-const TEAM_COLORS: Record<string, string> = {
-  Mercedes: "#27F4D2",
-  "Red Bull Racing": "#3671C6",
-  Ferrari: "#E8002D",
-  McLaren: "#FF8000",
-  "Aston Martin": "#229971",
-  Alpine: "#FF87BC",
-  Williams: "#64C4FF",
-  "Racing Bulls": "#6692FF",
-  "Kick Sauber": "#52E252",
-  Haas: "#B6BABD",
-  Audi: "#E50000",
-  Cadillac: "#C0C0C0",
-};
+import { TEAM_COLORS } from "../constants/teamColors";
 
 const TEAM_DISPLAY_NAMES: Record<string, string> = {
   Mercedes: "Mercedes-AMG PETRONAS F1 TEAM",

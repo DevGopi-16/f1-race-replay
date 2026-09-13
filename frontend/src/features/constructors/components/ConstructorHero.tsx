@@ -1,5 +1,5 @@
+
 import type { CSSProperties } from "react";
-import { Trophy } from "lucide-react";
 
 import { assetUrl } from "../constructors.api";
 import { getTeamColor } from "../constructors.colors";
@@ -69,7 +69,7 @@ function ConstructorHero({
       </div>
 
       {leader && (
-                <div
+        <div
           className="constructors-leader-card"
           style={
             {
@@ -77,43 +77,35 @@ function ConstructorHero({
             } as CSSProperties
           }
         >
-          <div className="constructors-leader-glow" />
-
-          <div className="constructors-leader-top">
-            <span>CHAMPIONSHIP LEADER</span>
-            <Trophy size={19} />
-          </div>
-
-          <div className="constructors-leader-logo">
-            {leader.teamLogo && (
-              <img
-                src={assetUrl(leader.teamLogo)}
-                alt=""
-                onError={(event) => {
-                  event.currentTarget.style.display = "none";
-                }}
-              />
-            )}
-          </div>
-
-          <h2>{leader.name}</h2>
-
-          <div className="constructors-leader-points">
-            <strong>
-              {formatNumber(leader.points)}
-            </strong>
-
-            <span>PTS</span>
-          </div>
-
-          <div className="constructors-leader-meta">
-            <span>
-              <b>{leader.wins}</b> WINS
+          <div className="constructors-leader-content">
+            <span className="constructors-leader-label">
+              CHAMPIONSHIP LEADER
             </span>
 
-            <span>
-              <b>#{leader.position}</b> POSITION
-            </span>
+            <div className="constructors-leader-name">
+              {leader.teamLogo && (
+                <img
+                  className="constructors-leader-logo"
+                  src={assetUrl(leader.teamLogo)}
+                  alt=""
+                  onError={(event) => {
+                    event.currentTarget.style.display = "none";
+                  }}
+                />
+              )}
+
+              <h2>{leader.name}</h2>
+            </div>
+
+            <div className="constructors-leader-points">
+              <strong>{formatNumber(leader.points)}</strong>
+
+              <span>PTS</span>
+
+              <span className="constructors-leader-pill">
+                {leader.wins} WINS
+              </span>
+            </div>
           </div>
         </div>
       )}
@@ -122,3 +114,4 @@ function ConstructorHero({
 }
 
 export default ConstructorHero;
+

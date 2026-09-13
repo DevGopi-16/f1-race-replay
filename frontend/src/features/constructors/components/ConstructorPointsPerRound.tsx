@@ -1,4 +1,5 @@
 import { useEffect, useRef, useState } from "react";
+import { getTeamColor } from "../constructors.colors";
 import type { ConstructorTeam } from "../constructors.types";
 import "./ConstructorPointsPerRound.css";
 
@@ -223,7 +224,7 @@ function ConstructorPointsPerRound({
 
         context.fillStyle =
           hexToRgba(
-            team.color,
+            getTeamColor(team),
             0.78,
           );
 
@@ -329,7 +330,7 @@ function ConstructorPointsPerRound({
 
       resizeObserver.disconnect();
     };
-  }, [history, team.color]);
+  }, [history, getTeamColor(team)]);
 
   function handlePointerMove(
     event: React.PointerEvent<HTMLDivElement>,

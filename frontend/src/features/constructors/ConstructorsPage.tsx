@@ -9,7 +9,7 @@ import type { ConstructorTeam } from "./constructors.types";
 import ConstructorHero from "./components/ConstructorHero";
 import ConstructorStandings from "./components/ConstructorStandings";
 import ConstructorProfile from "./components/ConstructorProfile";
-import NextRace from "./components/NextRace";
+
 
 import "./constructors.css";
 
@@ -20,8 +20,8 @@ const YEAR = 2026;
 type NextRoundInfo = {
   round?: number;
   country?: string;
-  event_name?: string;
-  date?: string;
+  name?: string;
+  date_range?: string;
 } | null;
 
 function formatNextRound(nextRound: NextRoundInfo) {
@@ -29,16 +29,9 @@ function formatNextRound(nextRound: NextRoundInfo) {
     return { title: "TBD", sub: "" };
   }
 
-  const sub = nextRound.date
-    ? new Date(nextRound.date).toLocaleDateString("en-US", {
-        day: "numeric",
-        month: "short",
-      })
-    : "";
-
   return {
-    title: nextRound.event_name ?? "TBD",
-    sub,
+    title: nextRound.name ?? "TBD",
+    sub: nextRound.date_range ?? "",
   };
 }
 
@@ -74,7 +67,11 @@ function ConstructorsPage() {
 
       const data = await getConstructorsPanel(YEAR);
 
+      console.log("next_round data:", data.next_round);
+
       const nextTeams = data.teams ?? [];
+
+
 
       setTeams(nextTeams);
 
@@ -290,28 +287,30 @@ function ConstructorsPage() {
         totalRounds={totalRounds}
       />
 
-      <section className="constructors-stat-strip">
+
+            <section className="constructors-stat-strip">
         <div className="constructors-stat-card">
+          <span className="constructors-stat-label">Total Points</span>
           <strong>{totalPoints.toLocaleString("en-US")}</strong>
-          <span>Total Points</span>
+          <span className="constructors-stat-sub">All Teams</span>
         </div>
 
         <div className="constructors-stat-card">
+          <span className="constructors-stat-label">Races Completed</span>
           <strong>{racesCompleted}</strong>
-          <span>Races Completed · {totalRounds} total rounds</span>
+          <span className="constructors-stat-sub">{totalRounds} Total Rounds</span>
         </div>
 
         <div className="constructors-stat-card">
+          <span className="constructors-stat-label">Teams</span>
           <strong>{teams.length}</strong>
-          <span>Constructors</span>
+          <span className="constructors-stat-sub">Constructors</span>
         </div>
 
         <div className="constructors-stat-card">
+          <span className="constructors-stat-label">Next Round</span>
           <strong>{nextRoundDisplay.title}</strong>
-          <span>
-            Next Round
-            {nextRoundDisplay.sub ? ` · ${nextRoundDisplay.sub}` : ""}
-          </span>
+          <span className="constructors-stat-sub">{nextRoundDisplay.sub}</span>
         </div>
       </section>
 
@@ -321,12 +320,6 @@ function ConstructorsPage() {
         onSortChange={setSortMode}
         onSelectTeam={setSelectedTeam}
       />
-
-      {nextRound && (
-        <NextRace
-          nextRound={nextRound}
-        />
-      )}
     </main>
   );
 }

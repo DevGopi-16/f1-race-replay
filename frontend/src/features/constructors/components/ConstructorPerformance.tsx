@@ -5,9 +5,9 @@ import {
   TrendingUp,
 } from "lucide-react";
 
+import { getTeamColor } from "../constructors.colors";
 import type { ConstructorTeam } from "../constructors.types";
 import "./ConstructorPerformance.css";
-
 interface ConstructorPerformanceProps {
   team: ConstructorTeam;
   racesCompleted: number;
@@ -208,7 +208,7 @@ function ConstructorPerformance({
                 <span
                   style={{
                     width: `${metric.value}%`,
-                    backgroundColor: team.color,
+                    backgroundColor: getTeamColor(team),
                   }}
                 />
               </div>

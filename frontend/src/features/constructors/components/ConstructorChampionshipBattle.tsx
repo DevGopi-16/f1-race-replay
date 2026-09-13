@@ -6,10 +6,10 @@ import {
 } from "lucide-react";
 
 import { assetUrl } from "../constructors.api";
+import { getTeamColor } from "../constructors.colors";
 import type { ConstructorTeam } from "../constructors.types";
 
 import "./ConstructorChampionshipBattle.css";
-
 interface ConstructorChampionshipBattleProps {
   team: ConstructorTeam;
   teams: ConstructorTeam[];
@@ -99,7 +99,7 @@ function ConstructorChampionshipBattle({
           style={
             {
               "--constructor-color":
-                team.color || "#e10600",
+                getTeamColor(team) || "#e10600",
             } as React.CSSProperties
           }
         >
@@ -331,9 +331,7 @@ function ConstructorChampionshipBattle({
                 key={entry.id}
                 style={
                   {
-                    "--constructor-color":
-                      entry.color ||
-                      "#e10600",
+                    "--constructor-color": getTeamColor(entry),
                     "--field-width": `${width}%`,
                   } as React.CSSProperties
                 }

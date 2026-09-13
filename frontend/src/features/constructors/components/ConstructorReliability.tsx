@@ -9,6 +9,7 @@ import {
 
 import type { CSSProperties } from "react";
 
+import { getTeamColor } from "../constructors.colors";
 import type { ConstructorTeam } from "../constructors.types";
 
 import "./ConstructorReliability.css";
@@ -91,7 +92,7 @@ function ConstructorReliability({
       style={
         {
           "--constructor-color":
-            team.color || "#e10600",
+            getTeamColor(team) || "#e10600",
         } as CSSProperties
       }
     >

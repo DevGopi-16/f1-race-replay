@@ -8,6 +8,7 @@ import {
   Zap,
 } from "lucide-react";
 
+import { getTeamColor } from "../constructors.colors";
 import type { ConstructorTeam } from "../constructors.types";
 
 import "./ConstructorTeamStatistics.css";
@@ -131,7 +132,7 @@ function ConstructorTeamStatistics({
       style={
         {
           "--constructor-color":
-            team.color || "#e10600",
+            getTeamColor(team),
         } as React.CSSProperties
       }
     >
