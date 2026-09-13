@@ -1,0 +1,141 @@
+.performance-list {
+  border-top: 1px solid var(--border-color);
+  width: 100%;
+  box-sizing: border-box;
+  padding-right: 16px;
+}
+
+.performance-row {
+  position: relative;
+  display: grid;
+  grid-template-columns:
+    minmax(130px, 200px)
+    minmax(80px, 1fr)
+    max-content;
+  gap: 20px;
+  align-items: center;
+  padding: 18px 12px 18px 0;
+  border-bottom: 1px solid var(--border-color);
+  width: 100%;
+  box-sizing: border-box;
+  transition: padding 250ms ease, background 250ms ease;
+  will-change: transform;
+  cursor: pointer;
+}
+
+.performance-row::before {
+  content: "";
+  position: absolute;
+  left: 0;
+  top: 0;
+  bottom: 0;
+  width: 2px;
+  background: currentColor;
+  transform: scaleY(0);
+  transform-origin: center;
+  transition: transform 300ms ease;
+}
+
+.performance-row:hover {
+  padding-left: 12px;
+  padding-right: 12px;
+  background: rgba(255, 255, 255, 0.025);
+}
+
+.performance-row:hover::before {
+  transform: scaleY(1);
+}
+
+.performance-driver {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  min-width: 0;
+}
+
+.performance-driver > div:last-child {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  min-width: 0;
+}
+
+.performance-driver strong {
+  font-size: 11px;
+  letter-spacing: 0.1em;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.performance-driver span {
+  font-size: 11px;
+  opacity: 0.5;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.performance-row:hover .analytics-driver-avatar {
+  transform: scale(1.08);
+}
+
+.performance-score {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 12px;
+  white-space: nowrap;
+  text-align: right;
+  font-size: 14px;
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
+  flex-shrink: 0;
+  padding-right: 8px;
+}
+
+.performance-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  letter-spacing: 0.08em;
+}
+
+@media (max-width: 700px) {
+  .performance-row {
+    grid-template-columns:
+      minmax(110px, 140px)
+      1fr
+      max-content;
+    gap: 12px;
+    padding-right: 8px;
+  }
+
+  .performance-driver {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 4px;
+  }
+}
+
+@media (max-width: 480px) {
+  .performance-row {
+    grid-template-columns:
+      minmax(90px, 120px)
+      1fr
+      max-content;
+    gap: 8px;
+  }
+
+  .performance-driver strong {
+    font-size: 10px;
+  }
+
+  .performance-driver span {
+    font-size: 9px;
+  }
+
+  .performance-score {
+    font-size: 12px;
+  }
+}

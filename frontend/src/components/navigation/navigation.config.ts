@@ -66,7 +66,7 @@ export const primaryNavigation: NavigationItem[] = [
   },
 ];
 
-export const secondaryNavigation: NavigationItem[] = [
+export const moreNavigation: NavigationItem[] = [
   {
     label: "Settings",
     path: "/settings",

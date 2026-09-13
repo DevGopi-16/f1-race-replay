@@ -1,10 +1,10 @@
 import { useEffect, useState } from "react";
-import { Menu, X } from "lucide-react";
+import { Menu, X, ChevronDown } from "lucide-react";
 import { NavLink } from "react-router-dom";
 
 import {
   primaryNavigation,
-  secondaryNavigation,
+  moreNavigation,
 } from "./navigation.config";
 
 import UserMenu from "../auth/UserMenu";
@@ -46,6 +46,17 @@ export default function FloatingNav() {
 
   const [mobileOpen, setMobileOpen] =
     useState(false);
+
+  const [moreOpen, setMoreOpen] =
+    useState(false);
+
+  useEffect(() => {
+    if (!moreOpen) return;
+    const handleClick = () => setMoreOpen(false);
+    document.addEventListener("click", handleClick);
+    return () =>
+      document.removeEventListener("click", handleClick);
+  }, [moreOpen]);
 
   useEffect(() => {
     const handleScroll = () => {
@@ -110,7 +121,7 @@ export default function FloatingNav() {
             </span>
           </NavLink>
 
-          <div className="floating-nav-links">
+                    <div className="floating-nav-links">
             {primaryNavigation
               .filter(
                 (item) =>
@@ -122,22 +133,48 @@ export default function FloatingNav() {
                   {...item}
                 />
               ))}
+
+            <div
+              className={`floating-nav-more ${
+                moreOpen ? "is-open" : ""
+              }`}
+              onClick={(e) => {
+                e.stopPropagation();
+                setMoreOpen((v) => !v);
+              }}
+            >
+              <button
+                type="button"
+                className="floating-nav-link floating-nav-more-trigger"
+              >
+                <span>More</span>
+                <ChevronDown
+                  size={14}
+                  strokeWidth={1.8}
+                  className="more-chevron"
+                />
+              </button>
+
+              <div className="floating-nav-more-menu">
+                {moreNavigation.map(
+                  (item) => (
+                    <NavigationLink
+                      key={item.path}
+                      {...item}
+                      onNavigate={() =>
+                        setMoreOpen(false)
+                      }
+                    />
+                  ),
+                )}
+              </div>
+            </div>
           </div>
 
           <div className="floating-nav-actions">
-            {secondaryNavigation.map(
-              (item) => (
-                <NavigationLink
-                  key={item.path}
-                  {...item}
-                />
-              ),
-            )}
-
             <div className="floating-nav-user">
               <UserMenu />
             </div>
-
             <button
               type="button"
               className="floating-nav-menu-button"
@@ -209,7 +246,7 @@ export default function FloatingNav() {
 
             <div className="mobile-nav-divider" />
 
-            {secondaryNavigation.map(
+            {moreNavigation.map(
               (item) => (
                 <NavigationLink
                   key={item.path}

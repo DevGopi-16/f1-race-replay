@@ -22,7 +22,7 @@ import XCallbackPage from "../features/auth/XCallbackPage";
 
 import DriversPage from "../pages/DriversPage";
 import DriverDetailPage from "../pages/DriverDetailPage";
-import AnalyticsPage from "../pages/AnalyticsPage";
+import AnalyticsPage from "../features/analytics/AnalyticsPage";
 
 function FoundationPage({
   eyebrow,
