@@ -38,6 +38,8 @@ export interface ConstructorTeamStats {
   mechanical_failures: number;
   retirements: number;
   reliability_rate: number;
+  classified_finishes: number;
+  race_starts: number;
   avg_start: number;
   avg_finish: number;
   best_finish: number;

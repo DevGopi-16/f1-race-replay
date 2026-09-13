@@ -117,11 +117,15 @@ def _compute_constructor_history(season: int) -> dict[str, list[dict]]:
             if not cid:
                 continue
             entry = history.setdefault(cid, [])
-            points = float(row.get("points", 0) or 0)
+            cumulative = float(row.get("points", 0) or 0)
+            previous_cumulative = (
+                entry[-1]["cumulative_points"] if entry else 0.0
+            )
+            round_points = round(cumulative - previous_cumulative, 3)
             entry.append({
                 "round": round_,
-                "points": points,
-                "cumulative_points": points,
+                "points": round_points,
+                "cumulative_points": cumulative,
                 "position": int(row["position"]) if row.get("position") else None,
                 "wins": int(row.get("wins", 0) or 0),
                 "country": country_map.get(round_, ""),
@@ -213,18 +217,32 @@ def _team_race_stats(team_drivers: list[dict]) -> dict:
     total_races_started = 0
     points_finish_rounds = set()
 
+    CLASSIFIED_STATUSES = {"finished", "lapped"}
+
     for d in team_drivers:
         for h in d.get("history", []) or []:
             total_races_started += 1
+
+            status = str(h.get("status", "")).strip()
+            status_lower = status.lower()
+
+            is_classified = (
+                status_lower in CLASSIFIED_STATUSES
+                or status_lower.startswith("+")
+            )
+
             if h.get("position") is not None:
                 all_finishes.append(h["position"])
-            else:
+
+            if not is_classified and status:
                 dnf_count += 1
-                status = str(h.get("status", "")).lower()
-                if any(kw in status for kw in ["mechanical", "engine", "gearbox", "hydraulics", "power unit", "turbo", "exhaust"]):
-                    mechanical_failures += 1
-                else:
-                    retirements += 1
+                # FastF1's Status field here only gives generic
+                # outcomes (Retired / Disqualified), not the
+                # specific failure reason, so mechanical vs. other
+                # retirement causes can't be reliably distinguished.
+                # Both are counted together as retirements.
+                retirements += 1
+
             if h.get("quali_position") is not None:
                 all_quali.append(h["quali_position"])
             if (h.get("points") or 0) > 0:
@@ -236,14 +254,15 @@ def _team_race_stats(team_drivers: list[dict]) -> dict:
     return {
         "points_finishes": len(points_finish_rounds),
         "dnfs": dnf_count,
-        "mechanical_failures": mechanical_failures,
+        "mechanical_failures": 0,
         "retirements": retirements,
         "reliability_rate": reliability_rate,
+        "classified_finishes": finishes_count,
+        "race_starts": total_races_started,
         "avg_start": round(sum(all_quali) / len(all_quali), 1) if all_quali else None,
         "avg_finish": round(sum(all_finishes) / len(all_finishes), 1) if all_finishes else None,
         "best_finish": min(all_finishes) if all_finishes else None,
     }
-
 
 def build_constructors_panel(
     season: int,

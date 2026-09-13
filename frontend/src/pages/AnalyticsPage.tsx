@@ -16,7 +16,6 @@ import "../styles/analytics.css";
 
 const API_ORIGIN = "http://127.0.0.1:8000";
 const YEAR = 2026;
-const ROUND = 11;
 
 const DRIVER_IMAGES: Record<string, string> = {
   ALB: "/images/drivers/albon.png",
@@ -559,7 +558,7 @@ export default function AnalyticsPage() {
         setError("");
 
         const response = await fetch(
-          `${API_ORIGIN}/api/analytics?year=${YEAR}&round=${ROUND}`,
+          `${API_ORIGIN}/api/analytics?year=${YEAR}`,
         );
 
         if (!response.ok) {

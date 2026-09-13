@@ -1,10 +1,11 @@
 import {
   AlertTriangle,
+  CheckCircle2,
   Clock3,
+  Flag,
   Gauge,
   ShieldCheck,
   Timer,
-  Wrench,
 } from "lucide-react";
 
 import type { CSSProperties } from "react";
@@ -65,26 +66,31 @@ function ConstructorReliability({
   const reliability =
     team.reliability_rate != null
       ? clamp(team.reliability_rate)
-      : clamp(100 - team.dnfs * 15);
+      : null;
 
-  const mechanicalFailures =
-    team.mechanical_failures ?? 0;
+  const classifiedFinishes =
+    team.team_stats?.classified_finishes ?? 0;
 
-  const retirements =
-    team.retirements ?? 0;
+  const raceStarts =
+    team.team_stats?.race_starts ?? 0;
+
 
   const dnfs = team.dnfs ?? 0;
 
   const reliabilityLabel =
-    reliability >= 95
-      ? "Exceptional"
-      : reliability >= 90
-        ? "Strong"
-        : reliability >= 80
-          ? "Stable"
-          : reliability >= 70
-            ? "Needs attention"
-            : "High risk";
+    reliability == null
+      ? "No data"
+      : reliability >= 95
+        ? "Exceptional"
+        : reliability >= 90
+          ? "Strong"
+          : reliability >= 80
+            ? "Stable"
+            : reliability >= 70
+              ? "Needs attention"
+              : "High risk";
+
+
 
   return (
     <section
@@ -120,8 +126,11 @@ function ConstructorReliability({
             <div>
               <span>RELIABILITY RATE</span>
               <strong>
-                {formatNumber(reliability, 1)}%
+                {reliability != null
+                  ? `${formatNumber(reliability, 1)}%`
+                  : "—"}
               </strong>
+
             </div>
           </div>
 
@@ -129,10 +138,12 @@ function ConstructorReliability({
             <div
               className="constructor-reliability-meter-fill"
               style={{
-                width: `${reliability}%`,
+                width: `${reliability ?? 0}%`,
               }}
             />
           </div>
+
+
 
           <div className="constructor-reliability-meter-meta">
             <span>0%</span>
@@ -163,31 +174,34 @@ function ConstructorReliability({
 
           <article className="constructor-reliability-mini-card">
             <div className="constructor-reliability-mini-icon">
-              <Wrench size={16} />
+              <CheckCircle2 size={16} />
             </div>
 
             <div>
-              <span>MECHANICAL</span>
+              <span>CLASSIFIED FINISHES</span>
               <strong>
                 {formatNumber(
-                  mechanicalFailures,
+                  classifiedFinishes,
                 )}
               </strong>
             </div>
           </article>
-
+          
           <article className="constructor-reliability-mini-card">
             <div className="constructor-reliability-mini-icon">
-              <Gauge size={16} />
+              <Flag size={16} />
             </div>
 
             <div>
-              <span>RETIREMENTS</span>
+              <span>RACE STARTS</span>
               <strong>
-                {formatNumber(retirements)}
+                {formatNumber(raceStarts)}
               </strong>
             </div>
           </article>
+
+
+
         </div>
       </div>
 

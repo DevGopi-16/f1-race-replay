@@ -349,3 +349,29 @@
     display: flex;
   }
 }
+
+.constructor-race-toggle {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  width: 100%;
+  margin-top: 14px;
+  padding: 12px;
+  background: rgba(255, 255, 255, 0.03);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 12px;
+  color: var(--cs-text-dim, #9199a8);
+  font-family: var(--font-display);
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  cursor: pointer;
+  transition: background 0.2s ease, color 0.2s ease, border-color 0.2s ease;
+}
+
+.constructor-race-toggle:hover {
+  background: rgba(255, 255, 255, 0.06);
+  color: var(--cs-text, #fff);
+  border-color: rgba(255, 255, 255, 0.15);
+}

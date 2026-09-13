@@ -1,4 +1,5 @@
-import { Flag, Trophy } from "lucide-react";
+import { useState } from "react";
+import { ChevronDown, ChevronUp, Flag, Trophy } from "lucide-react";
 
 import { assetUrl } from "../constructors.api";
 import { getTeamColor } from "../constructors.colors";
@@ -64,6 +65,8 @@ interface RaceResult {
   }>;
 }
 
+const COLLAPSED_COUNT = 3;
+
 function formatNumber(value: number | null | undefined) {
   if (value == null || Number.isNaN(value)) return "—";
   return value.toLocaleString("en-US");
@@ -119,12 +122,22 @@ function buildRaceResults(
 function ConstructorRaceResults({
   team,
 }: ConstructorRaceResultsProps) {
+  const [expanded, setExpanded] = useState(false);
+
   const races = buildRaceResults(team);
 
   const maxRoundPoints = Math.max(
     ...races.map((race) => race.teamPoints),
     1,
   );
+
+  const visibleRaces = expanded
+    ? races
+    : races.slice(-COLLAPSED_COUNT).reverse();
+
+  const displayRaces = expanded
+    ? [...races].reverse()
+    : visibleRaces;
 
   if (races.length === 0) {
     return (
@@ -170,7 +183,7 @@ function ConstructorRaceResults({
           </div>
 
           <div className="constructor-race-table-body">
-            {races.map((race) => {
+            {displayRaces.map((race) => {
               const pointsWidth =
                 (race.teamPoints / maxRoundPoints) * 100;
 
@@ -214,10 +227,6 @@ function ConstructorRaceResults({
                       ({ driver, result }) => {
                         const position =
                           result?.position ?? null;
-
-
-
-
 
                         return (
                           <div
@@ -295,6 +304,26 @@ function ConstructorRaceResults({
           </div>
         </div>
       </div>
+
+      {races.length > COLLAPSED_COUNT && (
+        <button
+          type="button"
+          className="constructor-race-toggle"
+          onClick={() => setExpanded((value) => !value)}
+        >
+          {expanded ? (
+            <>
+              <ChevronUp size={15} />
+              Show Latest {COLLAPSED_COUNT}
+            </>
+          ) : (
+            <>
+              <ChevronDown size={15} />
+              Show Full Season ({races.length} Rounds)
+            </>
+          )}
+        </button>
+      )}
 
       <div className="constructor-race-mobile-note">
         <span>SCROLL</span>

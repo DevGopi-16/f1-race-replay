@@ -274,6 +274,9 @@ def _compute_season_stats(
                         3,
                     )
 
+                    status = row.get("Status")
+                    status = str(status).strip() if status is not None else ""
+
                     entry["history"].append(
                         {
                             "round": int(round_),
@@ -283,8 +286,13 @@ def _compute_season_stats(
                             ),
                             "position": position,
                             "points": points,
+                            "status": status,
                         }
                     )
+
+
+
+
 
             if fl_code:
                 fl_code = str(fl_code).strip().upper()
@@ -576,6 +584,11 @@ def build_driver_panel(
         or {}
     )
 
+    racecraft_stats = (
+        get_racecraft_cached(season)
+        or {}
+    )
+
     static_by_key = _static_lookup(
         static_drivers
     )
@@ -620,6 +633,11 @@ def build_driver_panel(
         )
 
         extra = season_stats.get(
+            code,
+            {},
+        )
+
+        racecraft = racecraft_stats.get(
             code,
             {},
         )
@@ -745,6 +763,12 @@ def build_driver_panel(
                 ),
                 "avg_finish": extra.get(
                     "avg_finish"
+                ),
+                "avg_pit_stop": racecraft.get(
+                    "avg_pit_stop"
+                ),
+                "fastest_pit_stop": racecraft.get(
+                    "best_pit_stop"
                 ),
                 "history": (
                     extra.get("history", [])

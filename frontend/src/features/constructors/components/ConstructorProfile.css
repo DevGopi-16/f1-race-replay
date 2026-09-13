@@ -44,6 +44,18 @@
   letter-spacing: 0.1em;
   text-transform: uppercase;
   color: var(--cs-text-faint, #656c78);
+  animation: constructorSeasonPulse 2.6s ease-in-out infinite;
+}
+
+@keyframes constructorSeasonPulse {
+  0%, 100% {
+    color: var(--cs-text-faint, #656c78);
+    text-shadow: none;
+  }
+  50% {
+    color: color-mix(in srgb, var(--team-color, #e10600) 75%, white);
+    text-shadow: 0 0 14px color-mix(in srgb, var(--team-color, #e10600) 65%, transparent);
+  }
 }
 
 /* ============================================================
@@ -531,4 +543,97 @@
   letter-spacing: 0.08em;
   text-transform: uppercase;
   color: var(--cs-text-faint, #656c78);
+}
+
+.constructor-progression-wrap {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+.constructor-progression-tabs {
+  display: flex;
+  gap: 6px;
+  background: rgba(255, 255, 255, 0.03);
+  border: 1px solid rgba(255, 255, 255, 0.07);
+  border-radius: 10px;
+  padding: 4px;
+  align-self: flex-start;
+}
+
+.constructor-progression-tab {
+  border: none;
+  background: transparent;
+  color: var(--cs-text-faint, #656c78);
+  font-family: var(--font-display);
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  padding: 8px 14px;
+  border-radius: 7px;
+  cursor: pointer;
+  transition: color 0.2s ease, background 0.2s ease;
+}
+
+.constructor-progression-tab:hover {
+  color: var(--cs-text, #fff);
+}
+
+.constructor-progression-tab.active {
+  background: color-mix(in srgb, var(--team-color, #e10600) 20%, rgba(255, 255, 255, 0.1));
+  color: var(--cs-text, #fff);
+}
+
+.constructor-progression {
+  position: relative;
+}
+
+.constructor-progression canvas {
+  display: block;
+  width: 100%;
+  cursor: crosshair;
+}
+
+.constructor-progression-tooltip {
+  position: absolute;
+  transform: translate(-50%, -100%);
+  background: rgba(10, 10, 10, 0.92);
+  border: 1px solid color-mix(in srgb, var(--team-color, #e10600) 45%, rgba(255, 255, 255, 0.15));
+  border-radius: 10px;
+  padding: 10px 14px;
+  pointer-events: none;
+  white-space: nowrap;
+  z-index: 5;
+  box-shadow: 0 12px 24px -8px rgba(0, 0, 0, 0.6);
+}
+
+.constructor-progression-tooltip-round {
+  font-family: var(--font-display);
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  color: var(--cs-text-faint, #656c78);
+  margin-bottom: 4px;
+}
+
+.constructor-progression-tooltip strong {
+  display: block;
+  font-family: var(--font-display);
+  font-size: 15px;
+  font-weight: 800;
+  color: var(--cs-text, #fff);
+}
+
+.constructor-progression-tooltip small {
+  font-size: 10px;
+  font-weight: 600;
+  color: var(--cs-text-dim, #9199a8);
+}
+
+.constructor-progression-empty {
+  padding: 40px;
+  text-align: center;
+  color: var(--cs-text-faint, #656c78);
+  font-size: 13px;
 }

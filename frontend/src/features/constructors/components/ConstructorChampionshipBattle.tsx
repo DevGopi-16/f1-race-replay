@@ -39,16 +39,16 @@ function ConstructorChampionshipBattle({
     null;
 
   const ahead =
-    sortedTeams.find(
-      (entry) => entry.points > team.points,
-    ) ?? null;
+    sortedTeams
+      .filter((entry) => entry.points > team.points)
+      .sort((a, b) => a.points - b.points)[0] ?? null;
 
   const behind =
-    [...sortedTeams]
-      .reverse()
-      .find(
-        (entry) => entry.points < team.points,
-      ) ?? null;
+    sortedTeams
+      .filter((entry) => entry.points < team.points)
+      .sort((a, b) => b.points - a.points)[0] ?? null;
+
+
 
   const leaderGap =
     leader && leader.id !== team.id
