@@ -10,6 +10,7 @@ import { initializeAppearance } from "./features/auth/appearance";
 
 
 import "./styles/drivers.css";
+import "./styles/calendar.css";
 
 initializeAppearance();
 

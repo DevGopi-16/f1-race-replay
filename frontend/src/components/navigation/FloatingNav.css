@@ -948,3 +948,107 @@
     display: none;
   }
 }
+.next-session-badge {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 3px;
+
+  min-width: 150px;
+  padding: 6px 16px;
+  margin-right: 4px;
+
+  background: var(--color-white-05);
+  border: 1px solid var(--color-white-08);
+  border-radius: var(--radius-pill);
+
+  white-space: nowrap;
+  text-align: center;
+  line-height: 1.2;
+
+  animation:
+    next-session-fade-in 500ms var(--ease-standard),
+    next-session-pulse 3.5s ease-in-out infinite;
+}
+
+.next-session-label {
+  font-family: var(--font-body);
+  font-size: 0.52rem;
+  font-weight: var(--weight-semibold);
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--color-white-45);
+}
+
+.next-session-countdown {
+  display: inline-block;
+
+  font-family: var(--font-body);
+  font-size: 0.72rem;
+  font-weight: var(--weight-bold);
+  letter-spacing: 0.05em;
+  color: var(--color-white);
+}
+
+.next-session-countdown.is-ticking {
+  animation: next-session-tick 400ms var(--ease-standard);
+}
+
+@keyframes next-session-fade-in {
+  from {
+    opacity: 0;
+    transform: translateY(-4px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes next-session-pulse {
+  0%,
+  100% {
+    border-color: var(--color-white-08);
+    box-shadow: 0 0 0 rgba(225, 6, 0, 0);
+  }
+  50% {
+    border-color: rgba(225, 6, 0, 0.35);
+    box-shadow: 0 0 14px rgba(225, 6, 0, 0.18);
+  }
+}
+
+@keyframes next-session-tick {
+  0% {
+    opacity: 0.3;
+    transform: scale(0.94);
+    color: var(--color-accent);
+  }
+  100% {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+@media (max-width: 1100px) {
+  .next-session-badge {
+    display: none;
+  }
+}
+
+.next-session-flag {
+  margin-right: 4px;
+  font-size: 0.72rem;
+  vertical-align: -1px;
+}
+
+.next-session-badge {
+  cursor: pointer;
+  font: inherit;
+  appearance: none;
+}
+
+.next-session-badge:hover {
+  border-color: var(--color-white-15);
+  background: var(--color-white-08);
+}

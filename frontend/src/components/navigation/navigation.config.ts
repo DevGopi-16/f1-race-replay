@@ -2,6 +2,7 @@ import {
   Activity,
   BarChart3,
   CarFront,
+  Calendar,
   Gauge,
   Home,
   Radio,
@@ -67,6 +68,12 @@ export const primaryNavigation: NavigationItem[] = [
 ];
 
 export const moreNavigation: NavigationItem[] = [
+  {
+    label: "Calendar",
+    path: "/calendar",
+    icon: Calendar,
+  },
+
   {
     label: "Settings",
     path: "/settings",

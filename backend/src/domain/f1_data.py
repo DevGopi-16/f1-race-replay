@@ -1,4 +1,5 @@
 import os
+import pathlib
 import pickle
 import sys
 from datetime import timedelta
@@ -12,6 +13,9 @@ import pandas as pd
 from src.lib.settings import get_settings
 from src.lib.time import parse_time_string
 from src.lib.tyres import get_tyre_compound_int
+
+_COMPUTED_DATA_DIR = pathlib.Path(__file__).resolve().parent.parent / "computed_data"
+
 
 
 def enable_cache():
@@ -721,7 +725,7 @@ def get_race_telemetry(session, session_type="R"):
     try:
         if "--refresh-data" not in sys.argv:
             with open(
-                f"computed_data/{event_name}_{cache_suffix}_telemetry.pkl", "rb"
+                _COMPUTED_DATA_DIR / f"{event_name}_{cache_suffix}_telemetry.pkl", "rb"
             ) as f:
                 frames = pickle.load(f)
                 print(f"Loaded precomputed {cache_suffix} telemetry data.")
@@ -1280,11 +1284,10 @@ def get_race_telemetry(session, session_type="R"):
     print("completed telemetry extraction...")
     print("Saving to cache file...")
     # If computed_data/ directory doesn't exist, create it
-    if not os.path.exists("computed_data"):
-        os.makedirs("computed_data")
+    _COMPUTED_DATA_DIR.mkdir(parents=True, exist_ok=True)
 
     # Save using pickle (10-100x faster than JSON)
-    with open(f"computed_data/{event_name}_{cache_suffix}_telemetry.pkl", "wb") as f:
+    with open(_COMPUTED_DATA_DIR / f"{event_name}_{cache_suffix}_telemetry.pkl", "wb") as f:
         pickle.dump({
             "frames": frames,
             "driver_colors": get_driver_colors(session),
@@ -1700,7 +1703,7 @@ def get_quali_telemetry(session, session_type="Q"):
     try:
         if "--refresh-data" not in sys.argv:
             with open(
-                f"computed_data/{event_name}_{cache_suffix}_telemetry.pkl", "rb"
+                _COMPUTED_DATA_DIR / f"{event_name}_{cache_suffix}_telemetry.pkl", "rb"
             ) as f:
                 data = pickle.load(f)
                 print(f"Loaded precomputed {cache_suffix} telemetry data.")
@@ -1744,10 +1747,9 @@ def get_quali_telemetry(session, session_type="Q"):
 
     # Save to the compute_data directory
 
-    if not os.path.exists("computed_data"):
-        os.makedirs("computed_data")
+    _COMPUTED_DATA_DIR.mkdir(parents=True, exist_ok=True)
 
-    with open(f"computed_data/{event_name}_{cache_suffix}_telemetry.pkl", "wb") as f:
+    with open(_COMPUTED_DATA_DIR / f"{event_name}_{cache_suffix}_telemetry.pkl", "wb") as f:
         pickle.dump(
             {
                 "results": qualifying_results,

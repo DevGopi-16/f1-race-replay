@@ -1,6 +1,6 @@
 from typing import Optional
 
-from src.driver_panel import (
+from src.domain.driver_panel import (
     build_driver_panel,
     get_season_stats_cached,
     get_racecraft_stats,

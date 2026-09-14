@@ -174,6 +174,13 @@ function assetUrl(path?: string | null): string {
     return path;
   }
 
+  // Static assets under /images/... live in the frontend's own
+  // public/ folder (served by Vite), not the backend — so don't
+  // prefix those with the backend origin.
+  if (path.startsWith("/images/")) {
+    return path;
+  }
+
   return `${API_ORIGIN}/${path.replace(/^\/+/, "")}`;
 }
 

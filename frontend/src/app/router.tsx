@@ -8,6 +8,7 @@ import Divider from "../components/ui/Divider";
 import SectionLabel from "../components/ui/SectionLabel";
 import PageTransition from "../components/motion/PageTransition";
 import Reveal from "../components/motion/Reveal";
+import CalendarPage from "../features/schedule/CalendarPage";
 
 import HomePage from "../features/home/HomePage";
 import ConstructorsPage from "../features/constructors/ConstructorsPage";
@@ -155,7 +156,11 @@ export function AppRouter() {
           element={<ConstructorsPage />}
         />
 
-
+        <Route
+          path="/calendar"
+          element={<CalendarPage />}
+        />
+        
         <Route
           path="/telemetry"
           element={

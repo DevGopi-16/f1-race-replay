@@ -11,6 +11,7 @@ JOLPICA_BASE = "https://api.jolpi.ca/ergast/f1"
 COMPUTED_DATA_DIR = os.path.join(
     os.path.dirname(__file__),
     "..",
+    "..",
     "computed_data",
 )
 
