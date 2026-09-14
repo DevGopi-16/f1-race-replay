@@ -2,8 +2,19 @@ import React from "react";
 import ReactDOM from "react-dom/client";
 
 import App from "./app/App";
+
+import { useAuthStore } from "./features/auth/auth.store";
+
 import "./styles/globals.css";
+import { initializeAppearance } from "./features/auth/appearance";
+
+
 import "./styles/drivers.css";
+
+initializeAppearance();
+
+
+
 
 class F1ErrorBoundary extends React.Component<
   { children: React.ReactNode },
@@ -17,9 +28,19 @@ class F1ErrorBoundary extends React.Component<
     return { error };
   }
 
-  componentDidCatch(error: Error, info: React.ErrorInfo) {
-    console.error("F1 RACE REPLAY ERROR:", error);
-    console.error("COMPONENT STACK:", info.componentStack);
+  componentDidCatch(
+    error: Error,
+    info: React.ErrorInfo,
+  ) {
+    console.error(
+      "F1 RACE REPLAY ERROR:",
+      error,
+    );
+
+    console.error(
+      "COMPONENT STACK:",
+      info.componentStack,
+    );
   }
 
   render() {
@@ -34,7 +55,11 @@ class F1ErrorBoundary extends React.Component<
             fontFamily: "monospace",
           }}
         >
-          <h1 style={{ color: "#ff2337" }}>
+          <h1
+            style={{
+              color: "#ff2337",
+            }}
+          >
             F1 RACE REPLAY — RUNTIME ERROR
           </h1>
 
@@ -58,19 +83,64 @@ class F1ErrorBoundary extends React.Component<
   }
 }
 
-window.addEventListener("unhandledrejection", (event) => {
-  console.error(
-    "UNHANDLED PROMISE:",
-    event.reason,
+
+/* =========================================================
+   APPLICATION BOOTSTRAP
+========================================================= */
+
+function AppBootstrap() {
+  const restoreSession = useAuthStore(
+    (state) => state.restoreSession,
   );
-});
+
+  const isInitialized = useAuthStore(
+    (state) => state.isInitialized,
+  );
+
+  React.useEffect(() => {
+    void restoreSession();
+  }, [restoreSession]);
+
+  if (!isInitialized) {
+    return (
+      <div
+        style={{
+          minHeight: "100vh",
+          background: "#050505",
+        }}
+      />
+    );
+  }
+
+  return <App />;
+}
+
+
+/* =========================================================
+   GLOBAL ERROR HANDLING
+========================================================= */
+
+window.addEventListener(
+  "unhandledrejection",
+  (event) => {
+    console.error(
+      "UNHANDLED PROMISE:",
+      event.reason,
+    );
+  },
+);
+
+
+/* =========================================================
+   APPLICATION MOUNT
+========================================================= */
 
 ReactDOM.createRoot(
-  document.getElementById("root")!
+  document.getElementById("root")!,
 ).render(
   <React.StrictMode>
     <F1ErrorBoundary>
-      <App />
+      <AppBootstrap />
     </F1ErrorBoundary>
-  </React.StrictMode>
+  </React.StrictMode>,
 );

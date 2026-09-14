@@ -1,0 +1,171 @@
+.constructor-team-statistics {
+  margin-top: 32px;
+}
+
+.constructor-team-statistics-name {
+  display: inline-flex;
+  align-items: center;
+  min-height: 30px;
+  padding: 0 11px;
+  border: 1px solid color-mix(
+    in srgb,
+    var(--constructor-color, #e10600) 30%,
+    transparent
+  );
+  border-radius: 999px;
+  color: rgba(255, 255, 255, 0.58);
+  background: color-mix(
+    in srgb,
+    var(--constructor-color, #e10600) 7%,
+    transparent
+  );
+  font-family: var(
+    --font-display,
+    "Orbitron",
+    sans-serif
+  );
+  font-size: 8px;
+  font-weight: 700;
+  letter-spacing: 0.11em;
+}
+
+.constructor-team-statistics-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 10px;
+}
+
+.constructor-team-stat-card {
+  position: relative;
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  min-height: 108px;
+  padding: 17px;
+  overflow: hidden;
+  border: 1px solid rgba(255, 255, 255, 0.07);
+  border-radius: 15px;
+  background:
+    linear-gradient(
+      145deg,
+      rgba(255, 255, 255, 0.045),
+      rgba(255, 255, 255, 0.015)
+    );
+  transition:
+    transform 180ms ease,
+    border-color 180ms ease,
+    background 180ms ease;
+}
+
+.constructor-team-stat-card::before {
+  content: "";
+  position: absolute;
+  left: 0;
+  top: 0;
+  width: 2px;
+  height: 100%;
+  background: var(
+    --constructor-color,
+    #e10600
+  );
+  opacity: 0.65;
+}
+
+.constructor-team-stat-card:hover {
+  transform: translateY(-2px);
+  border-color: color-mix(
+    in srgb,
+    var(--constructor-color, #e10600) 28%,
+    rgba(255, 255, 255, 0.07)
+  );
+  background:
+    linear-gradient(
+      145deg,
+      rgba(255, 255, 255, 0.06),
+      rgba(255, 255, 255, 0.018)
+    );
+}
+
+.constructor-team-stat-icon {
+  display: grid;
+  flex: 0 0 auto;
+  width: 40px;
+  height: 40px;
+  place-items: center;
+  border: 1px solid color-mix(
+    in srgb,
+    var(--constructor-color, #e10600) 22%,
+    transparent
+  );
+  border-radius: 11px;
+  color: var(
+    --constructor-color,
+    #e10600
+  );
+  background: color-mix(
+    in srgb,
+    var(--constructor-color, #e10600) 7%,
+    transparent
+  );
+}
+
+.constructor-team-stat-copy {
+  min-width: 0;
+}
+
+.constructor-team-stat-label {
+  display: block;
+  margin-bottom: 4px;
+  color: rgba(255, 255, 255, 0.36);
+  font-family: var(
+    --font-display,
+    "Orbitron",
+    sans-serif
+  );
+  font-size: 8px;
+  font-weight: 700;
+  letter-spacing: 0.11em;
+}
+
+.constructor-team-stat-value {
+  display: block;
+  color: #fff;
+  font-family: var(
+    --font-display,
+    "Orbitron",
+    sans-serif
+  );
+  font-size: 23px;
+  line-height: 1.05;
+  letter-spacing: -0.04em;
+}
+
+.constructor-team-stat-detail {
+  display: block;
+  margin-top: 4px;
+  overflow: hidden;
+  color: rgba(255, 255, 255, 0.3);
+  font-size: 10px;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+@media (max-width: 900px) {
+  .constructor-team-statistics-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+@media (max-width: 560px) {
+  .constructor-team-statistics-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .constructor-team-statistics-name {
+    display: none;
+  }
+
+  .constructor-team-stat-card {
+    min-height: 92px;
+  }
+}

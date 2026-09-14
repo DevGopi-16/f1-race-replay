@@ -1,0 +1,151 @@
+.racecraft-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 1px;
+  background: var(--border-color);
+  border: 1px solid var(--border-color);
+}
+
+.racecraft-card {
+  position: relative;
+  background: var(--surface-color);
+  padding: 24px;
+  overflow: hidden;
+  transition:
+    transform 350ms ease,
+    background 350ms ease,
+    box-shadow 350ms ease,
+    border-color 350ms ease;
+  will-change: transform;
+  border: 1px solid transparent;
+}
+
+.racecraft-card::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background: radial-gradient(
+    circle at 100% 0%,
+    rgba(255, 255, 255, 0.06),
+    transparent 38%
+  );
+  opacity: 0;
+  transition: opacity 350ms ease;
+}
+
+.racecraft-card-glow {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  opacity: 0;
+  background: radial-gradient(
+    260px circle at var(--cursor-x, 50%) var(--cursor-y, 50%),
+    color-mix(in srgb, var(--team-accent, #fff) 22%, transparent),
+    transparent 65%
+  );
+  transition: opacity 300ms ease;
+}
+
+.racecraft-card:hover {
+  transform: translateY(-4px);
+  z-index: 2;
+  background: var(--surface-hover, rgba(255, 255, 255, 0.035));
+  border-color: color-mix(in srgb, var(--team-accent, transparent) 35%, transparent);
+  box-shadow:
+    0 20px 60px rgba(0, 0, 0, 0.16),
+    0 0 40px color-mix(in srgb, var(--team-accent, transparent) 12%, transparent);
+}
+
+.racecraft-card:hover::before {
+  opacity: 1;
+}
+
+.racecraft-card:hover .racecraft-card-glow {
+  opacity: 1;
+}
+
+.racecraft-card:hover .racecraft-card-top strong {
+  color: var(--team-accent, currentColor);
+  transition: color 250ms ease;
+}
+
+.racecraft-card-top {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  padding-bottom: 22px;
+  border-bottom: 1px solid var(--border-color);
+}
+
+.racecraft-card-top > div {
+  display: flex;
+  align-items: baseline;
+  gap: 10px;
+}
+
+.racecraft-card-top strong {
+  font-size: 13px;
+  letter-spacing: 0.08em;
+}
+
+.racecraft-card-top span {
+  font-size: 12px;
+  opacity: 0.5;
+}
+
+.racecraft-card:hover .analytics-driver-avatar {
+  transform: translateY(-3px) scale(1.05);
+  border-color: rgba(255, 255, 255, 0.3);
+  box-shadow: 0 12px 32px rgba(0, 0, 0, 0.3);
+}
+
+.racecraft-metrics {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 16px;
+  padding-top: 22px;
+}
+
+.racecraft-metrics div {
+  display: flex;
+  flex-direction: column;
+  gap: 7px;
+}
+
+.racecraft-metrics span {
+  font-size: 8px;
+  letter-spacing: 0.14em;
+  opacity: 0.45;
+}
+
+.racecraft-metrics strong {
+  font-size: 20px;
+  font-variant-numeric: tabular-nums;
+}
+
+@media (max-width: 1100px) {
+  .racecraft-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 700px) {
+  .racecraft-metrics {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+@media (max-width: 480px) {
+  .racecraft-card {
+    padding: 18px;
+  }
+
+  .racecraft-metrics {
+    gap: 12px;
+  }
+
+  .racecraft-metrics strong {
+    font-size: 17px;
+  }
+}

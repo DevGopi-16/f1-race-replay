@@ -1,0 +1,302 @@
+.constructor-engineering-insights {
+  position: relative;
+  margin-top: 28px;
+  padding: 28px;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 20px;
+  background:
+    linear-gradient(
+      145deg,
+      rgba(255, 255, 255, 0.055),
+      rgba(255, 255, 255, 0.018)
+    );
+  box-shadow:
+    0 24px 70px rgba(0, 0, 0, 0.2);
+  overflow: hidden;
+}
+
+.constructor-engineering-insights::before {
+  content: "";
+  position: absolute;
+  inset: 0 0 auto;
+  height: 1px;
+  background: linear-gradient(
+    90deg,
+    var(--color-accent, #e10600),
+    transparent 65%
+  );
+  opacity: 0.8;
+}
+
+.constructor-engineering-header {
+  position: relative;
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 24px;
+  margin-bottom: 22px;
+}
+
+.constructor-engineering-kicker {
+  display: block;
+  margin-bottom: 7px;
+  color: var(--color-accent, #e10600);
+  font-family: Orbitron, sans-serif;
+  font-size: 0.68rem;
+  font-weight: 700;
+  letter-spacing: 0.18em;
+}
+
+.constructor-engineering-header h2 {
+  margin: 0;
+  font-family: Orbitron, sans-serif;
+  font-size: clamp(1.25rem, 2vw, 1.65rem);
+  letter-spacing: -0.025em;
+}
+
+.constructor-engineering-header p {
+  margin: 8px 0 0;
+  color: rgba(255, 255, 255, 0.55);
+  font-size: 0.86rem;
+}
+
+.constructor-engineering-header-mark {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  flex-shrink: 0;
+  padding: 8px 11px;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 999px;
+  color: rgba(255, 255, 255, 0.52);
+  font-family: Orbitron, sans-serif;
+  font-size: 0.58rem;
+  letter-spacing: 0.12em;
+}
+
+.constructor-engineering-header-mark svg {
+  color: var(--color-accent, #e10600);
+}
+
+.constructor-engineering-summary {
+  display: flex;
+  align-items: flex-start;
+  gap: 14px;
+  margin-bottom: 18px;
+  padding: 17px 18px;
+  border: 1px solid rgba(255, 255, 255, 0.07);
+  border-radius: 14px;
+  background: rgba(0, 0, 0, 0.14);
+}
+
+.constructor-engineering-summary-icon {
+  display: grid;
+  width: 40px;
+  height: 40px;
+  flex: 0 0 40px;
+  place-items: center;
+  border-radius: 11px;
+  background: color-mix(
+    in srgb,
+    var(--color-accent, #e10600) 14%,
+    transparent
+  );
+  color: var(--color-accent, #e10600);
+}
+
+.constructor-engineering-summary span {
+  display: block;
+  margin-bottom: 5px;
+  color: rgba(255, 255, 255, 0.42);
+  font-family: Orbitron, sans-serif;
+  font-size: 0.58rem;
+  font-weight: 700;
+  letter-spacing: 0.13em;
+}
+
+.constructor-engineering-summary p {
+  margin: 0;
+  color: rgba(255, 255, 255, 0.72);
+  font-size: 0.86rem;
+  line-height: 1.65;
+}
+
+.constructor-engineering-grid {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 12px;
+}
+
+.constructor-engineering-insight-card {
+  position: relative;
+  display: flex;
+  min-height: 172px;
+  flex-direction: column;
+  justify-content: space-between;
+  gap: 22px;
+  padding: 17px;
+  border: 1px solid rgba(255, 255, 255, 0.07);
+  border-radius: 15px;
+  background: rgba(255, 255, 255, 0.025);
+  overflow: hidden;
+  transition:
+    border-color 180ms ease,
+    transform 180ms ease,
+    background 180ms ease;
+}
+
+.constructor-engineering-insight-card::after {
+  content: "";
+  position: absolute;
+  right: -30px;
+  bottom: -35px;
+  width: 105px;
+  height: 105px;
+  border-radius: 50%;
+  background: var(--insight-accent);
+  opacity: 0.035;
+  filter: blur(3px);
+}
+
+.constructor-engineering-insight-card:hover {
+  transform: translateY(-2px);
+  border-color: color-mix(
+    in srgb,
+    var(--insight-accent) 28%,
+    rgba(255, 255, 255, 0.07)
+  );
+  background: rgba(255, 255, 255, 0.04);
+}
+
+.constructor-engineering-insight-icon {
+  display: grid;
+  width: 36px;
+  height: 36px;
+  place-items: center;
+  border-radius: 10px;
+  background: color-mix(
+    in srgb,
+    var(--insight-accent) 12%,
+    transparent
+  );
+  color: var(--insight-accent);
+}
+
+.constructor-engineering-insight-content {
+  min-width: 0;
+}
+
+.constructor-engineering-insight-eyebrow {
+  display: block;
+  margin-bottom: 5px;
+  color: rgba(255, 255, 255, 0.38);
+  font-family: Orbitron, sans-serif;
+  font-size: 0.54rem;
+  font-weight: 700;
+  letter-spacing: 0.12em;
+}
+
+.constructor-engineering-insight-content h3 {
+  margin: 0 0 8px;
+  font-size: 0.88rem;
+  font-weight: 600;
+}
+
+.constructor-engineering-insight-content strong {
+  display: block;
+  color: var(--insight-accent);
+  font-family: Orbitron, sans-serif;
+  font-size: 1.55rem;
+  line-height: 1;
+}
+
+.constructor-engineering-insight-content p {
+  margin: 8px 0 0;
+  color: rgba(255, 255, 255, 0.48);
+  font-size: 0.7rem;
+  line-height: 1.5;
+}
+
+.constructor-engineering-metrics {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 14px;
+  margin-top: 18px;
+  padding-top: 18px;
+  border-top: 1px solid rgba(255, 255, 255, 0.07);
+}
+
+.constructor-engineering-metric {
+  min-width: 0;
+}
+
+.constructor-engineering-metric-top {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 14px;
+  margin-bottom: 9px;
+}
+
+.constructor-engineering-metric-top span {
+  color: rgba(255, 255, 255, 0.42);
+  font-family: Orbitron, sans-serif;
+  font-size: 0.54rem;
+  letter-spacing: 0.09em;
+}
+
+.constructor-engineering-metric-top strong {
+  color: rgba(255, 255, 255, 0.78);
+  font-family: Orbitron, sans-serif;
+  font-size: 0.72rem;
+}
+
+.constructor-engineering-track {
+  height: 4px;
+  overflow: hidden;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.07);
+}
+
+.constructor-engineering-track span {
+  display: block;
+  height: 100%;
+  border-radius: inherit;
+  background: var(--color-accent, #e10600);
+  transition: width 700ms cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+@media (max-width: 1050px) {
+  .constructor-engineering-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+@media (max-width: 700px) {
+  .constructor-engineering-insights {
+    padding: 20px;
+    border-radius: 16px;
+  }
+
+  .constructor-engineering-header {
+    flex-direction: column;
+    gap: 14px;
+  }
+
+  .constructor-engineering-header-mark {
+    align-self: flex-start;
+  }
+
+  .constructor-engineering-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .constructor-engineering-insight-card {
+    min-height: 145px;
+  }
+
+  .constructor-engineering-metrics {
+    grid-template-columns: 1fr;
+    gap: 16px;
+  }
+}

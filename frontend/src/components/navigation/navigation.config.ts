@@ -1,5 +1,6 @@
 import {
   Activity,
+  BarChart3,
   CarFront,
   Gauge,
   Home,
@@ -21,39 +22,51 @@ export const primaryNavigation: NavigationItem[] = [
     path: "/",
     icon: Home,
   },
+
   {
     label: "Replay",
     path: "/replay",
     icon: Radio,
   },
+
   {
     label: "Sessions",
     path: "/sessions",
     icon: Activity,
   },
+
   {
     label: "Drivers",
     path: "/drivers",
     icon: Users,
   },
+
   {
     label: "Teams",
     path: "/constructors",
     icon: CarFront,
   },
+
   {
     label: "Telemetry",
     path: "/telemetry",
     icon: Gauge,
   },
+
   {
     label: "Timing",
     path: "/timing",
     icon: Zap,
   },
+
+  {
+    label: "Analytics",
+    path: "/analytics",
+    icon: BarChart3,
+  },
 ];
 
-export const secondaryNavigation: NavigationItem[] = [
+export const moreNavigation: NavigationItem[] = [
   {
     label: "Settings",
     path: "/settings",

@@ -379,6 +379,11 @@
   font-family:
     var(--font-mono);
 
+
+:root[data-theme="light"] .replay-track-panel,
+:root[data-theme="light"] .track-viewport {
+  border-color: var(--border-default);
+}
   font-size: 6px;
 
   font-weight: 800;

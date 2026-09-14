@@ -152,9 +152,9 @@ export function useReplay(query?: ReplayQueryLike | null) {
                   | "FP2"
                   | "FP3",
               fps,
-            },
-            start,
-            CHUNK_SIZE,
+              start,
+              count: CHUNK_SIZE,
+            }
           );
 
         /*

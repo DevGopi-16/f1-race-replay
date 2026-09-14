@@ -1,0 +1,1 @@
+export { TEAM_COLORS, getTeamColor } from "../../constants/teamColors";

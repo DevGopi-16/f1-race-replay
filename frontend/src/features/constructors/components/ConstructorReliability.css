@@ -1,0 +1,349 @@
+.constructor-reliability {
+  margin-top: 32px;
+}
+
+.constructor-reliability-status {
+  display: inline-flex;
+  align-items: center;
+  min-height: 30px;
+  padding: 0 11px;
+  border: 1px solid color-mix(
+    in srgb,
+    var(--constructor-color, #e10600) 28%,
+    transparent
+  );
+  border-radius: 999px;
+  color: rgba(255, 255, 255, 0.58);
+  background: color-mix(
+    in srgb,
+    var(--constructor-color, #e10600) 7%,
+    transparent
+  );
+  font-family: var(
+    --font-display,
+    "Orbitron",
+    sans-serif
+  );
+  font-size: 8px;
+  font-weight: 700;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+}
+
+.constructor-reliability-layout {
+  display: grid;
+  grid-template-columns: minmax(0, 1.25fr) minmax(260px, 0.75fr);
+  gap: 12px;
+}
+
+.constructor-reliability-main {
+  padding: 22px;
+  border: 1px solid rgba(255, 255, 255, 0.07);
+  border-radius: 16px;
+  background:
+    linear-gradient(
+      145deg,
+      rgba(255, 255, 255, 0.045),
+      rgba(255, 255, 255, 0.015)
+    );
+}
+
+.constructor-reliability-main-header {
+  display: flex;
+  align-items: center;
+  gap: 13px;
+}
+
+.constructor-reliability-icon {
+  display: grid;
+  width: 44px;
+  height: 44px;
+  flex: 0 0 auto;
+  place-items: center;
+  border: 1px solid color-mix(
+    in srgb,
+    var(--constructor-color, #e10600) 28%,
+    transparent
+  );
+  border-radius: 12px;
+  color: var(--constructor-color, #e10600);
+  background: color-mix(
+    in srgb,
+    var(--constructor-color, #e10600) 8%,
+    transparent
+  );
+}
+
+.constructor-reliability-main-header span {
+  display: block;
+  margin-bottom: 5px;
+  color: rgba(255, 255, 255, 0.36);
+  font-family: var(
+    --font-display,
+    "Orbitron",
+    sans-serif
+  );
+  font-size: 8px;
+  font-weight: 700;
+  letter-spacing: 0.11em;
+}
+
+.constructor-reliability-main-header strong {
+  display: block;
+  color: #fff;
+  font-family: var(
+    --font-display,
+    "Orbitron",
+    sans-serif
+  );
+  font-size: 27px;
+  line-height: 1;
+}
+
+.constructor-reliability-meter {
+  height: 8px;
+  margin-top: 25px;
+  overflow: hidden;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.07);
+}
+
+.constructor-reliability-meter-fill {
+  height: 100%;
+  border-radius: inherit;
+  background: var(
+    --constructor-color,
+    #e10600
+  );
+  box-shadow:
+    0 0 16px color-mix(
+      in srgb,
+      var(--constructor-color, #e10600) 35%,
+      transparent
+    );
+  transition: width 700ms ease;
+}
+
+.constructor-reliability-meter-meta {
+  display: flex;
+  justify-content: space-between;
+  margin-top: 7px;
+  color: rgba(255, 255, 255, 0.24);
+  font-family: var(
+    --font-display,
+    "Orbitron",
+    sans-serif
+  );
+  font-size: 7px;
+  letter-spacing: 0.08em;
+}
+
+.constructor-reliability-description {
+  max-width: 620px;
+  margin: 18px 0 0;
+  color: rgba(255, 255, 255, 0.42);
+  font-size: 11px;
+  line-height: 1.7;
+}
+
+.constructor-reliability-failures {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 10px;
+}
+
+.constructor-reliability-mini-card {
+  display: flex;
+  align-items: center;
+  gap: 13px;
+  min-height: 84px;
+  padding: 15px;
+  border: 1px solid rgba(255, 255, 255, 0.07);
+  border-radius: 14px;
+  background: rgba(255, 255, 255, 0.025);
+}
+
+.constructor-reliability-mini-icon {
+  display: grid;
+  width: 37px;
+  height: 37px;
+  flex: 0 0 auto;
+  place-items: center;
+  border-radius: 10px;
+  color: var(--constructor-color, #e10600);
+  background: color-mix(
+    in srgb,
+    var(--constructor-color, #e10600) 8%,
+    transparent
+  );
+}
+
+.constructor-reliability-mini-card span {
+  display: block;
+  margin-bottom: 4px;
+  color: rgba(255, 255, 255, 0.34);
+  font-family: var(
+    --font-display,
+    "Orbitron",
+    sans-serif
+  );
+  font-size: 7px;
+  font-weight: 700;
+  letter-spacing: 0.1em;
+}
+
+.constructor-reliability-mini-card strong {
+  color: #fff;
+  font-family: var(
+    --font-display,
+    "Orbitron",
+    sans-serif
+  );
+  font-size: 21px;
+}
+
+.constructor-pitwall {
+  margin-top: 12px;
+  padding: 20px;
+  border: 1px solid rgba(255, 255, 255, 0.07);
+  border-radius: 16px;
+  background:
+    linear-gradient(
+      145deg,
+      rgba(255, 255, 255, 0.04),
+      rgba(255, 255, 255, 0.012)
+    );
+}
+
+.constructor-pitwall-heading {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 15px;
+  color: rgba(255, 255, 255, 0.3);
+}
+
+.constructor-pitwall-heading h3 {
+  margin: 3px 0 0;
+  color: #fff;
+  font-family: var(
+    --font-display,
+    "Orbitron",
+    sans-serif
+  );
+  font-size: 16px;
+  letter-spacing: -0.02em;
+}
+
+.constructor-pitwall-kicker {
+  color: rgba(255, 255, 255, 0.3);
+  font-family: var(
+    --font-display,
+    "Orbitron",
+    sans-serif
+  );
+  font-size: 7px;
+  font-weight: 700;
+  letter-spacing: 0.13em;
+}
+
+.constructor-pitwall-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 10px;
+}
+
+.constructor-pitwall-card {
+  display: flex;
+  align-items: center;
+  gap: 13px;
+  min-height: 92px;
+  padding: 15px;
+  border: 1px solid rgba(255, 255, 255, 0.06);
+  border-radius: 13px;
+  background: rgba(255, 255, 255, 0.02);
+}
+
+.constructor-pitwall-card-icon {
+  display: grid;
+  width: 39px;
+  height: 39px;
+  flex: 0 0 auto;
+  place-items: center;
+  border: 1px solid color-mix(
+    in srgb,
+    var(--constructor-color, #e10600) 22%,
+    transparent
+  );
+  border-radius: 10px;
+  color: var(--constructor-color, #e10600);
+  background: color-mix(
+    in srgb,
+    var(--constructor-color, #e10600) 7%,
+    transparent
+  );
+}
+
+.constructor-pitwall-card-copy span {
+  display: block;
+  margin-bottom: 4px;
+  color: rgba(255, 255, 255, 0.33);
+  font-family: var(
+    --font-display,
+    "Orbitron",
+    sans-serif
+  );
+  font-size: 7px;
+  font-weight: 700;
+  letter-spacing: 0.1em;
+}
+
+.constructor-pitwall-card-copy strong {
+  display: block;
+  color: #fff;
+  font-family: var(
+    --font-display,
+    "Orbitron",
+    sans-serif
+  );
+  font-size: 20px;
+}
+
+.constructor-pitwall-card-copy small {
+  display: block;
+  margin-top: 3px;
+  color: rgba(255, 255, 255, 0.25);
+  font-size: 9px;
+}
+
+@media (max-width: 900px) {
+  .constructor-reliability-layout {
+    grid-template-columns: 1fr;
+  }
+
+  .constructor-reliability-failures {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+}
+
+@media (max-width: 600px) {
+  .constructor-reliability-status {
+    display: none;
+  }
+
+  .constructor-reliability-main {
+    padding: 17px;
+  }
+
+  .constructor-reliability-failures {
+    grid-template-columns: 1fr;
+  }
+
+  .constructor-pitwall {
+    padding: 17px;
+  }
+
+  .constructor-pitwall-grid {
+    grid-template-columns: 1fr;
+  }
+}

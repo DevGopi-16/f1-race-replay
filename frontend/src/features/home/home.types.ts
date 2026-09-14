@@ -16,9 +16,9 @@ export interface HomeOverview {
   };
 
   track_overview: {
-    length_km: number;
-    turns: number;
-    longest_straight_km: number;
+    length_km: number | null;
+    turns: number | null;
+    longest_straight_km: number | null;
     lap_record: string;
   };
 }

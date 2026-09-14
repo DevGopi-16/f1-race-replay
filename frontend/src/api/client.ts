@@ -1,4 +1,6 @@
-const API_BASE_URL = "/api";
+const API_BASE_URL = "";
+
+const ACCESS_TOKEN_KEY = "f1_access_token";
 
 export class ApiError extends Error {
   status: number;
@@ -34,19 +36,45 @@ export async function apiRequest<T>(
   endpoint: string,
   options: RequestInit = {},
 ): Promise<T> {
-  const response = await fetch(
-    `${API_BASE_URL}${endpoint}`,
-    {
-      credentials: "include",
-
-      ...options,
-
-      headers: {
-        Accept: "application/json",
-        ...options.headers,
-      },
-    },
+  const token = localStorage.getItem(
+    ACCESS_TOKEN_KEY,
   );
+
+  const headers = new Headers(
+    options.headers,
+  );
+
+  headers.set(
+    "Accept",
+    "application/json",
+  );
+
+  if (
+    options.body &&
+    !headers.has("Content-Type")
+  ) {
+    headers.set(
+      "Content-Type",
+      "application/json",
+    );
+  }
+
+  if (token) {
+    headers.set(
+      "Authorization",
+      `Bearer ${token}`,
+    );
+  }
+
+  const url = endpoint.startsWith("http")
+    ? endpoint
+    : `${API_BASE_URL}${endpoint}`;
+
+  const response = await fetch(url, {
+    credentials: "include",
+    ...options,
+    headers,
+  });
 
   const data = await parseResponse(response);
 
@@ -87,11 +115,6 @@ export function apiPost<T>(
     endpoint,
     {
       method: "POST",
-
-      headers: {
-        "Content-Type": "application/json",
-      },
-
       body:
         body === undefined
           ? undefined

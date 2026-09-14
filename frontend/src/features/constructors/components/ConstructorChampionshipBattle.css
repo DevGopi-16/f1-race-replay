@@ -1,0 +1,512 @@
+.constructor-battle {
+  margin-top: 32px;
+}
+
+.constructor-battle-status {
+  display: inline-flex;
+  align-items: center;
+  min-height: 30px;
+  padding: 0 11px;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 999px;
+  color: rgba(255, 255, 255, 0.58);
+  background: rgba(255, 255, 255, 0.025);
+  font-family: var(--font-display, "Orbitron", sans-serif);
+  font-size: 9px;
+  font-weight: 700;
+  letter-spacing: 0.13em;
+}
+
+.constructor-battle-grid {
+  display: grid;
+  grid-template-columns: 1.15fr 1fr 1fr;
+  gap: 14px;
+}
+
+.constructor-battle-card {
+  position: relative;
+  min-height: 220px;
+  overflow: hidden;
+  padding: 22px;
+  border: 1px solid rgba(255, 255, 255, 0.075);
+  border-radius: 18px;
+  background:
+    linear-gradient(
+      145deg,
+      rgba(255, 255, 255, 0.055),
+      rgba(255, 255, 255, 0.018)
+    );
+  box-shadow: 0 18px 45px rgba(0, 0, 0, 0.18);
+}
+
+.constructor-battle-card::before {
+  content: "";
+  position: absolute;
+  inset: 0 auto auto 0;
+  width: 100%;
+  height: 2px;
+  background: var(--constructor-color, #e10600);
+  opacity: 0.85;
+}
+
+.constructor-battle-card--primary {
+  background:
+    radial-gradient(
+      circle at 85% 20%,
+      color-mix(
+        in srgb,
+        var(--constructor-color, #e10600) 18%,
+        transparent
+      ),
+      transparent 38%
+    ),
+    linear-gradient(
+      145deg,
+      rgba(255, 255, 255, 0.065),
+      rgba(255, 255, 255, 0.018)
+    );
+}
+
+.constructor-battle-card-top {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 16px;
+}
+
+.constructor-battle-label {
+  display: block;
+  margin-bottom: 8px;
+  color: rgba(255, 255, 255, 0.42);
+  font-family: var(--font-display, "Orbitron", sans-serif);
+  font-size: 9px;
+  font-weight: 700;
+  letter-spacing: 0.13em;
+}
+
+.constructor-battle-position {
+  display: block;
+  color: #fff;
+  font-family: var(--font-display, "Orbitron", sans-serif);
+  font-size: 38px;
+  line-height: 1;
+  letter-spacing: -0.05em;
+}
+
+.constructor-battle-team-logo {
+  display: grid;
+  width: 58px;
+  height: 58px;
+  place-items: center;
+}
+
+.constructor-battle-team-logo img {
+  width: 42px;
+  height: 42px;
+  object-fit: contain;
+}
+
+.constructor-battle-team-logo span,
+.constructor-battle-competitor-logo span,
+.constructor-field-logo span {
+  color: rgba(255, 255, 255, 0.7);
+  font-family: var(--font-display, "Orbitron", sans-serif);
+  font-weight: 800;
+}
+
+.constructor-battle-card h3 {
+  margin: 20px 0 0;
+  color: #fff;
+  font-family: var(--font-display, "Orbitron", sans-serif);
+  font-size: 19px;
+  font-weight: 800;
+  letter-spacing: -0.03em;
+}
+
+.constructor-battle-points {
+  display: flex;
+  align-items: baseline;
+  gap: 8px;
+  margin-top: 13px;
+}
+
+.constructor-battle-points strong {
+  color: #fff;
+  font-family: var(--font-display, "Orbitron", sans-serif);
+  font-size: 29px;
+  letter-spacing: -0.04em;
+}
+
+.constructor-battle-points span,
+.constructor-battle-gap span,
+.constructor-battle-leader-gap span {
+  color: rgba(255, 255, 255, 0.38);
+  font-family: var(--font-display, "Orbitron", sans-serif);
+  font-size: 8px;
+  font-weight: 700;
+  letter-spacing: 0.12em;
+}
+
+.constructor-battle-leader-gap {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  margin-top: 20px;
+  padding-top: 15px;
+  border-top: 1px solid rgba(255, 255, 255, 0.07);
+}
+
+.constructor-battle-leader-gap svg {
+  color: var(--constructor-color, #e10600);
+}
+
+.constructor-battle-leader-gap strong {
+  margin-left: 4px;
+  color: #fff;
+  font-family: var(--font-display, "Orbitron", sans-serif);
+  font-size: 15px;
+}
+
+.constructor-battle-card-heading {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 16px;
+}
+
+.constructor-battle-card-heading h3 {
+  margin-top: 0;
+  font-size: 17px;
+}
+
+.constructor-battle-card--ahead
+  .constructor-battle-card-heading
+  > svg {
+  color: #7ce38b;
+}
+
+.constructor-battle-card--behind
+  .constructor-battle-card-heading
+  > svg {
+  color: rgba(255, 255, 255, 0.45);
+}
+
+.constructor-battle-competitor {
+  display: grid;
+  grid-template-columns: 34px 46px 1fr;
+  align-items: center;
+  gap: 12px;
+  margin-top: 32px;
+}
+
+.constructor-battle-competitor-position {
+  color: rgba(255, 255, 255, 0.45);
+  font-family: var(--font-display, "Orbitron", sans-serif);
+  font-size: 12px;
+  font-weight: 800;
+}
+
+.constructor-battle-competitor-logo {
+  display: grid;
+  width: 46px;
+  height: 46px;
+  place-items: center;
+  border-radius: 11px;
+  background: rgba(0, 0, 0, 0.2);
+}
+
+.constructor-battle-competitor-logo img {
+  width: 34px;
+  height: 34px;
+  object-fit: contain;
+}
+
+.constructor-battle-competitor-points {
+  text-align: right;
+}
+
+.constructor-battle-competitor-points strong {
+  display: block;
+  color: #fff;
+  font-family: var(--font-display, "Orbitron", sans-serif);
+  font-size: 21px;
+}
+
+.constructor-battle-competitor-points span {
+  color: rgba(255, 255, 255, 0.35);
+  font-family: var(--font-display, "Orbitron", sans-serif);
+  font-size: 8px;
+  letter-spacing: 0.12em;
+}
+
+.constructor-battle-gap {
+  display: flex;
+  align-items: baseline;
+  gap: 7px;
+  margin-top: 25px;
+  padding-top: 15px;
+  border-top: 1px solid rgba(255, 255, 255, 0.07);
+}
+
+.constructor-battle-gap strong {
+  margin-left: auto;
+  color: #fff;
+  font-family: var(--font-display, "Orbitron", sans-serif);
+  font-size: 18px;
+}
+
+.constructor-battle-gap span {
+  color: rgba(255, 255, 255, 0.38);
+  font-family: var(--font-display, "Orbitron", sans-serif);
+  font-size: 8px;
+  font-weight: 700;
+  letter-spacing: 0.11em;
+}
+
+.constructor-battle-empty {
+  margin: 32px 0 0;
+  max-width: 260px;
+  color: rgba(255, 255, 255, 0.45);
+  font-size: 13px;
+  line-height: 1.65;
+}
+
+.constructor-field-card {
+  margin-top: 14px;
+  padding: 24px;
+  border: 1px solid rgba(255, 255, 255, 0.075);
+  border-radius: 18px;
+  background: rgba(255, 255, 255, 0.025);
+}
+
+.constructor-field-header {
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 20px;
+  margin-bottom: 22px;
+}
+
+.constructor-field-header h3 {
+  margin: 5px 0 0;
+  color: #fff;
+  font-family: var(--font-display, "Orbitron", sans-serif);
+  font-size: 22px;
+  letter-spacing: -0.04em;
+}
+
+.constructor-field-total {
+  color: rgba(255, 255, 255, 0.35);
+  font-family: var(--font-display, "Orbitron", sans-serif);
+  font-size: 9px;
+  font-weight: 700;
+  letter-spacing: 0.13em;
+}
+
+.constructor-field-list {
+  display: grid;
+  gap: 6px;
+}
+
+.constructor-field-row {
+  --field-width: 0%;
+
+  display: grid;
+  grid-template-columns: 36px minmax(180px, 1.1fr) minmax(120px, 2fr) 90px;
+  align-items: center;
+  gap: 15px;
+  min-height: 58px;
+  padding: 7px 12px;
+  border: 1px solid transparent;
+  border-radius: 12px;
+  transition:
+    background 180ms ease,
+    border-color 180ms ease,
+    transform 180ms ease;
+}
+
+.constructor-field-row:hover {
+  background: rgba(255, 255, 255, 0.035);
+}
+
+.constructor-field-row.is-selected {
+  border-color: color-mix(
+    in srgb,
+    var(--constructor-color, #e10600) 45%,
+    transparent
+  );
+  background:
+    linear-gradient(
+      90deg,
+      color-mix(
+        in srgb,
+        var(--constructor-color, #e10600) 9%,
+        transparent
+      ),
+      transparent
+    );
+}
+
+.constructor-field-rank {
+  color: rgba(255, 255, 255, 0.38);
+  font-family: var(--font-display, "Orbitron", sans-serif);
+  font-size: 11px;
+  font-weight: 800;
+  text-align: center;
+}
+
+.constructor-field-team {
+  display: flex;
+  align-items: center;
+  min-width: 0;
+  gap: 12px;
+}
+
+.constructor-field-logo {
+  display: grid;
+  flex: 0 0 auto;
+  width: 38px;
+  height: 38px;
+  place-items: center;
+  border-radius: 9px;
+  background: rgba(0, 0, 0, 0.2);
+}
+
+.constructor-field-logo img {
+  width: 29px;
+  height: 29px;
+  object-fit: contain;
+}
+
+.constructor-field-team > div:last-child {
+  display: flex;
+  align-items: center;
+  min-width: 0;
+  gap: 7px;
+  flex-wrap: wrap;
+}
+
+.constructor-field-team strong {
+  overflow: hidden;
+  color: rgba(255, 255, 255, 0.8);
+  font-size: 13px;
+  font-weight: 650;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.constructor-field-row.is-selected
+  .constructor-field-team
+  strong {
+  color: #fff;
+}
+
+.constructor-field-you,
+.constructor-field-leader {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  color: var(--constructor-color, #e10600);
+  font-family: var(--font-display, "Orbitron", sans-serif);
+  font-size: 7px;
+  font-weight: 800;
+  letter-spacing: 0.1em;
+}
+
+.constructor-field-leader {
+  color: #e7c75f;
+}
+
+.constructor-field-bar {
+  position: relative;
+  height: 6px;
+  overflow: hidden;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.055);
+}
+
+.constructor-field-bar span {
+  display: block;
+  width: var(--field-width);
+  height: 100%;
+  border-radius: inherit;
+  background: var(--constructor-color, #e10600);
+  opacity: 0.8;
+  transition: width 600ms cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+.constructor-field-row.is-selected
+  .constructor-field-bar
+  span {
+  opacity: 1;
+}
+
+.constructor-field-points {
+  text-align: right;
+}
+
+.constructor-field-points strong {
+  display: block;
+  color: #fff;
+  font-family: var(--font-display, "Orbitron", sans-serif);
+  font-size: 14px;
+}
+
+.constructor-field-points span {
+  color: rgba(255, 255, 255, 0.3);
+  font-family: var(--font-display, "Orbitron", sans-serif);
+  font-size: 7px;
+  letter-spacing: 0.1em;
+}
+
+@media (max-width: 900px) {
+  .constructor-battle-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .constructor-battle-card {
+    min-height: auto;
+  }
+}
+
+@media (max-width: 680px) {
+  .constructor-field-card {
+    padding: 18px 14px;
+  }
+
+  .constructor-field-header {
+    align-items: flex-start;
+  }
+
+  .constructor-field-row {
+    grid-template-columns: 28px minmax(145px, 1fr) 70px;
+    gap: 9px;
+    padding: 7px 5px;
+  }
+
+  .constructor-field-bar {
+    display: none;
+  }
+
+  .constructor-field-team strong {
+    font-size: 11px;
+  }
+
+  .constructor-field-logo {
+    width: 32px;
+    height: 32px;
+  }
+
+  .constructor-field-logo img {
+    width: 24px;
+    height: 24px;
+  }
+
+  .constructor-field-points strong {
+    font-size: 12px;
+  }
+
+  .constructor-battle-card {
+    padding: 18px;
+  }
+}
