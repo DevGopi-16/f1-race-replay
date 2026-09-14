@@ -3,7 +3,7 @@
   display: grid;
   grid-template-columns: repeat(5, 1fr);
   gap: 1px;
-  margin-top: 64px;
+  margin-top: 0px;
   border: 1px solid var(--border-color);
   background: var(--border-color);
   overflow: hidden;
@@ -121,7 +121,7 @@
 }
 
 @media (max-width: 700px) {
-  .analytics-overview { grid-template-columns: repeat(2, 1fr); margin-top: 44px; }
+  .analytics-overview { grid-template-columns: repeat(2, 1fr); margin-top: 0px; }
   .analytics-stat { min-height: 125px; padding: 18px; }
   .analytics-stat strong { font-size: 36px; }
 }

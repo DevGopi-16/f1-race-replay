@@ -12,7 +12,7 @@ import AnalyticsStandings from "./components/AnalyticsStandings";
 import AnalyticsPerformance from "./components/AnalyticsPerformance";
 import AnalyticsRacecraft from "./components/AnalyticsRacecraft";
 import AnalyticsTeammateBattle from "./components/AnalyticsTeammateBattle";
-import AnalyticsSeasonJourney from "./components/AnalyticsSeasonJourney";
+
 
 import "./AnalyticsShared.css";
 
@@ -104,7 +104,6 @@ export default function AnalyticsPage() {
 
           <AnalyticsTeammateBattle battles={data.teammate_battles} />
 
-          <AnalyticsSeasonJourney drivers={data.drivers} />
         </div>
       </PageContainer>
     </PageTransition>

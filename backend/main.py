@@ -37,6 +37,7 @@ from pydantic import BaseModel
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.staticfiles import StaticFiles
 
+
 # --- Internal Source Modules ---
 from src.track_geometry import get_track_map_with_telemetry, build_track_geometry, extract_race_events, point_at_distance, get_track_outline, get_cached_track_outline, build_track_overview
 from src.f1_data import (
@@ -2145,6 +2146,8 @@ def race_control(
     except Exception as e:
         raise HTTPException(status_code=502, detail=f"Failed to load race control messages: {e}")
     return {"messages": rows}
+
+
 
 @app.get("/api/minisectors", summary="Minisectors")
 def minisectors(

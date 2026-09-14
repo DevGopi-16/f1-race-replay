@@ -151,10 +151,11 @@ function AnalyticsTeammateBattle({ battles }: AnalyticsTeammateBattleProps) {
   const navigate = useNavigate();
 
   return (
-    <section className="analytics-section">
+    <section className="analytics-section analytics-last">
       <div className="analytics-section-heading">
         <div>
           <h2>Head to head.</h2>
+
           <p>Championship comparison between teammates.</p>
         </div>
       </div>

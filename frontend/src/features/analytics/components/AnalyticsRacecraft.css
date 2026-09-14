@@ -11,8 +11,13 @@
   background: var(--surface-color);
   padding: 24px;
   overflow: hidden;
-  transition: transform 350ms ease, background 350ms ease, box-shadow 350ms ease;
+  transition:
+    transform 350ms ease,
+    background 350ms ease,
+    box-shadow 350ms ease,
+    border-color 350ms ease;
   will-change: transform;
+  border: 1px solid transparent;
 }
 
 .racecraft-card::before {
@@ -29,15 +34,40 @@
   transition: opacity 350ms ease;
 }
 
+.racecraft-card-glow {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  opacity: 0;
+  background: radial-gradient(
+    260px circle at var(--cursor-x, 50%) var(--cursor-y, 50%),
+    color-mix(in srgb, var(--team-accent, #fff) 22%, transparent),
+    transparent 65%
+  );
+  transition: opacity 300ms ease;
+}
+
 .racecraft-card:hover {
   transform: translateY(-4px);
   z-index: 2;
   background: var(--surface-hover, rgba(255, 255, 255, 0.035));
-  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.16);
+  border-color: color-mix(in srgb, var(--team-accent, transparent) 35%, transparent);
+  box-shadow:
+    0 20px 60px rgba(0, 0, 0, 0.16),
+    0 0 40px color-mix(in srgb, var(--team-accent, transparent) 12%, transparent);
 }
 
 .racecraft-card:hover::before {
   opacity: 1;
+}
+
+.racecraft-card:hover .racecraft-card-glow {
+  opacity: 1;
+}
+
+.racecraft-card:hover .racecraft-card-top strong {
+  color: var(--team-accent, currentColor);
+  transition: color 250ms ease;
 }
 
 .racecraft-card-top {

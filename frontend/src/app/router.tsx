@@ -13,6 +13,7 @@ import HomePage from "../features/home/HomePage";
 import ConstructorsPage from "../features/constructors/ConstructorsPage";
 import ReplayPage from "../features/replay/ReplayPage";
 
+
 import LoginPage from "../features/auth/LoginPage";
 import RegisterPage from "../features/auth/RegisterPage";
 import ProfilePage from "../features/auth/ProfilePage";
@@ -154,6 +155,7 @@ export function AppRouter() {
           element={<ConstructorsPage />}
         />
 
+
         <Route
           path="/telemetry"
           element={
@@ -164,6 +166,7 @@ export function AppRouter() {
             />
           }
         />
+
 
         <Route
           path="/timing"
