@@ -22,13 +22,12 @@ import requests
 import datetime
 import asyncio
 import os
-import shutil
 from urllib.parse import urlencode
 from typing import Optional
 
 from starlette.middleware.gzip import GZipMiddleware
 
-from fastapi import FastAPI, HTTPException, Query, Depends, File, UploadFile
+from fastapi import FastAPI, HTTPException, Query, Depends
 from sqlalchemy.orm import Session
 from src.auth.database import get_db
 from src.auth.dependencies import get_current_user
@@ -376,20 +375,6 @@ FRONTEND_DIR = PROJECT_DIR / "frontend"
 DIST_DIR = FRONTEND_DIR / "dist"
 DIST_ASSETS_DIR = DIST_DIR / "assets"
 
-# Existing F1 static assets
-STATIC_DIR = FRONTEND_DIR / "static"
-UPLOADS_DIR = STATIC_DIR / "uploads"
-
-UPLOADS_DIR.mkdir(parents=True, exist_ok=True)
-
-# Existing assets:
-# /static/uploads/...
-app.mount(
-    "/static",
-    StaticFiles(directory=STATIC_DIR),
-    name="static",
-)
-
 # Vite production assets:
 # /assets/index-xxxxx.js
 # /assets/index-xxxxx.css
@@ -687,46 +672,6 @@ def get_profile_stats(
     finally:
         db.close()
 
-
-@app.post("/auth/profile/avatar", summary="Upload User Avatar")
-async def upload_user_avatar(
-    file: UploadFile = File(...),
-    current_user: User = Depends(get_current_active_user)
-):
-    """Saves uploaded avatar image to static/uploads and updates user record."""
-    extension = file.filename.split(".")[-1].lower() if "." in file.filename else "png"
-    if extension not in ["jpg", "jpeg", "png", "webp", "gif", "avif"]:
-        raise HTTPException(status_code=400, detail="Invalid image file format")
-
-    filename = f"avatar_user_{current_user.id}.{extension}"
-    file_path = UPLOADS_DIR / filename
-
-    with open(file_path, "wb") as buffer:
-        shutil.copyfileobj(file.file, buffer)
-
-    avatar_url = f"/static/uploads/{filename}"
-
-    db = SessionLocal()
-    try:
-        user = db.query(User).filter(User.id == current_user.id).first()
-        if user:
-            user.picture_url = avatar_url
-            db.commit()
-    finally:
-        db.close()
-
-    return {"message": "Avatar uploaded successfully", "picture_url": avatar_url}
-
-
-# --- Settings & Extended Tier Profile ---
-
-class UserSettingsUpdate(BaseModel):
-    telemetry_preferences: Optional[str] = None
-    default_driver_comp: Optional[str] = None
-    units: Optional[str] = None
-    theme: Optional[str] = None
-    accent_color: Optional[str] = None
-    notifications_enabled: Optional[bool] = None
 
 @app.get("/auth/settings", summary="Get User Settings")
 def get_user_settings(current_user: User = Depends(get_current_active_user)):
@@ -2388,10 +2333,6 @@ def react_spa_fallback(path: str):
     # Never treat API requests as React routes.
     if path.startswith("api/"):
         raise HTTPException(status_code=404, detail="API endpoint not found")
-
-    # Existing static files should be handled by /static.
-    if path.startswith("static/"):
-        raise HTTPException(status_code=404, detail="Static file not found")
 
     # Vite assets should be handled by /assets.
     if path.startswith("assets/"):
