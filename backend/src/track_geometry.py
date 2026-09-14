@@ -226,44 +226,6 @@ def build_start_finish(example_lap):
         "y": float(example_lap["Y"].iloc[0]),
     }
 
-def build_track_overview(example_lap, circuit_info, lap_record: str | None = None) -> dict:
-    """
-    Derives homepage 'Track Overview' stats from a single fastest-lap
-    telemetry sample plus FastF1's circuit_info corners table:
-      - length_km: total lap distance
-      - turns: number of distinct corners
-      - longest_straight_km: biggest gap between consecutive corners
-      - lap_record: passed through from the caller (fastest lap of the
-        session used), since FastF1 doesn't expose all-time records
-    """
-    distances = example_lap["Distance"].to_numpy() if "Distance" in example_lap.columns else None
-    length_km = round(float(distances.max()) / 1000.0, 3) if distances is not None and len(distances) else None
-
-    turns = 0
-    longest_straight_km = None
-
-    if circuit_info is not None and hasattr(circuit_info, "corners") and circuit_info.corners is not None \
-            and not circuit_info.corners.empty:
-        corners_df = circuit_info.corners
-        turns = int(corners_df["Number"].nunique())
-
-        corner_distances = sorted(float(d) for d in corners_df["Distance"].unique().tolist())
-        if length_km is not None and corner_distances:
-            track_length_m = length_km * 1000.0
-            gaps = []
-            for i, start in enumerate(corner_distances):
-                end = corner_distances[i + 1] if i + 1 < len(corner_distances) else corner_distances[0] + track_length_m
-                gaps.append(end - start)
-            if gaps:
-                longest_straight_km = round(max(gaps) / 1000.0, 3)
-
-    return {
-        "length_km": length_km,
-        "turns": turns,
-        "longest_straight_km": longest_straight_km,
-        "lap_record": lap_record,
-    }
-
 def plot_drs_zones(example_lap, offset: float = 140.0):
     """
     Detect contiguous DRS active zones. Returns both the raw track-line

@@ -1,86 +1,86 @@
-import type { HomeOverview } from "../home.types";
+import type { NextSession } from "../home.types";
 
 interface FeaturedRaceProps {
-  data: HomeOverview;
+  data: NextSession;
 }
 
-export default function FeaturedRace({
-  data,
-}: FeaturedRaceProps) {
-  const {
-    meta,
-    fastest_lap,
-    track_overview,
-  } = data;
+function formatStartTime(startUtc: string) {
+  const date = new Date(startUtc);
 
+  return date.toLocaleString(undefined, {
+    dateStyle: "full",
+    timeStyle: "short",
+  });
+}
+
+export default function FeaturedRace({ data }: FeaturedRaceProps) {
   return (
     <section className="home-featured-race">
       <div className="home-featured-track">
-        <img
-          src={meta.circuit_svg}
-          alt={`${meta.circuit_name} circuit`}
-          className="home-circuit-outline"
-        />
+        <div className="home-next-session-mark">
+          <span />
+          <span />
+          <span />
+        </div>
       </div>
 
       <div className="home-featured-info">
         <div className="home-featured-topline">
-          <span>FEATURED EVENT</span>
-
+          <span>NEXT SESSION</span>
           <span>
-            ROUND {String(meta.round).padStart(2, "0")}
+            ROUND {String(data.round).padStart(2, "0")}
           </span>
         </div>
 
-        <h2>{meta.event_name}</h2>
+        <h2>{data.event_name}</h2>
 
         <div className="home-featured-location">
-          <span>{meta.circuit_name}</span>
+          <span>{data.session_name}</span>
           <span>·</span>
-          <span>{meta.country}</span>
+          <span>{data.country}</span>
         </div>
 
         <div className="home-featured-date">
-          {meta.date}
+          {formatStartTime(data.start_utc)}
         </div>
       </div>
 
       <div className="home-featured-stats">
         <div className="home-featured-stat">
-          <span>FASTEST LAP</span>
-
-          <strong>{fastest_lap.time}</strong>
-
-          <small>
-            {fastest_lap.driver}
-            <span> · </span>
-            {fastest_lap.compound}
-          </small>
+          <span>SESSION</span>
+          <strong>
+            {data.session_type ?? "—"}
+          </strong>
+          <small>{data.session_name}</small>
         </div>
 
         <div className="home-featured-stat">
-          <span>CIRCUIT</span>
-
+          <span>ROUND</span>
           <strong>
-            {track_overview.length_km == null ? "—" : track_overview.length_km.toFixed(3)}
-            <small> KM</small>
+            {String(data.round).padStart(2, "0")}
           </strong>
-
-          <small>
-            {track_overview.turns == null ? "—" : track_overview.turns} TURNS
-          </small>
+          <small>2026 SEASON</small>
         </div>
 
         <div className="home-featured-stat">
-          <span>LONGEST STRAIGHT</span>
-
-          <strong>
-            {track_overview.longest_straight_km == null ? "—" : track_overview.longest_straight_km.toFixed(3)}
-            <small> KM</small>
+          <span>STARTS</span>
+          <strong className="home-featured-start">
+            {new Date(data.start_utc).toLocaleTimeString(
+              undefined,
+              {
+                hour: "2-digit",
+                minute: "2-digit",
+              },
+            )}
           </strong>
-
           <small>
-            LAP RECORD {track_overview.lap_record}
+            {new Date(data.start_utc).toLocaleDateString(
+              undefined,
+              {
+                day: "2-digit",
+                month: "short",
+              },
+            )}
           </small>
         </div>
       </div>

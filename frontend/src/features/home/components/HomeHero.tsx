@@ -1,49 +1,48 @@
 import Button from "../../../components/ui/Button";
 import Reveal from "../../../components/motion/Reveal";
 
-import type { HomeOverview } from "../home.types";
+import type { NextSession } from "../home.types";
 
 interface HomeHeroProps {
-  data: HomeOverview;
+  data: NextSession;
 }
 
 function navigate(path: string) {
   window.location.href = path;
 }
 
+function formatStartTime(startUtc: string) {
+  const date = new Date(startUtc);
+
+  return date.toLocaleString(undefined, {
+    dateStyle: "medium",
+    timeStyle: "short",
+  });
+}
+
 export default function HomeHero({
   data,
 }: HomeHeroProps) {
-  const { meta, fastest_lap } = data;
-
   return (
     <section className="home-hero-new">
       <div className="home-hero-grid" />
 
       <div className="home-hero-glow" />
 
-      <div className="home-hero-circuit">
-        <img
-          src={meta.circuit_svg}
-          alt=""
-          aria-hidden="true"
-        />
-      </div>
-
       <div className="home-hero-content">
         <Reveal>
           <div className="home-season-label">
             <span className="home-live-dot" />
 
-            {meta.year} FORMULA 1 SEASON
+            {new Date().getFullYear()} FORMULA 1 SEASON
           </div>
         </Reveal>
 
         <Reveal delay="short">
           <div className="home-event-context">
-            ROUND {String(meta.round).padStart(2, "0")}
+            NEXT SESSION
             <span> / </span>
-            {meta.event_name}
+            ROUND {String(data.round).padStart(2, "0")}
           </div>
         </Reveal>
 
@@ -57,9 +56,10 @@ export default function HomeHero({
 
         <Reveal delay="medium">
           <p className="home-hero-description">
-            Advanced telemetry. Race intelligence.
-            Every detail of Formula 1, reconstructed
-            for the ultimate replay experience.
+            Relive every lap. Explore every session.
+            Experience Formula 1 through an immersive
+            race replay built around the moments that
+            matter.
           </p>
         </Reveal>
 
@@ -83,14 +83,14 @@ export default function HomeHero({
         </Reveal>
 
         <div className="home-hero-feature">
-          <span>FASTEST LAP</span>
+          <span>NEXT SESSION</span>
 
-          <strong>{fastest_lap.time}</strong>
+          <strong>
+            {data.session_name.toUpperCase()}
+          </strong>
 
           <small>
-            {fastest_lap.driver}
-            {" · "}
-            {fastest_lap.compound}
+            {formatStartTime(data.start_utc)}
           </small>
         </div>
       </div>
@@ -99,9 +99,9 @@ export default function HomeHero({
         <span>F1 RACE REPLAY</span>
 
         <span>
-          {meta.circuit_name.toUpperCase()}
+          {data.event_name.toUpperCase()}
           {" / "}
-          {meta.country.toUpperCase()}
+          {data.country.toUpperCase()}
         </span>
       </div>
     </section>

@@ -6,7 +6,7 @@ import Reveal from "../../components/motion/Reveal";
 
 import HomeHero from "./components/HomeHero";
 import FeaturedRace from "./components/FeaturedRace";
-import { useHomeOverview } from "./home.api";
+import { useNextSession } from "./home.api";
 
 import "./home.css";
 
@@ -15,7 +15,7 @@ const destinations = [
     number: "01",
     title: "Replay",
     description:
-      "Relive every lap with race telemetry and track position.",
+      "Relive every lap with immersive race replay and track position.",
     path: "/replay",
   },
   {
@@ -88,7 +88,7 @@ function HomeError() {
 }
 
 export default function HomePage() {
-  const query = useHomeOverview();
+  const query = useNextSession();
 
   if (query.isLoading) {
     return <HomeLoading />;
@@ -120,11 +120,11 @@ export default function HomePage() {
               </h2>
 
               <p>
-                F1 Race Replay transforms raw race data
-                into an immersive way to explore Formula 1.
-                Follow the cars, understand the strategy,
-                compare drivers and relive every critical
-                moment.
+                F1 Race Replay transforms Formula 1
+                sessions into an immersive experience.
+                Relive races, explore drivers and
+                understand the moments that define
+                every lap.
               </p>
             </div>
           </section>
@@ -135,7 +135,7 @@ export default function HomePage() {
         <Reveal delay="short">
           <section className="home-featured-section">
             <SectionLabel number="02">
-              Featured Event
+              Next Session
             </SectionLabel>
 
             <FeaturedRace data={data} />
@@ -196,26 +196,26 @@ export default function HomePage() {
 
             <div className="home-data-content">
               <SectionLabel number="04">
-                Race Intelligence
+                Built For The Race
               </SectionLabel>
 
               <h2>
-                SEE THE
+                EVERY LAP.
                 <br />
-                <span>UNSEEN.</span>
+                <span>EVERY DETAIL.</span>
               </h2>
 
               <p>
-                Speed. Throttle. Braking. Tyres.
-                Position. Gaps. Sectors.
-                Turn race telemetry into a story.
+                Experience Formula 1 through race
+                replays, session data, driver insights
+                and constructor performance.
               </p>
 
               <Button
                 variant="outline"
-                onClick={() => navigate("/telemetry")}
+                onClick={() => navigate("/replay")}
               >
-                Explore Telemetry
+                Watch A Replay
               </Button>
             </div>
           </section>
