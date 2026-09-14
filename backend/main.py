@@ -74,50 +74,6 @@ from src.minisectors import build_minisectors
 from src.live.session_watcher import run_forever as run_live_watcher
 from src.live.state import live_state
 
-# --- Circuit SVG lookup (Track Overview card shape) ---
-# Maps FastF1's event Location (a city name) to the circuit slug used in
-# frontend/static/images/circuits/minimal/{color}/{slug}.svg — picking the
-# latest layout revision available for tracks currently on the calendar.
-CIRCUIT_SVG_SLUGS = {
-    "Sakhir": "bahrain-3",
-    "Jeddah": "jeddah-1",
-    "Melbourne": "melbourne-2",
-    "Suzuka": "suzuka-2",
-    "Shanghai": "shanghai-1",
-    "Miami": "miami-1",
-    "Imola": "imola-3",
-    "Monaco": "monaco-6",
-    "Barcelona": "catalunya-6",
-    "Montreal": "montreal-6",
-    "Montréal": "montreal-6",
-    "Spielberg": "spielberg-3",
-    "Silverstone": "silverstone-8",
-    "Budapest": "hungaroring-3",
-    "Spa-Francorchamps": "spa-francorchamps-4",
-    "Zandvoort": "zandvoort-5",
-    "Monza": "monza-7",
-    "Baku": "baku-1",
-    "Singapore": "marina-bay-4",
-    "Austin": "austin-1",
-    "Mexico City": "mexico-city-3",
-    "São Paulo": "interlagos-2",
-    "Sao Paulo": "interlagos-2",
-    "Las Vegas": "las-vegas-1",
-    "Lusail": "lusail-1",
-    "Abu Dhabi": "yas-marina-2",
-}
-
-
-def get_circuit_svg_path(location: str, variant: str = "white-outline", style: str = "minimal") -> Optional[str]:
-    """Returns the frontend static path for a circuit's SVG shape, or None
-    if we don't have a mapping for this location."""
-    slug = CIRCUIT_SVG_SLUGS.get(location)
-    if not slug:
-        return None
-    return f"/static/images/circuits/{style}/{variant}/{slug}.svg"
-
-
-
 # ============================================================================
 # REPLAY TELEMETRY MEMORY CACHE
 # ============================================================================
@@ -427,7 +383,6 @@ UPLOADS_DIR = STATIC_DIR / "uploads"
 UPLOADS_DIR.mkdir(parents=True, exist_ok=True)
 
 # Existing assets:
-# /static/images/...
 # /static/uploads/...
 app.mount(
     "/static",

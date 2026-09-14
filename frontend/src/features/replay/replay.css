@@ -3249,21 +3249,21 @@
     }
 .replay-info-items > div:nth-child(1)::after {
     content: "";
-    background-image: url(/static/images/weather/thermometer.png)
+    background-image: url(/images/weather/thermometer.png)
     }
 .replay-info-items > div:nth-child(2)::after {
     content: "";
-    background-image: url(/static/images/weather/rain.png);
+    background-image: url(/images/weather/rain.png);
     animation-delay: -0.7s
     }
 .replay-info-items > div:nth-child(3)::after {
     content: "";
-    background-image: url(/static/images/weather/drop.png);
+    background-image: url(/images/weather/drop.png);
     animation-delay: -1.4s
     }
 .replay-info-items > div:nth-child(4)::after {
     content: "";
-    background-image: url(/static/images/weather/wind.png);
+    background-image: url(/images/weather/wind.png);
     animation-delay: -2.1s
     }
 @keyframes replayWeatherFloat {
