@@ -85,4 +85,5 @@ frontend/static/
 frontend/replay-archive/
 frontend/index.legacy.html
 frontend/profile.html
-frontend/settings.html
+frontend/settings.htmlfrontend/public/images/
+frontend/dist/
