@@ -43,7 +43,7 @@ export const primaryNavigation: NavigationItem[] = [
   },
 
   {
-    label: "Teams",
+    label: "Constructors",
     path: "/constructors",
     icon: CarFront,
   },

@@ -11,6 +11,7 @@ import { initializeAppearance } from "./features/auth/appearance";
 
 import "./styles/drivers.css";
 import "./styles/calendar.css";
+import "./styles/sessions.css";
 
 initializeAppearance();
 

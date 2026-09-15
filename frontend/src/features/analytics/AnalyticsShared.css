@@ -125,6 +125,16 @@
   color: #62d68b;
   text-shadow: 0 0 18px rgba(98, 214, 139, 0.2);
 }
+
+.analytics-page h1,
+.analytics-page h2,
+.analytics-page h3,
+.analytics-page strong,
+.analytics-driver-name,
+.teammate-driver-full-name {
+  font-family: var(--font-display);
+}
+
 .analytics-page {
   position: relative;
   padding-bottom: 140px;

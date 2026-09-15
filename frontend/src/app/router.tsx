@@ -9,6 +9,7 @@ import SectionLabel from "../components/ui/SectionLabel";
 import PageTransition from "../components/motion/PageTransition";
 import Reveal from "../components/motion/Reveal";
 import CalendarPage from "../features/schedule/CalendarPage";
+import SessionsPage from "../features/sessions/SessionsPage";
 
 import HomePage from "../features/home/HomePage";
 import ConstructorsPage from "../features/constructors/ConstructorsPage";
@@ -142,13 +143,7 @@ export function AppRouter() {
 
         <Route
           path="/sessions"
-          element={
-            <FoundationPage
-              eyebrow="02 / Sessions"
-              title="Sessions"
-              description="Explore every practice, qualifying, sprint and race session."
-            />
-          }
+          element={<SessionsPage />}
         />
 
         <Route
@@ -160,7 +155,7 @@ export function AppRouter() {
           path="/calendar"
           element={<CalendarPage />}
         />
-        
+
         <Route
           path="/telemetry"
           element={

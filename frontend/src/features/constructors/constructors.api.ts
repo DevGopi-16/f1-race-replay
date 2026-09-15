@@ -32,5 +32,9 @@ export function assetUrl(path: string | null | undefined): string {
     return path;
   }
 
+  if (path.startsWith("/images/")) {
+    return path;
+  }
+
   return `${API_ORIGIN}/${path.replace(/^\/+/, "")}`;
 }

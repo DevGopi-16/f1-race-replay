@@ -250,13 +250,13 @@
 .featured-driver-name h2 {
   margin: 0;
   color: #4fa9c9;
+  font-family: var(--font-display);
   font-size: clamp(58px, 8vw, 112px);
   line-height: 0.85;
   font-weight: 950;
   letter-spacing: -0.07em;
   text-shadow: 0 5px 25px rgba(0, 0, 0, 0.45);
 }
-
 
 /* --- Featured driver meta (team / country) --- */
 
@@ -334,12 +334,12 @@
 .featured-driver-code {
   margin-top: 24px;
   color: var(--text-faint);
+  font-family: var(--font-display);
   font-size: 76px;
   line-height: 0.8;
   font-weight: 950;
   letter-spacing: -0.08em;
 }
-
 
 /* --- Featured driver visual (photo) --- */
 
@@ -448,11 +448,11 @@
 
 .featured-stat strong {
   color: #fff;
+  font-family: var(--font-display);
   font-size: 28px;
   line-height: 1;
   font-weight: 900;
 }
-
 
 /* SECTIONS */
 
@@ -483,6 +483,7 @@
 .drivers-section-heading h2 {
   margin: 0;
   color: #fff;
+  font-family: var(--font-display);
   font-size: 30px;
   line-height: 1;
   font-weight: 850;
@@ -723,6 +724,7 @@
   display: block;
   margin-top: 6px;
   color: #fff;
+  font-family: var(--font-display);
   font-size: clamp(18px, 1.7vw, 24px);
   line-height: 1;
   font-weight: 900;
@@ -948,6 +950,7 @@
 .driver-row-name-block strong {
   overflow: hidden;
   color: #fff;
+  font-family: var(--font-display);
   font-size: 15px;
   font-weight: 750;
   white-space: nowrap;
