@@ -1,4 +1,6 @@
-import "../styles/driver-detail.css";
+import "./driver-detail.css";
+import DriverBio from "./components/DriverBio";
+import DriverTeamCard from "./components/DriverTeamCard";
 
 import {
   useEffect,
@@ -13,13 +15,13 @@ import { useNavigate, useParams } from "react-router-dom";
 import {
   getDriverFull,
   type DriverPanelData,
-} from "../api/drivers";
+} from "../../api/drivers";
 
 const YEAR = 2026;
 
 const API_ORIGIN = "http://127.0.0.1:8000";
 
-import { TEAM_COLORS } from "../constants/teamColors";
+import { TEAM_COLORS } from "../../constants/teamColors";
 
 const TEAM_DISPLAY_NAMES: Record<string, string> = {
   Mercedes: "Mercedes-AMG PETRONAS F1 TEAM",
@@ -1806,153 +1808,30 @@ export default function DriverDetailPage() {
         {/* =================================================
             01 — BIOGRAPHY
         ================================================= */}
-
         {description && (
-          <section className="driver-section">
-
-            <div className="driver-section-heading">
-              <span>
-                01 / BIOGRAPHY
-              </span>
-
-              <h2>
-                About {firstName}
-              </h2>
-            </div>
-
-            <div className="driver-bio-card">
-
-              <p className="driver-bio-text">
-                {description}
-              </p>
-
-              <div className="driver-bio-facts">
-
-                {born && (
-                  <div className="driver-bio-fact">
-                    <span>
-                      BORN
-                    </span>
-
-                    <strong>
-                      {born}
-                    </strong>
-                  </div>
-                )}
-
-                {age > 0 && (
-                  <div className="driver-bio-fact">
-                    <span>
-                      AGE
-                    </span>
-
-                    <strong>
-                      {age}
-                    </strong>
-                  </div>
-                )}
-
-                {nationality && (
-                  <div className="driver-bio-fact">
-                    <span>
-                      NATIONALITY
-                    </span>
-
-                    <strong>
-                      <span className="flag-icon">
-                        {getNationalityFlag(
-                          nationality,
-                        )}
-                      </span>
-                      {nationality}
-                    </strong>
-                  </div>
-                )}
-
-                {debut && (
-                  <div className="driver-bio-fact">
-                    <span>
-                      F1 DEBUT
-                    </span>
-
-                    <strong>
-                      {debut}
-                    </strong>
-                  </div>
-                )}
-
-              </div>
-
-            </div>
-
-          </section>
+          <DriverBio
+            firstName={firstName}
+            description={description}
+            born={born}
+            age={age}
+            nationality={nationality}
+            debut={debut}
+            getNationalityFlag={getNationalityFlag}
+          />
         )}
+
+
 
         {/* =================================================
             02 — TEAM & CAR
         ================================================= */}
-
-        <section className="driver-section">
-
-          <div className="driver-section-heading">
-            <span>
-              02 / TEAM & CAR
-            </span>
-
-            <h2>
-              Current Team
-            </h2>
-          </div>
-
-          <div className="driver-team-card">
-
-            {teamLogo && (
-              <img
-                src={assetUrl(
-                  teamLogo,
-                )}
-                alt={teamDisplayName}
-                className="driver-team-card-logo"
-              />
-            )}
-
-            <div className="driver-team-card-info">
-              <span className="driver-team-card-label">
-                COMPETING FOR
-              </span>
-
-              <strong className="driver-team-card-name">
-                {teamDisplayName}
-              </strong>
-            </div>
-
-            <div className="driver-team-card-car">
-              <span className="driver-team-card-car-label">
-                CAR
-              </span>
-
-              <strong className="driver-team-card-car-name">
-                {carName || "-"}
-              </strong>
-            </div>
-
-            <div
-              className="driver-team-card-swatch"
-              style={{
-                background:
-                  teamColor,
-              }}
-            />
-
-          </div>
-
-          <p className="driver-section-footnote">
-            Car specifications aren't
-            currently tracked by this app —
-            only team affiliation.
-          </p>
-
-        </section>
+        <DriverTeamCard
+          teamLogo={teamLogo}
+          teamDisplayName={teamDisplayName}
+          carName={carName}
+          teamColor={teamColor}
+          assetUrl={assetUrl}
+        />
 
         {/* =================================================
             03 — SOCIAL

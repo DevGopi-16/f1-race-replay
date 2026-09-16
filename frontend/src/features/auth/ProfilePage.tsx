@@ -764,1241 +764,1222 @@ export default function ProfilePage() {
           </div>
         </header>
 
-        {/* PROFILE HERO */}
+        <div className="profile-layout">
 
-        <section className="profile-card profile-hero">
-          <div className="profile-hero-main">
+          {/* SIDEBAR */}
 
-            <div className="profile-avatar">
-              {profile.picture_url ? (
-                <img
-                  src={profile.picture_url}
-                  alt=""
-                />
-              ) : (
-                <span>
-                  {initials}
-                </span>
-              )}
-            </div>
+          <aside className="profile-sidebar">
 
-            <div className="profile-identity">
-              <span className="profile-card-label">
-                DRIVER PROFILE
-              </span>
+            {/* PROFILE HERO */}
 
-              <h2>
-                {displayName}
-              </h2>
+            <section className="profile-card profile-hero">
 
-              {profile.email && (
-                <div className="profile-email">
-                  <Mail size={15} />
-
+              <div className="profile-avatar">
+                {profile.picture_url ? (
+                  <img
+                    src={profile.picture_url}
+                    alt=""
+                  />
+                ) : (
                   <span>
-                    {profile.email}
+                    {initials}
                   </span>
-                </div>
-              )}
-            </div>
-          </div>
-
-          <div className="profile-membership">
-            {profile.is_pro ? (
-              <>
-                <Crown size={17} />
-
-                <span>
-                  PRO MEMBER
-                </span>
-              </>
-            ) : (
-              <>
-                <UserRound size={17} />
-
-                <span>
-                  FREE MEMBER
-                </span>
-              </>
-            )}
-          </div>
-        </section>
-
-        {/* ACCOUNT OVERVIEW */}
-
-        <section className="profile-section">
-          <div className="profile-section-heading">
-            <div>
-              <span className="profile-section-label">
-                ACCOUNT OVERVIEW
-              </span>
-
-              <h2>
-                Your account
-              </h2>
-            </div>
-
-            <ShieldCheck size={20} />
-          </div>
-
-          <div className="profile-stat-grid">
-
-            <div className="profile-stat-card">
-              <span>
-                REPLAYS WATCHED
-              </span>
-
-              <strong>
-                {stats?.replays_watched ?? 0}
-              </strong>
-
-              <small>
-                Completed replay sessions
-              </small>
-            </div>
-
-            <div className="profile-stat-card">
-              <span>
-                REPLAYS STARTED
-              </span>
-
-              <strong>
-                {stats?.replays_started ?? 0}
-              </strong>
-
-              <small>
-                Replay sessions started
-              </small>
-            </div>
-
-            <div className="profile-stat-card">
-              <span>
-                WATCH TIME
-              </span>
-
-              <strong>
-                {formatWatchTime(
-                  stats?.watch_time_seconds ?? 0,
                 )}
-              </strong>
-
-              <small>
-                Total replay watch time
-              </small>
-            </div>
-
-            <div className="profile-stat-card">
-              <span>
-                COMPLETION RATE
-              </span>
-
-              <strong>
-                {Math.round(
-                  stats?.completion_rate ?? 0,
-                )}%
-              </strong>
-
-              <small>
-                Replay completion rate
-              </small>
-            </div>
-
-          </div>
-
-          <div className="profile-membership-row">
-            <div>
-              <span className="profile-section-label">
-                MEMBERSHIP
-              </span>
-
-              <strong>
-                {profile.is_pro
-                  ? "PRO"
-                  : "FREE"}
-              </strong>
-            </div>
-
-            <small>
-              Current account status
-            </small>
-          </div>
-        </section>
-
-        {/* 2026 SEASON SUMMARY */}
-
-        <section className="profile-section profile-season-section">
-
-          <div className="profile-section-heading">
-            <div>
-              <span className="profile-section-label">
-                2026 SEASON
-              </span>
-
-              <h2>
-                Your season
-              </h2>
-            </div>
-
-            <Trophy size={20} />
-          </div>
-
-          {seasonSummaryLoading ? (
-            <div className="profile-season-summary-loading">
-              <LoaderCircle
-                size={18}
-                className="profile-loading-spinner"
-              />
-
-              <span>
-                Loading season summary...
-              </span>
-            </div>
-          ) : seasonSummary ? (
-            <div className="profile-season-summary">
-
-              <div className="profile-season-summary-header">
-
-                <div>
-                  <p className="profile-season-summary-kicker">
-                    SEASON JOURNEY
-                  </p>
-
-                  <h3 className="profile-season-summary-title">
-                    2026 Championship
-                  </h3>
-                </div>
-
-                <span className="profile-season-summary-year">
-                  26
-                </span>
-
               </div>
 
-              <div className="profile-season-progress">
+              <div className="profile-identity">
+                <span className="profile-card-label">
+                  DRIVER PROFILE
+                </span>
 
-                <div className="profile-season-progress-meta">
-                  <span className="profile-season-progress-label">
-                    SEASON EXPLORED
+                <h2>
+                  {displayName}
+                </h2>
+
+                {profile.email && (
+                  <div className="profile-email">
+                    <Mail size={15} />
+
+                    <span>
+                      {profile.email}
+                    </span>
+                  </div>
+                )}
+              </div>
+
+              <div className="profile-membership">
+                {profile.is_pro ? (
+                  <>
+                    <Crown size={17} />
+
+                    <span>
+                      PRO MEMBER
+                    </span>
+                  </>
+                ) : (
+                  <>
+                    <UserRound size={17} />
+
+                    <span>
+                      FREE MEMBER
+                    </span>
+                  </>
+                )}
+              </div>
+
+            </section>
+
+            {/* ACCOUNT OVERVIEW */}
+
+            <section className="profile-section profile-overview-card">
+              <div className="profile-section-heading">
+                <div>
+                  <span className="profile-section-label">
+                    ACCOUNT OVERVIEW
                   </span>
 
-                  <strong className="profile-season-progress-value">
+                  <h2>
+                    Your account
+                  </h2>
+                </div>
+
+                <ShieldCheck size={18} />
+              </div>
+
+              <div className="profile-overview-list">
+
+                <div className="profile-overview-row">
+                  <span>
+                    Replays watched
+                  </span>
+
+                  <strong>
+                    {stats?.replays_watched ?? 0}
+                  </strong>
+                </div>
+
+                <div className="profile-overview-row">
+                  <span>
+                    Replays started
+                  </span>
+
+                  <strong>
+                    {stats?.replays_started ?? 0}
+                  </strong>
+                </div>
+
+                <div className="profile-overview-row">
+                  <span>
+                    Watch time
+                  </span>
+
+                  <strong>
+                    {formatWatchTime(
+                      stats?.watch_time_seconds ?? 0,
+                    )}
+                  </strong>
+                </div>
+
+                <div className="profile-overview-row">
+                  <span>
+                    Completion rate
+                  </span>
+
+                  <strong>
                     {Math.round(
-                      seasonSummary.season_progress,
+                      stats?.completion_rate ?? 0,
                     )}%
                   </strong>
                 </div>
 
-                <div className="profile-season-progress-track">
-                  <span
-                    style={{
-                      width: `${Math.min(
-                        Math.max(
-                          seasonSummary.season_progress,
-                          0,
-                        ),
-                        100,
-                      )}%`,
-                    }}
+                <div className="profile-overview-row profile-overview-row-membership">
+                  <span>
+                    Membership
+                  </span>
+
+                  <strong>
+                    {profile.is_pro
+                      ? "PRO"
+                      : "FREE"}
+                  </strong>
+                </div>
+
+              </div>
+            </section>
+
+            {/* CONNECTED ACCOUNTS */}
+
+            <section className="profile-section profile-connections-card">
+              <div className="profile-section-heading">
+                <div>
+                  <span className="profile-section-label">
+                    CONNECTIONS
+                  </span>
+
+                  <h2>
+                    Connected accounts
+                  </h2>
+                </div>
+              </div>
+
+              {connectionError && (
+                <div className="profile-form-error">
+                  {connectionError}
+                </div>
+              )}
+
+              <div className="profile-connections">
+
+                {profile.connected_accounts.google && (
+                  <ConnectionRow
+                    name="Google"
+                    connected={true}
+                    busy={connectionBusy === "Google"}
+                    onDisconnect={() =>
+                      handleDisconnect("google")
+                    }
                   />
-                </div>
-
-              </div>
-
-              <div className="profile-season-stats">
-
-                <div className="profile-season-stat">
-                  <strong className="profile-season-stat-value">
-                    {seasonSummary.unique_races}
-                  </strong>
-
-                  <span className="profile-season-stat-label">
-                    Races explored
-                  </span>
-                </div>
-
-                <div className="profile-season-stat">
-                  <strong className="profile-season-stat-value">
-                    {seasonSummary.total_sessions}
-                  </strong>
-
-                  <span className="profile-season-stat-label">
-                    Sessions watched
-                  </span>
-                </div>
-
-                <div className="profile-season-stat">
-                  <strong className="profile-season-stat-value">
-                    {seasonSummary.completed_sessions}
-                  </strong>
-
-                  <span className="profile-season-stat-label">
-                    Sessions completed
-                  </span>
-                </div>
-
-                <div className="profile-season-stat">
-                  <strong className="profile-season-stat-value">
-                    {formatWatchTime(
-                      seasonSummary.watch_time_seconds,
-                    )}
-                  </strong>
-
-                  <span className="profile-season-stat-label">
-                    Total watch time
-                  </span>
-                </div>
-
-              </div>
-
-              <div className="profile-season-highlights">
-
-                {seasonSummary.most_watched && (
-                  <div className="profile-season-highlight">
-
-                    <p className="profile-season-highlight-label">
-                      MOST WATCHED
-                    </p>
-
-                    <div className="profile-season-highlight-main">
-                      <strong>
-                        Round{" "}
-                        {seasonSummary.most_watched.round}
-                      </strong>
-
-                      <span>
-                        {formatWatchTime(
-                          seasonSummary.most_watched
-                            .watch_time_seconds,
-                        )}
-                      </span>
-                    </div>
-
-                    <div className="profile-season-highlight-meta">
-                      <span>
-                        2026 GRAND PRIX
-                      </span>
-                    </div>
-
-                  </div>
                 )}
 
-                {seasonSummary.latest_replay && (
-                  <div className="profile-season-highlight">
+                {profile.connected_accounts.discord && (
+                  <ConnectionRow
+                    name="Discord"
+                    connected={true}
+                    busy={connectionBusy === "Discord"}
+                    onDisconnect={() =>
+                      handleDisconnect("discord")
+                    }
+                  />
+                )}
 
-                    <p className="profile-season-highlight-label">
-                      LATEST REPLAY
-                    </p>
+                {profile.connected_accounts.x && (
+                  <ConnectionRow
+                    name="X"
+                    connected={true}
+                    busy={connectionBusy === "X"}
+                    onDisconnect={() =>
+                      handleDisconnect("x")
+                    }
+                  />
+                )}
 
-                    <div className="profile-season-highlight-main">
-                      <strong>
-                        Round{" "}
-                        {seasonSummary.latest_replay.round}
-                      </strong>
+                {!profile.connected_accounts.google &&
+                  !profile.connected_accounts.discord &&
+                  !profile.connected_accounts.x && (
+                    <div className="profile-connections-empty">
+                      NO ACCOUNTS CONNECTED
+                    </div>
+                  )}
 
-                      <span>
+              </div>
+            </section>
+
+          </aside>
+
+          {/* MAIN CONTENT */}
+
+          <div className="profile-main">
+
+            {/* 2026 SEASON SUMMARY */}
+
+            <section className="profile-section profile-span-2 profile-season-section">
+
+              <div className="profile-section-heading">
+                <div>
+                  <span className="profile-section-label">
+                    2026 SEASON
+                  </span>
+
+                  <h2>
+                    Your season
+                  </h2>
+                </div>
+
+                <Trophy size={20} />
+              </div>
+
+              {seasonSummaryLoading ? (
+                <div className="profile-season-summary-loading">
+                  <LoaderCircle
+                    size={18}
+                    className="profile-loading-spinner"
+                  />
+
+                  <span>
+                    Loading season summary...
+                  </span>
+                </div>
+              ) : seasonSummary ? (
+                <div className="profile-season-summary">
+
+                  <div className="profile-season-summary-header">
+
+                    <div>
+                      <p className="profile-season-summary-kicker">
+                        SEASON JOURNEY
+                      </p>
+
+                      <h3 className="profile-season-summary-title">
+                        2026 Championship
+                      </h3>
+                    </div>
+
+                    <span className="profile-season-summary-year">
+                      26
+                    </span>
+
+                  </div>
+
+                  <div className="profile-season-progress">
+
+                    <div className="profile-season-progress-meta">
+                      <span className="profile-season-progress-label">
+                        SEASON EXPLORED
+                      </span>
+
+                      <strong className="profile-season-progress-value">
                         {Math.round(
-                          seasonSummary.latest_replay.progress *
-                            100,
+                          seasonSummary.season_progress,
                         )}%
+                      </strong>
+                    </div>
+
+                    <div className="profile-season-progress-track">
+                      <span
+                        style={{
+                          width: `${Math.min(
+                            Math.max(
+                              seasonSummary.season_progress,
+                              0,
+                            ),
+                            100,
+                          )}%`,
+                        }}
+                      />
+                    </div>
+
+                  </div>
+
+                  <div className="profile-season-stats">
+
+                    <div className="profile-season-stat">
+                      <strong className="profile-season-stat-value">
+                        {seasonSummary.unique_races}
+                      </strong>
+
+                      <span className="profile-season-stat-label">
+                        Races explored
                       </span>
                     </div>
 
-                    <div className="profile-season-highlight-meta">
-                      <span>
-                        {seasonSummary.latest_replay.session_type}
-                      </span>
+                    <div className="profile-season-stat">
+                      <strong className="profile-season-stat-value">
+                        {seasonSummary.total_sessions}
+                      </strong>
 
-                      <span>
-                        ·
+                      <span className="profile-season-stat-label">
+                        Sessions watched
                       </span>
+                    </div>
 
-                      <span>
-                        {seasonSummary.latest_replay.progress >=
-                        0.999
-                          ? "COMPLETED"
-                          : "IN PROGRESS"}
+                    <div className="profile-season-stat">
+                      <strong className="profile-season-stat-value">
+                        {seasonSummary.completed_sessions}
+                      </strong>
+
+                      <span className="profile-season-stat-label">
+                        Sessions completed
+                      </span>
+                    </div>
+
+                    <div className="profile-season-stat">
+                      <strong className="profile-season-stat-value">
+                        {formatWatchTime(
+                          seasonSummary.watch_time_seconds,
+                        )}
+                      </strong>
+
+                      <span className="profile-season-stat-label">
+                        Total watch time
                       </span>
                     </div>
 
                   </div>
-                )}
 
-              </div>
+                  <div className="profile-season-highlights">
 
-              <div className="profile-season-completion">
+                    {seasonSummary.most_watched && (
+                      <div className="profile-season-highlight">
 
-                <span>
-                  COMPLETION RATE
-                </span>
+                        <p className="profile-season-highlight-label">
+                          MOST WATCHED
+                        </p>
 
-                <strong>
-                  {Math.round(
-                    seasonSummary.completion_rate,
-                  )}%
-                </strong>
+                        <div className="profile-season-highlight-main">
+                          <strong>
+                            Round{" "}
+                            {seasonSummary.most_watched.round}
+                          </strong>
 
-              </div>
+                          <span>
+                            {formatWatchTime(
+                              seasonSummary.most_watched
+                                .watch_time_seconds,
+                            )}
+                          </span>
+                        </div>
 
-            </div>
-          ) : (
-            <div className="profile-loading-state">
-              <CircleOff size={20} />
+                        <div className="profile-season-highlight-meta">
+                          <span>
+                            2026 GRAND PRIX
+                          </span>
+                        </div>
 
-              <span>
-                Season summary unavailable.
-              </span>
-            </div>
-          )}
-
-        </section>
-
-        {/* F1 IDENTITY */}
-
-        <section className="profile-section">
-          <div className="profile-section-heading">
-            <div>
-              <span className="profile-section-label">
-                F1 IDENTITY
-              </span>
-
-              <h2>
-                Your preferences
-              </h2>
-            </div>
-
-            <Flag size={20} />
-          </div>
-
-          <div className="profile-identity-grid">
-
-            <div className="profile-preference-card">
-              <span>
-                FAVORITE DRIVER
-              </span>
-
-              <strong>
-                {profile.favorite_driver ||
-                  "Not set"}
-              </strong>
-            </div>
-
-            <div className="profile-preference-card">
-              <span>
-                FAVORITE TEAM
-              </span>
-
-              <strong>
-                {profile.favorite_team ||
-                  "Not set"}
-              </strong>
-            </div>
-
-          </div>
-        </section>
-
-        {/* ACHIEVEMENTS */}
-
-        <section className="profile-section profile-achievements-section">
-          <div className="profile-section-heading">
-            <div>
-              <span className="profile-section-label">
-                ACHIEVEMENTS
-              </span>
-
-              <h2>
-                Replay milestones
-              </h2>
-            </div>
-
-            <Trophy size={20} />
-          </div>
-
-          {achievementsLoading ? (
-            <div className="profile-achievements-loading">
-              <LoaderCircle
-                size={18}
-                className="profile-button-spinner"
-              />
-
-              LOADING ACHIEVEMENTS...
-            </div>
-          ) : (
-            <div className="profile-achievements-grid">
-
-              {achievements.map((achievement) => {
-                const progressPercent =
-                  achievement.target > 0
-                    ? Math.min(
-                        100,
-                        Math.round(
-                          (achievement.progress /
-                            achievement.target) *
-                            100,
-                        ),
-                      )
-                    : 0;
-
-                return (
-                  <article
-                    key={achievement.key}
-                    className={`profile-achievement-card ${
-                      achievement.unlocked
-                        ? "is-unlocked"
-                        : "is-locked"
-                    }`}
-                  >
-
-                    <div className="profile-achievement-top">
-
-                      <div className="profile-achievement-icon">
-                        {achievement.unlocked ? (
-                          <Trophy size={20} />
-                        ) : (
-                          <LockKeyhole size={19} />
-                        )}
                       </div>
+                    )}
 
-                      <span
-                        className={`profile-achievement-status ${
+                    {seasonSummary.latest_replay && (
+                      <div className="profile-season-highlight">
+
+                        <p className="profile-season-highlight-label">
+                          LATEST REPLAY
+                        </p>
+
+                        <div className="profile-season-highlight-main">
+                          <strong>
+                            Round{" "}
+                            {seasonSummary.latest_replay.round}
+                          </strong>
+
+                          <span>
+                            {Math.round(
+                              seasonSummary.latest_replay.progress *
+                                100,
+                            )}%
+                          </span>
+                        </div>
+
+                        <div className="profile-season-highlight-meta">
+                          <span>
+                            {seasonSummary.latest_replay.session_type}
+                          </span>
+
+                          <span>
+                            ·
+                          </span>
+
+                          <span>
+                            {seasonSummary.latest_replay.progress >=
+                            0.999
+                              ? "COMPLETED"
+                              : "IN PROGRESS"}
+                          </span>
+                        </div>
+
+                      </div>
+                    )}
+
+                  </div>
+
+                  <div className="profile-season-completion">
+
+                    <span>
+                      COMPLETION RATE
+                    </span>
+
+                    <strong>
+                      {Math.round(
+                        seasonSummary.completion_rate,
+                      )}%
+                    </strong>
+
+                  </div>
+
+                </div>
+              ) : (
+                <div className="profile-loading-state">
+                  <CircleOff size={20} />
+
+                  <span>
+                    Season summary unavailable.
+                  </span>
+                </div>
+              )}
+
+            </section>
+
+            {/* ACHIEVEMENTS */}
+
+            <section className="profile-section profile-span-2 profile-achievements-section">
+              <div className="profile-section-heading">
+                <div>
+                  <span className="profile-section-label">
+                    ACHIEVEMENTS
+                  </span>
+
+                  <h2>
+                    Replay milestones
+                  </h2>
+                </div>
+
+                <Trophy size={20} />
+              </div>
+
+              {achievementsLoading ? (
+                <div className="profile-achievements-loading">
+                  <LoaderCircle
+                    size={18}
+                    className="profile-button-spinner"
+                  />
+
+                  LOADING ACHIEVEMENTS...
+                </div>
+              ) : (
+                <div className="profile-achievements-grid">
+
+                  {achievements.map((achievement) => {
+                    const progressPercent =
+                      achievement.target > 0
+                        ? Math.min(
+                            100,
+                            Math.round(
+                              (achievement.progress /
+                                achievement.target) *
+                                100,
+                            ),
+                          )
+                        : 0;
+
+                    return (
+                      <article
+                        key={achievement.key}
+                        className={`profile-achievement-card ${
                           achievement.unlocked
                             ? "is-unlocked"
                             : "is-locked"
                         }`}
                       >
-                        {achievement.unlocked
-                          ? "UNLOCKED"
-                          : "LOCKED"}
-                      </span>
 
-                    </div>
+                        <div className="profile-achievement-top">
 
-                    <div className="profile-achievement-body">
+                          <div className="profile-achievement-icon">
+                            {achievement.unlocked ? (
+                              <Trophy size={20} />
+                            ) : (
+                              <LockKeyhole size={19} />
+                            )}
+                          </div>
 
-                      <strong>
-                        {achievement.title}
-                      </strong>
+                          <span
+                            className={`profile-achievement-status ${
+                              achievement.unlocked
+                                ? "is-unlocked"
+                                : "is-locked"
+                            }`}
+                          >
+                            {achievement.unlocked
+                              ? "UNLOCKED"
+                              : "LOCKED"}
+                          </span>
 
-                      <p>
-                        {achievement.description}
-                      </p>
+                        </div>
 
-                    </div>
+                        <div className="profile-achievement-body">
 
-                    <div className="profile-achievement-progress">
+                          <strong>
+                            {achievement.title}
+                          </strong>
 
-                      <div className="profile-achievement-progress-meta">
-                        <span>
-                          PROGRESS
-                        </span>
+                          <p>
+                            {achievement.description}
+                          </p>
 
-                        <strong>
-                          {achievement.progress_label}
-                        </strong>
-                      </div>
+                        </div>
 
-                      <div className="profile-achievement-progress-track">
-                        <span
-                          style={{
-                            width: `${progressPercent}%`,
-                          }}
-                        />
-                      </div>
+                        <div className="profile-achievement-progress">
 
-                    </div>
+                          <div className="profile-achievement-progress-meta">
+                            <span>
+                              PROGRESS
+                            </span>
 
-                  </article>
-                );
-              })}
+                            <strong>
+                              {achievement.progress_label}
+                            </strong>
+                          </div>
 
-            </div>
-          )}
+                          <div className="profile-achievement-progress-track">
+                            <span
+                              style={{
+                                width: `${progressPercent}%`,
+                              }}
+                            />
+                          </div>
 
-        </section>
+                        </div>
 
-        {/* CONNECTED ACCOUNTS */}
+                      </article>
+                    );
+                  })}
 
-        <section className="profile-section">
-          <div className="profile-section-heading">
-            <div>
-              <span className="profile-section-label">
-                CONNECTIONS
-              </span>
-
-              <h2>
-                Connected accounts
-              </h2>
-            </div>
-
-            <ShieldCheck size={20} />
-          </div>
-
-          {connectionError && (
-            <div className="profile-form-error">
-              {connectionError}
-            </div>
-          )}
-
-          {message && (
-            <div className="profile-form-success">
-              <CheckCircle2 size={16} />
-
-              <span>
-                {message}
-              </span>
-            </div>
-          )}
-
-          <div className="profile-connections">
-
-            {profile.connected_accounts.google && (
-              <ConnectionRow
-                name="Google"
-                connected={true}
-                busy={connectionBusy === "Google"}
-                onDisconnect={() =>
-                  handleDisconnect("google")
-                }
-              />
-            )}
-
-            {profile.connected_accounts.discord && (
-              <ConnectionRow
-                name="Discord"
-                connected={true}
-                busy={connectionBusy === "Discord"}
-                onDisconnect={() =>
-                  handleDisconnect("discord")
-                }
-              />
-            )}
-
-            {profile.connected_accounts.x && (
-              <ConnectionRow
-                name="X"
-                connected={true}
-                busy={connectionBusy === "X"}
-                onDisconnect={() =>
-                  handleDisconnect("x")
-                }
-              />
-            )}
-
-            {!profile.connected_accounts.google &&
-              !profile.connected_accounts.discord &&
-              !profile.connected_accounts.x && (
-                <div className="profile-connections-empty">
-                  NO ACCOUNTS CONNECTED
                 </div>
               )}
 
-          </div>
-        </section>
+            </section>
 
-        {/* EDIT PROFILE */}
+            {/* F1 IDENTITY */}
 
-        <section className="profile-section">
-          <div className="profile-section-heading">
-            <div>
-              <span className="profile-section-label">
-                PROFILE SETTINGS
-              </span>
+            <section className="profile-section">
+              <div className="profile-section-heading">
+                <div>
+                  <span className="profile-section-label">
+                    F1 IDENTITY
+                  </span>
 
-              <h2>
-                Edit profile
-              </h2>
-            </div>
-          </div>
+                  <h2>
+                    Your preferences
+                  </h2>
+                </div>
 
-          <form
-            className="profile-form"
-            onSubmit={handleSubmit}
-          >
-
-            <label className="profile-field">
-              <span>
-                USERNAME
-              </span>
-
-              <input
-                type="text"
-                value={username}
-                onChange={(event) =>
-                  setUsername(
-                    event.target.value,
-                  )
-                }
-                autoComplete="username"
-                required
-              />
-            </label>
-
-            <label className="profile-field">
-              <span>
-                EMAIL
-              </span>
-
-              <input
-                type="email"
-                value={profile.email ?? ""}
-                disabled
-              />
-
-              <small>
-                Email is managed by your
-                authentication provider.
-              </small>
-            </label>
-
-            <div className="profile-form-grid">
-
-              <label className="profile-field">
-                <span>
-                  FAVORITE DRIVER
-                </span>
-
-                <input
-                  type="text"
-                  value={favoriteDriver}
-                  onChange={(event) =>
-                    setFavoriteDriver(
-                      event.target.value,
-                    )
-                  }
-                />
-              </label>
-
-              <label className="profile-field">
-                <span>
-                  FAVORITE TEAM
-                </span>
-
-                <input
-                  type="text"
-                  value={favoriteTeam}
-                  onChange={(event) =>
-                    setFavoriteTeam(
-                      event.target.value,
-                    )
-                  }
-                />
-              </label>
-
-            </div>
-
-            {error && (
-              <div className="profile-form-error">
-                {error}
+                <Flag size={20} />
               </div>
-            )}
 
-            {message && (
-              <div className="profile-form-success">
-                <CheckCircle2 size={16} />
+              <div className="profile-identity-grid">
 
-                <span>
-                  {message}
-                </span>
+                <div className="profile-preference-card">
+                  <span>
+                    FAVORITE DRIVER
+                  </span>
+
+                  <strong>
+                    {profile.favorite_driver ||
+                      "Not set"}
+                  </strong>
+                </div>
+
+                <div className="profile-preference-card">
+                  <span>
+                    FAVORITE TEAM
+                  </span>
+
+                  <strong>
+                    {profile.favorite_team ||
+                      "Not set"}
+                  </strong>
+                </div>
+
               </div>
-            )}
+            </section>
 
-            <div className="profile-form-actions">
+            {/* EDIT PROFILE */}
 
-              <button
-                type="submit"
-                className="profile-save-button"
-                disabled={saving}
+            <section className="profile-section">
+              <div className="profile-section-heading">
+                <div>
+                  <span className="profile-section-label">
+                    PROFILE SETTINGS
+                  </span>
+
+                  <h2>
+                    Edit profile
+                  </h2>
+                </div>
+              </div>
+
+              <form
+                className="profile-form"
+                onSubmit={handleSubmit}
               >
-                {saving ? (
-                  <>
-                    <LoaderCircle
-                      size={17}
-                      className="profile-button-spinner"
-                    />
-
-                    SAVING...
-                  </>
-                ) : (
-                  <>
-                    <Save size={17} />
-
-                    SAVE PROFILE
-                  </>
-                )}
-              </button>
-
-            </div>
-
-          </form>
-        </section>
-
-        {/* ACCOUNT SETTINGS */}
-
-        <section className="profile-section">
-          <div className="profile-section-heading">
-            <div>
-              <span className="profile-section-label">
-                ACCOUNT SETTINGS
-              </span>
-
-              <h2>
-                Preferences
-              </h2>
-            </div>
-
-            <UserRound size={20} />
-          </div>
-
-          {settingsLoading ? (
-            <div className="profile-security-card">
-              <div>
-                <strong>
-                  Loading settings
-                </strong>
-
-                <p>
-                  Retrieving your account preferences...
-                </p>
-              </div>
-
-              <LoaderCircle
-                size={20}
-                className="profile-button-spinner"
-              />
-            </div>
-          ) : (
-            <form
-              className="profile-form"
-              onSubmit={handleSettingsSubmit}
-            >
-              <div className="profile-form-grid">
 
                 <label className="profile-field">
                   <span>
-                    DEFAULT DRIVER COMPARISON
+                    USERNAME
                   </span>
 
-                  <select
-                    value={defaultDriverComp}
+                  <input
+                    type="text"
+                    value={username}
                     onChange={(event) =>
-                      setDefaultDriverComp(
+                      setUsername(
                         event.target.value,
                       )
                     }
-                  >
-                    <option value="VER">
-                      VER — Max Verstappen
-                    </option>
-
-                    <option value="NOR">
-                      NOR — Lando Norris
-                    </option>
-
-                    <option value="LEC">
-                      LEC — Charles Leclerc
-                    </option>
-
-                    <option value="HAM">
-                      HAM — Lewis Hamilton
-                    </option>
-
-                    <option value="ANT">
-                      ANT — Kimi Antonelli
-                    </option>
-
-                    <option value="PIA">
-                      PIA — Oscar Piastri
-                    </option>
-
-                    <option value="RUS">
-                      RUS — George Russell
-                    </option>
-                  </select>
+                    autoComplete="username"
+                    required
+                  />
                 </label>
 
                 <label className="profile-field">
                   <span>
-                    UNITS
+                    EMAIL
                   </span>
 
-                  <select
-                    value={units}
-                    onChange={(event) =>
-                      setUnits(event.target.value)
-                    }
-                  >
-                    <option value="metric">
-                      Metric
-                    </option>
-
-                    <option value="imperial">
-                      Imperial
-                    </option>
-                  </select>
-                </label>
-
-              </div>
-
-              <div className="profile-form-grid">
-
-                <label className="profile-field">
-                  <span>
-                    THEME
-                  </span>
-
-                  <select
-                    value={theme}
-                    onChange={(event) =>
-                      setTheme(event.target.value)
-                    }
-                  >
-                    <option value="dark">
-                      Dark
-                    </option>
-
-                    <option value="light">
-                      Light
-                    </option>
-
-                    <option value="system">
-                      System
-                    </option>
-                  </select>
-                </label>
-
-                <label className="profile-field">
-                  <span>
-                    ACCENT COLOR
-                  </span>
-
-                  <select
-                    value={accentColor}
-                    onChange={(event) =>
-                      setAccentColor(event.target.value)
-                    }
-                  >
-                    <option value="#e10600">
-                      F1 Red
-                    </option>
-
-                    <option value="#ff1744">
-                      Crimson
-                    </option>
-
-                    <option value="#ffffff">
-                      White
-                    </option>
-                  </select>
-                </label>
-
-              </div>
-
-              <label className="profile-settings-toggle">
-                <span>
-                  <strong>
-                    REPLAY NOTIFICATIONS
-                  </strong>
+                  <input
+                    type="email"
+                    value={profile.email ?? ""}
+                    disabled
+                  />
 
                   <small>
-                    Receive notifications about replay activity
-                    and updates.
+                    Email is managed by your
+                    authentication provider.
                   </small>
-                </span>
+                </label>
 
-                <input
-                  type="checkbox"
-                  checked={notificationsEnabled}
-                  onChange={(event) =>
-                    setNotificationsEnabled(
-                      event.target.checked,
-                    )
-                  }
-                />
-              </label>
+                <div className="profile-form-grid">
 
-              {settingsError && (
-                <div className="profile-form-error">
-                  {settingsError}
-                </div>
-              )}
+                  <label className="profile-field">
+                    <span>
+                      FAVORITE DRIVER
+                    </span>
 
-              {settingsMessage && (
-                <div className="profile-form-success">
-                  <CheckCircle2 size={16} />
-
-                  <span>
-                    {settingsMessage}
-                  </span>
-                </div>
-              )}
-
-              <div className="profile-form-actions">
-                <button
-                  type="submit"
-                  className="profile-save-button"
-                  disabled={settingsSaving}
-                >
-                  {settingsSaving ? (
-                    <>
-                      <LoaderCircle
-                        size={17}
-                        className="profile-button-spinner"
-                      />
-
-                      SAVING...
-                    </>
-                  ) : (
-                    <>
-                      <Save size={17} />
-
-                      SAVE SETTINGS
-                    </>
-                  )}
-                </button>
-              </div>
-            </form>
-          )}
-        </section>
-
-        {/* SECURITY */}
-
-        <section className="profile-section">
-          <div className="profile-section-heading">
-            <div>
-              <span className="profile-section-label">
-                ACCOUNT SECURITY
-              </span>
-
-              <h2>
-                Authentication
-              </h2>
-            </div>
-
-            <ShieldCheck size={20} />
-          </div>
-
-          <form
-            className="profile-form profile-password-form"
-            onSubmit={handlePasswordSubmit}
-          >
-            <div className="profile-security-card">
-              <div>
-                <strong>
-                  {profile?.has_password
-                    ? "Change your password"
-                    : "Set a password"}
-                </strong>
-
-                <p>
-                  {profile?.has_password
-                    ? "Use a strong password to keep your F1 Race Replay account protected."
-                    : "Create a password so you can also sign in directly with your F1 Race Replay account."}
-                </p>
-              </div>
-
-              <ShieldCheck size={22} />
-            </div>
-
-            <div className="profile-form-grid">
-
-              {profile?.has_password && (
-                <label className="profile-field">
-                  <span>
-                    CURRENT PASSWORD
-                  </span>
-
-                  <div className="profile-password-input">
                     <input
-                      type={
-                        showCurrentPassword
-                          ? "text"
-                          : "password"
-                      }
-                      value={currentPassword}
+                      type="text"
+                      value={favoriteDriver}
                       onChange={(event) =>
-                        setCurrentPassword(
+                        setFavoriteDriver(
                           event.target.value,
                         )
                       }
-                      autoComplete="current-password"
-                      placeholder="Enter current password"
                     />
+                  </label>
 
-                    <button
-                      type="button"
-                      className="profile-password-toggle"
-                      aria-label={
-                        showCurrentPassword
-                          ? "Hide current password"
-                          : "Show current password"
-                      }
-                      onClick={() =>
-                        setShowCurrentPassword(
-                          (current) => !current,
+                  <label className="profile-field">
+                    <span>
+                      FAVORITE TEAM
+                    </span>
+
+                    <input
+                      type="text"
+                      value={favoriteTeam}
+                      onChange={(event) =>
+                        setFavoriteTeam(
+                          event.target.value,
                         )
                       }
+                    />
+                  </label>
+
+                </div>
+
+                {error && (
+                  <div className="profile-form-error">
+                    {error}
+                  </div>
+                )}
+
+                {message && (
+                  <div className="profile-form-success">
+                    <CheckCircle2 size={16} />
+
+                    <span>
+                      {message}
+                    </span>
+                  </div>
+                )}
+
+                <div className="profile-form-actions">
+
+                  <button
+                    type="submit"
+                    className="profile-save-button"
+                    disabled={saving}
+                  >
+                    {saving ? (
+                      <>
+                        <LoaderCircle
+                          size={17}
+                          className="profile-button-spinner"
+                        />
+
+                        SAVING...
+                      </>
+                    ) : (
+                      <>
+                        <Save size={17} />
+
+                        SAVE PROFILE
+                      </>
+                    )}
+                  </button>
+
+                </div>
+
+              </form>
+            </section>
+
+            {/* ACCOUNT SETTINGS */}
+
+            <section className="profile-section">
+              <div className="profile-section-heading">
+                <div>
+                  <span className="profile-section-label">
+                    ACCOUNT SETTINGS
+                  </span>
+
+                  <h2>
+                    Preferences
+                  </h2>
+                </div>
+
+                <UserRound size={20} />
+              </div>
+
+              {settingsLoading ? (
+                <div className="profile-security-card">
+                  <div>
+                    <strong>
+                      Loading settings
+                    </strong>
+
+                    <p>
+                      Retrieving your account preferences...
+                    </p>
+                  </div>
+
+                  <LoaderCircle
+                    size={20}
+                    className="profile-button-spinner"
+                  />
+                </div>
+              ) : (
+                <form
+                  className="profile-form"
+                  onSubmit={handleSettingsSubmit}
+                >
+                  <div className="profile-form-grid">
+
+                    <label className="profile-field">
+                      <span>
+                        DEFAULT DRIVER COMPARISON
+                      </span>
+
+                      <select
+                        value={defaultDriverComp}
+                        onChange={(event) =>
+                          setDefaultDriverComp(
+                            event.target.value,
+                          )
+                        }
+                      >
+                        <option value="VER">
+                          VER — Max Verstappen
+                        </option>
+
+                        <option value="NOR">
+                          NOR — Lando Norris
+                        </option>
+
+                        <option value="LEC">
+                          LEC — Charles Leclerc
+                        </option>
+
+                        <option value="HAM">
+                          HAM — Lewis Hamilton
+                        </option>
+
+                        <option value="ANT">
+                          ANT — Kimi Antonelli
+                        </option>
+
+                        <option value="PIA">
+                          PIA — Oscar Piastri
+                        </option>
+
+                        <option value="RUS">
+                          RUS — George Russell
+                        </option>
+                      </select>
+                    </label>
+
+                    <label className="profile-field">
+                      <span>
+                        UNITS
+                      </span>
+
+                      <select
+                        value={units}
+                        onChange={(event) =>
+                          setUnits(event.target.value)
+                        }
+                      >
+                        <option value="metric">
+                          Metric
+                        </option>
+
+                        <option value="imperial">
+                          Imperial
+                        </option>
+                      </select>
+                    </label>
+
+                  </div>
+
+                  <div className="profile-form-grid">
+
+                    <label className="profile-field">
+                      <span>
+                        THEME
+                      </span>
+
+                      <select
+                        value={theme}
+                        onChange={(event) =>
+                          setTheme(event.target.value)
+                        }
+                      >
+                        <option value="dark">
+                          Dark
+                        </option>
+
+                        <option value="light">
+                          Light
+                        </option>
+
+                        <option value="system">
+                          System
+                        </option>
+                      </select>
+                    </label>
+
+                    <label className="profile-field">
+                      <span>
+                        ACCENT COLOR
+                      </span>
+
+                      <select
+                        value={accentColor}
+                        onChange={(event) =>
+                          setAccentColor(event.target.value)
+                        }
+                      >
+                        <option value="#e10600">
+                          F1 Red
+                        </option>
+
+                        <option value="#ff1744">
+                          Crimson
+                        </option>
+
+                        <option value="#ffffff">
+                          White
+                        </option>
+                      </select>
+                    </label>
+
+                  </div>
+
+                  <label className="profile-settings-toggle">
+                    <span>
+                      <strong>
+                        REPLAY NOTIFICATIONS
+                      </strong>
+
+                      <small>
+                        Receive notifications about replay activity
+                        and updates.
+                      </small>
+                    </span>
+
+                    <input
+                      type="checkbox"
+                      checked={notificationsEnabled}
+                      onChange={(event) =>
+                        setNotificationsEnabled(
+                          event.target.checked,
+                        )
+                      }
+                    />
+                  </label>
+
+                  {settingsError && (
+                    <div className="profile-form-error">
+                      {settingsError}
+                    </div>
+                  )}
+
+                  {settingsMessage && (
+                    <div className="profile-form-success">
+                      <CheckCircle2 size={16} />
+
+                      <span>
+                        {settingsMessage}
+                      </span>
+                    </div>
+                  )}
+
+                  <div className="profile-form-actions">
+                    <button
+                      type="submit"
+                      className="profile-save-button"
+                      disabled={settingsSaving}
                     >
-                      {showCurrentPassword ? (
-                        <EyeOff size={17} />
+                      {settingsSaving ? (
+                        <>
+                          <LoaderCircle
+                            size={17}
+                            className="profile-button-spinner"
+                          />
+
+                          SAVING...
+                        </>
                       ) : (
-                        <Eye size={17} />
+                        <>
+                          <Save size={17} />
+
+                          SAVE SETTINGS
+                        </>
                       )}
                     </button>
                   </div>
-                </label>
+                </form>
               )}
+            </section>
 
-              <label className="profile-field">
-                <span>
-                  NEW PASSWORD
-                </span>
+            {/* SECURITY */}
 
-                <div className="profile-password-input">
-                  <input
-                    type={
-                      showNewPassword
-                        ? "text"
-                        : "password"
-                    }
-                    value={newPassword}
-                    onChange={(event) =>
-                      setNewPassword(
-                        event.target.value,
-                      )
-                    }
-                    autoComplete="new-password"
-                    placeholder="Minimum 8 characters"
-                  />
+            <section className="profile-section">
+              <div className="profile-section-heading">
+                <div>
+                  <span className="profile-section-label">
+                    ACCOUNT SECURITY
+                  </span>
 
-                  <button
-                    type="button"
-                    className="profile-password-toggle"
-                    aria-label={
-                      showNewPassword
-                        ? "Hide new password"
-                        : "Show new password"
-                    }
-                    onClick={() =>
-                      setShowNewPassword(
-                        (current) => !current,
-                      )
-                    }
-                  >
-                    {showNewPassword ? (
-                      <EyeOff size={17} />
-                    ) : (
-                      <Eye size={17} />
-                    )}
-                  </button>
+                  <h2>
+                    Authentication
+                  </h2>
                 </div>
-              </label>
 
-            </div>
-
-            <div className="profile-form-grid">
-
-              <label className="profile-field">
-                <span>
-                  CONFIRM NEW PASSWORD
-                </span>
-
-                <div className="profile-password-input">
-                  <input
-                    type={
-                      showConfirmPassword
-                        ? "text"
-                        : "password"
-                    }
-                    value={confirmPassword}
-                    onChange={(event) =>
-                      setConfirmPassword(
-                        event.target.value,
-                      )
-                    }
-                    autoComplete="new-password"
-                    placeholder="Repeat new password"
-                  />
-
-                  <button
-                    type="button"
-                    className="profile-password-toggle"
-                    aria-label={
-                      showConfirmPassword
-                        ? "Hide confirmation password"
-                        : "Show confirmation password"
-                    }
-                    onClick={() =>
-                      setShowConfirmPassword(
-                        (current) => !current,
-                      )
-                    }
-                  >
-                    {showConfirmPassword ? (
-                      <EyeOff size={17} />
-                    ) : (
-                      <Eye size={17} />
-                    )}
-                  </button>
-                </div>
-              </label>
-
-            </div>
-
-            <div className="profile-password-hint">
-              <LockKeyhole size={15} />
-
-              <span>
-                Passwords must contain at least 8 characters.
-              </span>
-            </div>
-
-            {passwordError && (
-              <div className="profile-form-error">
-                {passwordError}
+                <ShieldCheck size={20} />
               </div>
-            )}
 
-            {passwordMessage && (
-              <div className="profile-form-success">
-                <CheckCircle2 size={16} />
-
-                <span>
-                  {passwordMessage}
-                </span>
-              </div>
-            )}
-
-            <div className="profile-form-actions">
-
-              <button
-                type="submit"
-                className="profile-save-button"
-                disabled={passwordSaving}
+              <form
+                className="profile-form profile-password-form"
+                onSubmit={handlePasswordSubmit}
               >
-                {passwordSaving ? (
-                  <>
-                    <LoaderCircle
-                      size={17}
-                      className="profile-button-spinner"
-                    />
+                <div className="profile-security-card">
+                  <div>
+                    <strong>
+                      {profile?.has_password
+                        ? "Change your password"
+                        : "Set a password"}
+                    </strong>
 
-                    {profile?.has_password
-                      ? "UPDATING..."
-                      : "SETTING PASSWORD..."}
-                  </>
-                ) : (
-                  <>
-                    <ShieldCheck size={17} />
+                    <p>
+                      {profile?.has_password
+                        ? "Use a strong password to keep your F1 Race Replay account protected."
+                        : "Create a password so you can also sign in directly with your F1 Race Replay account."}
+                    </p>
+                  </div>
 
-                    {profile?.has_password
-                      ? "CHANGE PASSWORD"
-                      : "SET PASSWORD"}
-                  </>
+                  <ShieldCheck size={22} />
+                </div>
+
+                <div className="profile-form-grid">
+
+                  {profile?.has_password && (
+                    <label className="profile-field">
+                      <span>
+                        CURRENT PASSWORD
+                      </span>
+
+                      <div className="profile-password-input">
+                        <input
+                          type={
+                            showCurrentPassword
+                              ? "text"
+                              : "password"
+                          }
+                          value={currentPassword}
+                          onChange={(event) =>
+                            setCurrentPassword(
+                              event.target.value,
+                            )
+                          }
+                          autoComplete="current-password"
+                          placeholder="Enter current password"
+                        />
+
+                        <button
+                          type="button"
+                          className="profile-password-toggle"
+                          aria-label={
+                            showCurrentPassword
+                              ? "Hide current password"
+                              : "Show current password"
+                          }
+                          onClick={() =>
+                            setShowCurrentPassword(
+                              (current) => !current,
+                            )
+                          }
+                        >
+                          {showCurrentPassword ? (
+                            <EyeOff size={17} />
+                          ) : (
+                            <Eye size={17} />
+                          )}
+                        </button>
+                      </div>
+                    </label>
+                  )}
+
+                  <label className="profile-field">
+                    <span>
+                      NEW PASSWORD
+                    </span>
+
+                    <div className="profile-password-input">
+                      <input
+                        type={
+                          showNewPassword
+                            ? "text"
+                            : "password"
+                        }
+                        value={newPassword}
+                        onChange={(event) =>
+                          setNewPassword(
+                            event.target.value,
+                          )
+                        }
+                        autoComplete="new-password"
+                        placeholder="Minimum 8 characters"
+                      />
+
+                      <button
+                        type="button"
+                        className="profile-password-toggle"
+                        aria-label={
+                          showNewPassword
+                            ? "Hide new password"
+                            : "Show new password"
+                        }
+                        onClick={() =>
+                          setShowNewPassword(
+                            (current) => !current,
+                          )
+                        }
+                      >
+                        {showNewPassword ? (
+                          <EyeOff size={17} />
+                        ) : (
+                          <Eye size={17} />
+                        )}
+                      </button>
+                    </div>
+                  </label>
+
+                </div>
+
+                <div className="profile-form-grid">
+
+                  <label className="profile-field">
+                    <span>
+                      CONFIRM NEW PASSWORD
+                    </span>
+
+                    <div className="profile-password-input">
+                      <input
+                        type={
+                          showConfirmPassword
+                            ? "text"
+                            : "password"
+                        }
+                        value={confirmPassword}
+                        onChange={(event) =>
+                          setConfirmPassword(
+                            event.target.value,
+                          )
+                        }
+                        autoComplete="new-password"
+                        placeholder="Repeat new password"
+                      />
+
+                      <button
+                        type="button"
+                        className="profile-password-toggle"
+                        aria-label={
+                          showConfirmPassword
+                            ? "Hide confirmation password"
+                            : "Show confirmation password"
+                        }
+                        onClick={() =>
+                          setShowConfirmPassword(
+                            (current) => !current,
+                          )
+                        }
+                      >
+                        {showConfirmPassword ? (
+                          <EyeOff size={17} />
+                        ) : (
+                          <Eye size={17} />
+                        )}
+                      </button>
+                    </div>
+                  </label>
+
+                </div>
+
+                <div className="profile-password-hint">
+                  <LockKeyhole size={15} />
+
+                  <span>
+                    Passwords must contain at least 8 characters.
+                  </span>
+                </div>
+
+                {passwordError && (
+                  <div className="profile-form-error">
+                    {passwordError}
+                  </div>
                 )}
-              </button>
 
-            </div>
-          </form>
-        </section>
+                {passwordMessage && (
+                  <div className="profile-form-success">
+                    <CheckCircle2 size={16} />
+
+                    <span>
+                      {passwordMessage}
+                    </span>
+                  </div>
+                )}
+
+                <div className="profile-form-actions">
+
+                  <button
+                    type="submit"
+                    className="profile-save-button"
+                    disabled={passwordSaving}
+                  >
+                    {passwordSaving ? (
+                      <>
+                        <LoaderCircle
+                          size={17}
+                          className="profile-button-spinner"
+                        />
+
+                        {profile?.has_password
+                          ? "UPDATING..."
+                          : "SETTING PASSWORD..."}
+                      </>
+                    ) : (
+                      <>
+                        <ShieldCheck size={17} />
+
+                        {profile?.has_password
+                          ? "CHANGE PASSWORD"
+                          : "SET PASSWORD"}
+                      </>
+                    )}
+                  </button>
+
+                </div>
+              </form>
+            </section>
+
+          </div>
+
+        </div>
 
         <footer className="profile-footer">
           <span>

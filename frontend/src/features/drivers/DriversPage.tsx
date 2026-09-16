@@ -2,7 +2,7 @@ import { useEffect, useMemo, useState, type CSSProperties } from "react";
 import {
   getDriversPanel,
   type DriverPanelData,
-} from "../api/drivers";
+} from "../../api/drivers";
 import { useNavigate } from "react-router-dom";
 
 const DRIVER_IMAGES: Record<string, string> = {

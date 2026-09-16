@@ -23,8 +23,8 @@ import ProtectedRoute from "../features/auth/ProtectedRoute";
 import DiscordCallbackPage from "../features/auth/DiscordCallbackPage";
 import XCallbackPage from "../features/auth/XCallbackPage";
 
-import DriversPage from "../pages/DriversPage";
-import DriverDetailPage from "../pages/DriverDetailPage";
+import DriversPage from "../features/drivers/DriversPage";
+import DriverDetailPage from "../features/drivers/DriverDetailPage";
 import AnalyticsPage from "../features/analytics/AnalyticsPage";
 
 function FoundationPage({

@@ -142,6 +142,7 @@
   width: 100%;
   max-width: 100%;
   box-sizing: border-box;
+  margin-top: -110px;
 }
 
 .analytics-page::before {
@@ -394,3 +395,6 @@
     transition: none;
   }
 }
+
+
+
