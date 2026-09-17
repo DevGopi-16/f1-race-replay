@@ -7,38 +7,6 @@ interface ReplayControlsProps {
   onFrameChange: (index: number) => void;
 }
 
-function PlayIcon() {
-  return (
-    <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
-      <path d="M8 5v14l11-7z" />
-    </svg>
-  );
-}
-
-function PauseIcon() {
-  return (
-    <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
-      <path d="M6 5h4v14H6zM14 5h4v14h-4z" />
-    </svg>
-  );
-}
-
-function SkipBackIcon() {
-  return (
-    <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
-      <path d="M6 5h3v14H6zM10 12l9-7v14z" />
-    </svg>
-  );
-}
-
-function SkipForwardIcon() {
-  return (
-    <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
-      <path d="M15 5h3v14h-3zM5 5l9 7-9 7z" />
-    </svg>
-  );
-}
-
 function formatTime(seconds: number) {
   if (!Number.isFinite(seconds) || seconds < 0) {
     return "00:00";
@@ -65,49 +33,27 @@ export default function ReplayControls({
   onFrameChange,
 }: ReplayControlsProps) {
   const maxFrame = Math.max(0, totalFrames - 1);
-
-  const safeFrame = Math.min(
-    Math.max(0, frameIndex),
-    maxFrame,
-  );
-
-  const progress =
-    maxFrame > 0
-      ? (safeFrame / maxFrame) * 100
-      : 0;
-
-  const elapsed =
-    frameRate > 0
-      ? safeFrame / frameRate
-      : 0;
-
-  const duration =
-    frameRate > 0
-      ? maxFrame / frameRate
-      : 0;
-
-  const skipAmount = Math.max(
-    1,
-    Math.round(frameRate * 5),
-  );
+  const safeFrame = Math.min(Math.max(0, frameIndex), maxFrame);
+  const elapsed = frameRate > 0 ? safeFrame / frameRate : 0;
+  const duration = frameRate > 0 ? maxFrame / frameRate : 0;
+  const skipAmount = Math.max(1, Math.round(frameRate * 5));
 
   const skipBackward = () => {
-    onFrameChange(
-      Math.max(0, safeFrame - skipAmount),
-    );
+    onFrameChange(Math.max(0, safeFrame - skipAmount));
   };
 
   const skipForward = () => {
-    onFrameChange(
-      Math.min(maxFrame, safeFrame + skipAmount),
-    );
+    onFrameChange(Math.min(maxFrame, safeFrame + skipAmount));
   };
 
   return (
     <section className="replay-controls">
+      <div className="replay-section-heading">
+        <span>PLAYBACK CONTROLS</span>
+        <small>{playing ? "PLAYING" : "PAUSED"}</small>
+      </div>
 
       <div className="replay-controls-main">
-
         <div className="replay-control-actions">
 
           <button
@@ -118,7 +64,7 @@ export default function ReplayControls({
             aria-label="Skip backward five seconds"
             title="Skip backward 5 seconds"
           >
-            <SkipBackIcon />
+            <img src="/images/controls/rewind.png" alt="Rewind" />
           </button>
 
           <button
@@ -129,7 +75,10 @@ export default function ReplayControls({
             aria-label={playing ? "Pause replay" : "Play replay"}
             title={playing ? "Pause" : "Play"}
           >
-            {playing ? <PauseIcon /> : <PlayIcon />}
+            <img
+              src={playing ? "/images/controls/pause.png" : "/images/controls/play.png"}
+              alt={playing ? "Pause" : "Play"}
+            />
           </button>
 
           <button
@@ -140,66 +89,29 @@ export default function ReplayControls({
             aria-label="Skip forward five seconds"
             title="Skip forward 5 seconds"
           >
-            <SkipForwardIcon />
+            <img src="/images/controls/forward.png" alt="Forward" />
           </button>
 
         </div>
 
         <div className="replay-time-info">
-
-          <strong>
-            {formatTime(elapsed)}
-          </strong>
-
+          <strong>{formatTime(elapsed)}</strong>
           <span>/</span>
-
-          <small>
-            {formatTime(duration)}
-          </small>
-
+          <small>{formatTime(duration)}</small>
         </div>
 
         <div className="replay-frame-info">
           FRAME {safeFrame + 1} / {totalFrames}
         </div>
 
-        <div className="replay-speed">
+        <div className="replay-fps-label">
           <span>PLAYBACK</span>
           <strong>{frameRate} FPS</strong>
         </div>
 
       </div>
-
-      <div className="replay-timeline-wrap">
-
-        <div className="replay-timeline-labels">
-          <span>START</span>
-          <span>REPLAY</span>
-          <span>FINISH</span>
-        </div>
-
-        <input
-          className="replay-timeline"
-          type="range"
-          min={0}
-          max={maxFrame}
-          value={safeFrame}
-          style={
-            {
-              "--replay-progress": `${progress}%`,
-            } as React.CSSProperties
-          }
-          onChange={(event) =>
-            onFrameChange(
-              Number(event.target.value),
-            )
-          }
-          disabled={totalFrames <= 1}
-          aria-label="Replay timeline"
-        />
-
-      </div>
-
     </section>
   );
 }
+
+    

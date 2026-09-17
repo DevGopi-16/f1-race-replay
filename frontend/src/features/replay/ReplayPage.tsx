@@ -1391,41 +1391,7 @@ export default function ReplayPage() {
 
                 </main>
               </Reveal>
-
-              {/* REPLAY CONTROLS */}
-
-              <Reveal delay="short">
-
-                <ReplayControls
-                  frameIndex={
-                    frameIndex
-                  }
-
-                  totalFrames={
-                    totalFrames
-                  }
-
-                  frameRate={
-                    data.frame_rate
-                  }
-
-                  playing={
-                    playing
-                  }
-
-                  onPlayPause={
-                    handlePlayPause
-                  }
-
-                  onFrameChange={
-                    handleFrameChange
-                  }
-                />
-
-              </Reveal>
-
-              {/* SELECTED DRIVERS */}
-
+               {/* SELECTED DRIVERS */}
               <Reveal delay="short">
 
                 <section className="replay-driver-section">
@@ -1684,11 +1650,8 @@ export default function ReplayPage() {
                     </small>
 
                   </div>
-
-                  <div className="replay-timeline">
-
+                  <div className="replay-timeline-body">
                     <div className="replay-timeline-topline">
-
                       <div className="replay-timeline-live">
 
                         <span className="replay-timeline-live-dot" />
@@ -1895,147 +1858,53 @@ export default function ReplayPage() {
 
                     </div>
 
-                  </div>
+                    <div className="replay-controls-block">
 
+                      <ReplayControls
+                        frameIndex={frameIndex}
+                        totalFrames={totalFrames}
+                        frameRate={data.frame_rate}
+                        playing={playing}
+                        onPlayPause={handlePlayPause}
+                        onFrameChange={handleFrameChange}
+                      />
+
+                      <div className="replay-playback-meta">
+
+                        <div className="replay-speed">
+                          {[0.5, 1, 2, 4].map((value) => (
+                            <button
+                              key={value}
+                              type="button"
+                              className={speed === value ? "active" : ""}
+                              onClick={() => handleSpeedChange(value)}
+                            >
+                              {value}×
+                            </button>
+                          ))}
+                        </div>
+
+                        <div className="replay-keyboard">
+                          <span>
+                            SPACE
+                            <small>Play/Pause</small>
+                          </span>
+                          <span>
+                            <img src="/images/controls/arrow-left.png" alt="" className="replay-key-icon" />
+                            <img src="/images/controls/arrow-right.png" alt="" className="replay-key-icon" />
+                            <small>Seek</small>
+                          </span>
+                          <span>
+                            <img src="/images/controls/arrow-up.png" alt="" className="replay-key-icon" />
+                            <img src="/images/controls/arrow-down.png" alt="" className="replay-key-icon" />
+                            <small>Speed</small>
+                          </span>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
                 </section>
-
               </Reveal>
-
-              {/* PLAYBACK */}
-
-              <Reveal delay="medium">
-
-                <section className="replay-playback-section">
-
-                  <div className="replay-playback-main">
-
-                    <button
-                      type="button"
-                      className="replay-control-button"
-                      onClick={() =>
-                        handleFrameChange(
-                          frameIndex -
-                            fps * 5,
-                        )
-                      }
-                      aria-label="Seek backward 5 seconds"
-                      title="Seek backward 5 seconds"
-                    >
-                      <img
-                        src="/images/controls/rewind.png"
-                        alt="Rewind"
-                      />
-                    </button>
-
-                    <button
-                      type="button"
-                      className="replay-play-button"
-                      onClick={
-                        handlePlayPause
-                      }
-                      aria-label={
-                        playing
-                          ? "Pause replay"
-                          : "Play replay"
-                      }
-                      title={
-                        playing
-                          ? "Pause"
-                          : "Play"
-                      }
-                    >
-                      <img
-                        src={
-                          playing
-                            ? "/images/controls/pause.png"
-                            : "/images/controls/play.png"
-                        }
-                        alt={
-                          playing
-                            ? "Pause"
-                            : "Play"
-                        }
-                      />
-                    </button>
-
-                    <button
-                      type="button"
-                      className="replay-control-button"
-                      onClick={() =>
-                        handleFrameChange(
-                          frameIndex +
-                            fps * 5,
-                        )
-                      }
-                      aria-label="Seek forward 5 seconds"
-                      title="Seek forward 5 seconds"
-                    >
-                      <img
-                        src="/images/controls/forward.png"
-                        alt="Forward"
-                      />
-                    </button>
-
-                  </div>
-
-                  <div className="replay-speed">
-
-                    {[0.5, 1, 2, 4].map(
-                      (value) => (
-                        <button
-                          key={value}
-                          type="button"
-                          className={
-                            speed ===
-                            value
-                              ? "active"
-                              : ""
-                          }
-                          onClick={() =>
-                            handleSpeedChange(
-                              value,
-                            )
-                          }
-                        >
-                          {value}×
-                        </button>
-                      ),
-                    )}
-
-                  </div>
-
-                  <div className="replay-keyboard">
-
-                    <span>
-                      SPACE
-
-                      <small>
-                        Play/Pause
-                      </small>
-                    </span>
-
-                    <span>
-                      ← →
-
-                      <small>
-                        Seek
-                      </small>
-                    </span>
-
-                    <span>
-                      ↑ ↓
-
-                      <small>
-                        Speed
-                      </small>
-                    </span>
-
-                  </div>
-
-                </section>
-
-              </Reveal>
-
             </>
           )}
 
