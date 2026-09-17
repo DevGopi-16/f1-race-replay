@@ -14,6 +14,7 @@ import SessionsPage from "../features/sessions/SessionsPage";
 import HomePage from "../features/home/HomePage";
 import ConstructorsPage from "../features/constructors/ConstructorsPage";
 import ReplayPage from "../features/replay/ReplayPage";
+import ReplaySelectPage from "../features/replay/ReplaySelectPage";
 
 
 import LoginPage from "../features/auth/LoginPage";
@@ -187,8 +188,14 @@ export function AppRouter() {
         <Route element={<ProtectedRoute />}>
           <Route
             path="/replay"
+            element={<ReplaySelectPage />}
+          />
+
+          <Route
+            path="/replay/live"
             element={<ReplayPage />}
           />
+
 
           <Route
             path="/drivers"

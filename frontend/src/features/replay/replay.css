@@ -634,3 +634,57 @@
   border-radius: 6px;
   background: var(--replay-surface-2);
 }
+
+/* ---------- ORBITRON + ANIMATION ---------- */
+
+.replay-header-brand strong,
+.replay-race-meta strong,
+.replay-timeline-current-lap,
+.replay-timeline-laps .current,
+.replay-driver-card-code {
+  font-family: "Orbitron", Inter, sans-serif;
+  letter-spacing: 0.04em;
+}
+
+.replay-tagline {
+  margin: 0 0 4px;
+  padding: 0 2px;
+  font-family: "Orbitron", Inter, sans-serif;
+  font-size: 12px;
+  font-weight: 600;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--replay-muted);
+  opacity: 0;
+  animation: replayTaglineIn 0.8s ease forwards 0.15s;
+}
+
+@keyframes replayTaglineIn {
+  from { opacity: 0; transform: translateY(-4px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+/* Entrance animation for the whole shell */
+.replay-shell > * {
+  animation: replayFadeUp 0.5s ease both;
+}
+.replay-shell > *:nth-child(1) { animation-delay: 0.02s; }
+.replay-shell > *:nth-child(2) { animation-delay: 0.08s; }
+.replay-shell > *:nth-child(3) { animation-delay: 0.14s; }
+.replay-shell > *:nth-child(4) { animation-delay: 0.2s; }
+.replay-shell > *:nth-child(5) { animation-delay: 0.26s; }
+
+@keyframes replayFadeUp {
+  from { opacity: 0; transform: translateY(10px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+/* Pulsing glow on the brand mark and accent bar */
+.replay-brand-mark {
+  animation: replayBrandPulse 2s ease-in-out infinite;
+}
+@keyframes replayBrandPulse {
+  0%, 100% { box-shadow: 0 0 8px rgba(225,6,0,0.7); transform: scale(1); }
+  50% { box-shadow: 0 0 16px rgba(225,6,0,1); transform: scale(1.15); }
+}
+

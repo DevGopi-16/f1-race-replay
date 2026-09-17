@@ -6,12 +6,13 @@ import {
   useState,
 } from "react";
 
+import { useNavigate, useSearchParams } from "react-router-dom";
+
 import PageContainer from "../../components/layout/PageContainer";
 import Reveal from "../../components/motion/Reveal";
 
 import { useReplay } from "./hooks/useReplay";
 
-import ReplaySelector from "./components/ReplaySelector";
 import ReplayStatus from "./components/ReplayStatus";
 import ReplayTrack from "./components/ReplayTrack";
 import ReplayLeaderboard from "./components/ReplayLeaderboard";
@@ -25,6 +26,9 @@ import { saveReplayHistory } from "./replay-history.api";
 import "./replay.css";
 
 export default function ReplayPage() {
+  const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
+
   // ============================================================
   // DRIVER SELECTION
   // ============================================================
@@ -55,19 +59,18 @@ export default function ReplayPage() {
   // ============================================================
   // REPLAY STATE
   // ============================================================
+  const year = Number(searchParams.get("year") ?? 2026);
 
-  const [year, setYear] = useState(2026);
+  const grandPrix = searchParams.get("grandPrix") ?? "";
 
-  const [grandPrix, setGrandPrix] =
-    useState("");
+  const sessionType =
+    (searchParams.get("sessionType") as ReplaySessionType) ?? "R";
 
-  const [sessionType, setSessionType] =
-    useState<ReplaySessionType>("R");
-
-  const [fps, setFps] = useState(8);
+  const fps = Number(searchParams.get("fps") ?? 8);
 
   const [frameIndex, setFrameIndex] =
     useState(0);
+
 
   const [playing, setPlaying] =
     useState(false);
@@ -593,31 +596,7 @@ export default function ReplayPage() {
     setPlaying(false);
   }, [loadedQuery]);
 
-  // ============================================================
-  // LOAD REPLAY
-  // ============================================================
-
-  const handleLoadReplay = () => {
-    playbackGenerationRef.current +=
-      1;
-
-    latestFrameIndexRef.current = 0;
-
-    setFrameIndex(0);
-    setPlaying(false);
-
-    if (!grandPrix) {
-      return;
-    }
-
-    setLoadedQuery({
-      year,
-      grandPrix,
-      sessionType,
-      fps,
-    });
-  };
-
+  
   // ============================================================
   // EXISTING PLAYBACK ENGINE
   // ============================================================
@@ -1030,9 +1009,23 @@ export default function ReplayPage() {
   // ============================================================
   // KEYBOARD CONTROLS
   // ============================================================
+    // ============================================================
+  // AUTO-LOAD FROM URL PARAMS
+  // ============================================================
+
+  useEffect(() => {
+    if (!grandPrix) {
+      navigate("/replay");
+      return;
+    }
+
+    setLoadedQuery({ year, grandPrix, sessionType, fps });
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [year, grandPrix, sessionType, fps]);
 
   useEffect(() => {
     const handleKeyboard = (
+
       event: KeyboardEvent,
     ) => {
       if (
@@ -1249,56 +1242,7 @@ export default function ReplayPage() {
           </div>
 
         </section>
-
-        {/* SESSION SELECTOR */}
-
-        <details className="replay-selector-drawer">
-          <summary>
-            SESSION
-          </summary>
-
-          <div className="replay-selector-inner">
-
-            <ReplaySelector
-              grandPrix={
-                grandPrix
-              }
-
-              onGrandPrixChange={
-                setGrandPrix
-              }
-
-              year={year}
-
-              sessionType={
-                sessionType
-              }
-
-              fps={fps}
-
-              onYearChange={
-                setYear
-              }
-
-              onSessionChange={
-                setSessionType
-              }
-
-              onFpsChange={
-                setFps
-              }
-
-              onLoadReplay={
-                handleLoadReplay
-              }
-
-              loading={loading}
-            />
-
-          </div>
-        </details>
-
-        {loading && (
+          {loading && (
           <ReplayStatus
             type="loading"
             message="Loading race replay…"
