@@ -23,7 +23,12 @@ const SESSION_DEFS: SessionDef[] = [
   { key: "R", label: "Race", shortLabel: "R" },
 ];
 
-const YEAR_OPTIONS = [2026, 2025, 2024, 2023, 2022];
+const START_YEAR = 1950;
+const CURRENT_YEAR = new Date().getFullYear();
+const YEAR_OPTIONS = Array.from(
+  { length: CURRENT_YEAR - START_YEAR + 1 },
+  (_, i) => CURRENT_YEAR - i
+);
 
 const TABS: { key: Tab; label: string }[] = [
   { key: "all", label: "All" },

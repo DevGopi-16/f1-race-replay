@@ -1,3 +1,8 @@
+.floating-nav-wrapper,
+.mobile-nav-overlay {
+  --font-body: 'Orbitron', sans-serif;
+}
+
 .floating-nav-wrapper {
   position: fixed;
   top: 18px;
