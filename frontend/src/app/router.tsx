@@ -10,6 +10,7 @@ import PageTransition from "../components/motion/PageTransition";
 import Reveal from "../components/motion/Reveal";
 import CalendarPage from "../features/schedule/CalendarPage";
 import SessionsPage from "../features/sessions/SessionsPage";
+import SessionDetailPage from "../features/sessions/SessionDetailPage";
 
 import HomePage from "../features/home/HomePage";
 import ConstructorsPage from "../features/constructors/ConstructorsPage";
@@ -27,6 +28,7 @@ import XCallbackPage from "../features/auth/XCallbackPage";
 import DriversPage from "../features/drivers/DriversPage";
 import DriverDetailPage from "../features/drivers/DriverDetailPage";
 import AnalyticsPage from "../features/analytics/AnalyticsPage";
+import HeadToHeadPageContainer from "../features/head-to-head/HeadToHeadPageContainer";
 
 function FoundationPage({
   eyebrow,
@@ -148,6 +150,11 @@ export function AppRouter() {
         />
 
         <Route
+          path="/sessions/:year/:round"
+          element={<SessionDetailPage />}
+        />
+
+        <Route
           path="/constructors"
           element={<ConstructorsPage />}
         />
@@ -183,6 +190,11 @@ export function AppRouter() {
         <Route
           path="/analytics"
           element={<AnalyticsPage />}
+        />
+
+        <Route
+          path="/head-to-head"
+          element={<HeadToHeadPageContainer />}
         />
 
         <Route element={<ProtectedRoute />}>

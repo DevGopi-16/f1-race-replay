@@ -11,7 +11,7 @@ from src.domain.f1_data import (
     get_tyre_strategy,
     get_session_drivers,
 )
-from src.domain.driver_panel import build_driver_panel
+from src.domain.driver_panel import build_driver_panel, build_driver_full
 
 
 router = APIRouter(prefix="/api", tags=["Drivers"])
@@ -33,6 +33,11 @@ def _load_drivers():
     except Exception:
         return []
 
+@router.get("/drivers/all", summary="Full Driver Roster")
+def drivers_all():
+    """Static roster from drivers.json — no year/round required.
+    Used for global driver search (e.g. Head-to-Head page)."""
+    return _load_drivers()
 
 @router.get("/quali", summary="Qualifying Results")
 def quali(

@@ -1,4 +1,5 @@
 import type { NextSession } from "../home.types";
+import { LiveCircuit } from "./LiveCircuit";
 
 interface FeaturedRaceProps {
   data: NextSession;
@@ -17,6 +18,9 @@ export default function FeaturedRace({ data }: FeaturedRaceProps) {
   return (
     <section className="home-featured-race">
       <div className="home-featured-track">
+        {/* Pass country and event_name to derive track layout dynamically */}
+        <LiveCircuit country={data.country} eventName={data.event_name} />
+
         <div className="home-next-session-mark">
           <span />
           <span />

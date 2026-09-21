@@ -1,0 +1,266 @@
+{
+  "hamilton": {
+    "file": "hamilton.png",
+    "name": "Lewis Hamilton",
+    "source": "formula1.com (via f1-headshots)",
+    "season": 2026
+  },
+  "vettel": {
+    "file": "vettel.png",
+    "name": "Sebastian Vettel",
+    "source": "formula1.com (via f1-headshots)",
+    "season": 2022
+  },
+  "albon": {
+    "file": "albon.png",
+    "name": "Alexander Albon",
+    "source": "formula1.com (via f1-headshots)",
+    "season": 2026
+  },
+  "alonso": {
+    "file": "alonso.png",
+    "name": "Fernando Alonso",
+    "source": "formula1.com (via f1-headshots)",
+    "season": 2026
+  },
+  "antonelli": {
+    "file": "antonelli.png",
+    "name": "Andrea Kimi Antonelli",
+    "source": "formula1.com (via f1-headshots)",
+    "season": 2026
+  },
+  "bearman": {
+    "file": "bearman.png",
+    "name": "Oliver Bearman",
+    "source": "formula1.com (via f1-headshots)",
+    "season": 2026
+  },
+  "bortoleto": {
+    "file": "bortoleto.png",
+    "name": "Gabriel Bortoleto",
+    "source": "formula1.com (via f1-headshots)",
+    "season": 2026
+  },
+  "bottas": {
+    "file": "bottas.png",
+    "name": "Valtteri Bottas",
+    "source": "formula1.com (via f1-headshots)",
+    "season": 2026
+  },
+  "colapinto": {
+    "file": "colapinto.png",
+    "name": "Franco Colapinto",
+    "source": "formula1.com (via f1-headshots)",
+    "season": 2026
+  },
+  "gasly": {
+    "file": "gasly.png",
+    "name": "Pierre Gasly",
+    "source": "formula1.com (via f1-headshots)",
+    "season": 2026
+  },
+  "hadjar": {
+    "file": "hadjar.png",
+    "name": "Isack Hadjar",
+    "source": "formula1.com (via f1-headshots)",
+    "season": 2026
+  },
+  "hulkenberg": {
+    "file": "hulkenberg.png",
+    "name": "Nico H\u00fclkenberg",
+    "source": "formula1.com (via f1-headshots)",
+    "season": 2026
+  },
+  "lawson": {
+    "file": "lawson.png",
+    "name": "Liam Lawson",
+    "source": "formula1.com (via f1-headshots)",
+    "season": 2026
+  },
+  "leclerc": {
+    "file": "leclerc.png",
+    "name": "Charles Leclerc",
+    "source": "formula1.com (via f1-headshots)",
+    "season": 2026
+  },
+  "arvid_lindblad": {
+    "file": "arvid_lindblad.png",
+    "name": "Arvid Lindblad",
+    "source": "formula1.com (via f1-headshots)",
+    "season": 2026
+  },
+  "norris": {
+    "file": "norris.png",
+    "name": "Lando Norris",
+    "source": "formula1.com (via f1-headshots)",
+    "season": 2026
+  },
+  "ocon": {
+    "file": "ocon.png",
+    "name": "Esteban Ocon",
+    "source": "formula1.com (via f1-headshots)",
+    "season": 2026
+  },
+  "perez": {
+    "file": "perez.png",
+    "name": "Sergio P\u00e9rez",
+    "source": "formula1.com (via f1-headshots)",
+    "season": 2026
+  },
+  "piastri": {
+    "file": "piastri.png",
+    "name": "Oscar Piastri",
+    "source": "formula1.com (via f1-headshots)",
+    "season": 2026
+  },
+  "russell": {
+    "file": "russell.png",
+    "name": "George Russell",
+    "source": "formula1.com (via f1-headshots)",
+    "season": 2026
+  },
+  "sainz": {
+    "file": "sainz.png",
+    "name": "Carlos Sainz",
+    "source": "formula1.com (via f1-headshots)",
+    "season": 2026
+  },
+  "stroll": {
+    "file": "stroll.png",
+    "name": "Lance Stroll",
+    "source": "formula1.com (via f1-headshots)",
+    "season": 2026
+  },
+  "max_verstappen": {
+    "file": "max_verstappen.png",
+    "name": "Max Verstappen",
+    "source": "formula1.com (via f1-headshots)",
+    "season": 2026
+  },
+  "doohan": {
+    "file": "doohan.png",
+    "name": "Jack Doohan",
+    "source": "formula1.com (via f1-headshots)",
+    "season": 2025
+  },
+  "tsunoda": {
+    "file": "tsunoda.png",
+    "name": "Yuki Tsunoda",
+    "source": "formula1.com (via f1-headshots)",
+    "season": 2025
+  },
+  "kevin_magnussen": {
+    "file": "kevin_magnussen.png",
+    "name": "Kevin Magnussen",
+    "source": "formula1.com (via f1-headshots)",
+    "season": 2024
+  },
+  "ricciardo": {
+    "file": "ricciardo.png",
+    "name": "Daniel Ricciardo",
+    "source": "formula1.com (via f1-headshots)",
+    "season": 2024
+  },
+  "sargeant": {
+    "file": "sargeant.png",
+    "name": "Logan Sargeant",
+    "source": "formula1.com (via f1-headshots)",
+    "season": 2024
+  },
+  "zhou": {
+    "file": "zhou.png",
+    "name": "Guanyu Zhou",
+    "source": "formula1.com (via f1-headshots)",
+    "season": 2024
+  },
+  "de_vries": {
+    "file": "de_vries.png",
+    "name": "Nyck de Vries",
+    "source": "formula1.com (via f1-headshots)",
+    "season": 2023
+  },
+  "latifi": {
+    "file": "latifi.png",
+    "name": "Nicholas Latifi",
+    "source": "formula1.com (via f1-headshots)",
+    "season": 2022
+  },
+  "mick_schumacher": {
+    "file": "mick_schumacher.png",
+    "name": "Mick Schumacher",
+    "source": "formula1.com (via f1-headshots)",
+    "season": 2022
+  },
+  "giovinazzi": {
+    "file": "giovinazzi.png",
+    "name": "Antonio Giovinazzi",
+    "source": "formula1.com (via f1-headshots)",
+    "season": 2021
+  },
+  "kubica": {
+    "file": "kubica.png",
+    "name": "Robert Kubica",
+    "source": "formula1.com (via f1-headshots)",
+    "season": 2021
+  },
+  "mazepin": {
+    "file": "mazepin.png",
+    "name": "Nikita Mazepin",
+    "source": "formula1.com (via f1-headshots)",
+    "season": 2021
+  },
+  "raikkonen": {
+    "file": "raikkonen.png",
+    "name": "Kimi R\u00e4ikk\u00f6nen",
+    "source": "formula1.com (via f1-headshots)",
+    "season": 2021
+  },
+  "aitken": {
+    "file": "aitken.png",
+    "name": "Jack Aitken",
+    "source": "formula1.com (via f1-headshots)",
+    "season": 2020
+  },
+  "pietro_fittipaldi": {
+    "file": "pietro_fittipaldi.png",
+    "name": "Pietro Fittipaldi",
+    "source": "formula1.com (via f1-headshots)",
+    "season": 2020
+  },
+  "grosjean": {
+    "file": "grosjean.png",
+    "name": "Romain Grosjean",
+    "source": "formula1.com (via f1-headshots)",
+    "season": 2020
+  },
+  "kvyat": {
+    "file": "kvyat.png",
+    "name": "Daniil Kvyat",
+    "source": "formula1.com (via f1-headshots)",
+    "season": 2020
+  },
+  "ericsson": {
+    "file": "ericsson.png",
+    "name": "Marcus Ericsson",
+    "source": "formula1.com (via f1-headshots)",
+    "season": 2018
+  },
+  "brendon_hartley": {
+    "file": "brendon_hartley.png",
+    "name": "Brendon Hartley",
+    "source": "formula1.com (via f1-headshots)",
+    "season": 2018
+  },
+  "sirotkin": {
+    "file": "sirotkin.png",
+    "name": "Sergey Sirotkin",
+    "source": "formula1.com (via f1-headshots)",
+    "season": 2018
+  },
+  "vandoorne": {
+    "file": "vandoorne.png",
+    "name": "Stoffel Vandoorne",
+    "source": "formula1.com (via f1-headshots)",
+    "season": 2018
+  }
+}

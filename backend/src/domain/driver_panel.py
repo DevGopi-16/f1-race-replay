@@ -17,7 +17,7 @@ COMPUTED_DATA_DIR = os.path.join(
 
 STATS_CACHE_TTL_SECONDS = 24 * 60 * 60
 CAREER_CACHE_TTL_SECONDS = 7 * 24 * 60 * 60
-
+ALLTIME_CACHE_TTL_SECONDS = 7 * 24 * 60 * 60
 
 def _safe_number(value, default=0.0):
     if value is None:
@@ -923,7 +923,6 @@ def get_career_stats(
         COMPUTED_DATA_DIR,
         exist_ok=True,
     )
-
     with open(path, "w") as file:
         json.dump(
             totals,
@@ -932,6 +931,145 @@ def get_career_stats(
         )
 
     return totals
+
+
+def _alltime_cache_path(driver_id: str) -> str:
+    return os.path.join(
+        COMPUTED_DATA_DIR,
+        f"alltime_{driver_id}.json",
+    )
+
+
+def get_alltime_career_stats(driver_id: str) -> dict:
+    driver_id = str(driver_id).lower()
+
+    path = _alltime_cache_path(driver_id)
+
+    if os.path.exists(path):
+        age = time.time() - os.path.getmtime(path)
+
+        if age < ALLTIME_CACHE_TTL_SECONDS:
+            try:
+                with open(path) as file:
+                    return json.load(file)
+            except (json.JSONDecodeError, OSError):
+                pass
+
+    def _fetch_all(resource: str, table_key: str, list_key: str) -> list[dict]:
+        items: list[dict] = []
+        offset = 0
+        page_size = 100
+
+        while True:
+            url = f"{JOLPICA_BASE}/drivers/{driver_id}/{resource}/?limit={page_size}&offset={offset}"
+            resp = requests.get(url, timeout=15)
+            resp.raise_for_status()
+            payload = resp.json().get("MRData", {})
+
+            page_items = payload.get(table_key, {}).get(list_key, [])
+            items.extend(page_items)
+
+            total = _safe_int(payload.get("total"), 0) or 0
+            offset += page_size
+
+            if offset >= total or not page_items:
+                break
+
+        return items
+
+    races = _fetch_all("results", "RaceTable", "Races")
+
+    wins = podiums = fastest_laps = 0
+    first_win_year = None
+
+    for race in races:
+        result = (race.get("Results") or [{}])[0]
+        pos = result.get("position")
+        year = _safe_int(race.get("season"))
+
+        if pos == "1":
+            wins += 1
+            if first_win_year is None and year is not None:
+                first_win_year = year
+
+        if pos in ("1", "2", "3"):
+            podiums += 1
+
+        if result.get("FastestLap", {}).get("rank") == "1":
+            fastest_laps += 1
+
+    starts = len(races)
+
+    quali_races = _fetch_all("qualifying", "RaceTable", "Races")
+
+
+
+    poles = 0
+    first_pole_year = None
+
+    for race in quali_races:
+        q = (race.get("QualifyingResults") or [{}])[0]
+        if q.get("position") == "1":
+            poles += 1
+            year = _safe_int(race.get("season"))
+            if first_pole_year is None and year is not None:
+                first_pole_year = year
+
+        seasons_url = f"{JOLPICA_BASE}/drivers/{driver_id}/seasons/?limit=100"
+    seasons_resp = requests.get(seasons_url, timeout=15)
+    seasons_resp.raise_for_status()
+    season_list = (
+        seasons_resp.json()
+        .get("MRData", {})
+        .get("SeasonTable", {})
+        .get("Seasons", [])
+    )
+
+    seasons = len(season_list)
+    championships = 0
+
+    for season_entry in season_list:
+        year = season_entry.get("season")
+        if not year:
+            continue
+
+        champ_url = f"{JOLPICA_BASE}/{year}/driverstandings/1/"
+        try:
+            champ_resp = requests.get(champ_url, timeout=10)
+            champ_resp.raise_for_status()
+            champ_lists = (
+                champ_resp.json()
+                .get("MRData", {})
+                .get("StandingsTable", {})
+                .get("StandingsLists", [])
+            )
+            if not champ_lists:
+                continue
+            champ_standing = (champ_lists[0].get("DriverStandings") or [{}])[0]
+            champ_id = champ_standing.get("Driver", {}).get("driverId")
+            if champ_id == driver_id:
+                championships += 1
+        except requests.RequestException:
+            continue
+
+    data = {
+        "wins": wins,
+        "podiums": podiums,
+        "poles": poles,
+        "fastest_laps": fastest_laps,
+        "starts": starts,
+        "championships": championships,
+        "seasons": seasons,
+        "first_win_year": first_win_year,
+        "first_pole_year": first_pole_year,
+    }
+
+    os.makedirs(COMPUTED_DATA_DIR, exist_ok=True)
+
+    with open(path, "w") as file:
+        json.dump(data, file, indent=2)
+
+    return data
 
 
 def get_season_journey(
@@ -1766,8 +1904,12 @@ def build_driver_full(
             entry,
             racecraft_entry,
         ),
-        "teammate_battle": get_teammate_battle(
+                "teammate_battle": get_teammate_battle(
             code,
             panel,
         ),
+        "career_alltime": get_alltime_career_stats(
+            me.get("driverId", "")
+        ),
     }
+        

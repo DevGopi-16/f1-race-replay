@@ -4,6 +4,7 @@ import { getSchedule, type RaceWeekend } from "../schedule/schedule.api";
 import { getFlagEmoji } from "../schedule/countryFlags";
 import { getCircuitSvgUrl, getCircuitMeta } from "../schedule/circuitAssets";
 import { CircuitTrack } from "../schedule/CircuitTrack";
+import SeasonPicker from "./components/SeasonPicker";
 
 type SessionKey = "FP1" | "FP2" | "FP3" | "Q" | "S" | "R";
 type Tab = "all" | "upcoming" | "completed" | "sprint";
@@ -23,12 +24,8 @@ const SESSION_DEFS: SessionDef[] = [
   { key: "R", label: "Race", shortLabel: "R" },
 ];
 
-const START_YEAR = 1950;
-const CURRENT_YEAR = new Date().getFullYear();
-const YEAR_OPTIONS = Array.from(
-  { length: CURRENT_YEAR - START_YEAR + 1 },
-  (_, i) => CURRENT_YEAR - i
-);
+// Telemetry/timing data only exists from 2018 onwards.
+const REPLAY_MIN_YEAR = 2018;
 
 const TABS: { key: Tab; label: string }[] = [
   { key: "all", label: "All" },
@@ -101,6 +98,8 @@ export default function SessionsPage() {
   const [search, setSearch] = useState("");
   const [expandedRound, setExpandedRound] = useState<number | null>(null);
   const [now, setNow] = useState(() => new Date());
+  const replayAvailable = year >= REPLAY_MIN_YEAR;
+
 
   useEffect(() => {
     const tick = setInterval(() => setNow(new Date()), 1000);
@@ -227,21 +226,9 @@ export default function SessionsPage() {
               {year} season weekends — pick any round to jump into a session.
             </p>
           </div>
+          <SeasonPicker year={year} onChange={setYear} />
 
-          <div className="sessions-year-toggle" role="tablist" aria-label="Season">
-            {YEAR_OPTIONS.map((y) => (
-              <button
-                key={y}
-                type="button"
-                role="tab"
-                aria-selected={y === year}
-                className={`sessions-year-pill${y === year ? " is-active" : ""}`}
-                onClick={() => setYear(y)}
-              >
-                {y}
-              </button>
-            ))}
-          </div>
+
         </header>
 
         <nav className="sessions-tabs" role="tablist" aria-label="Filter rounds">
@@ -335,7 +322,7 @@ export default function SessionsPage() {
                     </div>
 
                     <div className="sessions-hero-chips">
-                      {getSessionsForWeekend(heroWeekend).map((s) => (
+                      {(replayAvailable ? getSessionsForWeekend(heroWeekend) : []).map((s) => (
                         <button
                           key={s.key}
                           type="button"
@@ -385,10 +372,24 @@ export default function SessionsPage() {
                     replay any session below.
                   </p>
                 )}
+                <button
+                  type="button"
+                  className="sessions-hero-cta"
+                  onClick={() =>
+                    navigate(
+                      `/sessions/${year}/${heroWeekend.round_number}`,
+                    )
+                  }
+                >
+                  Race Details
+                </button>
 
                 <button
                   type="button"
                   className="sessions-hero-cta"
+                  disabled={!replayAvailable}
+
+                
                   onClick={() =>
                     handleOpenSession(
                       heroWeekend,
@@ -396,7 +397,7 @@ export default function SessionsPage() {
                     )
                   }
                 >
-                  Open Replay
+                  {replayAvailable ? "Open Replay" : "No replay data"}
                 </button>
               </div>
             </section>
@@ -427,7 +428,9 @@ export default function SessionsPage() {
                   const d = parseWeekendDate(weekend.date);
                   const upcoming = d ? d.getTime() >= now.getTime() : true;
                   const expanded = expandedRound === weekend.round_number;
-                  const sessions = getSessionsForWeekend(weekend);
+                  const sessions = replayAvailable
+                    ? getSessionsForWeekend(weekend)
+                    : [];
                   const meta = getCircuitMeta(weekend.event_name, weekend.country);
 
                   return (
@@ -507,10 +510,19 @@ export default function SessionsPage() {
                           </span>
                         </div>
                       </div>
-
+                      <button
+                        type="button"
+                        className="round-card-view-btn"
+                        onClick={() =>
+                          navigate(`/sessions/${year}/${weekend.round_number}`)
+                        }
+                      >
+                        Race Details
+                      </button>
 
                       {expanded ? (
                         <div className="round-card-sessions">
+
                           {sessions.map((s) => (
                             <button
                               key={s.key}
@@ -527,9 +539,10 @@ export default function SessionsPage() {
                         <button
                           type="button"
                           className="round-card-view-btn"
+                          disabled={!replayAvailable}
                           onClick={() => toggleExpanded(weekend.round_number)}
                         >
-                          View Sessions
+                          {replayAvailable ? "View Sessions" : "No replay data"}
                         </button>
                       )}
 

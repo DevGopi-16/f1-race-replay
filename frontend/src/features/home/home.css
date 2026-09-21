@@ -11,8 +11,9 @@
 
   display: flex;
   align-items: center;
+  justify-content: space-between;
 
-  overflow: hidden;
+  padding: 40px 6% 0;
 
   background:
     radial-gradient(
@@ -82,7 +83,7 @@
 
   max-width: 1000px;
 
-  padding-top: 80px;
+  padding-top: 0;
 }
 
 .home-season-label {
@@ -158,8 +159,8 @@
 .home-hero-meta {
   position: absolute;
 
-  left: 0;
-  right: 0;
+  left: 6%;
+  right: 6%;
   bottom: 28px;
 
   display: flex;
@@ -439,6 +440,12 @@
   .home-section-heading {
     gap: 30px;
   }
+
+  .home-hero-circuit-live {
+    width: 80vw;
+    right: -15%;
+    opacity: 0.25;
+  }
 }
 
 @media (max-width: 600px) {
@@ -447,7 +454,7 @@
   }
 
   .home-hero-content {
-    padding-top: 70px;
+    padding-top: 0;
   }
 
   .home-season-label {
@@ -535,34 +542,6 @@
 
 .home-event-context span {
   color: var(--color-accent);
-}
-
-.home-hero-circuit {
-  position: absolute;
-
-  z-index: 1;
-
-  width: min(48vw, 760px);
-
-  right: -2%;
-  top: 50%;
-
-  transform: translateY(-42%);
-
-  opacity: 0.22;
-
-  pointer-events: none;
-}
-
-.home-hero-circuit img {
-  width: 100%;
-  height: auto;
-
-  filter:
-    drop-shadow(
-      0 0 30px
-      var(--color-accent-glow)
-    );
 }
 
 .home-hero-feature {
@@ -839,82 +818,63 @@
   }
 }
 
-@media (max-width: 900px) {
-  .home-hero-circuit {
-    width: 60vw;
-    right: -12%;
-    opacity: 0.16;
-  }
+.home-hero-circuit-live {
+  position: absolute;
+  right: 2%;
+  top: 50%;
+  transform: translateY(-50%);
 
-  .home-hero-feature {
-    position: static;
+  width: 50vw;
+  max-width: 650px;
+  min-width: 320px;
+  height: 380px;
 
-    margin-top: 45px;
-  }
-
-  .home-featured-race {
-    min-height: 600px;
-
-    padding: 35px;
-  }
-
-  .home-featured-track {
-    width: 70%;
-
-    right: -12%;
-    top: 42%;
-
-    opacity: 0.16;
-  }
-
-  .home-featured-stats {
-    left: 35px;
-    right: 35px;
-  }
+  z-index: 10;
+  pointer-events: none;
 }
 
-@media (max-width: 600px) {
-  .home-hero-circuit {
-    width: 90vw;
+.circuit-svg {
+  width: 100%;
+  height: 100%;
+  display: block;
+  overflow: visible;
+}
 
-    right: -35%;
-    top: 52%;
+.track-glow {
+  filter: drop-shadow(0 0 20px #ff1e1e);
+  opacity: 0.6;
+}
 
-    opacity: 0.12;
-  }
+.live-car-dot {
+  filter: drop-shadow(0 0 10px #ffffff) drop-shadow(0 0 16px #ff1e1e);
+}
 
-  .home-event-context {
-    font-size: 0.48rem;
-  }
+.home-featured-track .home-hero-circuit-live {
+  position: relative;
+  right: auto;
+  top: auto;
+  transform: none;
 
-  .home-featured-race {
-    min-height: 760px;
+  width: 100%;
+  height: 100%;
+  min-height: 280px;
+}
 
-    padding: 28px 22px;
-  }
+.home-featured-track {
+  opacity: 0.85;
+}
 
-  .home-featured-topline {
-    margin-bottom: 40px;
-  }
+.dynamic-track-container {
+  width: 100%;
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
 
-  .home-featured-info h2 {
-    font-size: clamp(2.8rem, 14vw, 5rem);
-  }
-
-  .home-featured-track {
-    width: 105%;
-
-    right: -35%;
-    top: 43%;
-  }
-
-  .home-featured-stats {
-    left: 22px;
-    right: 22px;
-    bottom: 28px;
-
-    grid-template-columns: 1fr;
-
-    gap: 18px;
-  }
+.dynamic-track-img {
+  max-width: 100%;
+  max-height: 320px;
+  object-fit: contain;
+  filter: drop-shadow(0 0 20px var(--color-accent-glow)) brightness(1.2);
 }

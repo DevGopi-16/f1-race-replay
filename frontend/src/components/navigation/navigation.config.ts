@@ -7,6 +7,7 @@ import {
   Home,
   Radio,
   Settings,
+  Swords,
   Users,
   Zap,
 } from "lucide-react";
@@ -68,6 +69,12 @@ export const primaryNavigation: NavigationItem[] = [
 ];
 
 export const moreNavigation: NavigationItem[] = [
+  {
+    label: "Head-to-Head",
+    path: "/head-to-head",
+    icon: Swords,
+  },
+
   {
     label: "Calendar",
     path: "/calendar",

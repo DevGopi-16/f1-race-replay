@@ -46,6 +46,7 @@ from src.domain.driver_panel import (
 from src.domain.constructors_panel import warm_constructor_history
 from src.domain.next_session import get_next_session
 from src.domain.serialize import serialize_frames, serialize_replay_frames, serialize_driver_colors
+from src.api.head_to_head import router as h2h_router
 
 
 from src.auth.routes import router as auth_router, get_current_active_user
@@ -58,6 +59,7 @@ from src.live.session_watcher import run_forever as run_live_watcher
 from src.live.state import live_state
 
 from src.api.schedule import router as schedule_router
+from src.api.session_detail import router as session_detail_router
 from src.api.live import router as live_router
 from src.api.replay import router as replay_router
 from src.api.drivers import router as drivers_router
@@ -356,9 +358,11 @@ Base.metadata.create_all(bind=engine)
 app.include_router(auth_router)
 app.include_router(replay_history_router)
 app.include_router(profile_router)
+app.include_router(h2h_router)
 
 # F1 API routers
 app.include_router(schedule_router)
+app.include_router(session_detail_router)
 app.include_router(live_router)
 app.include_router(replay_router)
 app.include_router(drivers_router)

@@ -1,6 +1,6 @@
 .sessions-page {
   min-height: 100vh;
-  padding: 48px 24px 80px;
+  padding: 4px 24px 80px;
 
   background-image: linear-gradient(
       var(--color-white-05) 1px,
@@ -786,4 +786,11 @@
   .sessions-grid {
     grid-template-columns: 1fr;
   }
+}
+
+.sessions-hero-cta:disabled,
+.round-card-view-btn:disabled {
+  opacity: 0.45;
+  cursor: not-allowed;
+  pointer-events: none;
 }

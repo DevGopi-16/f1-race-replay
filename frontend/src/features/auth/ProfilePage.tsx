@@ -19,21 +19,15 @@ import {
   getProfileStats,
   getAchievements,
   getSeasonSummary,
-  updateProfile,
   changePassword,
   getUserSettings,
   updateUserSettings,
-  connectGoogleAccount,
-  disconnectProfileConnection,
-  startDiscordConnection,
   type UserProfile,
   type ProfileStats,
   type Achievement,
   type SeasonSummary,
   type UserSettings,
 } from "./auth.api";
-
-import { signInWithGoogleFirebase } from "./firebase.auth";
 
 import "./profile.css";
 import { saveAppearanceLocally } from "./appearance";
@@ -79,15 +73,6 @@ export default function ProfilePage() {
   const [seasonSummaryLoading, setSeasonSummaryLoading] =
     useState(true);
 
-  const [username, setUsername] =
-    useState("");
-
-  const [favoriteDriver, setFavoriteDriver] =
-    useState("");
-
-  const [favoriteTeam, setFavoriteTeam] =
-    useState("");
-
   const [userSettings, setUserSettings] =
     useState<UserSettings | null>(null);
 
@@ -121,19 +106,7 @@ export default function ProfilePage() {
   const [loading, setLoading] =
     useState(true);
 
-  const [saving, setSaving] =
-    useState(false);
-
   const [error, setError] =
-    useState("");
-
-  const [message, setMessage] =
-    useState("");
-
-  const [connectionBusy, setConnectionBusy] =
-    useState<string | null>(null);
-
-  const [connectionError, setConnectionError] =
     useState("");
 
   const [currentPassword, setCurrentPassword] =
@@ -182,15 +155,6 @@ export default function ProfilePage() {
       setProfile(data);
       setStats(profileStats);
 
-      setUsername(data.username);
-
-      setFavoriteDriver(
-        data.favorite_driver ?? "",
-      );
-
-      setFavoriteTeam(
-        data.favorite_team ?? "",
-      );
     } catch (err) {
       setError(
         err instanceof Error
@@ -300,100 +264,6 @@ export default function ProfilePage() {
       active = false;
     };
   }, []);
-
-  async function handleGoogleConnect() {
-    if (connectionBusy) {
-      return;
-    }
-
-    setConnectionBusy("Google");
-    setConnectionError("");
-    setError("");
-    setMessage("");
-
-    try {
-      const { idToken } =
-        await signInWithGoogleFirebase();
-
-      await connectGoogleAccount(idToken);
-
-      await loadProfile(false);
-
-      setMessage(
-        "Google account connected successfully.",
-      );
-    } catch (err) {
-      setConnectionError(
-        err instanceof Error
-          ? err.message
-          : "Unable to connect Google account.",
-      );
-    } finally {
-      setConnectionBusy(null);
-    }
-  }
-
-  async function handleDiscordConnect() {
-    if (connectionBusy) {
-      return;
-    }
-
-    setConnectionBusy("Discord");
-    setConnectionError("");
-    setError("");
-    setMessage("");
-
-    try {
-      await startDiscordConnection();
-    } catch (err) {
-      setConnectionError(
-        err instanceof Error
-          ? err.message
-          : "Unable to connect Discord account.",
-      );
-      setConnectionBusy(null);
-    }
-  }
-
-  async function handleDisconnect(
-    provider: "google" | "discord" | "x",
-  ) {
-    if (connectionBusy) {
-      return;
-    }
-
-    const displayName =
-      provider === "google"
-        ? "Google"
-        : provider === "discord"
-          ? "Discord"
-          : "X";
-
-    setConnectionBusy(displayName);
-    setConnectionError("");
-    setError("");
-    setMessage("");
-
-    try {
-      await disconnectProfileConnection(
-        provider,
-      );
-
-      await loadProfile(false);
-
-      setMessage(
-        `${displayName} account disconnected successfully.`,
-      );
-    } catch (err) {
-      setConnectionError(
-        err instanceof Error
-          ? err.message
-          : `Unable to disconnect ${displayName} account.`,
-      );
-    } finally {
-      setConnectionBusy(null);
-    }
-  }
 
   async function handleSettingsSubmit(
     event: FormEvent<HTMLFormElement>,
@@ -567,112 +437,6 @@ export default function ProfilePage() {
     }
   }
 
-  async function handleSubmit(
-    event: FormEvent<HTMLFormElement>,
-  ) {
-    event.preventDefault();
-
-    setSaving(true);
-    setError("");
-    setMessage("");
-
-    try {
-      const cleanUsername =
-        username.trim();
-
-      const cleanFavoriteDriver =
-        favoriteDriver.trim();
-
-      const cleanFavoriteTeam =
-        favoriteTeam.trim();
-
-      if (!cleanUsername) {
-        setError("Username cannot be empty.");
-        setSaving(false);
-        return;
-      }
-
-      if (cleanUsername.length < 3) {
-        setError("Username must be at least 3 characters.");
-        setSaving(false);
-        return;
-      }
-
-      if (cleanUsername.length > 50) {
-        setError("Username must be 50 characters or fewer.");
-        setSaving(false);
-        return;
-      }
-
-      if (!/^[A-Za-z0-9_]+$/.test(cleanUsername)) {
-        setError(
-          "Username can contain only letters, numbers, and underscores.",
-        );
-        setSaving(false);
-        return;
-      }
-
-      await updateProfile({
-        username: cleanUsername,
-
-        ...(cleanFavoriteDriver
-          ? {
-              favorite_driver:
-                cleanFavoriteDriver,
-            }
-          : {}),
-
-        ...(cleanFavoriteTeam
-          ? {
-              favorite_team:
-                cleanFavoriteTeam,
-            }
-          : {}),
-      });
-
-      setProfile((current) =>
-        current
-          ? {
-              ...current,
-
-              username:
-                cleanUsername,
-
-              favorite_driver:
-                cleanFavoriteDriver ||
-                current.favorite_driver,
-
-              favorite_team:
-                cleanFavoriteTeam ||
-                current.favorite_team,
-            }
-          : current,
-      );
-
-      setUsername(cleanUsername);
-
-      setFavoriteDriver(
-        cleanFavoriteDriver,
-      );
-
-      setFavoriteTeam(
-        cleanFavoriteTeam,
-      );
-
-      setMessage(
-        "Profile updated successfully.",
-      );
-    } catch (err) {
-      setError(
-        err instanceof Error
-          ? err.message
-          : "Unable to update profile.",
-      );
-    } finally {
-      setSaving(false);
-    }
-  }
-
   if (loading) {
     return (
       <main className="profile-page">
@@ -738,6 +502,42 @@ export default function ProfilePage() {
       .slice(0, 2)
       .toUpperCase() || "U";
 
+  const profileCompletion =
+    Math.min(
+      100,
+      Math.max(
+        0,
+        Math.round((stats?.completion_rate ?? 0) + (profile.is_pro ? 6 : 0)),
+      ),
+    );
+
+  const metricCards = [
+    {
+      label: "PROFILE COMPLETION",
+      value: `${profileCompletion}%`,
+      helper: profile.favorite_driver
+        ? `Fav. driver: ${profile.favorite_driver}`
+        : "No favorite driver selected",
+    },
+    {
+      label: "WATCH TIME",
+      value: formatWatchTime(stats?.watch_time_seconds ?? 0),
+      helper: `${stats?.replays_watched ?? 0} replays watched`,
+    },
+    {
+      label: "SEASON PROGRESS",
+      value: `${Math.round(seasonSummary?.season_progress ?? 0)}%`,
+      helper: seasonSummary
+        ? `${seasonSummary.completed_sessions} sessions completed`
+        : "Season summary loading",
+    },
+    {
+      label: "PREFERRED TEAM",
+      value: profile.favorite_team || "Not set",
+      helper: profile.favorite_driver || "Add your race preference",
+    },
+  ];
+
   return (
     <main className="profile-page">
       <div className="profile-page-glow" />
@@ -747,7 +547,7 @@ export default function ProfilePage() {
         {/* PAGE HEADER */}
 
         <header className="profile-header">
-          <div>
+          <div className="profile-header-copy">
             <span className="profile-kicker">
               ACCOUNT / PROFILE
             </span>
@@ -761,6 +561,15 @@ export default function ProfilePage() {
               Your F1 Race Replay identity,
               preferences and account details.
             </p>
+          </div>
+
+          <div className="profile-header-actions">
+            <span className="profile-mini-pill profile-mini-pill-live">
+              {profile.is_pro ? "PRO MEMBER" : "FREE MEMBER"}
+            </span>
+            <span className="profile-mini-pill">
+              {new Date().getFullYear()} season
+            </span>
           </div>
         </header>
 
@@ -825,6 +634,27 @@ export default function ProfilePage() {
                     </span>
                   </>
                 )}
+              </div>
+
+              <div className="profile-hero-meta">
+                <span className="profile-hero-badge is-live">
+                  <span className="profile-badge-dot" />
+                  Online now
+                </span>
+                <span className="profile-hero-badge">
+                  2026 season live
+                </span>
+              </div>
+
+              <div className="profile-hero-kpis">
+                <div className="profile-kpi-tile">
+                  <span>Win rate</span>
+                  <strong>{Math.round(stats?.completion_rate ?? 0)}%</strong>
+                </div>
+                <div className="profile-kpi-tile">
+                  <span>Watch time</span>
+                  <strong>{formatWatchTime(stats?.watch_time_seconds ?? 0)}</strong>
+                </div>
               </div>
 
             </section>
@@ -907,78 +737,40 @@ export default function ProfilePage() {
               </div>
             </section>
 
-            {/* CONNECTED ACCOUNTS */}
-
-            <section className="profile-section profile-connections-card">
-              <div className="profile-section-heading">
-                <div>
-                  <span className="profile-section-label">
-                    CONNECTIONS
-                  </span>
-
-                  <h2>
-                    Connected accounts
-                  </h2>
-                </div>
-              </div>
-
-              {connectionError && (
-                <div className="profile-form-error">
-                  {connectionError}
-                </div>
-              )}
-
-              <div className="profile-connections">
-
-                {profile.connected_accounts.google && (
-                  <ConnectionRow
-                    name="Google"
-                    connected={true}
-                    busy={connectionBusy === "Google"}
-                    onDisconnect={() =>
-                      handleDisconnect("google")
-                    }
-                  />
-                )}
-
-                {profile.connected_accounts.discord && (
-                  <ConnectionRow
-                    name="Discord"
-                    connected={true}
-                    busy={connectionBusy === "Discord"}
-                    onDisconnect={() =>
-                      handleDisconnect("discord")
-                    }
-                  />
-                )}
-
-                {profile.connected_accounts.x && (
-                  <ConnectionRow
-                    name="X"
-                    connected={true}
-                    busy={connectionBusy === "X"}
-                    onDisconnect={() =>
-                      handleDisconnect("x")
-                    }
-                  />
-                )}
-
-                {!profile.connected_accounts.google &&
-                  !profile.connected_accounts.discord &&
-                  !profile.connected_accounts.x && (
-                    <div className="profile-connections-empty">
-                      NO ACCOUNTS CONNECTED
-                    </div>
-                  )}
-
-              </div>
-            </section>
-
           </aside>
 
           {/* MAIN CONTENT */}
 
           <div className="profile-main">
+
+            <section className="profile-section profile-span-2 profile-dashboard-strip">
+              <div className="profile-section-heading">
+                <div>
+                  <span className="profile-section-label">
+                    QUICK OVERVIEW
+                  </span>
+
+                  <h2>
+                    Race intelligence
+                  </h2>
+                </div>
+
+                <Flag size={20} />
+              </div>
+
+              <div className="profile-metric-grid">
+                {metricCards.map((metric) => (
+                  <div
+                    key={metric.label}
+                    className="profile-metric-card"
+                  >
+                    <span>{metric.label}</span>
+                    <strong>{metric.value}</strong>
+                    <small>{metric.helper}</small>
+                  </div>
+                ))}
+              </div>
+            </section>
 
             {/* 2026 SEASON SUMMARY */}
 
@@ -1325,187 +1117,6 @@ export default function ProfilePage() {
                 </div>
               )}
 
-            </section>
-
-            {/* F1 IDENTITY */}
-
-            <section className="profile-section">
-              <div className="profile-section-heading">
-                <div>
-                  <span className="profile-section-label">
-                    F1 IDENTITY
-                  </span>
-
-                  <h2>
-                    Your preferences
-                  </h2>
-                </div>
-
-                <Flag size={20} />
-              </div>
-
-              <div className="profile-identity-grid">
-
-                <div className="profile-preference-card">
-                  <span>
-                    FAVORITE DRIVER
-                  </span>
-
-                  <strong>
-                    {profile.favorite_driver ||
-                      "Not set"}
-                  </strong>
-                </div>
-
-                <div className="profile-preference-card">
-                  <span>
-                    FAVORITE TEAM
-                  </span>
-
-                  <strong>
-                    {profile.favorite_team ||
-                      "Not set"}
-                  </strong>
-                </div>
-
-              </div>
-            </section>
-
-            {/* EDIT PROFILE */}
-
-            <section className="profile-section">
-              <div className="profile-section-heading">
-                <div>
-                  <span className="profile-section-label">
-                    PROFILE SETTINGS
-                  </span>
-
-                  <h2>
-                    Edit profile
-                  </h2>
-                </div>
-              </div>
-
-              <form
-                className="profile-form"
-                onSubmit={handleSubmit}
-              >
-
-                <label className="profile-field">
-                  <span>
-                    USERNAME
-                  </span>
-
-                  <input
-                    type="text"
-                    value={username}
-                    onChange={(event) =>
-                      setUsername(
-                        event.target.value,
-                      )
-                    }
-                    autoComplete="username"
-                    required
-                  />
-                </label>
-
-                <label className="profile-field">
-                  <span>
-                    EMAIL
-                  </span>
-
-                  <input
-                    type="email"
-                    value={profile.email ?? ""}
-                    disabled
-                  />
-
-                  <small>
-                    Email is managed by your
-                    authentication provider.
-                  </small>
-                </label>
-
-                <div className="profile-form-grid">
-
-                  <label className="profile-field">
-                    <span>
-                      FAVORITE DRIVER
-                    </span>
-
-                    <input
-                      type="text"
-                      value={favoriteDriver}
-                      onChange={(event) =>
-                        setFavoriteDriver(
-                          event.target.value,
-                        )
-                      }
-                    />
-                  </label>
-
-                  <label className="profile-field">
-                    <span>
-                      FAVORITE TEAM
-                    </span>
-
-                    <input
-                      type="text"
-                      value={favoriteTeam}
-                      onChange={(event) =>
-                        setFavoriteTeam(
-                          event.target.value,
-                        )
-                      }
-                    />
-                  </label>
-
-                </div>
-
-                {error && (
-                  <div className="profile-form-error">
-                    {error}
-                  </div>
-                )}
-
-                {message && (
-                  <div className="profile-form-success">
-                    <CheckCircle2 size={16} />
-
-                    <span>
-                      {message}
-                    </span>
-                  </div>
-                )}
-
-                <div className="profile-form-actions">
-
-                  <button
-                    type="submit"
-                    className="profile-save-button"
-                    disabled={saving}
-                  >
-                    {saving ? (
-                      <>
-                        <LoaderCircle
-                          size={17}
-                          className="profile-button-spinner"
-                        />
-
-                        SAVING...
-                      </>
-                    ) : (
-                      <>
-                        <Save size={17} />
-
-                        SAVE PROFILE
-                      </>
-                    )}
-                  </button>
-
-                </div>
-
-              </form>
             </section>
 
             {/* ACCOUNT SETTINGS */}
@@ -1993,177 +1604,5 @@ export default function ProfilePage() {
 
       </div>
     </main>
-  );
-}
-
-type ConnectionRowProps = {
-  name: string;
-  connected: boolean;
-  busy?: boolean;
-  onConnect?: () => Promise<void>;
-  onDisconnect?: () => Promise<void>;
-};
-
-function ProviderIcon({
-  provider,
-}: {
-  provider: string;
-}) {
-  if (provider === "Google") {
-    return (
-      <svg
-        className="profile-provider-svg"
-        viewBox="0 0 24 24"
-        aria-hidden="true"
-      >
-        <path
-          fill="currentColor"
-          d="M21.35 12.27c0-.72-.06-1.41-.18-2.07H12v3.92h5.24a4.48 4.48 0 0 1-1.94 2.94v2.45h3.14c1.84-1.69 2.91-4.18 2.91-7.24Z"
-        />
-
-        <path
-          fill="currentColor"
-          d="M12 21.68c2.63 0 4.84-.87 6.45-2.35l-3.14-2.45c-.87.58-1.98.92-3.31.92-2.54 0-4.69-1.72-5.46-4.03H3.3v2.53A9.74 9.74 0 0 0 12 21.68Z"
-        />
-
-        <path
-          fill="currentColor"
-          d="M6.54 13.77A5.86 5.86 0 0 1 6.23 12c0-.61.11-1.2.31-1.77V7.7H3.3A9.74 9.74 0 0 0 2.27 12c0 1.57.38 3.05 1.03 4.3l3.24-2.53Z"
-        />
-
-        <path
-          fill="currentColor"
-          d="M12 6.2c1.43 0 2.71.49 3.72 1.45l2.79-2.79C16.83 3.29 14.62 2.32 12 2.32A9.74 9.74 0 0 0 3.3 7.7l3.24 2.53C7.31 7.92 9.46 6.2 12 6.2Z"
-        />
-      </svg>
-    );
-  }
-
-  if (provider === "Discord") {
-    return (
-      <svg
-        className="profile-provider-svg"
-        viewBox="0 0 24 24"
-        aria-hidden="true"
-      >
-        <path
-          fill="currentColor"
-          d="M19.54 5.01A16.7 16.7 0 0 0 15.5 3.75l-.49 1a15.16 15.16 0 0 0-6.02 0l-.49-1a16.75 16.75 0 0 0-4.04 1.26C1.9 8.93 1.2 12.77 1.55 16.56a16.67 16.67 0 0 0 5.13 2.6l1.25-1.7c-.68-.25-1.33-.56-1.94-.92l.47-.36c3.74 1.75 7.79 1.75 11.48 0l.48.36c-.61.36-1.26.67-1.94.92l1.25 1.7a16.67 16.67 0 0 0 5.13-2.6c.41-4.39-.7-8.19-3.32-11.55ZM8.18 14.37c-1.1 0-2-.99-2-2.21s.88-2.21 2-2.21 2 .99 2 2.21-.9 2.21-2 2.21Zm7.64 0c-1.1 0-2-.99-2-2.21s.88-2.21 2-2.21 2 .99 2 2.21-.9 2.21-2 2.21Z"
-        />
-      </svg>
-    );
-  }
-
-  return (
-    <svg
-      className="profile-provider-svg"
-      viewBox="0 0 24 24"
-      aria-hidden="true"
-    >
-      <path
-        fill="currentColor"
-        d="M18.9 2H22l-6.77 7.74L23.2 22h-6.25l-4.9-6.93L5.98 22H2.86l7.24-8.28L2.2 2h6.41l4.43 6.39L18.9 2Zm-1.1 17.88h1.73L7.7 4H5.84l11.96 15.88Z"
-      />
-    </svg>
-  );
-}
-
-function ConnectionRow({
-  name,
-  connected,
-  busy = false,
-  onConnect,
-  onDisconnect,
-}: ConnectionRowProps) {
-  return (
-    <div className="profile-connection-row">
-
-      <div className="profile-connection-name">
-
-        <span
-          className={`profile-connection-icon provider-${name.toLowerCase()}`}
-        >
-          <ProviderIcon
-            provider={name}
-          />
-        </span>
-
-        <span>
-          {name}
-        </span>
-
-      </div>
-
-      <div className="profile-connection-actions">
-
-        <div
-          className={
-            connected
-              ? "profile-connection-status is-connected"
-              : "profile-connection-status"
-          }
-        >
-          {connected ? (
-            <>
-              <CheckCircle2 size={15} />
-
-              CONNECTED
-            </>
-          ) : (
-            <>
-              <CircleOff size={15} />
-
-              NOT CONNECTED
-            </>
-          )}
-        </div>
-
-        {connected && onDisconnect && (
-          <button
-            type="button"
-            className="profile-connection-button profile-connection-button-danger"
-            onClick={onDisconnect}
-            disabled={busy}
-          >
-            {busy ? (
-              <>
-                <LoaderCircle
-                  size={14}
-                  className="profile-button-spinner"
-                />
-
-                DISCONNECTING...
-              </>
-            ) : (
-              "DISCONNECT"
-            )}
-          </button>
-        )}
-
-        {!connected && onConnect && (
-          <button
-            type="button"
-            className="profile-connection-button"
-            onClick={onConnect}
-            disabled={busy}
-          >
-            {busy ? (
-              <>
-                <LoaderCircle
-                  size={14}
-                  className="profile-button-spinner"
-                />
-
-                CONNECTING...
-              </>
-            ) : (
-              "CONNECT"
-            )}
-          </button>
-        )}
-
-      </div>
-
-    </div>
   );
 }
