@@ -6,6 +6,7 @@ import Reveal from "../../components/motion/Reveal";
 
 import HomeHero from "./components/HomeHero";
 import FeaturedRace from "./components/FeaturedRace";
+import ExperienceSection from "./components/ExperienceSection";
 import { useNextSession } from "./home.api";
 
 import "./home.css";
@@ -105,39 +106,11 @@ export default function HomePage() {
 
       <HomeHero data={data} />
 
-      <PageContainer>
-        <Reveal>
-          <section className="home-intro">
-            <SectionLabel number="01">
-              The Experience
-            </SectionLabel>
-
-            <div className="home-intro-content">
-              <h2>
-                Not just a race.
-                <br />
-                <span>Every detail.</span>
-              </h2>
-
-              <p>
-                F1 Race Replay transforms Formula 1
-                sessions into an immersive experience.
-                Relive races, explore drivers and
-                understand the moments that define
-                every lap.
-              </p>
-            </div>
-          </section>
-        </Reveal>
-      </PageContainer>
+      <ExperienceSection />
 
       <PageContainer wide>
         <Reveal delay="short">
           <section className="home-featured-section">
-            <SectionLabel number="02">
-              Next Session
-            </SectionLabel>
-
             <FeaturedRace data={data} />
           </section>
         </Reveal>

@@ -1,4 +1,7 @@
-import React, { useState } from "react";
+import React from "react";
+
+import { CircuitTrack } from "../../schedule/CircuitTrack";
+import { getCircuitSvgUrl } from "../../schedule/circuitAssets";
 
 interface LiveCircuitProps {
   country?: string;
@@ -6,30 +9,18 @@ interface LiveCircuitProps {
 }
 
 export const LiveCircuit: React.FC<LiveCircuitProps> = ({ country, eventName }) => {
-  const [hasError, setHasError] = useState(false);
-
-  // Normalize name for asset lookup (e.g. "Azerbaijan" -> "azerbaijan")
-  const trackSlug = (country || eventName || "")
-    .toLowerCase()
-    .trim()
-    .replace(/\s+/g, "-");
-
-  const trackImageUrl = `https://media.formula1.com/image/upload/v1677244985/content/dam/fom-website/2018-redesign-assets/Circuit%20maps%2016x9/${trackSlug}_Circuit.png`;
+  const trackUrl = getCircuitSvgUrl(eventName || "", country);
 
   return (
     <div className="home-hero-circuit-live">
-      {!hasError && trackSlug ? (
-        <div className="dynamic-track-container">
-          <img
-            src={trackImageUrl}
-            alt={`${country || eventName || "Circuit"} Layout`}
-            className="dynamic-track-img"
-            onError={() => setHasError(true)}
-          />
-        </div>
-      ) : (
-        <div className="track-fallback-placeholder" />
-      )}
+      <div className="dynamic-track-container">
+        <CircuitTrack
+          url={trackUrl}
+          className="dynamic-track-svg"
+          animate
+          fallback={<span className="track-fallback-placeholder">TRACK DATA UNAVAILABLE</span>}
+        />
+      </div>
     </div>
   );
 };
