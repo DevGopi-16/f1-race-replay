@@ -1146,7 +1146,7 @@ export default function ReplayPage() {
 
   return (
     <PageContainer
-      className="replay-page"
+      className="replay-page replay-live-page"
       wide
     >
       <div className="replay-shell">
@@ -1243,11 +1243,44 @@ export default function ReplayPage() {
 
         </section>
           {loading && (
-          <ReplayStatus
-            type="loading"
-            message="Loading race replay…"
-          />
-        )}
+            <>
+              <ReplayStatus
+                type="loading"
+                message="Loading race replay…"
+              />
+              <section className="replay-loading-stage" aria-live="polite">
+                <div className="replay-loading-orbit" aria-hidden="true">
+                  <span />
+                  <span />
+                  <span />
+                </div>
+                <div className="replay-loading-copy">
+                  <span className="replay-loading-kicker">
+                    {year} / {eventName}
+                  </span>
+                  <strong>Preparing race control</strong>
+                  <p>
+                    Fetching circuit geometry, timing frames, and driver
+                    telemetry for your replay.
+                  </p>
+                </div>
+                <div className="replay-loading-metrics">
+                  <div>
+                    <span>TRACK DATA</span>
+                    <i />
+                  </div>
+                  <div>
+                    <span>TELEMETRY</span>
+                    <i />
+                  </div>
+                  <div>
+                    <span>RACE FRAMES</span>
+                    <i />
+                  </div>
+                </div>
+              </section>
+            </>
+          )}
 
         {error &&
           !loading && (

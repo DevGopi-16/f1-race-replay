@@ -59,30 +59,40 @@ export default function ReplaySelectPage() {
         </Reveal>
 
         <Reveal delay="short">
-          <p className="replay-tagline">
-            Relive every lap, every overtake, every second.
-          </p>
+          <section className="replay-intro">
+            <div className="replay-intro-copy">
+              <span className="replay-kicker">
+                <i />
+                ARCHIVE / RACE CONTROL
+              </span>
+              <h1>Relive the race.</h1>
+              <p>
+                Reconstruct every lap, overtake, and split-second decision
+                from the official race archive.
+              </p>
+            </div>
+            <div className="replay-intro-mark" aria-hidden="true">
+              <span>REPLAY</span>
+              <strong>01</strong>
+              <i />
+            </div>
+          </section>
         </Reveal>
 
-
-
-        <section className="replay-race-meta">
-          <div>
-            <strong>{year}</strong>
-            <span>RACE</span>
-            <span>RACE</span>
-          </div>
-
-          <div className="replay-race-lap">
-            LAP <strong>--</strong> / 78
-          </div>
-
-          <div className="replay-clock">0:00:00 / 0:00:00</div>
-        </section>
-
         <Reveal delay="short">
-          <section className="replay-selector-drawer" style={{ padding: "12px 16px" }}>
-            <div className="replay-selector-inner" style={{ borderTop: "none", padding: 0 }}>
+          <section className="replay-command-panel">
+            <div className="replay-command-heading">
+              <div>
+                <span className="replay-kicker">01 / SELECT ARCHIVE</span>
+                <h2>Configure your replay</h2>
+              </div>
+              <span className="replay-command-status">
+                <i />
+                DATA READY
+              </span>
+            </div>
+
+            <div className="replay-selector-inner">
               <ReplaySelector
                 grandPrix={grandPrix}
                 onGrandPrixChange={setGrandPrix}
@@ -96,6 +106,40 @@ export default function ReplaySelectPage() {
                 loading={false}
               />
             </div>
+
+            <div className="replay-selection-summary">
+              <div>
+                <span>SELECTED SEASON</span>
+                <strong>{year}</strong>
+              </div>
+              <div>
+                <span>GRAND PRIX</span>
+                <strong>{grandPrix || "Choose an event"}</strong>
+              </div>
+              <div>
+                <span>SESSION FORMAT</span>
+                <strong>{sessionType === "R" ? "Race" : sessionType === "S" ? "Sprint" : sessionType}</strong>
+              </div>
+              <div>
+                <span>PLAYBACK</span>
+                <strong>{fps} FPS</strong>
+              </div>
+            </div>
+          </section>
+        </Reveal>
+
+        <Reveal delay="medium">
+          <section className="replay-empty-state">
+            <div className="replay-empty-grid" aria-hidden="true" />
+            <div className="replay-empty-content">
+              <span className="replay-kicker">02 / LIVE VIEWER</span>
+              <strong>Load an archive to enter race control.</strong>
+              <p>
+                Track position, timing, telemetry, and driver focus will
+                appear here once a replay is loaded.
+              </p>
+            </div>
+            <span className="replay-empty-index">NO SESSION LOADED</span>
           </section>
         </Reveal>
       </div>
