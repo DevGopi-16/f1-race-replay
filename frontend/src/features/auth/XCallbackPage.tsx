@@ -18,19 +18,9 @@ export default function XCallbackPage() {
 
     async function completeXLogin() {
       try {
-        const hashParams = new URLSearchParams(
-          window.location.hash.replace(
-            /^#/,
-            "",
-          ),
-        );
-
         const queryParams = new URLSearchParams(
           window.location.search,
         );
-
-        const accessToken =
-          hashParams.get("access_token");
 
         const oauthError =
         queryParams.get("error");
@@ -46,17 +36,6 @@ export default function XCallbackPage() {
         );
         }
 
-        if (!accessToken) {
-          throw new Error(
-            "X did not return an access token.",
-          );
-        }
-
-        localStorage.setItem(
-          "f1_access_token",
-          accessToken,
-        );
-
         await restoreSession();
 
         if (!cancelled) {
@@ -68,10 +47,6 @@ export default function XCallbackPage() {
         console.error(
           "[Auth] X callback failed:",
           err,
-        );
-
-        localStorage.removeItem(
-          "f1_access_token",
         );
 
         if (!cancelled) {

@@ -4,7 +4,7 @@
   display: flex;
   align-items: center;
   flex-wrap: wrap;
-  gap: 8px;
+  gap: 6px;
 }
 
 .season-pill,
@@ -28,10 +28,12 @@
 }
 
 .season-pill {
-  min-height: 40px;
-  padding: 0 16px;
-  border-radius: 10px;
-  font-size: 0.95rem;
+  min-height: 30px;
+  padding: 0 11px;
+  border-radius: 8px;
+  font-size: 0.75rem;
+  letter-spacing: 0;
+  gap: 6px;
 }
 
 .season-pill:hover,
@@ -61,8 +63,8 @@
 }
 
 .season-dot {
-  width: 7px;
-  height: 7px;
+  width: 6px;
+  height: 6px;
   flex-shrink: 0;
   border-radius: 50%;
   background: var(--era, currentColor);

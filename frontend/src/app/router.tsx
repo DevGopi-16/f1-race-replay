@@ -16,6 +16,7 @@ import HomePage from "../features/home/HomePage";
 import ConstructorsPage from "../features/constructors/ConstructorsPage";
 import ReplayPage from "../features/replay/ReplayPage";
 import ReplaySelectPage from "../features/replay/ReplaySelectPage";
+import TelemetryPage from "../features/telemetry/TelemetryPage";
 
 
 import LoginPage from "../features/auth/LoginPage";
@@ -208,6 +209,10 @@ export function AppRouter() {
             element={<ReplayPage />}
           />
 
+          <Route
+            path="/replay/:sessionKey/telemetry"
+            element={<TelemetryPage />}
+          />
 
           <Route
             path="/drivers"

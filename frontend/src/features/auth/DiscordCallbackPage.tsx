@@ -21,56 +21,25 @@ export default function DiscordCallbackPage() {
         /*
          * Discord backend redirects with:
          *
-         * /auth/discord/callback#access_token=JWT
-         *
-         * Therefore we must read window.location.hash.
-         *
-         * We also support query parameters in case the
-         * callback format is changed later.
+         * The backend sets the session cookie before redirecting
+         * to this page, so the browser sends it automatically.
          */
 
         const searchParams = new URLSearchParams(
           window.location.search,
         );
 
-        const hashParams = new URLSearchParams(
-          window.location.hash.replace(/^#/, ""),
-        );
-
-        const accessToken =
-          hashParams.get("access_token") ??
-          searchParams.get("access_token");
-
         const oauthError =
           searchParams.get("error") ??
-          hashParams.get("error");
+          new URLSearchParams(
+            window.location.hash.replace(/^#/, ""),
+          ).get("error");
 
         if (oauthError) {
           throw new Error(
             "Discord authorization was cancelled.",
           );
         }
-
-        if (!accessToken) {
-          throw new Error(
-            "Discord did not return an access token.",
-          );
-        }
-
-        /*
-         * Store the JWT so the normal auth system can
-         * restore the logged-in user.
-         */
-
-        localStorage.setItem(
-          "f1_access_token",
-          accessToken,
-        );
-
-        /*
-         * restoreSession() reads f1_access_token,
-         * calls /auth/me, and updates the Zustand store.
-         */
 
         await restoreSession();
 
@@ -94,10 +63,6 @@ export default function DiscordCallbackPage() {
         console.error(
           "[Auth] Discord callback failed:",
           err,
-        );
-
-        localStorage.removeItem(
-          "f1_access_token",
         );
 
         if (!cancelled) {

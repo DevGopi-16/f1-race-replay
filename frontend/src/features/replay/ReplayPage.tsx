@@ -229,15 +229,6 @@ export default function ReplayPage() {
       // Only authenticated users have replay history.
       // ----------------------------------------------------------
 
-      const token =
-        localStorage.getItem(
-          "f1_access_token",
-        );
-
-      if (!token) {
-        return Promise.resolve();
-      }
-
       if (!currentQuery) {
         return Promise.resolve();
       }
@@ -495,13 +486,7 @@ export default function ReplayPage() {
       const currentMeta =
         latestMetaRef.current;
 
-      const token =
-        localStorage.getItem(
-          "f1_access_token",
-        );
-
       if (
-        !token ||
         !currentQuery ||
         !currentData?.frames?.length
       ) {
@@ -1195,6 +1180,20 @@ export default function ReplayPage() {
                   ? "REPLAY READY"
                   : "SELECT REPLAY"}
             </div>
+
+            {data && (
+              <button
+                className="replay-telemetry-link"
+                type="button"
+                onClick={() =>
+                  navigate(
+                    `/replay/${year}-${data.meta.round}-${sessionType}/telemetry?year=${year}&grandPrix=${encodeURIComponent(eventName)}&sessionType=${sessionType}`,
+                  )
+                }
+              >
+                TELEMETRY
+              </button>
+            )}
 
           </header>
         </Reveal>

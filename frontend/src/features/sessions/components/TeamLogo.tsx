@@ -5,7 +5,7 @@ import { useEffect, useMemo, useState } from "react";
 // row never gets a modern logo of a different team.
 const TEAM_SLUGS: [RegExp, string][] = [
   [/red bull/i, "red-bull"],
-  [/racing bulls/i, "racing-bulls"],
+  [/racing bulls|^rb\b|visa cash app/i, "rb"],
   [/ferrari/i, "ferrari"],
   [/mercedes/i, "mercedes"],
   [/mclaren/i, "mclaren"],

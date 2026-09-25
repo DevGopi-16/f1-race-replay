@@ -7,7 +7,6 @@ import type {
 } from "./auth.types";
 
 const AUTH_BASE = "/auth";
-const ACCESS_TOKEN_KEY = "f1_access_token";
 
 /* =========================================================
    PROFILE TYPES
@@ -44,9 +43,6 @@ async function authRequest<T>(
   endpoint: string,
   options: RequestInit = {},
 ): Promise<T> {
-  const token =
-    localStorage.getItem(ACCESS_TOKEN_KEY);
-
   const response = await fetch(
     `${AUTH_BASE}${endpoint}`,
     {
@@ -56,12 +52,6 @@ async function authRequest<T>(
 
       headers: {
         Accept: "application/json",
-
-        ...(token
-          ? {
-              Authorization: `Bearer ${token}`,
-            }
-          : {}),
 
         ...options.headers,
       },
@@ -386,4 +376,3 @@ export function updateUserSettings(
     body: JSON.stringify(payload),
   });
 }
-

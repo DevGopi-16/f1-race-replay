@@ -1,5 +1,7 @@
 import {
   GoogleAuthProvider,
+  onAuthStateChanged,
+  signOut,
   signInWithPopup,
 } from "firebase/auth";
 
@@ -23,4 +25,17 @@ export async function signInWithGoogleFirebase() {
     user: result.user,
     idToken,
   };
+}
+
+export function subscribeToFirebaseAuth(
+  callback: Parameters<typeof onAuthStateChanged>[1],
+) {
+  return onAuthStateChanged(
+    firebaseAuth,
+    callback,
+  );
+}
+
+export function signOutFirebase() {
+  return signOut(firebaseAuth);
 }

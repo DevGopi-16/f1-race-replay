@@ -49,15 +49,24 @@ function formatDate(raw: string): string {
   });
 }
 
-function formatLocalTime(date: string, time: string): string {
-  if (!time) return "";
-  const d = new Date(`${date}T${time}`);
-  if (Number.isNaN(d.getTime())) return "";
-  return d.toLocaleTimeString(undefined, {
-    hour: "numeric",
-    minute: "2-digit",
-    timeZoneName: "short",
-  });
+function formatStart(date: string, time: string): { day: string; clock: string } {
+  if (!time) return { day: formatDate(date), clock: "" };
+  const t = /z$|[+-]\d\d:?\d\d$/i.test(time) ? time : `${time}Z`;
+  const d = new Date(`${date}T${t}`);
+  if (Number.isNaN(d.getTime())) return { day: formatDate(date), clock: "" };
+  return {
+    day: d.toLocaleDateString(undefined, {
+      weekday: "long",
+      month: "long",
+      day: "numeric",
+      year: "numeric",
+    }),
+    clock: d.toLocaleTimeString(undefined, {
+      hour: "numeric",
+      minute: "2-digit",
+      timeZoneName: "short",
+    }),
+  };
 }
 
 function isPast(raw: string): boolean {
@@ -246,7 +255,7 @@ export default function SessionDetailPage() {
   // Circuit layouts changed a lot over the decades, so only draw the track
   // for recent seasons.
   const svg = year >= 2018 ? getCircuitSvgUrl(meta.event_name, meta.country) : null;
-  const localTime = formatLocalTime(meta.date, meta.time_utc);
+  const start = formatStart(meta.date, meta.time_utc);
 
   const highlightCards: { label: string; driver: DriverRef | null }[] = [
     { label: "Winner", driver: highlights.winner },
@@ -314,8 +323,9 @@ export default function SessionDetailPage() {
             </p>
 
             <p className="sd-sub">
-              {formatDate(meta.date)}
-              {localTime ? ` · ${localTime}` : ""}
+              {start.day}
+              {start.clock ? ` · ${start.clock} (your time)` : ""}
+
             </p>
 
             <div className="sd-stats">
@@ -351,12 +361,10 @@ export default function SessionDetailPage() {
                   )}
                   <div className="sd-highlight-text">
                     <span className="sd-highlight-label">{label}</span>
-                    <span className="sd-highlight-code">
-                      {driver ? driver.code : "—"}
-                    </span>
                     <span className="sd-highlight-name">
                       {driver ? driver.name : "Not recorded"}
                     </span>
+
                   </div>
                 </div>
               ))}
@@ -564,11 +572,11 @@ function ResultsTable({
                   <div className="sd-driver-cell">
                     <DriverAvatar id={r.id} code={r.code} name={r.name} year={year} size={30} />
                     <div className="sd-driver-text">
-                      <strong>{r.code}</strong> <span>{r.name}</span>
+                      <strong>{r.name}</strong> 
                     </div>
                   </div>
                 </td>
-                <td className="is-muted">
+                <td className="sd-team-td">
                   <div className="sd-team-cell">
                     <TeamLogo name={r.team} size={22} />
                     <span>{r.team}</span>
@@ -618,12 +626,17 @@ function ResultsTable({
                 <div className="sd-driver-cell">
                   <DriverAvatar id={r.id} code={r.code} name={r.name} year={year} size={30} />
                   <div className="sd-driver-text">
-                    <strong>{r.code}</strong> <span>{r.name}</span>
+                    <strong>{r.name}</strong>
                     {r.fastest_lap && <em className="sd-tag is-fl">FL</em>}
                   </div>
                 </div>
               </td>
-              <td className="is-muted">{r.team}</td>
+              <td className="sd-team-td">
+                <div className="sd-team-cell">
+                  <TeamLogo name={r.team} size={22} />
+                  <span>{r.team}</span>
+                </div>
+              </td>
               <td className="is-num">{r.grid ?? "--"}</td>
               <td className="is-num">{r.gap || "--"}</td>
               <td className="is-num">{r.points > 0 ? r.points : "--"}</td>

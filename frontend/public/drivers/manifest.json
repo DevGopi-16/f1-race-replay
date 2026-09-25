@@ -262,5 +262,29 @@
     "name": "Stoffel Vandoorne",
     "source": "formula1.com (via f1-headshots)",
     "season": 2018
+  },
+  "resta": {
+    "file": "resta.jpg",
+    "name": "Paul di Resta",
+    "source": "http://en.wikipedia.org/wiki/Paul_di_Resta",
+    "suit_verified": 1.0
+  },
+  "barth": {
+    "file": "barth.jpg",
+    "name": "Edgar Barth",
+    "source": "http://en.wikipedia.org/wiki/Edgar_Barth",
+    "suit_verified": 0.67
+  },
+  "borgudd": {
+    "file": "borgudd.jpg",
+    "name": "Slim Borgudd",
+    "source": "http://en.wikipedia.org/wiki/Slim_Borgudd",
+    "suit_verified": 0.93
+  },
+  "bueb": {
+    "file": "bueb.jpg",
+    "name": "Ivor Bueb",
+    "source": "http://en.wikipedia.org/wiki/Ivor_Bueb",
+    "suit_verified": 0.97
   }
 }

@@ -1334,3 +1334,13 @@
   0%, 100% { box-shadow: 0 0 8px rgba(225,6,0,0.7); transform: scale(1); }
   50% { box-shadow: 0 0 16px rgba(225,6,0,1); transform: scale(1.15); }
 }
+.replay-telemetry-link {
+  border: 1px solid rgba(225, 6, 0, .55);
+  background: rgba(225, 6, 0, .12);
+  color: #fff;
+  border-radius: 6px;
+  padding: 9px 12px;
+  font: 700 10px/1 ui-monospace, SFMono-Regular, monospace;
+  letter-spacing: .12em;
+  cursor: pointer;
+}
