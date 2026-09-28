@@ -1,0 +1,1783 @@
+tree -I "node_modules|.git|dist|build" -L 5 > tree.txt
+
+.
+├── README.md
+├── assets
+│   ├── banners(.md)
+│   │   ├── energy
+│   │   │   ├── banner_arc_reactor_slit.svg
+│   │   │   ├── banner_breathing_gradient.svg
+│   │   │   ├── banner_controled_storm.svg
+│   │   │   ├── banner_core_energy_pulse.svg
+│   │   │   ├── banner_core_lightning_minimal.svg
+│   │   │   ├── banner_eclipse_core.svg
+│   │   │   ├── banner_energy_beam.svg
+│   │   │   ├── banner_energy_cloude.svg
+│   │   │   ├── banner_energy_seal.svg
+│   │   │   ├── banner_energy_transfer.svg
+│   │   │   ├── banner_fracture_beam.svg
+│   │   │   ├── banner_glowing_core.svg
+│   │   │   ├── banner_gradient_cyber_line_sweep.svg
+│   │   │   ├── banner_gradient_pulse.svg
+│   │   │   ├── banner_horizontal_breach.svg
+│   │   │   └── banner_tethered_orb.svg
+│   │   ├── minimal
+│   │   │   ├── banner_breathing_dot.svg
+│   │   │   ├── banner_breathing_line.svg
+│   │   │   ├── banner_center_crosshair.svg
+│   │   │   ├── banner_double_pulse_rings.svg
+│   │   │   ├── banner_expanding_center_line.svg
+│   │   │   ├── banner_premium_minimal_dot.svg
+│   │   │   ├── banner_pulse_ring.svg
+│   │   │   ├── banner_rotating_ring.svg
+│   │   │   └── banner_soft_glow.svg
+│   │   ├── particles
+│   │   │   ├── banner_floating_dense_particles.svg
+│   │   │   ├── banner_floating_dot.svg
+│   │   │   ├── banner_horizontal_drifting_particles.svg
+│   │   │   ├── banner_network_particles.svg
+│   │   │   ├── banner_orbiting_particle.svg
+│   │   │   ├── banner_pulse_glowing_stars.svg
+│   │   │   ├── banner_pulse_node.svg
+│   │   │   ├── banner_shooting_stars.svg
+│   │   │   ├── banner_sparkle_twinkle.svg
+│   │   │   └── banner_subtle_wave_particle.svg
+│   │   └── waves
+│   │       ├── banner_dna_waves.svg
+│   │       ├── banner_gradient_wave.svg
+│   │       ├── banner_wave_bottom.svg
+│   │       ├── banner_wave_double_premium_bottom.svg
+│   │       ├── banner_wave_double_premium_top.svg
+│   │       ├── banner_wave_sharp_bottom.svg
+│   │       ├── banner_wave_sharp_top.svg
+│   │       ├── banner_wave_slow_float_bottom.svg
+│   │       ├── banner_wave_slow_float_top.svg
+│   │       ├── banner_wave_soft_bottom.svg
+│   │       ├── banner_wave_soft_top.svg
+│   │       └── banner_wave_top.svg
+│   ├── dividers
+│   │   ├── LICENSE-dividers.txt
+│   │   ├── animated
+│   │   │   ├── bars
+│   │   │   │   ├── divider_circuit_pulse_bar.svg
+│   │   │   │   ├── divider_data_stream.svg
+│   │   │   │   ├── divider_digital_loading_bar.svg
+│   │   │   │   ├── divider_dual_energy_tracks.svg
+│   │   │   │   ├── divider_frequency_bar.svg
+│   │   │   │   ├── divider_glitch_bar.svg
+│   │   │   │   └── divider_scanning_bar.svg
+│   │   │   ├── lines
+│   │   │   │   ├── divider_breathing_line.svg
+│   │   │   │   ├── divider_dash_energy_lines.svg
+│   │   │   │   ├── divider_data_flow.svg
+│   │   │   │   ├── divider_electric_spark.svg
+│   │   │   │   ├── divider_energy_wave_line.svg
+│   │   │   │   ├── divider_expanding_grid.svg
+│   │   │   │   ├── divider_glitch_lines.svg
+│   │   │   │   ├── divider_gradient_line.svg
+│   │   │   │   ├── divider_moving_neon_gradient.svg
+│   │   │   │   ├── divider_multi_wave.svg
+│   │   │   │   ├── divider_neon_center_dot.svg
+│   │   │   │   ├── divider_neon_flicker_line.svg
+│   │   │   │   ├── divider_neural_pulse.svg
+│   │   │   │   ├── divider_orbiting_satellite.svg
+│   │   │   │   ├── divider_premium_gradient_flow.svg
+│   │   │   │   ├── divider_pulse_node_chain.svg
+│   │   │   │   ├── divider_red_alert.svg
+│   │   │   │   ├── divider_rotating_square.svg
+│   │   │   │   ├── divider_rune_pulse.svg
+│   │   │   │   ├── divider_scanning_radar.svg
+│   │   │   │   ├── divider_signal_wave_scanner.svg
+│   │   │   │   ├── divider_sliding_dot_on_line.svg
+│   │   │   │   ├── divider_sliding_segments.svg
+│   │   │   │   ├── divider_twin_collapsing_lines.svg
+│   │   │   │   └── divider_twin_line_waves.svg
+│   │   │   └── unique_effects
+│   │   │       ├── divider_arc_reactor.svg
+│   │   │       ├── divider_binary_flicker.svg
+│   │   │       ├── divider_celestial_gate.svg
+│   │   │       ├── divider_cyber_cycle.svg
+│   │   │       ├── divider_cyber_cycle_mirrored.svg
+│   │   │       ├── divider_cyber_cycle_reverse.svg
+│   │   │       ├── divider_cyber_sigil.svg
+│   │   │       ├── divider_data_capsul.svg
+│   │   │       ├── divider_eclipse.svg
+│   │   │       ├── divider_expanding_ring.svg
+│   │   │       ├── divider_futuristic_notch.svg
+│   │   │       ├── divider_matrix.svg
+│   │   │       ├── divider_matrix_stream.svg
+│   │   │       ├── divider_orbit_core_divider.svg
+│   │   │       ├── divider_portal_breach.svg
+│   │   │       ├── divider_pulse_wave.svg
+│   │   │       ├── divider_quantum_lattice.svg
+│   │   │       ├── divider_ritual_ring.svg
+│   │   │       ├── divider_twin_serpant.svg
+│   │   │       └── divider_zigzag_energy_line.svg
+│   │   └── static
+│   │       ├── divider_arc_bridge.svg
+│   │       ├── divider_center_diamond.svg
+│   │       ├── divider_dash_terminal.svg
+│   │       ├── divider_dot_center.svg
+│   │       ├── divider_hex_tech.svg
+│   │       ├── divider_minimal_clean.svg
+│   │       ├── divider_neon.svg
+│   │       ├── divider_split_gradient_blue_purple.svg
+│   │       ├── divider_triangle_cut.svg
+│   │       ├── divider_two_beam_lines.svg
+│   │       ├── divider_wave.svg
+│   │       └── divider_zigzag.svg
+│   ├── file_headers
+│   │   ├── code_of_conduct_green.svg
+│   │   ├── code_of_conduct_red.svg
+│   │   ├── code_of_conduct_white.svg
+│   │   ├── contributing_green.svg
+│   │   ├── contributing_red.svg
+│   │   ├── contributing_white.svg
+│   │   ├── security_green.svg
+│   │   ├── security_red.svg
+│   │   └── security_white.svg
+│   ├── headers
+│   │   ├── animated
+│   │   │   ├── header_blinking_danger.svg
+│   │   │   ├── header_blinking_info.svg
+│   │   │   ├── header_blinking_warning.svg
+│   │   │   ├── header_center_glow.svg
+│   │   │   ├── header_collaboration.svg
+│   │   │   ├── header_collaboration_premium.svg
+│   │   │   ├── header_expanding_bar.svg
+│   │   │   ├── header_expanding_circle.svg
+│   │   │   ├── header_floating_particles.svg
+│   │   │   ├── header_floating_text.svg
+│   │   │   ├── header_glow_up_highlight.svg
+│   │   │   ├── header_horizontal_scanning.svg
+│   │   │   ├── header_orbiting_dots.svg
+│   │   │   ├── header_pulse_underline_glow.svg
+│   │   │   ├── header_radial_core.svg
+│   │   │   ├── header_rotating_square.svg
+│   │   │   ├── header_scanning_status.svg
+│   │   │   ├── header_sliding_highlightbar.svg
+│   │   │   ├── header_stretching_text.svg
+│   │   │   ├── header_typing_dots.svg
+│   │   │   └── header_wave_distortion.svg
+│   │   └── static
+│   │       ├── header_circuit.svg
+│   │       ├── header_collaboration_static.svg
+│   │       ├── header_cyber_frame.svg
+│   │       ├── header_data_rail.svg
+│   │       ├── header_floating_shader.svg
+│   │       ├── header_glitch_style.svg
+│   │       ├── header_hero_banner.svg
+│   │       ├── header_hex_tech.svg
+│   │       ├── header_matrix.svg
+│   │       ├── header_minimal_lux.svg
+│   │       ├── header_monolith.svg
+│   │       ├── header_neon_glow.svg
+│   │       ├── header_orbit_core.svg
+│   │       ├── header_portal.svg
+│   │       ├── header_puls_dot.svg
+│   │       ├── header_scanner_banner.svg
+│   │       ├── header_split_line.svg
+│   │       ├── header_status_dashboard.svg
+│   │       ├── header_terminal_typing.svg
+│   │       └── header_wave_line.svg
+│   ├── icons
+│   │   ├── core
+│   │   │   ├── icon_bell.svg
+│   │   │   ├── icon_benchmark.svg
+│   │   │   ├── icon_box.svg
+│   │   │   ├── icon_bug.svg
+│   │   │   ├── icon_bug_colored.svg
+│   │   │   ├── icon_bug_report.svg
+│   │   │   ├── icon_close_x.svg
+│   │   │   ├── icon_copied.svg
+│   │   │   ├── icon_copy.svg
+│   │   │   ├── icon_docs.svg
+│   │   │   ├── icon_document.svg
+│   │   │   ├── icon_eye.svg
+│   │   │   ├── icon_folder.svg
+│   │   │   ├── icon_folder_open.svg
+│   │   │   ├── icon_grid_colored.svg
+│   │   │   ├── icon_heart.svg
+│   │   │   ├── icon_list.svg
+│   │   │   ├── icon_loading_dots.svg
+│   │   │   ├── icon_lock.svg
+│   │   │   ├── icon_pause.svg
+│   │   │   ├── icon_play.svg
+│   │   │   ├── icon_profile.svg
+│   │   │   ├── icon_progress_bar.svg
+│   │   │   ├── icon_question.svg
+│   │   │   ├── icon_queue.svg
+│   │   │   ├── icon_roadmap.svg
+│   │   │   ├── icon_settings_colored.svg
+│   │   │   ├── icon_share.svg
+│   │   │   ├── icon_shield_check.svg
+│   │   │   ├── icon_signal_strength.svg
+│   │   │   ├── icon_star.svg
+│   │   │   ├── icon_tip.svg
+│   │   │   ├── icon_toggle_sign.svg
+│   │   │   ├── icon_trash.svg
+│   │   │   └── icon_unlock.svg
+│   │   ├── data-ai
+│   │   │   ├── Icon_brain_activity.svg
+│   │   │   ├── icon_ai_eye_core.svg
+│   │   │   ├── icon_data_pipeline.svg
+│   │   │   ├── icon_neural_pulse_web.svg
+│   │   │   ├── icon_radar_sweep.svg
+│   │   │   ├── icon_robot_head.svg
+│   │   │   ├── icon_robot_head_simple.svg
+│   │   │   ├── icon_server_rack.svg
+│   │   │   ├── icon_signal_pulse.svg
+│   │   │   ├── icon_streaming.svg
+│   │   │   └── icon_system_online.svg
+│   │   ├── decorative
+│   │   │   ├── icon_bouncing_node.svg
+│   │   │   ├── icon_breathing_square.svg
+│   │   │   ├── icon_compass_flare.svg
+│   │   │   ├── icon_dual_wave_field.svg
+│   │   │   ├── icon_expanding_dot.svg
+│   │   │   ├── icon_flicker_dot.svg
+│   │   │   ├── icon_glow_animation.svg
+│   │   │   ├── icon_ink_drop.svg
+│   │   │   ├── icon_pendulum_orb.svg
+│   │   │   ├── icon_pulsing_core.svg
+│   │   │   ├── icon_pulsing_ring.svg
+│   │   │   ├── icon_retro_pixel_star.svg
+│   │   │   ├── icon_sliding_line.svg
+│   │   │   └── icon_star.svg
+│   │   ├── dev
+│   │   │   ├── icon_api.svg
+│   │   │   ├── icon_build.svg
+│   │   │   ├── icon_cli.svg
+│   │   │   ├── icon_code.svg
+│   │   │   ├── icon_code_colored.svg
+│   │   │   ├── icon_commit_dot_pulse.svg
+│   │   │   ├── icon_download.svg
+│   │   │   ├── icon_download_cloud.svg
+│   │   │   ├── icon_git_branch.svg
+│   │   │   ├── icon_install.svg
+│   │   │   ├── icon_pipeline.svg
+│   │   │   ├── icon_terminal.svg
+│   │   │   ├── icon_upload.svg
+│   │   │   └── icon_upload_cloud.svg
+│   │   ├── devops
+│   │   │   ├── icon_cyber_scan_line.svg
+│   │   │   ├── icon_expanding_signal_grid.svg
+│   │   │   ├── icon_heartbeat_node.svg
+│   │   │   ├── icon_new_scanning_eye.svg
+│   │   │   └── icon_reactor_spin.svg
+│   │   ├── effects
+│   │   │   ├── icon_eclipse_orbit.svg
+│   │   │   ├── icon_energy_portal.svg
+│   │   │   ├── icon_glitch_core.svg
+│   │   │   ├── icon_glitch_square.svg
+│   │   │   ├── icon_lightning_charge.svg
+│   │   │   ├── icon_liquid_blob.svg
+│   │   │   ├── icon_magical_rune_seal.svg
+│   │   │   ├── icon_orbit_ring.svg
+│   │   │   ├── icon_orbiting_node.svg
+│   │   │   ├── icon_orbiting_satellites.svg
+│   │   │   ├── icon_origami_spinner.svg
+│   │   │   ├── icon_quantum_core_spin.svg
+│   │   │   ├── icon_ripple_circle.svg
+│   │   │   ├── icon_rotating_arc_field.svg
+│   │   │   ├── icon_rotating_cube.svg
+│   │   │   ├── icon_rotating_data_cube.svg
+│   │   │   ├── icon_rotating_gear.svg
+│   │   │   ├── icon_rotating_hex.svg
+│   │   │   ├── icon_rotating_plus.svg
+│   │   │   ├── icon_rotating_triangle.svg
+│   │   │   └── icon_spinning_ring.svg
+│   │   ├── navigation
+│   │   │   └── icon_navigation_ping.svg
+│   │   ├── objects
+│   │   │   ├── icon_calendar.svg
+│   │   │   ├── icon_cassette_reel.svg
+│   │   │   ├── icon_clock.svg
+│   │   │   ├── icon_gyroscope.svg
+│   │   │   ├── icon_hourglass_flux.svg
+│   │   │   ├── icon_industrial_fan.svg
+│   │   │   ├── icon_location.svg
+│   │   │   ├── icon_rocket_launch.svg
+│   │   │   └── icon_sprouting_seed.svg
+│   │   ├── status
+│   │   │   ├── icon_check_circle.svg
+│   │   │   ├── icon_danger.svg
+│   │   │   ├── icon_deprecated.svg
+│   │   │   ├── icon_info.svg
+│   │   │   ├── icon_info_circle.svg
+│   │   │   ├── icon_live.svg
+│   │   │   ├── icon_notice.svg
+│   │   │   ├── icon_success.svg
+│   │   │   ├── icon_warning.svg
+│   │   │   ├── icon_warning_triangle.svg
+│   │   │   └── icon_x_circle.svg
+│   │   └── ui
+│   │       ├── icon_arrow_down.svg
+│   │       ├── icon_arrow_down_right.svg
+│   │       ├── icon_arrow_left.svg
+│   │       ├── icon_arrow_right.svg
+│   │       ├── icon_arrow_up.svg
+│   │       ├── icon_arrow_up_right.svg
+│   │       ├── icon_chevron_down.svg
+│   │       ├── icon_chevron_left.svg
+│   │       ├── icon_chevron_right.svg
+│   │       ├── icon_chevron_up.svg
+│   │       ├── icon_double_chevron_left.svg
+│   │       ├── icon_double_chevron_right.svg
+│   │       ├── icon_external_link.svg
+│   │       ├── icon_filter.svg
+│   │       ├── icon_hamburger_menu.svg
+│   │       ├── icon_scroll_hint.svg
+│   │       └── icon_search.svg
+│   ├── loadings
+│   │   ├── loading_arc_cheese.svg
+│   │   ├── loading_bouncing_capsuls.svg
+│   │   ├── loading_bouncing_dots.svg
+│   │   ├── loading_bouncing_dots_colored.svg
+│   │   ├── loading_breathing_circle.svg
+│   │   ├── loading_classic_spinner.svg
+│   │   ├── loading_constellation.svg
+│   │   ├── loading_curved_square_rotation.svg
+│   │   ├── loading_double_pulse_ring.svg
+│   │   ├── loading_dual_ring_reactor.svg
+│   │   ├── loading_equalizer_bars.svg
+│   │   ├── loading_expanding_circle.svg
+│   │   ├── loading_expanding_ripple.svg
+│   │   ├── loading_expanding_ripple_colored.svg
+│   │   ├── loading_expanding_square.svg
+│   │   ├── loading_fading_circle.svg
+│   │   ├── loading_four_fading_dots.svg
+│   │   ├── loading_hex_energy_move.svg
+│   │   ├── loading_infinity_energy.svg
+│   │   ├── loading_morph_blob.svg
+│   │   ├── loading_moving_dash_line.svg
+│   │   ├── loading_moving_gradient_bars.svg
+│   │   ├── loading_neon_orbit.svg
+│   │   ├── loading_orbiting_dots.svg
+│   │   ├── loading_pulsing_dots.svg
+│   │   ├── loading_pulsing_ring_blue.svg
+│   │   ├── loading_ring_dot_combo.svg
+│   │   ├── loading_rotating_arc_double_line.svg
+│   │   ├── loading_rotating_blue_dashlines.svg
+│   │   ├── loading_rotating_dash.svg
+│   │   ├── loading_rotating_diamond_pulse.svg
+│   │   ├── loading_rotating_plus.svg
+│   │   ├── loading_rotating_square.svg
+│   │   ├── loading_rotating_squares_grid.svg
+│   │   ├── loading_rotating_triangle.svg
+│   │   ├── loading_sliding_bar.svg
+│   │   ├── loading_sliding_dot.svg
+│   │   ├── loading_spinner_arc.svg
+│   │   ├── loading_triple_pulse_dot.svg
+│   │   ├── loading_two_bouncing_balls.svg
+│   │   ├── loading_vertical_pulse_bars.svg
+│   │   └── loading_zigzag_energy.svg
+│   ├── progress_bars
+│   │   ├── progress_bar_classic.svg
+│   │   ├── progress_bar_gradient_sweep.svg
+│   │   ├── progress_bar_indeterminate.svg
+│   │   ├── progress_bar_segment.svg
+│   │   └── progress_bar_smooth.svg
+│   └── visuals
+│       ├── banner_dual_core_entanglement.svg
+│       ├── blackhole.svg
+│       ├── eye.svg
+│       ├── mlp.svg
+│       ├── mlp_2.svg
+│       ├── mlp_space.svg
+│       ├── moving_system.svg
+│       ├── neural_singularity_reactor.svg
+│       ├── planet.svg
+│       ├── quantum_computing.svg
+│       ├── server.svg
+│       ├── singularity.svg
+│       ├── solar_system.svg
+│       ├── solar_system_2.svg
+│       └── spiral_energy_core.svg
+├── backend
+│   ├── __pycache__
+│   │   └── main.cpython-314.pyc
+│   ├── backend
+│   ├── cache
+│   │   ├── 2026
+│   │   │   └── 2026-03-29_Japanese_Grand_Prix
+│   │   │       └── 2026-03-29_Race
+│   │   ├── fastf1_http_cache.sqlite
+│   │   ├── schedules
+│   │   │   ├── 1950.json
+│   │   │   ├── 1951.json
+│   │   │   ├── 1952.json
+│   │   │   ├── 1953.json
+│   │   │   ├── 1954.json
+│   │   │   ├── 1955.json
+│   │   │   ├── 1956.json
+│   │   │   ├── 1957.json
+│   │   │   ├── 1958.json
+│   │   │   ├── 1959.json
+│   │   │   ├── 1960.json
+│   │   │   ├── 1961.json
+│   │   │   ├── 1962.json
+│   │   │   ├── 1963.json
+│   │   │   ├── 1964.json
+│   │   │   ├── 1965.json
+│   │   │   ├── 1966.json
+│   │   │   ├── 1967.json
+│   │   │   ├── 1968.json
+│   │   │   ├── 1969.json
+│   │   │   ├── 1970.json
+│   │   │   ├── 1971.json
+│   │   │   ├── 1972.json
+│   │   │   ├── 1973.json
+│   │   │   ├── 1974.json
+│   │   │   ├── 1975.json
+│   │   │   ├── 1976.json
+│   │   │   ├── 1977.json
+│   │   │   ├── 1978.json
+│   │   │   ├── 1979.json
+│   │   │   ├── 1980.json
+│   │   │   ├── 1981.json
+│   │   │   ├── 1982.json
+│   │   │   ├── 1983.json
+│   │   │   ├── 1984.json
+│   │   │   ├── 1985.json
+│   │   │   ├── 1986.json
+│   │   │   ├── 1987.json
+│   │   │   ├── 1988.json
+│   │   │   ├── 1989.json
+│   │   │   ├── 1990.json
+│   │   │   ├── 1991.json
+│   │   │   ├── 1992.json
+│   │   │   ├── 1993.json
+│   │   │   ├── 1994.json
+│   │   │   ├── 1995.json
+│   │   │   ├── 1996.json
+│   │   │   ├── 1997.json
+│   │   │   ├── 1998.json
+│   │   │   ├── 1999.json
+│   │   │   ├── 2000.json
+│   │   │   ├── 2001.json
+│   │   │   ├── 2002.json
+│   │   │   ├── 2003.json
+│   │   │   ├── 2004.json
+│   │   │   ├── 2005.json
+│   │   │   ├── 2006.json
+│   │   │   ├── 2007.json
+│   │   │   ├── 2008.json
+│   │   │   ├── 2009.json
+│   │   │   ├── 2010.json
+│   │   │   ├── 2011.json
+│   │   │   ├── 2012.json
+│   │   │   ├── 2013.json
+│   │   │   ├── 2014.json
+│   │   │   ├── 2015.json
+│   │   │   ├── 2016.json
+│   │   │   ├── 2017.json
+│   │   │   ├── 2018.json
+│   │   │   ├── 2019.json
+│   │   │   ├── 2020.json
+│   │   │   ├── 2021.json
+│   │   │   ├── 2022.json
+│   │   │   ├── 2023.json
+│   │   │   ├── 2024.json
+│   │   │   ├── 2025.json
+│   │   │   └── 2026.json
+│   │   └── session_detail
+│   │       ├── circuit_races_albert_park.json
+│   │       ├── circuit_races_americas.json
+│   │       ├── circuit_races_baku.json
+│   │       ├── circuit_races_madring.json
+│   │       ├── circuit_races_miami.json
+│   │       ├── circuit_races_red_bull_ring.json
+│   │       ├── circuit_races_shanghai.json
+│   │       ├── circuit_races_silverstone.json
+│   │       ├── circuit_races_spa.json
+│   │       ├── circuit_races_suzuka.json
+│   │       ├── circuit_races_villeneuve.json
+│   │       ├── circuit_races_zandvoort.json
+│   │       ├── legends_monza.json
+│   │       ├── legends_shanghai.json
+│   │       ├── legends_suzuka.json
+│   │       ├── legends_v2_albert_park.json
+│   │       ├── legends_v2_americas.json
+│   │       ├── legends_v2_baku.json
+│   │       ├── legends_v2_madring.json
+│   │       ├── legends_v2_red_bull_ring.json
+│   │       ├── legends_v2_shanghai.json
+│   │       ├── legends_v2_spa.json
+│   │       ├── legends_v2_suzuka.json
+│   │       ├── v2_2004_16_0.json
+│   │       ├── v2_2014_4_0.json
+│   │       ├── v2_2024_5_1.json
+│   │       ├── v2_2025_2_1.json
+│   │       ├── v2_2026_2_1.json
+│   │       ├── v2_2026_3_1.json
+│   │       ├── v3_2014_8_0.json
+│   │       ├── v3_2020_1_0.json
+│   │       ├── v3_2023_9_1.json
+│   │       ├── v3_2025_11_1.json
+│   │       ├── v3_2026_2_1.json
+│   │       ├── v3_2026_8_1.json
+│   │       ├── v4_2026_2_1.json
+│   │       ├── v5_1951_3_0.json
+│   │       ├── v5_2023_9_1.json
+│   │       ├── v5_2024_11_1.json
+│   │       ├── v5_2025_11_1.json
+│   │       ├── v5_2025_17_1.json
+│   │       ├── v5_2025_19_1.json
+│   │       ├── v5_2025_2_1.json
+│   │       ├── v5_2026_12_1.json
+│   │       ├── v5_2026_14_1.json
+│   │       ├── v5_2026_15_1.json
+│   │       ├── v5_2026_18_1.json
+│   │       ├── v5_2026_1_1.json
+│   │       ├── v5_2026_2_1.json
+│   │       ├── v5_2026_3_1.json
+│   │       ├── v5_2026_4_1.json
+│   │       ├── v5_2026_5_1.json
+│   │       ├── v5_2026_8_1.json
+│   │       └── v5_2026_9_1.json
+│   ├── computed_data
+│   │   ├── 2026_Season_Round_11:_Hungarian_Grand_Prix_-_Qualifying_quali_telemetry.pkl
+│   │   ├── 2026_Season_Round_1:_Australian_Grand_Prix_-_Race_race_v7_telemetry.pkl
+│   │   ├── alltime_antonelli.json
+│   │   ├── alltime_bortoleto.json
+│   │   ├── alltime_hamilton.json
+│   │   ├── alltime_leclerc.json
+│   │   ├── alltime_max_verstappen.json
+│   │   ├── alltime_russell.json
+│   │   ├── alltime_tsunoda.json
+│   │   ├── career_ANT.json
+│   │   ├── career_BOR.json
+│   │   ├── career_COL.json
+│   │   ├── career_HAD.json
+│   │   ├── career_HAM.json
+│   │   ├── career_HUL.json
+│   │   ├── career_LEC.json
+│   │   ├── career_LIN.json
+│   │   ├── career_NOR.json
+│   │   ├── career_OCO.json
+│   │   ├── career_PER.json
+│   │   ├── career_PIA.json
+│   │   ├── career_RUS.json
+│   │   ├── career_TSU.json
+│   │   ├── career_VER.json
+│   │   ├── constructor_history_2025.json
+│   │   ├── constructor_history_2026.json
+│   │   ├── driver_stats_2007.json
+│   │   ├── driver_stats_2008.json
+│   │   ├── driver_stats_2009.json
+│   │   ├── driver_stats_2010.json
+│   │   ├── driver_stats_2011.json
+│   │   ├── driver_stats_2012.json
+│   │   ├── driver_stats_2013.json
+│   │   ├── driver_stats_2014.json
+│   │   ├── driver_stats_2015.json
+│   │   ├── driver_stats_2016.json
+│   │   ├── driver_stats_2017.json
+│   │   ├── driver_stats_2018.json
+│   │   ├── driver_stats_2019.json
+│   │   ├── driver_stats_2020.json
+│   │   ├── driver_stats_2021.json
+│   │   ├── driver_stats_2022.json
+│   │   ├── driver_stats_2023.json
+│   │   ├── driver_stats_2024.json
+│   │   ├── driver_stats_2025.json
+│   │   ├── driver_stats_2026.json
+│   │   ├── racecraft_2026.json
+│   │   ├── track_outline_2026_1.pkl
+│   │   ├── track_outline_2026_10.pkl
+│   │   ├── track_outline_2026_11.pkl
+│   │   ├── track_outline_2026_12.pkl
+│   │   ├── track_outline_2026_13.pkl
+│   │   ├── track_outline_2026_14.pkl
+│   │   ├── track_outline_2026_15.pkl
+│   │   ├── track_outline_2026_16.pkl
+│   │   ├── track_outline_2026_17.pkl
+│   │   ├── track_outline_2026_18.pkl
+│   │   ├── track_outline_2026_19.pkl
+│   │   ├── track_outline_2026_2.pkl
+│   │   ├── track_outline_2026_20.pkl
+│   │   ├── track_outline_2026_21.pkl
+│   │   ├── track_outline_2026_22.pkl
+│   │   ├── track_outline_2026_23.pkl
+│   │   ├── track_outline_2026_3.pkl
+│   │   ├── track_outline_2026_4.pkl
+│   │   ├── track_outline_2026_5.pkl
+│   │   ├── track_outline_2026_6.pkl
+│   │   ├── track_outline_2026_7.pkl
+│   │   ├── track_outline_2026_8.pkl
+│   │   └── track_outline_2026_9.pkl
+│   ├── data
+│   │   └── drivers.json
+│   ├── firebase-service-account.json
+│   ├── logcookies.txt
+│   ├── logs
+│   │   └── security_events.log
+│   ├── main.py
+│   ├── requirements.txt
+│   ├── scripts
+│   │   └── warm_seasons.py
+│   └── src
+│       ├── __pycache__
+│       │   ├── analytics.cpython-314.pyc
+│       │   ├── constructors_panel.cpython-314.pyc
+│       │   ├── driver_panel.cpython-314.pyc
+│       │   ├── f1_data.cpython-314.pyc
+│       │   ├── minisectors.cpython-314.pyc
+│       │   ├── next_session.cpython-314.pyc
+│       │   ├── race_control.cpython-314.pyc
+│       │   ├── serialize.cpython-314.pyc
+│       │   ├── team_radio.cpython-314.pyc
+│       │   ├── timing_tower.cpython-314.pyc
+│       │   └── track_geometry.cpython-314.pyc
+│       ├── api
+│       │   ├── __init__.py
+│       │   ├── __pycache__
+│       │   │   ├── __init__.cpython-314.pyc
+│       │   │   ├── analytics.cpython-314.pyc
+│       │   │   ├── constructors.cpython-314.pyc
+│       │   │   ├── driver_detail.cpython-314.pyc
+│       │   │   ├── drivers.cpython-314.pyc
+│       │   │   ├── head_to_head.cpython-314.pyc
+│       │   │   ├── live.cpython-314.pyc
+│       │   │   ├── minisectors.cpython-314.pyc
+│       │   │   ├── profile_extra.cpython-314.pyc
+│       │   │   ├── race_control.cpython-314.pyc
+│       │   │   ├── replay.cpython-314.pyc
+│       │   │   ├── schedule.cpython-314.pyc
+│       │   │   ├── session_detail.cpython-314.pyc
+│       │   │   ├── settings.cpython-314.pyc
+│       │   │   ├── telemetry.cpython-314.pyc
+│       │   │   ├── timing.cpython-314.pyc
+│       │   │   └── track.cpython-314.pyc
+│       │   ├── analytics.py
+│       │   ├── constructors.py
+│       │   ├── driver_detail.py
+│       │   ├── drivers.py
+│       │   ├── head_to_head.py
+│       │   ├── live.py
+│       │   ├── minisectors.py
+│       │   ├── profile_extra.py
+│       │   ├── race_control.py
+│       │   ├── replay.py
+│       │   ├── schedule.py
+│       │   ├── session_detail.py
+│       │   ├── settings.py
+│       │   ├── telemetry.py
+│       │   ├── timing.py
+│       │   └── track.py
+│       ├── auth
+│       │   ├── __init__.py
+│       │   ├── __pycache__
+│       │   │   ├── __init__.cpython-314.pyc
+│       │   │   ├── database.cpython-314.pyc
+│       │   │   ├── dependencies.cpython-314.pyc
+│       │   │   ├── firebase_admin.cpython-314.pyc
+│       │   │   ├── models.cpython-314.pyc
+│       │   │   ├── profile_routes.cpython-314.pyc
+│       │   │   ├── replay_history.cpython-314.pyc
+│       │   │   ├── replay_history_routes.cpython-314.pyc
+│       │   │   ├── routes.cpython-314.pyc
+│       │   │   ├── schemas.cpython-314.pyc
+│       │   │   └── security.cpython-314.pyc
+│       │   ├── database.py
+│       │   ├── dependencies.py
+│       │   ├── firebase_admin.py
+│       │   ├── models.py
+│       │   ├── password_reset
+│       │   │   ├── __init__.py
+│       │   │   ├── __pycache__
+│       │   │   ├── email.py
+│       │   │   ├── routes.py
+│       │   │   └── used_tokens.py
+│       │   ├── profile_routes.py
+│       │   ├── rate_limit
+│       │   │   ├── __init__.py
+│       │   │   ├── __pycache__
+│       │   │   ├── dependency.py
+│       │   │   └── limiter.py
+│       │   ├── refresh_tokens
+│       │   │   ├── __pycache__
+│       │   │   ├── models.py
+│       │   │   ├── routes.py
+│       │   │   └── service.py
+│       │   ├── replay_history.py
+│       │   ├── replay_history_routes.py
+│       │   ├── routes.py
+│       │   ├── schemas.py
+│       │   ├── security.py
+│       │   └── security_log
+│       │       ├── __init__.py
+│       │       ├── __pycache__
+│       │       └── logger.py
+│       ├── computed_data
+│       │   ├── track_outline_2026_1.pkl
+│       │   ├── track_outline_2026_10.pkl
+│       │   ├── track_outline_2026_11.pkl
+│       │   ├── track_outline_2026_12.pkl
+│       │   ├── track_outline_2026_13.pkl
+│       │   ├── track_outline_2026_14.pkl
+│       │   ├── track_outline_2026_15.pkl
+│       │   ├── track_outline_2026_16.pkl
+│       │   ├── track_outline_2026_17.pkl
+│       │   ├── track_outline_2026_18.pkl
+│       │   ├── track_outline_2026_19.pkl
+│       │   ├── track_outline_2026_2.pkl
+│       │   ├── track_outline_2026_20.pkl
+│       │   ├── track_outline_2026_21.pkl
+│       │   ├── track_outline_2026_22.pkl
+│       │   ├── track_outline_2026_23.pkl
+│       │   ├── track_outline_2026_3.pkl
+│       │   ├── track_outline_2026_4.pkl
+│       │   ├── track_outline_2026_5.pkl
+│       │   ├── track_outline_2026_6.pkl
+│       │   ├── track_outline_2026_7.pkl
+│       │   ├── track_outline_2026_8.pkl
+│       │   └── track_outline_2026_9.pkl
+│       ├── config
+│       │   ├── __init__.py
+│       │   ├── __pycache__
+│       │   │   ├── __init__.cpython-314.pyc
+│       │   │   └── settings.cpython-314.pyc
+│       │   └── settings.py
+│       ├── domain
+│       │   ├── __init__.py
+│       │   ├── __pycache__
+│       │   │   ├── __init__.cpython-314.pyc
+│       │   │   ├── analytics.cpython-314.pyc
+│       │   │   ├── constructors_panel.cpython-314.pyc
+│       │   │   ├── driver_panel.cpython-314.pyc
+│       │   │   ├── f1_data.cpython-314.pyc
+│       │   │   ├── head_to_head.cpython-314.pyc
+│       │   │   ├── minisectors.cpython-314.pyc
+│       │   │   ├── next_session.cpython-314.pyc
+│       │   │   ├── race_control.cpython-314.pyc
+│       │   │   ├── serialize.cpython-314.pyc
+│       │   │   ├── timing_tower.cpython-314.pyc
+│       │   │   └── track_geometry.cpython-314.pyc
+│       │   ├── analytics.py
+│       │   ├── constructors_panel.py
+│       │   ├── driver_panel.py
+│       │   ├── f1_data.py
+│       │   ├── minisectors.py
+│       │   ├── next_session.py
+│       │   ├── race_control.py
+│       │   ├── serialize.py
+│       │   ├── timing_tower.py
+│       │   └── track_geometry.py
+│       ├── lib
+│       │   ├── __init__.py
+│       │   ├── __pycache__
+│       │   │   ├── __init__.cpython-314.pyc
+│       │   │   ├── settings.cpython-314.pyc
+│       │   │   ├── time.cpython-314.pyc
+│       │   │   └── tyres.cpython-314.pyc
+│       │   ├── settings.py
+│       │   ├── time.py
+│       │   └── tyres.py
+│       ├── live
+│       │   ├── __init__.py
+│       │   ├── __pycache__
+│       │   │   ├── __init__.cpython-314.pyc
+│       │   │   ├── capture.cpython-314.pyc
+│       │   │   ├── parse_timing.cpython-314.pyc
+│       │   │   ├── session_watcher.cpython-314.pyc
+│       │   │   └── state.cpython-314.pyc
+│       │   ├── capture.py
+│       │   ├── parse_timing.py
+│       │   ├── recordings
+│       │   │   ├── 2026_12_Q_20260822_193027.txt
+│       │   │   ├── 2026_12_Q_20260822_201324.txt
+│       │   │   ├── 2026_12_R_20260805_131912.txt
+│       │   │   ├── 2026_12_R_20260823_183032.txt
+│       │   │   ├── 2026_12_R_20260823_200113.txt
+│       │   │   ├── 2026_12_R_20260823_200125.txt
+│       │   │   ├── 2026_12_R_20260823_200238.txt
+│       │   │   ├── 2026_12_R_20260823_200557.txt
+│       │   │   ├── 2026_12_R_20260823_200611.txt
+│       │   │   ├── 2026_12_R_20260823_200613.txt
+│       │   │   ├── 2026_12_R_20260823_200634.txt
+│       │   │   ├── 2026_12_R_20260823_200639.txt
+│       │   │   ├── 2026_12_SQ_20260821_200051.txt
+│       │   │   ├── 2026_12_S_20260822_153236.txt
+│       │   │   ├── 2026_12_S_20260822_162045.txt
+│       │   │   ├── 2026_14_FP2_20260911_203018.txt
+│       │   │   ├── 2026_14_FP2_20260911_203333.txt
+│       │   │   ├── 2026_14_FP2_20260911_203338.txt
+│       │   │   ├── 2026_14_FP2_20260911_204101.txt
+│       │   │   ├── 2026_14_FP3_20260912_162329.txt
+│       │   │   ├── 2026_14_FP3_20260912_163238.txt
+│       │   │   ├── 2026_14_FP3_20260912_164346.txt
+│       │   │   ├── 2026_14_FP3_20260912_164708.txt
+│       │   │   ├── 2026_14_FP3_20260912_165952.txt
+│       │   │   ├── 2026_14_FP3_20260912_165953.txt
+│       │   │   ├── 2026_14_FP3_20260912_170600.txt
+│       │   │   ├── 2026_14_FP3_20260912_170604.txt
+│       │   │   ├── 2026_14_FP3_20260912_170640.txt
+│       │   │   ├── 2026_14_FP3_20260912_170642.txt
+│       │   │   ├── 2026_14_FP3_20260912_170720.txt
+│       │   │   ├── 2026_14_FP3_20260912_170735.txt
+│       │   │   ├── 2026_14_FP3_20260912_170746.txt
+│       │   │   ├── 2026_14_FP3_20260912_170751.txt
+│       │   │   ├── 2026_14_Q_20260912_193026.txt
+│       │   │   ├── 2026_14_R_20260913_183047.txt
+│       │   │   └── 2026_14_R_20260913_183051.txt
+│       │   ├── session_watcher.py
+│       │   └── state.py
+│       └── services
+│           ├── __init__.py
+│           ├── __pycache__
+│           │   ├── __init__.cpython-314.pyc
+│           │   └── replay.cpython-314.pyc
+│           └── replay.py
+├── computed_data
+├── frontend
+│   ├── index.html
+│   ├── package-lock.json
+│   ├── package.json
+│   ├── public
+│   │   ├── circuits
+│   │   ├── drivers
+│   │   │   ├── aitken-2020.png
+│   │   │   ├── aitken.png
+│   │   │   ├── albon-2019.png
+│   │   │   ├── albon-2020.png
+│   │   │   ├── albon-2022.png
+│   │   │   ├── albon-2023.png
+│   │   │   ├── albon-2024.png
+│   │   │   ├── albon-2025.png
+│   │   │   ├── albon-2026.png
+│   │   │   ├── albon.png
+│   │   │   ├── alboreto.jpg
+│   │   │   ├── alonso-2018.png
+│   │   │   ├── alonso-2021.png
+│   │   │   ├── alonso-2022.png
+│   │   │   ├── alonso-2023.png
+│   │   │   ├── alonso-2024.png
+│   │   │   ├── alonso-2025.png
+│   │   │   ├── alonso-2026.png
+│   │   │   ├── alonso.png
+│   │   │   ├── andrews.jpg
+│   │   │   ├── antonelli-2024.png
+│   │   │   ├── antonelli-2025.png
+│   │   │   ├── antonelli-2026.png
+│   │   │   ├── antonelli.png
+│   │   │   ├── arvid_lindblad-2026.png
+│   │   │   ├── arvid_lindblad.png
+│   │   │   ├── badoer.jpg
+│   │   │   ├── barth.jpg
+│   │   │   ├── bearman-2024.png
+│   │   │   ├── bearman-2025.png
+│   │   │   ├── bearman-2026.png
+│   │   │   ├── bearman.png
+│   │   │   ├── bleekemolen.jpg
+│   │   │   ├── boesel.jpg
+│   │   │   ├── borgudd.jpg
+│   │   │   ├── bortoleto-2025.png
+│   │   │   ├── bortoleto-2026.png
+│   │   │   ├── bortoleto.png
+│   │   │   ├── bottas-2017.png
+│   │   │   ├── bottas-2018.png
+│   │   │   ├── bottas-2019.png
+│   │   │   ├── bottas-2020.png
+│   │   │   ├── bottas-2021.png
+│   │   │   ├── bottas-2022.png
+│   │   │   ├── bottas-2023.png
+│   │   │   ├── bottas-2024.png
+│   │   │   ├── bottas-2026.png
+│   │   │   ├── bottas.png
+│   │   │   ├── brabham.jpg
+│   │   │   ├── brendon_hartley-2018.png
+│   │   │   ├── brendon_hartley.png
+│   │   │   ├── bueb.jpg
+│   │   │   ├── cevert.jpg
+│   │   │   ├── chandhok.jpg
+│   │   │   ├── clark.jpg
+│   │   │   ├── colapinto-2024.png
+│   │   │   ├── colapinto-2026.png
+│   │   │   ├── colapinto.png
+│   │   │   ├── coulthard.jpg
+│   │   │   ├── courage.jpg
+│   │   │   ├── crawford.jpg
+│   │   │   ├── crespo.jpg
+│   │   │   ├── damon_hill.jpg
+│   │   │   ├── de_vries-2022.png
+│   │   │   ├── de_vries-2023.png
+│   │   │   ├── de_vries.png
+│   │   │   ├── doohan-2025.png
+│   │   │   ├── doohan.png
+│   │   │   ├── ecclestone.jpg
+│   │   │   ├── ericsson-2018.png
+│   │   │   ├── ericsson.png
+│   │   │   ├── fischer.jpg
+│   │   │   ├── gachot.jpg
+│   │   │   ├── gasly-2018.png
+│   │   │   ├── gasly-2019.png
+│   │   │   ├── gasly-2020.png
+│   │   │   ├── gasly-2021.png
+│   │   │   ├── gasly-2022.png
+│   │   │   ├── gasly-2023.png
+│   │   │   ├── gasly-2024.png
+│   │   │   ├── gasly-2025.png
+│   │   │   ├── gasly-2026.png
+│   │   │   ├── gasly.png
+│   │   │   ├── giovinazzi-2019.png
+│   │   │   ├── giovinazzi-2020.png
+│   │   │   ├── giovinazzi-2021.png
+│   │   │   ├── giovinazzi.png
+│   │   │   ├── grosjean-2018.png
+│   │   │   ├── grosjean-2019.png
+│   │   │   ├── grosjean-2020.png
+│   │   │   ├── grosjean.png
+│   │   │   ├── gutierrez.jpg
+│   │   │   ├── hadjar-2025.png
+│   │   │   ├── hadjar-2026.png
+│   │   │   ├── hadjar.png
+│   │   │   ├── hamilton-2017.png
+│   │   │   ├── hamilton-2018.png
+│   │   │   ├── hamilton-2019.png
+│   │   │   ├── hamilton-2020.png
+│   │   │   ├── hamilton-2021.png
+│   │   │   ├── hamilton-2022.png
+│   │   │   ├── hamilton-2023.png
+│   │   │   ├── hamilton-2024.png
+│   │   │   ├── hamilton-2025.png
+│   │   │   ├── hamilton-2026.png
+│   │   │   ├── hamilton.png
+│   │   │   ├── hulkenberg-2018.png
+│   │   │   ├── hulkenberg-2019.png
+│   │   │   ├── hulkenberg-2020.png
+│   │   │   ├── hulkenberg-2022.png
+│   │   │   ├── hulkenberg-2023.png
+│   │   │   ├── hulkenberg-2024.png
+│   │   │   ├── hulkenberg-2025.png
+│   │   │   ├── hulkenberg-2026.png
+│   │   │   ├── hulkenberg.png
+│   │   │   ├── ide.jpg
+│   │   │   ├── jabouille.jpg
+│   │   │   ├── kevin_magnussen-2018.png
+│   │   │   ├── kevin_magnussen-2019.png
+│   │   │   ├── kevin_magnussen-2020.png
+│   │   │   ├── kevin_magnussen-2022.png
+│   │   │   ├── kevin_magnussen-2023.png
+│   │   │   ├── kevin_magnussen-2024.png
+│   │   │   ├── kevin_magnussen.png
+│   │   │   ├── klien.jpg
+│   │   │   ├── koinigg.jpg
+│   │   │   ├── kubica-2019.png
+│   │   │   ├── kubica-2021.png
+│   │   │   ├── kubica.png
+│   │   │   ├── kvyat-2019.png
+│   │   │   ├── kvyat-2020.png
+│   │   │   ├── kvyat.png
+│   │   │   ├── lammers.jpg
+│   │   │   ├── larini.jpg
+│   │   │   ├── latifi-2020.png
+│   │   │   ├── latifi-2021.png
+│   │   │   ├── latifi-2022.png
+│   │   │   ├── latifi.png
+│   │   │   ├── lawson-2023.png
+│   │   │   ├── lawson-2024.png
+│   │   │   ├── lawson-2025.png
+│   │   │   ├── lawson-2026.png
+│   │   │   ├── lawson.png
+│   │   │   ├── leclerc-2018.png
+│   │   │   ├── leclerc-2019.png
+│   │   │   ├── leclerc-2020.png
+│   │   │   ├── leclerc-2021.png
+│   │   │   ├── leclerc-2022.png
+│   │   │   ├── leclerc-2023.png
+│   │   │   ├── leclerc-2024.png
+│   │   │   ├── leclerc-2025.png
+│   │   │   ├── leclerc-2026.png
+│   │   │   ├── leclerc.png
+│   │   │   ├── lotterer.jpg
+│   │   │   ├── magnussen.jpg
+│   │   │   ├── manifest.json
+│   │   │   ├── mario_andretti.jpg
+│   │   │   ├── massa.jpg
+│   │   │   ├── max_verstappen-2017.png
+│   │   │   ├── max_verstappen-2018.png
+│   │   │   ├── max_verstappen-2019.png
+│   │   │   ├── max_verstappen-2020.png
+│   │   │   ├── max_verstappen-2021.png
+│   │   │   ├── max_verstappen-2022.png
+│   │   │   ├── max_verstappen-2023.png
+│   │   │   ├── max_verstappen-2024.png
+│   │   │   ├── max_verstappen-2025.png
+│   │   │   ├── max_verstappen-2026.png
+│   │   │   ├── max_verstappen.png
+│   │   │   ├── mazepin-2021.png
+│   │   │   ├── mazepin.png
+│   │   │   ├── merhi.jpg
+│   │   │   ├── mick_schumacher-2021.png
+│   │   │   ├── mick_schumacher-2022.png
+│   │   │   ├── mick_schumacher.png
+│   │   │   ├── mieres.jpg
+│   │   │   ├── missing.txt
+│   │   │   ├── moreno.jpg
+│   │   │   ├── norris-2019.png
+│   │   │   ├── norris-2020.png
+│   │   │   ├── norris-2021.png
+│   │   │   ├── norris-2022.png
+│   │   │   ├── norris-2023.png
+│   │   │   ├── norris-2024.png
+│   │   │   ├── norris-2025.png
+│   │   │   ├── norris-2026.png
+│   │   │   ├── norris.png
+│   │   │   ├── ocon-2018.png
+│   │   │   ├── ocon-2020.png
+│   │   │   ├── ocon-2021.png
+│   │   │   ├── ocon-2022.png
+│   │   │   ├── ocon-2023.png
+│   │   │   ├── ocon-2024.png
+│   │   │   ├── ocon-2025.png
+│   │   │   ├── ocon-2026.png
+│   │   │   ├── ocon.png
+│   │   │   ├── perez-2018.png
+│   │   │   ├── perez-2019.png
+│   │   │   ├── perez-2020.png
+│   │   │   ├── perez-2021.png
+│   │   │   ├── perez-2022.png
+│   │   │   ├── perez-2023.png
+│   │   │   ├── perez-2024.png
+│   │   │   ├── perez-2026.png
+│   │   │   ├── perez.png
+│   │   │   ├── peterson.jpg
+│   │   │   ├── pian.jpg
+│   │   │   ├── piastri-2023.png
+│   │   │   ├── piastri-2024.png
+│   │   │   ├── piastri-2025.png
+│   │   │   ├── piastri-2026.png
+│   │   │   ├── piastri.png
+│   │   │   ├── pic.jpg
+│   │   │   ├── pietro_fittipaldi-2020.png
+│   │   │   ├── pietro_fittipaldi.png
+│   │   │   ├── purley.jpg
+│   │   │   ├── raikkonen-2017.png
+│   │   │   ├── raikkonen-2018.png
+│   │   │   ├── raikkonen-2019.png
+│   │   │   ├── raikkonen-2020.png
+│   │   │   ├── raikkonen-2021.png
+│   │   │   ├── raikkonen.png
+│   │   │   ├── rejected
+│   │   │   ├── resta.jpg
+│   │   │   ├── ricciardo-2017.png
+│   │   │   ├── ricciardo-2018.png
+│   │   │   ├── ricciardo-2019.png
+│   │   │   ├── ricciardo-2020.png
+│   │   │   ├── ricciardo-2021.png
+│   │   │   ├── ricciardo-2022.png
+│   │   │   ├── ricciardo-2023.png
+│   │   │   ├── ricciardo-2024.png
+│   │   │   ├── ricciardo.png
+│   │   │   ├── russell-2019.png
+│   │   │   ├── russell-2020.png
+│   │   │   ├── russell-2021.png
+│   │   │   ├── russell-2022.png
+│   │   │   ├── russell-2023.png
+│   │   │   ├── russell-2024.png
+│   │   │   ├── russell-2025.png
+│   │   │   ├── russell-2026.png
+│   │   │   ├── russell.png
+│   │   │   ├── sainz-2018.png
+│   │   │   ├── sainz-2019.png
+│   │   │   ├── sainz-2020.png
+│   │   │   ├── sainz-2021.png
+│   │   │   ├── sainz-2022.png
+│   │   │   ├── sainz-2023.png
+│   │   │   ├── sainz-2024.png
+│   │   │   ├── sainz-2025.png
+│   │   │   ├── sainz-2026.png
+│   │   │   ├── sainz.png
+│   │   │   ├── salazar.jpg
+│   │   │   ├── salo.jpg
+│   │   │   ├── salvadori.jpg
+│   │   │   ├── sargeant-2023.png
+│   │   │   ├── sargeant-2024.png
+│   │   │   ├── sargeant.png
+│   │   │   ├── sirotkin-2018.png
+│   │   │   ├── sirotkin.png
+│   │   │   ├── stroll-2017.png
+│   │   │   ├── stroll-2018.png
+│   │   │   ├── stroll-2019.png
+│   │   │   ├── stroll-2020.png
+│   │   │   ├── stroll-2021.png
+│   │   │   ├── stroll-2022.png
+│   │   │   ├── stroll-2023.png
+│   │   │   ├── stroll-2024.png
+│   │   │   ├── stroll-2025.png
+│   │   │   ├── stroll-2026.png
+│   │   │   ├── stroll.png
+│   │   │   ├── tsunoda-2021.png
+│   │   │   ├── tsunoda-2022.png
+│   │   │   ├── tsunoda-2023.png
+│   │   │   ├── tsunoda-2024.png
+│   │   │   ├── tsunoda-2025.png
+│   │   │   ├── tsunoda.png
+│   │   │   ├── vandoorne-2018.png
+│   │   │   ├── vandoorne.png
+│   │   │   ├── vettel-2017.png
+│   │   │   ├── vettel-2018.png
+│   │   │   ├── vettel-2019.png
+│   │   │   ├── vettel-2020.png
+│   │   │   ├── vettel-2021.png
+│   │   │   ├── vettel-2022.png
+│   │   │   ├── vettel.png
+│   │   │   ├── wilson_fittipaldi.jpg
+│   │   │   ├── zhou-2022.png
+│   │   │   ├── zhou-2023.png
+│   │   │   ├── zhou-2024.png
+│   │   │   └── zhou.png
+│   │   ├── favicon.png
+│   │   └── images
+│   │       ├── banners
+│   │       │   ├── albon.png
+│   │       │   ├── alonso.png
+│   │       │   ├── antonelli.png
+│   │       │   ├── bearman.png
+│   │       │   ├── bortoleto.png
+│   │       │   ├── bottas.png
+│   │       │   ├── colapinto.png
+│   │       │   ├── gasly.png
+│   │       │   ├── hadjar.png
+│   │       │   ├── hamilton.png
+│   │       │   ├── hulkenberg.png
+│   │       │   ├── lawson.png
+│   │       │   ├── leclerc.png
+│   │       │   ├── lindblad.png
+│   │       │   ├── norris.png
+│   │       │   ├── ocon.png
+│   │       │   ├── perez.png
+│   │       │   ├── piastri.png
+│   │       │   ├── russell.png
+│   │       │   ├── sainz.png
+│   │       │   ├── stroll.png
+│   │       │   └── verstappen.png
+│   │       ├── circuits
+│   │       │   ├── detailed
+│   │       │   └── minimal
+│   │       ├── controls
+│   │       │   ├── arrow-down.png
+│   │       │   ├── arrow-left.png
+│   │       │   ├── arrow-right.png
+│   │       │   ├── arrow-up.png
+│   │       │   ├── forward.png
+│   │       │   ├── pause.png
+│   │       │   ├── play.png
+│   │       │   ├── rewind.png
+│   │       │   ├── speed+.png
+│   │       │   └── speed-.png
+│   │       ├── driver-banners
+│   │       │   ├── albon.png
+│   │       │   ├── alonso.png
+│   │       │   ├── antonelli.png
+│   │       │   ├── bearman.png
+│   │       │   ├── bortoleto.png
+│   │       │   ├── bottas.png
+│   │       │   ├── colapinto.png
+│   │       │   ├── gasly.png
+│   │       │   ├── hadjar.png
+│   │       │   ├── hamilton.png
+│   │       │   ├── hulkenberg.png
+│   │       │   ├── lawson.png
+│   │       │   ├── leclerc.png
+│   │       │   ├── lindblad.png
+│   │       │   ├── norris.png
+│   │       │   ├── ocon.png
+│   │       │   ├── perez.png
+│   │       │   ├── piastri.png
+│   │       │   ├── russell.png
+│   │       │   ├── sainz.png
+│   │       │   ├── stroll.png
+│   │       │   ├── tsunoda.png
+│   │       │   └── verstappen.png
+│   │       ├── drivers
+│   │       │   ├── albon.png
+│   │       │   ├── alonso.png
+│   │       │   ├── antonelli.png
+│   │       │   ├── bearman.png
+│   │       │   ├── bortoleto.png
+│   │       │   ├── bottas.png
+│   │       │   ├── colapinto.png
+│   │       │   ├── gasly.png
+│   │       │   ├── hadjar.png
+│   │       │   ├── hamilton.png
+│   │       │   ├── headshots
+│   │       │   ├── hulkenberg.png
+│   │       │   ├── lawson.png
+│   │       │   ├── leclerc.png
+│   │       │   ├── lindblad.png
+│   │       │   ├── norris.png
+│   │       │   ├── ocon.png
+│   │       │   ├── perez.png
+│   │       │   ├── piastri.png
+│   │       │   ├── russell.png
+│   │       │   ├── sainz.png
+│   │       │   ├── stroll.png
+│   │       │   ├── tsunoda.png
+│   │       │   └── verstappen.png
+│   │       ├── teambanner
+│   │       │   ├── AstonMartin.png
+│   │       │   ├── Williams.png
+│   │       │   ├── alpine.png
+│   │       │   ├── audi.png
+│   │       │   ├── cadillac.png
+│   │       │   ├── ferrari.png
+│   │       │   ├── haas.png
+│   │       │   ├── mclaren.png
+│   │       │   ├── mercedes.png
+│   │       │   ├── racingbulls.png
+│   │       │   └── redbull.png
+│   │       ├── teams
+│   │       │   ├── alpine.png
+│   │       │   ├── aston-martin.png
+│   │       │   ├── audi.png
+│   │       │   ├── cadillac.png
+│   │       │   ├── ferrari.png
+│   │       │   ├── haas.png
+│   │       │   ├── mclaren.png
+│   │       │   ├── mercedes.png
+│   │       │   ├── rb.png
+│   │       │   ├── red-bull.png
+│   │       │   └── williams.png
+│   │       ├── tyres
+│   │       │   ├── 0.0.png
+│   │       │   ├── 1.0.png
+│   │       │   ├── 2.0.png
+│   │       │   ├── 3.0.png
+│   │       │   └── 4.0.png
+│   │       └── weather
+│   │           ├── drop.png
+│   │           ├── rain.png
+│   │           ├── thermometer.png
+│   │           └── wind.png
+│   ├── src
+│   │   ├── api
+│   │   │   ├── client.ts
+│   │   │   └── drivers.ts
+│   │   ├── app
+│   │   │   ├── App.tsx
+│   │   │   ├── providers.tsx
+│   │   │   └── router.tsx
+│   │   ├── components
+│   │   │   ├── auth
+│   │   │   │   ├── UserMenu.css
+│   │   │   │   └── UserMenu.tsx
+│   │   │   ├── layout
+│   │   │   │   ├── AppShell.css
+│   │   │   │   ├── AppShell.tsx
+│   │   │   │   ├── PageContainer.tsx
+│   │   │   │   ├── PageHeader.tsx
+│   │   │   │   └── page-layout.css
+│   │   │   ├── motion
+│   │   │   │   ├── PageTransition.tsx
+│   │   │   │   ├── Reveal.tsx
+│   │   │   │   └── motion.css
+│   │   │   ├── navigation
+│   │   │   │   ├── FloatingNav.css
+│   │   │   │   ├── FloatingNav.tsx
+│   │   │   │   ├── NextSessionBadge.tsx
+│   │   │   │   └── navigation.config.ts
+│   │   │   └── ui
+│   │   │       ├── Button.tsx
+│   │   │       ├── Divider.tsx
+│   │   │       ├── SectionLabel.tsx
+│   │   │       └── ui.css
+│   │   ├── constants
+│   │   │   └── teamColors.ts
+│   │   ├── features
+│   │   │   ├── analytics
+│   │   │   │   ├── AnalyticsPage.tsx
+│   │   │   │   ├── AnalyticsShared.css
+│   │   │   │   ├── analytics.api.ts
+│   │   │   │   ├── analytics.helpers.tsx
+│   │   │   │   ├── analytics.types.ts
+│   │   │   │   └── components
+│   │   │   ├── auth
+│   │   │   │   ├── AuthBootstrap.tsx
+│   │   │   │   ├── DiscordCallbackPage.tsx
+│   │   │   │   ├── LoginPage.tsx
+│   │   │   │   ├── ProfilePage.tsx
+│   │   │   │   ├── ProtectedRoute.tsx
+│   │   │   │   ├── RegisterPage.tsx
+│   │   │   │   ├── XCallbackPage.tsx
+│   │   │   │   ├── appearance.ts
+│   │   │   │   ├── auth.api.ts
+│   │   │   │   ├── auth.css
+│   │   │   │   ├── auth.store.ts
+│   │   │   │   ├── auth.types.ts
+│   │   │   │   ├── firebase.auth.ts
+│   │   │   │   └── profile.css
+│   │   │   ├── constructors
+│   │   │   │   ├── ConstructorsPage.tsx
+│   │   │   │   ├── components
+│   │   │   │   ├── constructors.api.ts
+│   │   │   │   ├── constructors.colors.ts
+│   │   │   │   ├── constructors.css
+│   │   │   │   └── constructors.types.ts
+│   │   │   ├── drivers
+│   │   │   │   ├── DriverDetailPage.tsx
+│   │   │   │   ├── DriversPage.tsx
+│   │   │   │   ├── components
+│   │   │   │   ├── driver-detail.css
+│   │   │   │   └── drivers.css
+│   │   │   ├── head-to-head
+│   │   │   │   ├── HeadToHeadPage.tsx
+│   │   │   │   ├── HeadToHeadPageContainer.tsx
+│   │   │   │   ├── driverSearch.ts
+│   │   │   │   ├── head-to-head-results.css
+│   │   │   │   └── head-to-head.css
+│   │   │   ├── home
+│   │   │   │   ├── HomePage.tsx
+│   │   │   │   ├── components
+│   │   │   │   ├── home.api.ts
+│   │   │   │   ├── home.css
+│   │   │   │   └── home.types.ts
+│   │   │   ├── replay
+│   │   │   │   ├── ReplayPage.tsx
+│   │   │   │   ├── ReplaySelectPage.tsx
+│   │   │   │   ├── components
+│   │   │   │   ├── hooks
+│   │   │   │   ├── replay-history.api.ts
+│   │   │   │   ├── replay.api.ts
+│   │   │   │   ├── replay.css
+│   │   │   │   └── replay.types.ts
+│   │   │   ├── schedule
+│   │   │   │   ├── CalendarPage.tsx
+│   │   │   │   ├── CircuitTrack.tsx
+│   │   │   │   ├── NextSessionBadge.tsx
+│   │   │   │   ├── circuitAssets.ts
+│   │   │   │   ├── countryFlags.ts
+│   │   │   │   ├── nextSession.api.ts
+│   │   │   │   ├── schedule.api.ts
+│   │   │   │   ├── useCircuitTrack.ts
+│   │   │   │   └── useNextSession.ts
+│   │   │   ├── sessions
+│   │   │   │   ├── SessionDetailPage.tsx
+│   │   │   │   ├── SessionsPage.tsx
+│   │   │   │   ├── components
+│   │   │   │   └── sessionDetail.api.ts
+│   │   │   └── telemetry
+│   │   │       ├── TelemetryPage.tsx
+│   │   │       ├── telemetry.api.ts
+│   │   │       └── telemetry.css
+│   │   ├── index.css
+│   │   ├── lib
+│   │   │   └── firebase.ts
+│   │   ├── main.tsx
+│   │   ├── pages
+│   │   ├── styles
+│   │   │   ├── background.css
+│   │   │   ├── calendar.css
+│   │   │   ├── globals.css
+│   │   │   ├── sessionDetail.css
+│   │   │   ├── sessions.css
+│   │   │   ├── tokens.css
+│   │   │   └── typography.css
+│   │   └── vite-env.d.ts
+│   ├── tsconfig.json
+│   ├── tsconfig.node.json
+│   ├── tsconfig.node.tsbuildinfo
+│   ├── tsconfig.tsbuildinfo
+│   ├── vite.config.d.ts
+│   ├── vite.config.js
+│   └── vite.config.ts
+├── package-lock.json
+├── package.json
+├── requirements.txt
+├── scripts
+│   ├── __pycache__
+│   │   ├── download_driver_images.cpython-314.pyc
+│   │   └── suit_check.cpython-314.pyc
+│   ├── audit_driver_images.py
+│   ├── download_driver_images.py
+│   ├── import_headshots.py
+│   ├── missing_report.tsv
+│   ├── review.html
+│   └── suit_check.py
+├── tree.txt
+└── venv
+    ├── bin
+    │   ├── Activate.ps1
+    │   ├── activate
+    │   ├── activate.csh
+    │   ├── activate.fish
+    │   ├── chardetect
+    │   ├── csscapture
+    │   ├── csscombine
+    │   ├── cssparse
+    │   ├── doesitcache
+    │   ├── dotenv
+    │   ├── email_validator
+    │   ├── f2py
+    │   ├── fastapi
+    │   ├── fonttools
+    │   ├── git-filter-repo
+    │   ├── google-oauthlib-tool
+    │   ├── graphify
+    │   ├── graphify-mcp
+    │   ├── hf
+    │   ├── httpx
+    │   ├── huggingface-cli
+    │   ├── idna
+    │   ├── isympy
+    │   ├── markdown-it
+    │   ├── normalizer
+    │   ├── numpy-config
+    │   ├── pip
+    │   ├── pip3
+    │   ├── pip3.14
+    │   ├── pyftmerge
+    │   ├── pyftsubset
+    │   ├── pygmentize
+    │   ├── pyrsa-decrypt
+    │   ├── pyrsa-encrypt
+    │   ├── pyrsa-keygen
+    │   ├── pyrsa-priv2pub
+    │   ├── pyrsa-sign
+    │   ├── pyrsa-verify
+    │   ├── python -> python3.14
+    │   ├── python3 -> python3.14
+    │   ├── python3.14 -> /opt/homebrew/opt/python@3.14/bin/python3.14
+    │   ├── tiny-agents
+    │   ├── torchfrtrace
+    │   ├── torchrun
+    │   ├── tqdm
+    │   ├── transformers
+    │   ├── ttx
+    │   ├── typer
+    │   ├── url-normalize
+    │   ├── uvicorn
+    │   ├── watchfiles
+    │   ├── websockets
+    │   └── 𝜋thon -> python3.14
+    ├── include
+    ├── lib
+    │   └── python3.14
+    │       └── site-packages
+    │           ├── 7cf47097c39cf1afcee8__mypyc.cpython-314-darwin.so
+    │           ├── 81d243bd2c585b0f4821__mypyc.cpython-314-darwin.so
+    │           ├── PIL
+    │           ├── __pycache__
+    │           ├── _cffi_backend.cpython-314-darwin.so
+    │           ├── _distutils_hack
+    │           ├── _yaml
+    │           ├── aiohappyeyeballs
+    │           ├── aiohappyeyeballs-2.7.1.dist-info
+    │           ├── aiohttp
+    │           ├── aiohttp-3.14.3.dist-info
+    │           ├── aiosignal
+    │           ├── aiosignal-1.4.0.dist-info
+    │           ├── annotated_doc
+    │           ├── annotated_doc-0.0.4.dist-info
+    │           ├── annotated_types
+    │           ├── annotated_types-0.7.0.dist-info
+    │           ├── anyio
+    │           ├── anyio-4.14.1.dist-info
+    │           ├── attr
+    │           ├── attrs
+    │           ├── attrs-26.1.0.dist-info
+    │           ├── bcrypt
+    │           ├── bcrypt-4.0.1.dist-info
+    │           ├── cachecontrol
+    │           ├── cachecontrol-0.14.4.dist-info
+    │           ├── cattr
+    │           ├── cattrs
+    │           ├── cattrs-26.1.0.dist-info
+    │           ├── certifi
+    │           ├── certifi-2026.6.17.dist-info
+    │           ├── cffi
+    │           ├── cffi-2.0.0.dist-info
+    │           ├── chardet
+    │           ├── chardet-7.6.0.dist-info
+    │           ├── charset_normalizer
+    │           ├── charset_normalizer-3.4.7.dist-info
+    │           ├── click
+    │           ├── click-8.4.2.dist-info
+    │           ├── contourpy
+    │           ├── contourpy-1.3.3.dist-info
+    │           ├── cryptography
+    │           ├── cryptography-49.0.0.dist-info
+    │           ├── cssutils
+    │           ├── cssutils-2.15.0.dist-info
+    │           ├── cv2
+    │           ├── cycler
+    │           ├── cycler-0.12.1.dist-info
+    │           ├── dateutil
+    │           ├── distutils-precedence.pth
+    │           ├── dns
+    │           ├── dnspython-2.8.0.dist-info
+    │           ├── dotenv
+    │           ├── ecdsa
+    │           ├── ecdsa-0.19.2.dist-info
+    │           ├── email_validator
+    │           ├── email_validator-2.3.0.dist-info
+    │           ├── encutils
+    │           ├── encutils-1.0.0.dist-info
+    │           ├── fastapi
+    │           ├── fastapi-0.139.0.dist-info
+    │           ├── fastf1
+    │           ├── fastf1-3.8.3.dist-info
+    │           ├── filelock
+    │           ├── filelock-4.0.4.dist-info
+    │           ├── firebase_admin
+    │           ├── firebase_admin-7.5.0.dist-info
+    │           ├── fontTools
+    │           ├── fonttools-4.63.0.dist-info
+    │           ├── frozenlist
+    │           ├── frozenlist-1.8.0.dist-info
+    │           ├── fsspec
+    │           ├── fsspec-2026.9.0.dist-info
+    │           ├── functorch
+    │           ├── git_filter_repo-2.47.0.dist-info
+    │           ├── git_filter_repo.py
+    │           ├── google
+    │           ├── google_api_core-2.36.0.dist-info
+    │           ├── google_auth-2.56.2.dist-info
+    │           ├── google_auth_httplib2-0.4.0.dist-info
+    │           ├── google_auth_httplib2.py
+    │           ├── google_auth_oauthlib
+    │           ├── google_auth_oauthlib-1.4.0.dist-info
+    │           ├── google_cloud_core-2.7.0.dist-info
+    │           ├── google_cloud_firestore-2.30.0.dist-info
+    │           ├── google_cloud_storage-3.14.1.dist-info
+    │           ├── google_crc32c
+    │           ├── google_crc32c-1.8.0.dist-info
+    │           ├── google_resumable_media-2.10.2.dist-info
+    │           ├── googleapis_common_protos-1.75.3.dist-info
+    │           ├── graphify
+    │           ├── graphifyy-0.9.48.dist-info
+    │           ├── grpc
+    │           ├── grpc_status
+    │           ├── grpcio-1.83.1.dist-info
+    │           ├── grpcio_status-1.83.1.dist-info
+    │           ├── h11
+    │           ├── h11-0.16.0.dist-info
+    │           ├── h2
+    │           ├── h2-4.4.1.dist-info
+    │           ├── hf_xet
+    │           ├── hf_xet-1.6.0.dist-info
+    │           ├── hpack
+    │           ├── hpack-4.2.0.dist-info
+    │           ├── httpcore
+    │           ├── httpcore-1.0.9.dist-info
+    │           ├── httplib2
+    │           ├── httplib2-0.32.0.dist-info
+    │           ├── httptools
+    │           ├── httptools-0.8.0.dist-info
+    │           ├── httpx
+    │           ├── httpx-0.28.1.dist-info
+    │           ├── huggingface_hub
+    │           ├── huggingface_hub-1.33.0.dist-info
+    │           ├── hyperframe
+    │           ├── hyperframe-6.1.0.dist-info
+    │           ├── idna
+    │           ├── idna-3.18.dist-info
+    │           ├── isympy.py
+    │           ├── jinja2
+    │           ├── jinja2-3.1.6.dist-info
+    │           ├── jose
+    │           ├── jwt
+    │           ├── kiwisolver
+    │           ├── kiwisolver-1.5.0.dist-info
+    │           ├── markdown_it
+    │           ├── markdown_it_py-4.2.0.dist-info
+    │           ├── markupsafe
+    │           ├── markupsafe-3.0.3.dist-info
+    │           ├── matplotlib
+    │           ├── matplotlib-3.11.0.dist-info
+    │           ├── mdurl
+    │           ├── mdurl-0.1.2.dist-info
+    │           ├── more_itertools
+    │           ├── more_itertools-11.1.0.dist-info
+    │           ├── mpl_toolkits
+    │           ├── mpmath
+    │           ├── mpmath-1.3.0.dist-info
+    │           ├── msgpack
+    │           ├── msgpack-1.1.2.dist-info
+    │           ├── multidict
+    │           ├── multidict-6.7.1.dist-info
+    │           ├── multipart
+    │           ├── networkx
+    │           ├── networkx-3.6.1.dist-info
+    │           ├── numpy
+    │           ├── numpy-2.5.0.dist-info
+    │           ├── oauthlib
+    │           ├── oauthlib-3.3.1.dist-info
+    │           ├── opencv_python_headless-4.14.0.94.dist-info
+    │           ├── opentelemetry
+    │           ├── opentelemetry_api-1.44.0.dist-info
+    │           ├── packaging
+    │           ├── packaging-26.2.dist-info
+    │           ├── pandas
+    │           ├── pandas-2.3.3.dist-info
+    │           ├── passlib
+    │           ├── passlib-1.7.4.dist-info
+    │           ├── pillow-12.3.0.dist-info
+    │           ├── pip
+    │           ├── pip-26.2.dist-info
+    │           ├── platformdirs
+    │           ├── platformdirs-4.10.0.dist-info
+    │           ├── propcache
+    │           ├── propcache-0.5.2.dist-info
+    │           ├── proto
+    │           ├── proto_plus-1.28.4.dist-info
+    │           ├── protobuf-7.36.1.dist-info
+    │           ├── psycopg2
+    │           ├── psycopg2_binary-2.9.12.dist-info
+    │           ├── pyasn1
+    │           ├── pyasn1-0.6.4.dist-info
+    │           ├── pyasn1_modules
+    │           ├── pyasn1_modules-0.4.2.dist-info
+    │           ├── pycparser
+    │           ├── pycparser-3.0.dist-info
+    │           ├── pydantic
+    │           ├── pydantic-2.13.4.dist-info
+    │           ├── pydantic_core
+    │           ├── pydantic_core-2.46.4.dist-info
+    │           ├── pydantic_settings
+    │           ├── pydantic_settings-2.15.0.dist-info
+    │           ├── pygments
+    │           ├── pygments-2.21.0.dist-info
+    │           ├── pyjwt-2.13.0.dist-info
+    │           ├── pylab.py
+    │           ├── pyparsing
+    │           ├── pyparsing-3.3.2.dist-info
+    │           ├── python_dateutil-2.9.0.post0.dist-info
+    │           ├── python_dotenv-1.2.2.dist-info
+    │           ├── python_jose-3.5.0.dist-info
+    │           ├── python_multipart
+    │           ├── python_multipart-0.0.32.dist-info
+    │           ├── pytz
+    │           ├── pytz-2026.2.dist-info
+    │           ├── pyyaml-6.0.3.dist-info
+    │           ├── rapidfuzz
+    │           ├── rapidfuzz-3.14.5.dist-info
+    │           ├── regex
+    │           ├── regex-2026.9.10.dist-info
+    │           ├── requests
+    │           ├── requests-2.34.2.dist-info
+    │           ├── requests_cache
+    │           ├── requests_cache-1.3.2.dist-info
+    │           ├── requests_oauthlib
+    │           ├── requests_oauthlib-2.0.0.dist-info
+    │           ├── resend
+    │           ├── resend-2.48.0.dist-info
+    │           ├── rich
+    │           ├── rich-15.0.0.dist-info
+    │           ├── rsa
+    │           ├── rsa-4.9.1.dist-info
+    │           ├── safetensors
+    │           ├── safetensors-0.8.0.dist-info
+    │           ├── scipy
+    │           ├── scipy-1.18.0.dist-info
+    │           ├── setuptools
+    │           ├── setuptools-84.0.0.dist-info
+    │           ├── shellingham
+    │           ├── shellingham-1.5.4.dist-info
+    │           ├── signalrcore
+    │           ├── signalrcore-1.0.2.dist-info
+    │           ├── six-1.17.0.dist-info
+    │           ├── six.py
+    │           ├── sqlalchemy
+    │           ├── sqlalchemy-2.0.51.dist-info
+    │           ├── starlette
+    │           ├── starlette-1.3.1.dist-info
+    │           ├── sympy
+    │           ├── sympy-1.14.0.dist-info
+    │           ├── timple
+    │           ├── timple-0.1.8.dist-info
+    │           ├── tokenizers
+    │           ├── tokenizers-0.23.2.dist-info
+    │           ├── torch
+    │           ├── torch-2.14.0.dist-info
+    │           ├── torchgen
+    │           ├── tqdm
+    │           ├── tqdm-4.70.1.dist-info
+    │           ├── transformers
+    │           ├── transformers-5.17.0.dist-info
+    │           ├── tree_sitter
+    │           ├── tree_sitter-0.25.2.dist-info
+    │           ├── tree_sitter_bash
+    │           ├── tree_sitter_bash-0.25.1.dist-info
+    │           ├── tree_sitter_c
+    │           ├── tree_sitter_c-0.24.2.dist-info
+    │           ├── tree_sitter_c-sharp
+    │           ├── tree_sitter_c_sharp
+    │           ├── tree_sitter_c_sharp-0.23.5.dist-info
+    │           ├── tree_sitter_cpp
+    │           ├── tree_sitter_cpp-0.23.4.dist-info
+    │           ├── tree_sitter_elixir
+    │           ├── tree_sitter_elixir-0.3.5.dist-info
+    │           ├── tree_sitter_fortran
+    │           ├── tree_sitter_fortran-0.6.0.dist-info
+    │           ├── tree_sitter_go
+    │           ├── tree_sitter_go-0.25.0.dist-info
+    │           ├── tree_sitter_groovy
+    │           ├── tree_sitter_groovy-0.1.2.dist-info
+    │           ├── tree_sitter_java
+    │           ├── tree_sitter_java-0.23.5.dist-info
+    │           ├── tree_sitter_javascript
+    │           ├── tree_sitter_javascript-0.25.0.dist-info
+    │           ├── tree_sitter_json
+    │           ├── tree_sitter_json-0.24.8.dist-info
+    │           ├── tree_sitter_julia
+    │           ├── tree_sitter_julia-0.23.1.dist-info
+    │           ├── tree_sitter_kotlin
+    │           ├── tree_sitter_kotlin-1.1.0.dist-info
+    │           ├── tree_sitter_lua
+    │           ├── tree_sitter_lua-0.5.0.dist-info
+    │           ├── tree_sitter_objc
+    │           ├── tree_sitter_objc-3.0.2.dist-info
+    │           ├── tree_sitter_php
+    │           ├── tree_sitter_php-0.24.1.dist-info
+    │           ├── tree_sitter_powershell
+    │           ├── tree_sitter_powershell-0.26.4.dist-info
+    │           ├── tree_sitter_python
+    │           ├── tree_sitter_python-0.25.0.dist-info
+    │           ├── tree_sitter_ruby
+    │           ├── tree_sitter_ruby-0.23.1.dist-info
+    │           ├── tree_sitter_rust
+    │           ├── tree_sitter_rust-0.24.2.dist-info
+    │           ├── tree_sitter_scala
+    │           ├── tree_sitter_scala-0.26.2.dist-info
+    │           ├── tree_sitter_swift
+    │           ├── tree_sitter_swift-0.7.3.dist-info
+    │           ├── tree_sitter_typescript
+    │           ├── tree_sitter_typescript-0.23.2.dist-info
+    │           ├── tree_sitter_verilog
+    │           ├── tree_sitter_verilog-1.0.3.dist-info
+    │           ├── tree_sitter_zig
+    │           ├── tree_sitter_zig-1.1.2.dist-info
+    │           ├── typer
+    │           ├── typer-0.27.2.dist-info
+    │           ├── typing_extensions-4.15.0.dist-info
+    │           ├── typing_extensions.py
+    │           ├── typing_inspection
+    │           ├── typing_inspection-0.4.2.dist-info
+    │           ├── tzdata
+    │           ├── tzdata-2026.2.dist-info
+    │           ├── url_normalize
+    │           ├── url_normalize-3.0.0.dist-info
+    │           ├── urllib3
+    │           ├── urllib3-2.7.0.dist-info
+    │           ├── uvicorn
+    │           ├── uvicorn-0.49.0.dist-info
+    │           ├── uvloop
+    │           ├── uvloop-0.22.1.dist-info
+    │           ├── watchfiles
+    │           ├── watchfiles-1.2.0.dist-info
+    │           ├── websockets
+    │           ├── websockets-16.0.dist-info
+    │           ├── yaml
+    │           ├── yarl
+    │           └── yarl-1.24.5.dist-info
+    ├── pyvenv.cfg
+    └── share
+        └── man
+            └── man1
+                ├── isympy.1
+                └── ttx.1
+
+438 directories, 1341 files
