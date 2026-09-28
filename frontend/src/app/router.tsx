@@ -18,7 +18,6 @@ import ReplayPage from "../features/replay/ReplayPage";
 import ReplaySelectPage from "../features/replay/ReplaySelectPage";
 import TelemetryPage from "../features/telemetry/TelemetryPage";
 
-
 import LoginPage from "../features/auth/LoginPage";
 import RegisterPage from "../features/auth/RegisterPage";
 import ProfilePage from "../features/auth/ProfilePage";
@@ -30,6 +29,15 @@ import DriversPage from "../features/drivers/DriversPage";
 import DriverDetailPage from "../features/drivers/DriverDetailPage";
 import AnalyticsPage from "../features/analytics/AnalyticsPage";
 import HeadToHeadPageContainer from "../features/head-to-head/HeadToHeadPageContainer";
+import ComingSoonPage from "../features/coming-soon/ComingSoonPage";
+
+import PrivacyPolicy from "../features/legal/privacy-policy/PrivacyPolicy";
+import TermsAndConditions from "../features/legal/terms/TermsAndConditions";
+import CookiePolicy from "../features/legal/cookie-policy/CookiePolicy";
+
+import AboutPage from "../features/legal/about/AboutPage";
+import FAQPage from "../features/legal/faq/FAQPage";
+import ContactPage from "../features/legal/contact/ContactPage";
 
 function FoundationPage({
   eyebrow,
@@ -167,27 +175,14 @@ export function AppRouter() {
 
         <Route
           path="/telemetry"
-          element={
-            <FoundationPage
-              eyebrow="05 / Telemetry"
-              title="Telemetry"
-              description="Dive into speed, throttle, braking, gears, tyres and track position."
-            />
-          }
+          element={<ComingSoonPage eyebrow="05 / Telemetry" title="Telemetry" description="Dive into speed, throttle, braking, gears, tyres and track position." features={["Speed, throttle and brake traces for every lap", "Gear and tyre data mapped to track position", "Lap-by-lap comparison between drivers"]} />}
         />
-
 
         <Route
           path="/timing"
-          element={
-            <FoundationPage
-              eyebrow="06 / Timing"
-              title="Timing"
-              description="Follow live-style race timing, gaps, positions and sector performance."
-            />
-          }
+          element={<ComingSoonPage eyebrow="06 / Timing" title="Timing" description="Follow live-style race timing, gaps, positions and sector performance." features={["Live-style gaps and intervals between cars", "Sector times with personal and session bests", "Position changes and pit stop tracking"]} />}
         />
-
+        
         <Route
           path="/analytics"
           element={<AnalyticsPage />}
@@ -196,6 +191,36 @@ export function AppRouter() {
         <Route
           path="/head-to-head"
           element={<HeadToHeadPageContainer />}
+        />
+
+        <Route
+          path="/privacy-policy"
+          element={<PrivacyPolicy />}
+        />
+
+        <Route
+          path="/terms"
+          element={<TermsAndConditions />}
+        />
+
+        <Route
+          path="/cookie-policy"
+          element={<CookiePolicy />}
+        />
+
+        <Route
+          path="/about"
+          element={<AboutPage />}
+        />
+        
+        <Route
+          path="/faq"
+          element={<FAQPage />}
+        />
+
+        <Route
+          path="/contact"
+          element={<ContactPage />}
         />
 
         <Route element={<ProtectedRoute />}>

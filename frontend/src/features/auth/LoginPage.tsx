@@ -257,9 +257,9 @@ export default function LoginPage() {
 
             <div className="auth-terms">
               By signing in, you agree to our{" "}
-              <a href="#terms">Terms</a>{" "}
+              <a href="/terms" target="_blank" rel="noreferrer">Terms</a>{" "}
               and{" "}
-              <a href="#privacy">
+              <a href="/privacy-policy" target="_blank" rel="noreferrer">
                 Privacy Policy
               </a>
             </div>

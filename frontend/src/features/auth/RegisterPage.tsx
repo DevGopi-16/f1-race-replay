@@ -232,6 +232,15 @@ export default function RegisterPage() {
             </div>
           )}
 
+          <div className="auth-terms">
+            By creating an account, you agree to our{" "}
+            <a href="/terms" target="_blank" rel="noreferrer">Terms</a>{" "}
+            and{" "}
+            <a href="/privacy-policy" target="_blank" rel="noreferrer">
+              Privacy Policy
+            </a>
+          </div>
+
           <button
             type="submit"
             className="auth-submit"

@@ -13,8 +13,9 @@ import pandas as pd
 from src.lib.settings import get_settings
 from src.lib.time import parse_time_string
 from src.lib.tyres import get_tyre_compound_int
+from src.config.settings import DATA_DIR
 
-_COMPUTED_DATA_DIR = pathlib.Path(__file__).resolve().parent.parent / "computed_data"
+_COMPUTED_DATA_DIR = pathlib.Path(DATA_DIR)
 
 
 

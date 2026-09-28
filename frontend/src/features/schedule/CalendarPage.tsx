@@ -161,7 +161,7 @@ export default function CalendarPage() {
     grid.style.setProperty("--spotlight-x", `${event.clientX - rect.left}px`);
     grid.style.setProperty("--spotlight-y", `${event.clientY - rect.top}px`);
   }
-
+  
   return (
     <main className="calendar-page">
       <div className="calendar-container">

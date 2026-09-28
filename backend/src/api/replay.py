@@ -1,4 +1,7 @@
-from fastapi import APIRouter, HTTPException, Query
+import math
+import re
+
+from fastapi import APIRouter, Depends, HTTPException, Query
 from fastapi.responses import JSONResponse
 
 from src.domain.f1_data import (
@@ -6,6 +9,7 @@ from src.domain.f1_data import (
     load_session,
     get_driver_statuses,
 )
+from src.auth.dependencies import get_current_user
 from src.domain.track_geometry import (
     build_track_geometry,
     extract_race_events,
@@ -17,6 +21,8 @@ from src.services.replay import (
     _find_local_replay_cache,
     replay_cache_key,
     get_cached_replay_telemetry,
+    get_cached_replay_lap_telemetry,
+    get_cached_replay_stints,
     get_cached_serialized_replay,
 )
 
@@ -227,6 +233,84 @@ def sanitize_replay_json(value):
         return value
 
     return value
+
+
+_REPLAY_SESSION_KEY = re.compile(
+    r"^(?P<year>\d{4})-(?P<round>\d{1,2})-"
+    r"(?P<session>R|S|Q|SQ|FP1|FP2|FP3)$",
+    re.IGNORECASE,
+)
+
+
+def _parse_replay_session_key(session_key: str):
+    """Parse the stable frontend key ``year-round-sessionType``."""
+    match = _REPLAY_SESSION_KEY.fullmatch(str(session_key).strip())
+    if match is None:
+        raise HTTPException(
+            status_code=400,
+            detail=(
+                "Invalid session key. Expected "
+                "year-round-sessionType, for example 2024-1-R."
+            ),
+        )
+
+    year = int(match.group("year"))
+    round_number = int(match.group("round"))
+    if round_number < 1:
+        raise HTTPException(status_code=400, detail="Round must be positive.")
+    return year, round_number, match.group("session").upper()
+
+
+def _finite(value, default=None):
+    try:
+        number = float(value)
+    except (TypeError, ValueError):
+        return default
+    return number if math.isfinite(number) else default
+
+
+def _serialize_lap_telemetry(data, driver_number):
+    distances = data.get("distance", [])
+    fields = ("speed", "throttle", "brake", "gear", "rpm")
+    points = []
+    for index, distance in enumerate(distances):
+        point = {"distance": _finite(distance, 0.0)}
+        for field in fields:
+            values = data.get(field, [])
+            if index < len(values):
+                value = _finite(values[index])
+                if value is not None:
+                    point[field] = int(value) if field == "gear" else value
+        points.append(point)
+
+    total_distance = _finite(data.get("total_distance"), 0.0) or 0.0
+    if total_distance > 0:
+        for point in points:
+            point["distance"] = round(
+                max(0.0, min(1.0, point["distance"] / total_distance)),
+                6,
+            )
+
+    sector_times = data.get("sector_times", {})
+    if isinstance(sector_times, dict):
+        sector_times = [
+            sector_times.get("sector1"),
+            sector_times.get("sector2"),
+            sector_times.get("sector3"),
+        ]
+
+    return {
+        "driver_number": str(driver_number),
+        "driver_code": str(data.get("driver", driver_number)),
+        "lap_number": int(data.get("lap_number", 0)),
+        "lap_time": _finite(data.get("lap_time")),
+        "sector_times": [_finite(value) for value in sector_times],
+        "points": points,
+        "compound": data.get("compound"),
+        "tyre_age": _finite(data.get("tyre_age")),
+        "stint_number": None,
+        "total_laps": None,
+    }
 
 
 @router.get(
@@ -872,3 +956,56 @@ def replay_chunk(
     return response
 
 
+@router.get(
+    "/replay/{session_key}/telemetry/{driver_number}/{lap_number}",
+    response_class=JSONResponse,
+    summary="Lap Telemetry",
+)
+def replay_lap_telemetry(
+    session_key: str,
+    driver_number: str,
+    lap_number: int,
+    _user=Depends(get_current_user),
+):
+    if lap_number < 1:
+        raise HTTPException(status_code=400, detail="Lap must be positive.")
+    year, round_number, session_type = _parse_replay_session_key(session_key)
+    try:
+        data = get_cached_replay_lap_telemetry(
+            year, round_number, session_type, driver_number, lap_number
+        )
+    except ValueError as exc:
+        raise HTTPException(status_code=404, detail=str(exc)) from exc
+    except Exception as exc:
+        raise HTTPException(
+            status_code=502,
+            detail=f"Failed to load lap telemetry: {exc}",
+        ) from exc
+    return sanitize_replay_json(
+        _serialize_lap_telemetry(data, driver_number)
+    )
+
+
+@router.get(
+    "/replay/{session_key}/stints/{driver_number}",
+    response_class=JSONResponse,
+    summary="Driver Tyre Stints",
+)
+def replay_driver_stints(
+    session_key: str,
+    driver_number: str,
+    _user=Depends(get_current_user),
+):
+    year, round_number, session_type = _parse_replay_session_key(session_key)
+    try:
+        stints = get_cached_replay_stints(
+            year, round_number, session_type, driver_number
+        )
+    except ValueError as exc:
+        raise HTTPException(status_code=404, detail=str(exc)) from exc
+    except Exception as exc:
+        raise HTTPException(
+            status_code=502,
+            detail=f"Failed to load driver stints: {exc}",
+        ) from exc
+    return sanitize_replay_json(stints)

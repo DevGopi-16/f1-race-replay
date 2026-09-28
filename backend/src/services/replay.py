@@ -1,7 +1,11 @@
 import pickle
 from pathlib import Path
 
-from src.domain.f1_data import load_session, get_race_telemetry
+from src.domain.f1_data import (
+    get_driver_lap_telemetry,
+    get_race_telemetry,
+    load_session,
+)
 from src.domain.serialize import serialize_replay_frames
 
 
@@ -9,6 +13,9 @@ SOURCE_FPS = 25
 
 _REPLAY_TELEMETRY_CACHE = {}
 _REPLAY_SERIALIZED_CACHE = {}
+_REPLAY_DETAIL_SESSION_CACHE = {}
+_REPLAY_LAP_TELEMETRY_CACHE = {}
+_REPLAY_STINTS_CACHE = {}
 
 
 def _find_local_replay_cache(year, round_number, session_type="R"):
@@ -62,6 +69,110 @@ def replay_cache_key(year, round_number, session_type):
         int(round_number),
         str(session_type),
     )
+
+
+def get_cached_replay_session(year, round_number, session_type):
+    """Load a telemetry-enabled FastF1 session once per replay session."""
+    key = replay_cache_key(year, round_number, session_type)
+    session = _REPLAY_DETAIL_SESSION_CACHE.get(key)
+    if session is None:
+        session = load_session(
+            year,
+            round_number,
+            session_type,
+            telemetry=True,
+        )
+        _REPLAY_DETAIL_SESSION_CACHE[key] = session
+    return session
+
+
+def get_cached_replay_lap_telemetry(
+    year,
+    round_number,
+    session_type,
+    driver_number,
+    lap_number,
+    session=None,
+):
+    """Return one lap's FastF1 telemetry, cached by session/driver/lap."""
+    key = (
+        *replay_cache_key(year, round_number, session_type),
+        str(driver_number),
+        int(lap_number),
+    )
+    if key not in _REPLAY_LAP_TELEMETRY_CACHE:
+        session = session or get_cached_replay_session(
+            year,
+            round_number,
+            session_type,
+        )
+        _REPLAY_LAP_TELEMETRY_CACHE[key] = get_driver_lap_telemetry(
+            session,
+            str(driver_number),
+            int(lap_number),
+        )
+    return _REPLAY_LAP_TELEMETRY_CACHE[key]
+
+
+def get_cached_replay_stints(
+    year,
+    round_number,
+    session_type,
+    driver_number,
+    session=None,
+):
+    """Build and cache the compact tyre-stint summary for one driver."""
+    key = (
+        *replay_cache_key(year, round_number, session_type),
+        str(driver_number),
+    )
+    if key in _REPLAY_STINTS_CACHE:
+        return _REPLAY_STINTS_CACHE[key]
+
+    session = session or get_cached_replay_session(
+        year,
+        round_number,
+        session_type,
+    )
+    laps = session.laps.pick_drivers(str(driver_number))
+    if laps.empty:
+        raise ValueError(f"No laps found for driver '{driver_number}'")
+
+    stints = []
+    for stint_number, stint_laps in laps.groupby("Stint"):
+        if stint_laps.empty:
+            continue
+        compound = (
+            stint_laps["Compound"].iloc[0]
+            if "Compound" in stint_laps
+            else None
+        )
+        tyre_life = (
+            stint_laps["TyreLife"].iloc[0]
+            if "TyreLife" in stint_laps
+            else None
+        )
+        try:
+            tyre_age = float(tyre_life)
+        except (TypeError, ValueError):
+            tyre_age = None
+        if tyre_age is not None and tyre_age != tyre_age:
+            tyre_age = None
+        stints.append({
+            "stint_number": int(stint_number),
+            "compound": (
+                str(compound)
+                if compound is not None and str(compound).lower() != "nan"
+                else "UNKNOWN"
+            ),
+            "tyre_age_at_start": tyre_age,
+            "lap_start": int(stint_laps["LapNumber"].min()),
+            "lap_end": int(stint_laps["LapNumber"].max()),
+        })
+
+    stints.sort(key=lambda item: item["lap_start"])
+    _REPLAY_STINTS_CACHE[key] = stints
+    return stints
 
 
 def get_cached_replay_telemetry(

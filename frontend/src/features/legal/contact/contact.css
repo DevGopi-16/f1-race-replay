@@ -1,0 +1,121 @@
+.contact-body {
+  padding: 32px 0 72px;
+  display: grid;
+  grid-template-columns: 1fr 1.3fr;
+  gap: clamp(32px, 6vw, 72px);
+  align-items: start;
+}
+
+@media (max-width: 860px) {
+  .contact-body {
+    grid-template-columns: 1fr;
+  }
+}
+
+.contact-info-block {
+  padding: 20px 0;
+}
+
+.contact-info-block:first-child {
+  padding-top: 0;
+}
+
+.contact-info-block h2 {
+  font-size: 1.05rem;
+  font-weight: 600;
+  margin: 0 0 6px;
+}
+
+.contact-info-block a {
+  color: #e10600;
+  text-decoration: none;
+}
+
+.contact-info-block a:hover {
+  text-decoration: underline;
+}
+
+.contact-info-block p {
+  color: rgba(237, 239, 242, 0.55);
+  font-size: 0.92rem;
+  margin: 4px 0 0;
+}
+
+/* ---------- Form ---------- */
+.contact-form {
+  background: rgba(237, 239, 242, 0.03);
+  border: 1px solid rgba(237, 239, 242, 0.1);
+  border-radius: 6px;
+  padding: clamp(24px, 4vw, 36px);
+}
+
+.contact-form-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 18px;
+}
+
+@media (max-width: 520px) {
+  .contact-form-row {
+    grid-template-columns: 1fr;
+  }
+}
+
+.contact-field {
+  margin-bottom: 20px;
+}
+
+.contact-field label {
+  display: block;
+  font-size: 0.85rem;
+  color: rgba(237, 239, 242, 0.55);
+  margin-bottom: 6px;
+}
+
+.contact-field input,
+.contact-field select,
+.contact-field textarea {
+  width: 100%;
+  background: rgba(0, 0, 0, 0.35);
+  border: 1px solid rgba(237, 239, 242, 0.12);
+  border-radius: 4px;
+  color: inherit;
+  font-family: inherit;
+  font-size: 0.95rem;
+  padding: 11px 13px;
+  box-sizing: border-box;
+}
+
+.contact-field input:focus,
+.contact-field select:focus,
+.contact-field textarea:focus {
+  border-color: #e10600;
+  outline: none;
+}
+
+.contact-field textarea {
+  resize: vertical;
+  min-height: 130px;
+}
+
+.contact-field-error {
+  color: #ffc400;
+  font-size: 0.8rem;
+  margin-top: 6px;
+}
+
+.contact-form-footer {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  margin-top: 8px;
+}
+
+.contact-form-status {
+  font-size: 0.9rem;
+  color: rgba(237, 239, 242, 0.55);
+}
+
+.contact-form-status[data-state="success"] {
+  color: #e10600;
+}

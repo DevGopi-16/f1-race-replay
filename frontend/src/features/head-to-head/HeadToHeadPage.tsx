@@ -361,13 +361,17 @@ function HeadToHeadResultsView({
 }) {
   const [viewMode, setViewMode] = useState<"visual" | "detail">("visual");
   const [trajectorySeason, setTrajectorySeason] = useState(2025);
+    // TODO: read from result.careerTrajectory once its shape is known
+  const firstSeason = 2007;
+  const lastSeason = 2026;
   const a = result.driverA;
   const b = result.driverB;
   const driverAName = a.fullName.split(" ").at(-1) ?? a.fullName;
   const driverBName = b.fullName.split(" ").at(-1) ?? b.fullName;
-  const isHamilton = a.fullName.toLowerCase().includes("hamilton") || b.fullName.toLowerCase().includes("hamilton");
-  const primary = isHamilton && !a.fullName.toLowerCase().includes("hamilton") ? b : a;
-  const secondary = primary.driverId === a.driverId ? b : a;
+    // TODO: derive from result.headToHeadRecord once its shape is known
+  // (e.g. whoever leads the direct race record).
+  const primary = a;
+  const secondary = b;
   const metrics = [
     { label: "Win rate", detail: "Races won per start", left: 26.9, right: 28.7, leftValue: "26.9%", rightValue: "28.7%", leftName: a.fullName, rightName: b.fullName, leader: "Verstappen leads by 1.8 percentage points" },
     { label: "Podium rate", detail: "Podiums per start", left: 52.5, right: 53.8, leftValue: "52.5%", rightValue: "53.8%", leftName: a.fullName, rightName: b.fullName, leader: "Verstappen leads by 1.3 percentage points" },
@@ -497,20 +501,20 @@ function HeadToHeadResultsView({
                 <div className="h2h-section-heading"><span>Driver DNA</span><small>Performance fingerprint</small><ViewToggle mode={viewMode} onChange={setViewMode} /></div>
                 <div className="h2h-panel h2h-dna-panel">
                   <div className="h2h-dna-head"><span>{a.fullName}</span><b>Matchup edge <em>{primary.fullName} 5 - 0 {secondary.fullName}</em></b><span>{b.fullName}</span></div>
-                  {viewMode === "visual" ? <div className="h2h-dna-grid">{dna.map(([label, detail, left, right, edge]) => <div className="h2h-dna-card" key={label}><header><b>{label}</b><em>{edge}</em></header><small>{detail}</small><div><strong>{left}</strong><span>— vs —</span><strong>{right}</strong></div></div>)}</div> : <DetailTable rows={dna.map(([label, detail, left, right]) => [label, left, right, detail])} />}
+                  {viewMode === "visual" ? <div className="h2h-dna-grid">{dna.map(([label, detail, left, right, edge]) => <div className="h2h-dna-card" key={label}><header><b>{label}</b><em>{edge}</em></header><small>{detail}</small><div><strong>{left}</strong><span>— vs —</span><strong>{right}</strong></div></div>)}</div> : <DetailTable leftLabel={a.fullName} rightLabel={b.fullName} rows={dna.map(([label, detail, left, right]) => [label, left, right, detail])} />}
                 </div>
               </section>
 
               <section className="h2h-section">
                 <div className="h2h-section-heading"><span>Head-to-head comparison</span><ViewToggle mode={viewMode} onChange={setViewMode} /></div>
                 <div className="h2h-panel h2h-chart-panel">
-                  {viewMode === "visual" ? <><p className="h2h-kicker">Direct head-to-head</p><small>Shared-race win split by session type.</small><BarChart label="Qualifying" left="94" right="71" /><BarChart label="Race" left="83" right="54" /><p className="h2h-kicker h2h-chart-gap">Performance gaps over seasons</p><LineChart /></> : <DetailTable rows={[["Qualifying", "94", "71", "Shared qualifying sessions"], ["Race", "83", "54", "Shared race sessions"], ["Shared races", "165", "165", "High confidence overlap"]]} />}
+                  {viewMode === "visual" ? <><p className="h2h-kicker">Direct head-to-head</p><small>Shared-race win split by session type.</small><BarChart label="Qualifying" left="94" right="71" /><BarChart label="Race" left="83" right="54" /><p className="h2h-kicker h2h-chart-gap">Performance gaps over seasons</p><LineChart /></> : <DetailTable leftLabel={a.fullName} rightLabel={b.fullName} rows={[["Qualifying", "94", "71", "Shared qualifying sessions"], ["Race", "83", "54", "Shared race sessions"], ["Shared races", "165", "165", "High confidence overlap"]]} />}
                 </div>
               </section>
 
               <section className="h2h-section">
                 <div className="h2h-section-heading"><span>Teammate-relative comparison</span><ViewToggle mode={viewMode} onChange={setViewMode} /></div>
-                <div className="h2h-panel h2h-relative-panel"><p>Measures how each driver performed against their own teammates. A positive “Edge” means they were faster/better than the baseline of their colleagues in shared machinery.</p>{viewMode === "visual" ? ["Qualifying edge", "Race edge", "Points share %"].map((label, index) => <div className="h2h-relative-row" key={label}><b>{label}</b><span>{index === 2 ? "0.56 / 0.50" : "0.15 / 0.24"}</span><div><i style={{ left: `${index === 2 ? 56 : 42}%` }} /><i className="muted" style={{ left: `${index === 2 ? 50 : 47}%` }} /></div><small>{a.fullName}: Moderate advantage vs teammates</small><small>{b.fullName}: Moderate advantage vs teammates</small></div>) : <DetailTable rows={[["Qualifying edge", "0.15", "0.38", "Slight advantage vs teammates"], ["Race edge", "0.15", "0.24", "Moderate advantage vs teammates"], ["Points share", "0.56", "0.50", "Majority / minority share"]]} />}</div>
+                <div className="h2h-panel h2h-relative-panel"><p>Measures how each driver performed against their own teammates. A positive “Edge” means they were faster/better than the baseline of their colleagues in shared machinery.</p>{viewMode === "visual" ? ["Qualifying edge", "Race edge", "Points share %"].map((label, index) => <div className="h2h-relative-row" key={label}><b>{label}</b><span>{index === 2 ? "0.56 / 0.50" : "0.15 / 0.24"}</span><div><i style={{ left: `${index === 2 ? 56 : 42}%` }} /><i className="muted" style={{ left: `${index === 2 ? 50 : 47}%` }} /></div><small>{a.fullName}: Moderate advantage vs teammates</small><small>{b.fullName}: Moderate advantage vs teammates</small></div>) : <DetailTable leftLabel={a.fullName} rightLabel={b.fullName} rows={[["Qualifying edge", "0.15", "0.38", "Slight advantage vs teammates"], ["Race edge", "0.15", "0.24", "Moderate advantage vs teammates"], ["Points share", "0.56", "0.50", "Majority / minority share"]]} />}</div>
               </section>
             </main>
             <aside className="h2h-dashboard-side">
@@ -531,15 +535,15 @@ function HeadToHeadResultsView({
           </section>
           <section className="h2h-section">
             <div className="h2h-section-heading"><span>Yearly comparison</span><small>One shared baseline replaces four competing lines.</small><ViewToggle mode={viewMode} onChange={setViewMode} /></div>
-            <div className="h2h-panel h2h-year-panel">{viewMode === "visual" ? <><div className="h2h-year-axis"><span>{b.fullName}</span><b>Level</b><span>{a.fullName}</span></div><YearChart /></> : <DetailTable rows={[["2026", "P3 · +0.00 / +0.09", "P2 · -0.14 / -0.33", "Ferrari vs Mercedes"], ["2025", "P6", "P4", "Season comparison"], ["2024", "P7", "P6", "Season comparison"]]} />}<div className="h2h-season-row"><div><small>Season</small><strong>2026</strong></div><div><b>{a.fullName}</b><span>Ferrari · P3</span><small>+0.00 / +0.09</small></div><div><b>{b.fullName}</b><span>Mercedes · P2</span><small>-0.14 / -0.33</small></div></div></div>
+            <div className="h2h-panel h2h-year-panel">{viewMode === "visual" ? <><div className="h2h-year-axis"><span>{b.fullName}</span><b>Level</b><span>{a.fullName}</span></div><YearChart /></> : <DetailTable leftLabel={a.fullName} rightLabel={b.fullName} rows={[["2026", "P3 · +0.00 / +0.09", "P2 · -0.14 / -0.33", `${a.team} vs ${b.team}`], ["2025", "P6", "P4", "Season comparison"], ["2024", "P7", "P6", "Season comparison"]]} />} <div className="h2h-season-row"><div><small>Season</small><strong>2026</strong></div><div><b>{a.fullName}</b><span>Ferrari · P3</span><small>+0.00 / +0.09</small></div><div><b>{b.fullName}</b><span>Mercedes · P2</span><small>-0.14 / -0.33</small></div></div></div>
           </section>
           <section className="h2h-section">
             <div className="h2h-section-heading"><span>Career trajectory</span><small>How have their careers evolved?</small></div>
             <div className="h2h-panel h2h-trajectory-panel">
               <div className="h2h-trajectory-head"><span className="red-dot">{a.fullName}<small>20 seasons<br />7 titles</small></span><span className="gray-dot">{b.fullName}<small>8 seasons<br />0 titles</small></span></div>
               <TrajectoryChart />
-              <div className="h2h-trajectory-legend"><span className="red-dot">Hamilton</span><span className="gray-dot">Russell</span></div>
-              <div className="h2h-season-toolbar"><div><small>Season</small><strong>{trajectorySeason}</strong></div><div className="h2h-season-pager"><button type="button" onClick={() => setTrajectorySeason((year) => Math.max(2007, year - 1))}>‹</button><span>{trajectorySeason - 2007 + 1} of 20</span><button type="button" onClick={() => setTrajectorySeason((year) => Math.min(2026, year + 1))}>›</button></div></div>
+              <div className="h2h-trajectory-legend"><span className="red-dot">{a.fullName}</span><span className="gray-dot">{b.fullName}</span></div>
+              <div className="h2h-season-toolbar"><div><small>Season</small><strong>{trajectorySeason}</strong></div><div className="h2h-season-pager"><button type="button" onClick={() => setTrajectorySeason((year) => Math.max(firstSeason, year - 1))}>‹</button><span>{trajectorySeason - firstSeason + 1} of {lastSeason - firstSeason + 1}</span><button type="button" onClick={() => setTrajectorySeason((year) => Math.min(lastSeason, year + 1))}>›</button></div></div>
               <div className="h2h-season-cards"><div><b>{a.fullName}</b><span>Ferrari</span><strong>{trajectorySeason === 2025 ? "P6" : "P3"}</strong><small>{trajectorySeason === 2025 ? "156 pts · 0 wins" : "183 pts · 1 wins"}</small></div><div><b>{b.fullName}</b><span>Mercedes</span><strong>{trajectorySeason === 2025 ? "P4" : "P2"}</strong><small>{trajectorySeason === 2025 ? "319 pts · 2 wins" : "183 pts · 2 wins"}</small></div></div>
               <div className="h2h-season-dots"><i /><i className="active" /><i /><i /><i /><i /><i /><i /><i /><i /><i /><i /><i /><i /><i /><i /><i /><i /></div>
             </div>
@@ -550,16 +554,12 @@ function HeadToHeadResultsView({
   );
 }
 
-function MetricBar({ label, detail, left, right, leftValue, rightValue, leftName, rightName }: { label: string; detail: string; left: number; right: number; leftValue: string; rightValue: string; leftName: string; rightName: string }) {
-  return <div className="h2h-metric"><header><b>{label}</b><small>{detail}</small><em>{leftName} leads by {(left - right).toFixed(1)} percentage points</em></header><div className="h2h-metric-labels"><span>{leftName} <strong>{leftValue}</strong></span><span><strong>{rightValue}</strong> {rightName}</span></div><div className="h2h-metric-track"><i style={{ width: `${(left / (left + right)) * 100}%` }} /></div><div className="h2h-metric-foot"><small>{left}%</small><small>{right}%</small></div></div>;
-}
-
 function ViewToggle({ mode, onChange }: { mode: "visual" | "detail"; onChange: (mode: "visual" | "detail") => void }) {
   return <div className="h2h-tabs"><button type="button" className={mode === "visual" ? "active" : ""} onClick={() => onChange("visual")}>▦ Visual</button><button type="button" className={mode === "detail" ? "active" : ""} onClick={() => onChange("detail")}>▤ Detail</button></div>;
 }
 
-function DetailTable({ rows }: { rows: string[][] }) {
-  return <div className="h2h-detail-table"><div className="h2h-detail-head"><span>Metric</span><span>Driver A</span><span>Driver B</span><span>Context</span></div>{rows.map((row) => <div className="h2h-detail-row" key={row[0]}>{row.map((cell, index) => <span className={index === 0 ? "metric" : ""} key={`${row[0]}-${index}`}>{cell}</span>)}</div>)}</div>;
+function DetailTable({ rows, leftLabel, rightLabel }: { rows: string[][]; leftLabel: string; rightLabel: string }) {
+  return <div className="h2h-detail-table"><div className="h2h-detail-head"><span>Metric</span><span>{leftLabel}</span><span>{rightLabel}</span><span>Context</span></div>{rows.map((row) => <div className="h2h-detail-row" key={row[0]}>{row.map((cell, index) => <span className={index === 0 ? "metric" : ""} key={`${row[0]}-${index}`}>{cell}</span>)}</div>)}</div>;
 }
 
 function BarChart({ label, left, right }: { label: string; left: string; right: string }) {

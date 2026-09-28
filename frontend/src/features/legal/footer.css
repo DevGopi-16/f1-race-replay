@@ -1,0 +1,110 @@
+.site-footer {
+  background: var(--bg-primary, #0b0d10);
+  border-top: 1px solid var(--border-color, #23262b);
+  padding: 40px 20px 32px;
+  margin-top: 64px;
+}
+
+.site-footer__container {
+  max-width: 960px;
+  margin: 0 auto;
+  text-align: center;
+}
+
+.site-footer__brand-row {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  justify-content: center;
+  gap: 20px;
+  margin-bottom: 24px;
+}
+
+.site-footer__logo-img {
+  height: 28px;
+  width: auto;
+}
+
+.site-footer__icons {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+}
+
+.site-footer__icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  color: var(--text-secondary, #7a8087);
+  transition: color 0.15s ease, background 0.15s ease;
+}
+
+.site-footer__icon:hover,
+.site-footer__icon:focus-visible {
+  color: var(--text-primary, #f5f6f7);
+  background: rgba(255, 255, 255, 0.06);
+}
+
+.site-footer__icon:focus-visible {
+  outline: 2px solid var(--team-color, #e10600);
+  outline-offset: 2px;
+}
+
+.site-footer__x-icon {
+  font-size: 1rem;
+  line-height: 1;
+}
+
+.site-footer__links {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 10px;
+  font-size: 0.875rem;
+  margin-bottom: 16px;
+}
+
+.site-footer__links a {
+  color: var(--text-secondary, #9aa1a9);
+  text-decoration: none;
+}
+
+.site-footer__links a:hover,
+.site-footer__links a:focus-visible {
+  color: var(--team-color, #e10600);
+  text-decoration: underline;
+}
+
+.site-footer__links a:focus-visible {
+  outline: 2px solid var(--team-color, #e10600);
+  outline-offset: 3px;
+  border-radius: 2px;
+}
+
+.site-footer__links span {
+  color: var(--border-color, #3a3d42);
+}
+
+.site-footer__disclaimer {
+  font-size: 0.8rem;
+  color: var(--text-secondary, #6c7278);
+  margin: 0 0 12px;
+  max-width: 60ch;
+  margin-left: auto;
+  margin-right: auto;
+}
+
+.site-footer__copyright {
+  font-size: 0.75rem;
+  color: var(--text-secondary, #5c6167);
+  margin: 0;
+}
+
+@media (max-width: 480px) {
+  .site-footer__links {
+    flex-wrap: wrap;
+  }
+}

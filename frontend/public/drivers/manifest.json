@@ -286,5 +286,296 @@
     "name": "Ivor Bueb",
     "source": "http://en.wikipedia.org/wiki/Ivor_Bueb",
     "suit_verified": 0.97
+  },
+  "clark": {
+    "file": "clark.jpg",
+    "name": "Jim Clark",
+    "source": "http://en.wikipedia.org/wiki/Jim_Clark",
+    "suit_verified": 0.98
+  },
+  "coulthard": {
+    "file": "coulthard.jpg",
+    "name": "David Coulthard",
+    "source": "http://en.wikipedia.org/wiki/David_Coulthard",
+    "suit_verified": 1.0
+  },
+  "crawford": {
+    "file": "crawford.jpg",
+    "name": "Jim Crawford",
+    "source": "http://en.wikipedia.org/wiki/Jim_Crawford_(driver)",
+    "suit_verified": 0.96
+  },
+  "crespo": {
+    "file": "crespo.jpg",
+    "name": "Alberto Crespo",
+    "source": "http://en.wikipedia.org/wiki/Alberto_Crespo",
+    "suit_verified": 0.98
+  },
+  "fischer": {
+    "file": "fischer.jpg",
+    "name": "Rudi Fischer",
+    "source": "http://en.wikipedia.org/wiki/Rudi_Fischer",
+    "suit_verified": 0.89
+  },
+  "gachot": {
+    "file": "gachot.jpg",
+    "name": "Bertrand Gachot",
+    "source": "http://en.wikipedia.org/wiki/Bertrand_Gachot",
+    "suit_verified": 1.0
+  },
+  "gutierrez": {
+    "file": "gutierrez.jpg",
+    "name": "Esteban Guti\u00e9rrez",
+    "source": "http://en.wikipedia.org/wiki/Esteban_Guti%C3%A9rrez",
+    "suit_verified": 1.0
+  },
+  "damon_hill": {
+    "file": "damon_hill.jpg",
+    "name": "Damon Hill",
+    "source": "http://en.wikipedia.org/wiki/Damon_Hill",
+    "suit_verified": 0.91
+  },
+  "ide": {
+    "file": "ide.jpg",
+    "name": "Yuji Ide",
+    "source": "http://en.wikipedia.org/wiki/Yuji_Ide",
+    "suit_verified": 1.0
+  },
+  "jabouille": {
+    "file": "jabouille.jpg",
+    "name": "Jean-Pierre Jabouille",
+    "source": "http://en.wikipedia.org/wiki/Jean-Pierre_Jabouille",
+    "suit_verified": 1.0
+  },
+  "klien": {
+    "file": "klien.jpg",
+    "name": "Christian Klien",
+    "source": "http://en.wikipedia.org/wiki/Christian_Klien",
+    "suit_verified": 0.99
+  },
+  "koinigg": {
+    "file": "koinigg.jpg",
+    "name": "Helmuth Koinigg",
+    "source": "http://en.wikipedia.org/wiki/Helmuth_Koinigg",
+    "suit_verified": 1.0
+  },
+  "lotterer": {
+    "file": "lotterer.jpg",
+    "name": "Andr\u00e9 Lotterer",
+    "source": "http://en.wikipedia.org/wiki/Andr%C3%A9_Lotterer",
+    "suit_verified": 0.96
+  },
+  "magnussen": {
+    "file": "magnussen.jpg",
+    "name": "Jan Magnussen",
+    "source": "http://en.wikipedia.org/wiki/Jan_Magnussen",
+    "suit_verified": 0.99
+  },
+  "merhi": {
+    "file": "merhi.jpg",
+    "name": "Roberto Merhi",
+    "source": "http://en.wikipedia.org/wiki/Roberto_Merhi",
+    "suit_verified": 0.96
+  },
+  "mieres": {
+    "file": "mieres.jpg",
+    "name": "Roberto Mieres",
+    "source": "http://en.wikipedia.org/wiki/Roberto_Mieres",
+    "suit_verified": 1.0
+  },
+  "moreno": {
+    "file": "moreno.jpg",
+    "name": "Roberto Moreno",
+    "source": "http://en.wikipedia.org/wiki/Roberto_Moreno",
+    "suit_verified": 1.0
+  },
+  "peterson": {
+    "file": "peterson.jpg",
+    "name": "Ronnie Peterson",
+    "source": "http://en.wikipedia.org/wiki/Ronnie_Peterson",
+    "suit_verified": 1.0
+  },
+  "pic": {
+    "file": "pic.jpg",
+    "name": "Charles Pic",
+    "source": "http://en.wikipedia.org/wiki/Charles_Pic",
+    "suit_verified": 0.99
+  },
+  "pian": {
+    "file": "pian.jpg",
+    "name": "Alfredo Pi\u00e1n",
+    "source": "http://en.wikipedia.org/wiki/Alfredo_Pi%C3%A0n",
+    "suit_verified": 0.97
+  },
+  "purley": {
+    "file": "purley.jpg",
+    "name": "David Purley",
+    "source": "http://en.wikipedia.org/wiki/David_Purley",
+    "suit_verified": 0.9
+  },
+  "salazar": {
+    "file": "salazar.jpg",
+    "name": "Eliseo Salazar",
+    "source": "http://en.wikipedia.org/wiki/Eliseo_Salazar",
+    "suit_verified": 0.99
+  },
+  "salo": {
+    "file": "salo.jpg",
+    "name": "Mika Salo",
+    "source": "http://en.wikipedia.org/wiki/Mika_Salo",
+    "suit_verified": 0.96
+  },
+  "salvadori": {
+    "file": "salvadori.jpg",
+    "name": "Roy Salvadori",
+    "source": "http://en.wikipedia.org/wiki/Roy_Salvadori",
+    "suit_verified": 0.97
+  },
+  "mario_andretti": {
+    "file": "mario_andretti.jpg",
+    "name": "Mario Andretti",
+    "source": "http://en.wikipedia.org/wiki/Mario_Andretti",
+    "suit_verified": 0.98
+  },
+  "andrews": {
+    "file": "andrews.jpg",
+    "name": "Keith Andrews",
+    "source": "http://en.wikipedia.org/wiki/Keith_Andrews_(driver)",
+    "suit_verified": 0.64
+  },
+  "badoer": {
+    "file": "badoer.jpg",
+    "name": "Luca Badoer",
+    "source": "http://en.wikipedia.org/wiki/Luca_Badoer",
+    "suit_verified": 0.86
+  },
+  "bleekemolen": {
+    "file": "bleekemolen.jpg",
+    "name": "Michael Bleekemolen",
+    "source": "http://en.wikipedia.org/wiki/Michael_Bleekemolen",
+    "suit_verified": 1.0
+  },
+  "courage": {
+    "file": "courage.jpg",
+    "name": "Piers Courage",
+    "source": "http://en.wikipedia.org/wiki/Piers_Courage",
+    "suit_verified": 1.0
+  },
+  "ecclestone": {
+    "file": "ecclestone.jpg",
+    "name": "Bernie Ecclestone",
+    "source": "http://en.wikipedia.org/wiki/Bernie_Ecclestone",
+    "suit_verified": 0.83
+  },
+  "lammers": {
+    "file": "lammers.jpg",
+    "name": "Jan Lammers",
+    "source": "http://en.wikipedia.org/wiki/Jan_Lammers",
+    "suit_verified": 1.0
+  },
+  "alboreto": {
+    "file": "alboreto.jpg",
+    "name": "Michele Alboreto",
+    "source": "http://en.wikipedia.org/wiki/Michele_Alboreto",
+    "suit_verified": 0.99
+  },
+  "brabham": {
+    "file": "brabham.jpg",
+    "name": "David Brabham",
+    "source": "http://en.wikipedia.org/wiki/David_Brabham",
+    "suit_verified": 0.81
+  },
+  "cevert": {
+    "file": "cevert.jpg",
+    "name": "Fran\u00e7ois Cevert",
+    "source": "http://en.wikipedia.org/wiki/Fran%C3%A7ois_Cevert",
+    "suit_verified": 1.0
+  },
+  "chandhok": {
+    "file": "chandhok.jpg",
+    "name": "Karun Chandhok",
+    "source": "http://en.wikipedia.org/wiki/Karun_Chandhok",
+    "suit_verified": 0.99
+  },
+  "wilson_fittipaldi": {
+    "file": "wilson_fittipaldi.jpg",
+    "name": "Wilson Fittipaldi",
+    "source": "http://en.wikipedia.org/wiki/Wilson_Fittipaldi",
+    "suit_verified": 0.74
+  },
+  "larini": {
+    "file": "larini.jpg",
+    "name": "Nicola Larini",
+    "source": "http://en.wikipedia.org/wiki/Nicola_Larini",
+    "suit_verified": 1.0
+  },
+  "massa": {
+    "file": "massa.jpg",
+    "name": "Felipe Massa",
+    "source": "http://en.wikipedia.org/wiki/Felipe_Massa",
+    "suit_verified": 1.0
+  },
+  "boesel": {
+    "file": "boesel.jpg",
+    "name": "Raul Boesel",
+    "source": "http://en.wikipedia.org/wiki/Raul_Boesel",
+    "suit_verified": 1.0
+  },
+  "alliot": {
+    "file": "alliot.jpg",
+    "name": "Philippe Alliot",
+    "source": "http://en.wikipedia.org/wiki/Philippe_Alliot",
+    "suit_verified": 0.96,
+    "license": "cc0",
+    "attribution": "<a href=\"//commons.wikimedia.org/w/index.php?title=User:Stanoux&amp;action=edit&amp;redlink=1\" class=\"new\" title=\"User:Stanoux (page does not exist)\">Stanoux</a>",
+    "credit_url": "https://commons.wikimedia.org/wiki/File:Philippe_Alliot_en_1993_(bearb_Sp).jpg"
+  },
+  "bell": {
+    "file": "bell.jpg",
+    "name": "Derek Bell",
+    "source": "http://en.wikipedia.org/wiki/Derek_Bell_(auto_racer)",
+    "suit_verified": 0.79
+  },
+  "hattori": {
+    "file": "hattori.jpg",
+    "name": "Naoki Hattori",
+    "source": "http://en.wikipedia.org/wiki/Naoki_Hattori",
+    "suit_verified": 0.96
+  },
+  "herrmann": {
+    "file": "herrmann.jpg",
+    "name": "Hans Herrmann",
+    "source": "http://en.wikipedia.org/wiki/Hans_Herrmann",
+    "suit_verified": 0.98
+  },
+  "migault": {
+    "file": "migault.jpg",
+    "name": "Fran\u00e7ois Migault",
+    "source": "http://en.wikipedia.org/wiki/Fran%C3%A7ois_Migault",
+    "suit_verified": 1.0
+  },
+  "moser": {
+    "file": "moser.jpg",
+    "name": "Silvio Moser",
+    "source": "http://en.wikipedia.org/wiki/Silvio_Moser",
+    "suit_verified": 1.0
+  },
+  "pantano": {
+    "file": "pantano.jpg",
+    "name": "Giorgio Pantano",
+    "source": "http://en.wikipedia.org/wiki/Giorgio_Pantano",
+    "suit_verified": 0.9
+  },
+  "rodriguez": {
+    "file": "rodriguez.jpg",
+    "name": "Pedro Rodr\u00edguez",
+    "source": "http://en.wikipedia.org/wiki/Pedro_Rodr%C3%ADguez_(racing_driver)",
+    "suit_verified": 1.0
+  },
+  "schneider": {
+    "file": "schneider.jpg",
+    "name": "Bernd Schneider",
+    "source": "http://en.wikipedia.org/wiki/Bernd_Schneider_(racecar_driver)",
+    "suit_verified": 0.98
   }
 }

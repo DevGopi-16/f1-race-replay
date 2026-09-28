@@ -19,11 +19,13 @@ router = APIRouter(
 
 @router.get(
     "/auth/profile/season-summary",
-    summary="Get 2026 Season Summary",
+    summary="Get Current Season Summary",
 )
 def get_profile_season_summary(
     current_user: User = Depends(get_current_active_user),
 ):
+    import datetime
+    current_season = datetime.date.today().year
     db = SessionLocal()
 
     try:
@@ -31,7 +33,7 @@ def get_profile_season_summary(
             db.query(ReplayHistory)
             .filter(
                 ReplayHistory.user_id == current_user.id,
-                ReplayHistory.year == 2026,
+                ReplayHistory.year == current_season,
             )
             .order_by(ReplayHistory.last_watched_at.desc())
             .all()
@@ -62,9 +64,12 @@ def get_profile_season_summary(
             else 0.0
         )
 
-        # 2026 currently has 24 scheduled Grands Prix.
+        # TODO: race count varies by season (23-24 typical) — consider
+        # pulling this from the actual schedule (FastF1 or Jolpica)
+        # instead of a fixed number, so it stays correct every year.
+        races_this_season = 24
         season_progress = min(
-            (unique_races / 24) * 100,
+            (unique_races / races_this_season) * 100,
             100.0,
         )
 
@@ -106,7 +111,7 @@ def get_profile_season_summary(
             }
 
         return {
-            "year": 2026,
+            "year": current_season,
             "total_sessions": total_sessions,
             "completed_sessions": completed_sessions,
             "unique_races": unique_races,
@@ -276,62 +281,74 @@ def get_achievements(
 def get_extended_profile(
     current_user: User = Depends(get_current_active_user),
 ):
-    return {
-        "xp": getattr(current_user, "xp", 1250),
-        "level": getattr(current_user, "level", 4),
-        "next_milestone_xp": 2000,
-        "circuits_visited": getattr(current_user, "circuits_visited", 12),
-        "most_watched_circuit": getattr(
-            current_user,
-            "most_watched_circuit",
-            "Silverstone",
-        ),
-        "circuit_completion": getattr(
-            current_user,
-            "circuit_completion_rate",
-            86.0,
-        ),
-        "season_stats": {
-            "sessions": getattr(
-                current_user,
-                "replays_watched",
-                24,
-            ),
-            "laps": 128,
-            "watch_time": (
-                f"{getattr(current_user, 'watch_time_hours', 18.5)} hrs"
-            ),
-        },
-        "achievements": [
-            {
-                "id": "first_lap",
-                "name": "First Lap",
-                "unlocked": True,
+    db = SessionLocal()
+
+    try:
+        histories = (
+            db.query(ReplayHistory)
+            .filter(ReplayHistory.user_id == current_user.id)
+            .all()
+        )
+
+        def is_completed(history):
+            return (
+                history.completed_at is not None
+                or float(history.progress or 0.0) >= 0.999
+            )
+
+        completed_count = sum(1 for h in histories if is_completed(h))
+        total_watch_seconds = sum(
+            float(h.duration_seconds or 0.0) for h in histories
+        )
+        watch_minutes = total_watch_seconds / 60
+
+        # XP formula: 10 per completed session + 1 per full minute watched.
+        # TODO: tune weights, or replace with a designed progression curve.
+        xp = completed_count * 10 + int(watch_minutes)
+        xp_per_level = 500
+        level = xp // xp_per_level + 1
+        next_milestone_xp = (level) * xp_per_level
+
+        distinct_circuits = {
+            (h.year, h.round) for h in histories
+        }
+
+        circuit_watch_time: dict = {}
+        for h in histories:
+            key = (h.year, h.round)
+            circuit_watch_time[key] = (
+                circuit_watch_time.get(key, 0.0)
+                + float(h.duration_seconds or 0.0)
+            )
+
+        most_watched_circuit = None
+        if circuit_watch_time:
+            top_key = max(circuit_watch_time, key=circuit_watch_time.get)
+            most_watched_circuit = f"{top_key[0]} round {top_key[1]}"
+            # TODO: map (year, round) to a real circuit name once a
+            # schedule lookup is wired in here — currently shows year/round.
+
+        # TODO: circuit_completion has no real denominator yet — needs a
+        # live "total circuits this season" source (FastF1 schedule),
+        # same gap as season_progress in get_profile_season_summary.
+        races_this_season = 24
+        circuit_completion = round(
+            (len(distinct_circuits) / races_this_season) * 100, 1
+        )
+
+        return {
+            "xp": xp,
+            "level": level,
+            "next_milestone_xp": next_milestone_xp,
+            "circuits_visited": len(distinct_circuits),
+            "most_watched_circuit": most_watched_circuit,
+            "circuit_completion": circuit_completion,
+            "season_stats": {
+                "sessions": len(histories),
+                "watch_time": f"{round(total_watch_seconds / 3600, 1)} hrs",
             },
-            {
-                "id": "telemetry_eng",
-                "name": "Telemetry Engineer",
-                "unlocked": True,
-            },
-            {
-                "id": "hot_lap",
-                "name": "Hot Lap Hunter",
-                "unlocked": True,
-            },
-            {
-                "id": "race_eng",
-                "name": "Race Engineer",
-                "unlocked": False,
-            },
-            {
-                "id": "speed_demon",
-                "name": "Speed Demon",
-                "unlocked": True,
-            },
-            {
-                "id": "paddock_reg",
-                "name": "Paddock Regular",
-                "unlocked": True,
-            },
-        ],
-    }
+            "achievements": get_achievements(db=db, current_user=current_user),
+        }
+
+    finally:
+        db.close()

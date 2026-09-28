@@ -3,10 +3,6 @@ import re
 from dotenv import load_dotenv
 load_dotenv()
 
-"""
-uvicorn main:app --reload --port 8000
-"""
-
 import json
 import pickle
 import sys
@@ -31,7 +27,7 @@ from fastapi.middleware.cors import CORSMiddleware
 from fastapi.staticfiles import StaticFiles
 
 
-# --- Internal Source Modules ---
+# Internal Source Modules 
 from src.domain.track_geometry import build_track_geometry, extract_race_events, point_at_distance, get_track_outline, get_cached_track_outline
 from src.domain.f1_data import (
     load_session,
@@ -55,6 +51,10 @@ from src.auth.models import User
 from src.auth.replay_history_routes import router as replay_history_router
 from src.auth.replay_history import ReplayHistory
 from src.auth.profile_routes import router as profile_router
+from src.auth.password_reset.routes import router as password_reset_router
+from src.auth.refresh_tokens.routes import router as refresh_tokens_router
+from src.auth.sessions.routes import router as sessions_router
+from src.auth.sessions.context import RequestContextMiddleware
 from src.live.session_watcher import run_forever as run_live_watcher
 from src.live.state import live_state
 
@@ -347,17 +347,30 @@ app.add_middleware(GZipMiddleware, minimum_size=1000)
 
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],  # tighten before deploying publicly
+    allow_origins=[
+        origin.strip()
+        for origin in os.getenv(
+            "FRONTEND_ORIGIN",
+            "http://localhost:5173",
+        ).split(",")
+        if origin.strip()
+    ],
     allow_methods=["*"],
     allow_headers=["*"],
+    allow_credentials=True,
 )
 
-# Creates the `users` table if it doesn't exist yet.
+
+app.add_middleware(RequestContextMiddleware)
+
 Base.metadata.create_all(bind=engine)
 
 app.include_router(auth_router)
 app.include_router(replay_history_router)
 app.include_router(profile_router)
+app.include_router(password_reset_router)
+app.include_router(refresh_tokens_router)
+app.include_router(sessions_router)
 app.include_router(h2h_router)
 
 # F1 API routers

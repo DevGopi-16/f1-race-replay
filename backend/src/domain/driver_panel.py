@@ -8,11 +8,14 @@ import fastf1
 
 
 JOLPICA_BASE = "https://api.jolpi.ca/ergast/f1"
-COMPUTED_DATA_DIR = os.path.join(
-    os.path.dirname(__file__),
-    "..",
-    "..",
-    "computed_data",
+COMPUTED_DATA_DIR = os.environ.get(
+    "COMPUTED_DATA_DIR",
+    os.path.join(
+        os.path.dirname(__file__),
+        "..",
+        "..",
+        "computed_data",
+    ),
 )
 
 STATS_CACHE_TTL_SECONDS = 24 * 60 * 60
@@ -801,10 +804,14 @@ def build_driver_panel(
 def get_or_build_season_stats(
     season: int,
 ) -> dict[str, dict]:
-    return (
-        get_season_stats_cached(season)
-        or {}
-    )
+    cached = get_season_stats_cached(season)
+
+    if cached:
+        return cached
+
+    warm_season_stats(season)
+
+    return get_season_stats_cached(season)
 
 
 def _career_cache_path(
@@ -815,6 +822,93 @@ def _career_cache_path(
         f"career_{code}.json",
     )
 
+def get_head_to_head_record(
+    code_a: str,
+    code_b: str,
+    start_year: int,
+    end_year: int,
+) -> dict:
+    code_a = str(code_a).upper()
+    code_b = str(code_b).upper()
+
+    quali_a_wins = quali_b_wins = 0
+    race_a_wins = race_b_wins = 0
+    shared_races = 0
+    by_season: dict[int, dict] = {}
+
+    incomplete_years = []
+
+    for year in range(start_year, end_year + 1):
+        try:
+            season_stats = get_or_build_season_stats(year)
+        except Exception:
+            incomplete_years.append(year)
+            continue
+
+        entry_a = season_stats.get(code_a)
+        entry_b = season_stats.get(code_b)
+
+        if not entry_a or not entry_b:
+            incomplete_years.append(year)
+            continue
+
+        rounds_a = {
+            h.get("round"): h
+            for h in entry_a.get("history", [])
+            if h.get("round") is not None
+        }
+        rounds_b = {
+            h.get("round"): h
+            for h in entry_b.get("history", [])
+            if h.get("round") is not None
+        }
+
+        season_race_a = season_race_b = 0
+        season_quali_a = season_quali_b = 0
+        season_shared = 0
+
+        for round_no, h_a in rounds_a.items():
+            h_b = rounds_b.get(round_no)
+            if not h_b:
+                continue
+
+            season_shared += 1
+
+            pos_a = h_a.get("position")
+            pos_b = h_b.get("position")
+            if pos_a is not None and pos_b is not None:
+                if pos_a < pos_b:
+                    race_a_wins += 1
+                    season_race_a += 1
+                elif pos_b < pos_a:
+                    race_b_wins += 1
+                    season_race_b += 1
+
+            q_a = h_a.get("quali_position")
+            q_b = h_b.get("quali_position")
+            if q_a is not None and q_b is not None:
+                if q_a < q_b:
+                    quali_a_wins += 1
+                    season_quali_a += 1
+                elif q_b < q_a:
+                    quali_b_wins += 1
+                    season_quali_b += 1
+
+        if season_shared:
+            shared_races += season_shared
+            by_season[year] = {
+                "shared_races": season_shared,
+                "race": {code_a: season_race_a, code_b: season_race_b},
+                "qualifying": {code_a: season_quali_a, code_b: season_quali_b},
+            }
+
+    return {
+        "shared_races": shared_races,
+        "qualifying": {code_a: quali_a_wins, code_b: quali_b_wins},
+        "race": {code_a: race_a_wins, code_b: race_b_wins},
+        "by_season": by_season,
+        "incomplete_years": incomplete_years,
+    }
 
 def get_career_stats(
     code: str,
@@ -1015,7 +1109,7 @@ def get_alltime_career_stats(driver_id: str) -> dict:
             if first_pole_year is None and year is not None:
                 first_pole_year = year
 
-        seasons_url = f"{JOLPICA_BASE}/drivers/{driver_id}/seasons/?limit=100"
+    seasons_url = f"{JOLPICA_BASE}/drivers/{driver_id}/seasons/?limit=100"
     seasons_resp = requests.get(seasons_url, timeout=15)
     seasons_resp.raise_for_status()
     season_list = (
@@ -1076,15 +1170,16 @@ def get_season_journey(
     code: str,
     current_season: int,
     years_back: int = 3,
+    start_year: int | None = None,
 ) -> list[dict]:
     code = str(code).upper()
 
     journey = []
 
     start_year = (
-        current_season -
-        years_back +
-        1
+        start_year
+        if start_year is not None
+        else current_season - years_back + 1
     )
 
     for year in range(
@@ -1892,7 +1987,7 @@ def build_driver_full(
         "season_journey": get_season_journey(
             code,
             season,
-            years_back=3,
+            start_year=debut_year,
         ),
         "circuit_dna": get_circuit_dna(
             code,

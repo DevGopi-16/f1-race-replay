@@ -23,7 +23,7 @@ import json
 import time
 from pathlib import Path
 from urllib.parse import unquote, urlparse
-
+from suit_check import suit_score
 import requests
 
 JOLPICA = "https://api.jolpi.ca/ergast/f1"
@@ -78,6 +78,44 @@ def wiki_image_url(wiki_page_url: str) -> str | None:
     page = next(iter(pages.values()), {})
     return page.get("thumbnail", {}).get("source")
 
+def get_with_retry(url: str, params: dict | None = None, tries: int = 4) -> requests.Response:
+    for attempt in range(tries):
+        r = requests.get(url, params=params, headers=HEADERS, timeout=30)
+        if r.status_code == 429:  # rate limited: wait and retry
+            time.sleep(5 * (attempt + 1))
+            continue
+        r.raise_for_status()
+        return r
+    r.raise_for_status()
+    return r
+
+
+SKIP_WORDS = ("logo", "flag", "signature", "icon", "fia_", "platinum", "badge")
+
+def wiki_image_urls(wiki_page_url: str, limit: int = 8) -> list[str]:
+    """Lead image first, then the other photos used on the article."""
+    title = unquote(urlparse(wiki_page_url).path.rsplit("/", 1)[-1]).replace("_", " ")
+    urls: list[str] = []
+    lead = wiki_image_url(wiki_page_url)
+    if lead:
+        urls.append(lead)
+
+    r = get_with_retry(WIKI_API, params={
+        "action": "query", "titles": title, "generator": "images",
+        "gimlimit": 30, "prop": "imageinfo", "iiprop": "url|mime",
+        "iiurlwidth": 800, "redirects": 1, "format": "json",
+    })
+    for p in r.json().get("query", {}).get("pages", {}).values():
+        name = p.get("title", "").lower()
+        info = (p.get("imageinfo") or [{}])[0]
+        if info.get("mime") not in ("image/jpeg", "image/png"):
+            continue
+        if any(w in name for w in SKIP_WORDS):
+            continue
+        u = info.get("thumburl") or info.get("url")
+        if u and u not in urls:
+            urls.append(u)
+    return urls[:limit]
 
 def crop_face(content: bytes, size: int = 400) -> bytes | None:
     """Return a square JPEG centred on the main face, or None if no clear face."""
@@ -93,8 +131,9 @@ def crop_face(content: bytes, size: int = 400) -> bytes | None:
     cascade = cv2.CascadeClassifier(
         cv2.data.haarcascades + "haarcascade_frontalface_default.xml"
     )
+    gray = cv2.equalizeHist(gray)
     faces = cascade.detectMultiScale(
-        gray, scaleFactor=1.1, minNeighbors=5, minSize=(60, 60)
+        gray, scaleFactor=1.08, minNeighbors=6, minSize=(50, 50)
     )
     if len(faces) == 0:
         return None
@@ -102,7 +141,23 @@ def crop_face(content: bytes, size: int = 400) -> bytes | None:
     x, y, w, h = max(faces, key=lambda f: f[2] * f[3])
 
     # Face too small relative to the photo = crowd / action shot
-    if w < width * 0.12:
+    if w < width * 0.08:
+        return None
+
+    # A real face is roughly square; a very stretched box is usually a
+    # false positive (e.g. locking onto a mustache or sunglasses instead
+    # of the whole face), which produces an extreme, wrongly-centred crop.
+    if not (0.75 <= w / h <= 1.35):
+        return None
+
+    # Reject if no eyes are found inside the box - a strong sign the
+    # detector matched the wrong region.
+    eye_cascade = cv2.CascadeClassifier(
+        cv2.data.haarcascades + "haarcascade_eye.xml"
+    )
+    face_gray = gray[y:y + h, x:x + w]
+    eyes = eye_cascade.detectMultiScale(face_gray, scaleFactor=1.1, minNeighbors=5)
+    if len(eyes) == 0:
         return None
 
     cx, cy = x + w / 2, y + h / 2 + h * 0.15  # slightly lower to include shoulders
@@ -126,6 +181,7 @@ def main() -> None:
         action="store_true",
         help="save the raw Wikipedia image without face detection",
     )
+    parser.add_argument("--threshold", type=float, default=0.6)
     args = parser.parse_args()
 
     if not args.no_face_filter:
@@ -158,42 +214,52 @@ def main() -> None:
         driver_id = d["driverId"]
         if args.only and driver_id not in args.only:
             continue
-        if driver_id in manifest and (OUT / manifest[driver_id]["file"]).exists():
+        if any((OUT / f"{driver_id}{e}").exists() for e in (".jpg", ".jpeg", ".png", ".webp")):
             if args.only:
-                print(f"  already have: {driver_id} ({manifest[driver_id]['file']})")
+                print(f"  already have: {driver_id}")
             continue
-
         name = f"{d.get('givenName', '')} {d.get('familyName', '')}".strip()
 
         try:
-            url = wiki_image_url(d["url"]) if d.get("url") else None
-            if not url:
+            urls = wiki_image_urls(d["url"]) if d.get("url") else []
+            if not urls:
                 missing.append(driver_id)
                 print(f"  no Wikipedia image: {name}")
                 continue
 
-            img = requests.get(url, headers=HEADERS, timeout=30)
-            img.raise_for_status()
-            content = img.content
-            filename = f"{driver_id}.jpg"
+            content, filename, suit = None, f"{driver_id}.jpg", None
+            for url in urls:
+                raw = get_with_retry(url).content
+                time.sleep(1.5)  # stay under Wikimedia's rate limit
+                score = suit_score(raw)
 
-            if not args.no_face_filter:
-                content = crop_face(content)
-                if content is None:
-                    missing.append(driver_id)
-                    print(f"  no clear face, skipped: {name}")
-                    time.sleep(0.5)
+                if score < args.threshold:
+                    time.sleep(0.3)
                     continue
-            else:
-                ext = Path(urlparse(url).path).suffix.lower() or ".jpg"
-                filename = f"{driver_id}{ext}"
+                suit = score
+                if args.no_face_filter:
+                    content = raw
+                    filename = f"{driver_id}{Path(urlparse(url).path).suffix.lower() or '.jpg'}"
+                    break
+                content = crop_face(raw)
+                if content:
+                    break
+                time.sleep(0.3)
+
+            if content is None:
+                missing.append(driver_id)
+                print(f"  no usable photo among {len(urls)} images: {name}")
+                time.sleep(0.5)
+                continue
 
             (OUT / filename).write_bytes(content)
             manifest[driver_id] = {
                 "file": filename,
                 "name": name,
                 "source": d["url"],
+                "suit_verified": round(suit, 2),
             }
+
             MANIFEST.write_text(json.dumps(manifest, indent=2))
             downloaded += 1
             print(f"  saved: {name} -> {filename}")
