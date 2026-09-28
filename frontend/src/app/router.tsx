@@ -8,11 +8,15 @@ import Divider from "../components/ui/Divider";
 import SectionLabel from "../components/ui/SectionLabel";
 import PageTransition from "../components/motion/PageTransition";
 import Reveal from "../components/motion/Reveal";
+import CalendarPage from "../features/schedule/CalendarPage";
+import SessionsPage from "../features/sessions/SessionsPage";
+import SessionDetailPage from "../features/sessions/SessionDetailPage";
 
 import HomePage from "../features/home/HomePage";
 import ConstructorsPage from "../features/constructors/ConstructorsPage";
 import ReplayPage from "../features/replay/ReplayPage";
-
+import ReplaySelectPage from "../features/replay/ReplaySelectPage";
+import TelemetryPage from "../features/telemetry/TelemetryPage";
 
 import LoginPage from "../features/auth/LoginPage";
 import RegisterPage from "../features/auth/RegisterPage";
@@ -21,9 +25,19 @@ import ProtectedRoute from "../features/auth/ProtectedRoute";
 import DiscordCallbackPage from "../features/auth/DiscordCallbackPage";
 import XCallbackPage from "../features/auth/XCallbackPage";
 
-import DriversPage from "../pages/DriversPage";
-import DriverDetailPage from "../pages/DriverDetailPage";
+import DriversPage from "../features/drivers/DriversPage";
+import DriverDetailPage from "../features/drivers/DriverDetailPage";
 import AnalyticsPage from "../features/analytics/AnalyticsPage";
+import HeadToHeadPageContainer from "../features/head-to-head/HeadToHeadPageContainer";
+import ComingSoonPage from "../features/coming-soon/ComingSoonPage";
+
+import PrivacyPolicy from "../features/legal/privacy-policy/PrivacyPolicy";
+import TermsAndConditions from "../features/legal/terms/TermsAndConditions";
+import CookiePolicy from "../features/legal/cookie-policy/CookiePolicy";
+
+import AboutPage from "../features/legal/about/AboutPage";
+import FAQPage from "../features/legal/faq/FAQPage";
+import ContactPage from "../features/legal/contact/ContactPage";
 
 function FoundationPage({
   eyebrow,
@@ -141,13 +155,12 @@ export function AppRouter() {
 
         <Route
           path="/sessions"
-          element={
-            <FoundationPage
-              eyebrow="02 / Sessions"
-              title="Sessions"
-              description="Explore every practice, qualifying, sprint and race session."
-            />
-          }
+          element={<SessionsPage />}
+        />
+
+        <Route
+          path="/sessions/:year/:round"
+          element={<SessionDetailPage />}
         />
 
         <Route
@@ -155,39 +168,75 @@ export function AppRouter() {
           element={<ConstructorsPage />}
         />
 
+        <Route
+          path="/calendar"
+          element={<CalendarPage />}
+        />
 
         <Route
           path="/telemetry"
-          element={
-            <FoundationPage
-              eyebrow="05 / Telemetry"
-              title="Telemetry"
-              description="Dive into speed, throttle, braking, gears, tyres and track position."
-            />
-          }
+          element={<ComingSoonPage eyebrow="05 / Telemetry" title="Telemetry" description="Dive into speed, throttle, braking, gears, tyres and track position." features={["Speed, throttle and brake traces for every lap", "Gear and tyre data mapped to track position", "Lap-by-lap comparison between drivers"]} />}
         />
-
 
         <Route
           path="/timing"
-          element={
-            <FoundationPage
-              eyebrow="06 / Timing"
-              title="Timing"
-              description="Follow live-style race timing, gaps, positions and sector performance."
-            />
-          }
+          element={<ComingSoonPage eyebrow="06 / Timing" title="Timing" description="Follow live-style race timing, gaps, positions and sector performance." features={["Live-style gaps and intervals between cars", "Sector times with personal and session bests", "Position changes and pit stop tracking"]} />}
         />
-
+        
         <Route
           path="/analytics"
           element={<AnalyticsPage />}
         />
 
+        <Route
+          path="/head-to-head"
+          element={<HeadToHeadPageContainer />}
+        />
+
+        <Route
+          path="/privacy-policy"
+          element={<PrivacyPolicy />}
+        />
+
+        <Route
+          path="/terms"
+          element={<TermsAndConditions />}
+        />
+
+        <Route
+          path="/cookie-policy"
+          element={<CookiePolicy />}
+        />
+
+        <Route
+          path="/about"
+          element={<AboutPage />}
+        />
+        
+        <Route
+          path="/faq"
+          element={<FAQPage />}
+        />
+
+        <Route
+          path="/contact"
+          element={<ContactPage />}
+        />
+
         <Route element={<ProtectedRoute />}>
           <Route
             path="/replay"
+            element={<ReplaySelectPage />}
+          />
+
+          <Route
+            path="/replay/live"
             element={<ReplayPage />}
+          />
+
+          <Route
+            path="/replay/:sessionKey/telemetry"
+            element={<TelemetryPage />}
           />
 
           <Route

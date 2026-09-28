@@ -8,6 +8,7 @@ import {
 } from "./navigation.config";
 
 import UserMenu from "../auth/UserMenu";
+import NextSessionBadge from "./NextSessionBadge";
 
 function NavigationLink({
   label,
@@ -172,9 +173,12 @@ export default function FloatingNav() {
           </div>
 
           <div className="floating-nav-actions">
+            <NextSessionBadge />
+
             <div className="floating-nav-user">
               <UserMenu />
             </div>
+
             <button
               type="button"
               className="floating-nav-menu-button"

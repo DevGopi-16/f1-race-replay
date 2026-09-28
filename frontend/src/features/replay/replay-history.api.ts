@@ -1,7 +1,6 @@
 import type { ReplaySessionType } from "./replay.types";
 
 const AUTH_BASE = "/auth";
-const TOKEN_KEY = "f1_access_token";
 
 export interface ReplayHistory {
   id: number;
@@ -24,25 +23,14 @@ export interface SaveReplayHistoryPayload {
   completed?: boolean;
 }
 
-function getToken(): string | null {
-  return localStorage.getItem(TOKEN_KEY);
-}
-
 async function authRequest<T>(
   path: string,
   options: RequestInit = {},
 ): Promise<T> {
-  const token = getToken();
-
-  if (!token) {
-    throw new Error("Not authenticated");
-  }
-
   const response = await fetch(`${AUTH_BASE}${path}`, {
     ...options,
     headers: {
       "Content-Type": "application/json",
-      Authorization: `Bearer ${token}`,
       ...(options.headers ?? {}),
     },
     credentials: "include",

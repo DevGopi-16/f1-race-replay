@@ -1,6 +1,5 @@
 const API_BASE_URL = "";
 
-const ACCESS_TOKEN_KEY = "f1_access_token";
 
 export class ApiError extends Error {
   status: number;
@@ -36,10 +35,6 @@ export async function apiRequest<T>(
   endpoint: string,
   options: RequestInit = {},
 ): Promise<T> {
-  const token = localStorage.getItem(
-    ACCESS_TOKEN_KEY,
-  );
-
   const headers = new Headers(
     options.headers,
   );
@@ -56,13 +51,6 @@ export async function apiRequest<T>(
     headers.set(
       "Content-Type",
       "application/json",
-    );
-  }
-
-  if (token) {
-    headers.set(
-      "Authorization",
-      `Bearer ${token}`,
     );
   }
 

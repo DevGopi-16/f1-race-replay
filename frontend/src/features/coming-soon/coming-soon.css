@@ -1,0 +1,101 @@
+/* ---------- Layout: centered, padded column ---------- */
+.coming-soon-shell {
+  width: 100%;
+  max-width: 1000px;
+  margin: 0 auto;
+  padding: 32px clamp(20px, 5vw, 48px) 0;
+  box-sizing: border-box;
+}
+
+/* ---------- Coming soon pill ---------- */
+.coming-soon-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  padding: 8px 16px;
+  border: 1px solid rgba(225, 6, 0, 0.45);
+  border-radius: 999px;
+  background: rgba(225, 6, 0, 0.08);
+  color: #edeff2;
+  font-size: 0.78rem;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  margin: 8px 0 24px;
+}
+
+.coming-soon-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: #e10600;
+  animation: coming-soon-pulse 1.6s ease-in-out infinite;
+}
+
+@keyframes coming-soon-pulse {
+  0%,
+  100% {
+    opacity: 1;
+    box-shadow: 0 0 0 0 rgba(225, 6, 0, 0.55);
+  }
+  50% {
+    opacity: 0.6;
+    box-shadow: 0 0 0 8px rgba(225, 6, 0, 0);
+  }
+}
+
+/* ---------- Sections ---------- */
+.coming-soon-section {
+  padding: 24px 0 8px;
+}
+
+.coming-soon-space {
+  height: 16px;
+}
+
+.coming-soon-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  max-width: 62ch;
+}
+
+.coming-soon-list li {
+  position: relative;
+  padding: 0 0 14px 22px;
+  color: rgba(237, 239, 242, 0.7);
+  font-size: 1rem;
+  line-height: 1.7;
+}
+
+.coming-soon-list li::before {
+  content: "";
+  position: absolute;
+  left: 2px;
+  top: 0.75em;
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: #e10600;
+}
+
+.coming-soon-actions-wrap {
+  padding-bottom: 72px;
+}
+
+.coming-soon-actions {
+  display: flex;
+  gap: 14px;
+  flex-wrap: wrap;
+}
+
+@media (max-width: 640px) {
+  .coming-soon-shell {
+    padding-top: 24px;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .coming-soon-dot {
+    animation: none;
+  }
+}

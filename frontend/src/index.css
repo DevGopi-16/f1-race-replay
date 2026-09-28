@@ -1,6 +1,3 @@
-
-/* DRIVER PAGE — STEP 1 SHELL */
-
 .drivers-page {
   min-height: 100vh;
   padding: 32px;
@@ -80,4 +77,4 @@
   }
 }
 
-@import "./styles/drivers.css";
+@import "../features/drivers/drivers.css";

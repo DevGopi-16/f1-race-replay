@@ -75,7 +75,7 @@ class User(Base):
 
     replays_watched = Column(
         Integer,
-        default=24,
+        default=0,
         nullable=True,
     )
 

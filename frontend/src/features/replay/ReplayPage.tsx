@@ -6,12 +6,13 @@ import {
   useState,
 } from "react";
 
+import { useNavigate, useSearchParams } from "react-router-dom";
+
 import PageContainer from "../../components/layout/PageContainer";
 import Reveal from "../../components/motion/Reveal";
 
 import { useReplay } from "./hooks/useReplay";
 
-import ReplaySelector from "./components/ReplaySelector";
 import ReplayStatus from "./components/ReplayStatus";
 import ReplayTrack from "./components/ReplayTrack";
 import ReplayLeaderboard from "./components/ReplayLeaderboard";
@@ -25,6 +26,9 @@ import { saveReplayHistory } from "./replay-history.api";
 import "./replay.css";
 
 export default function ReplayPage() {
+  const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
+
   // ============================================================
   // DRIVER SELECTION
   // ============================================================
@@ -55,19 +59,18 @@ export default function ReplayPage() {
   // ============================================================
   // REPLAY STATE
   // ============================================================
+  const year = Number(searchParams.get("year") ?? 2026);
 
-  const [year, setYear] = useState(2026);
+  const grandPrix = searchParams.get("grandPrix") ?? "";
 
-  const [grandPrix, setGrandPrix] =
-    useState("");
+  const sessionType =
+    (searchParams.get("sessionType") as ReplaySessionType) ?? "R";
 
-  const [sessionType, setSessionType] =
-    useState<ReplaySessionType>("R");
-
-  const [fps, setFps] = useState(8);
+  const fps = Number(searchParams.get("fps") ?? 8);
 
   const [frameIndex, setFrameIndex] =
     useState(0);
+
 
   const [playing, setPlaying] =
     useState(false);
@@ -225,15 +228,6 @@ export default function ReplayPage() {
       // ----------------------------------------------------------
       // Only authenticated users have replay history.
       // ----------------------------------------------------------
-
-      const token =
-        localStorage.getItem(
-          "f1_access_token",
-        );
-
-      if (!token) {
-        return Promise.resolve();
-      }
 
       if (!currentQuery) {
         return Promise.resolve();
@@ -492,13 +486,7 @@ export default function ReplayPage() {
       const currentMeta =
         latestMetaRef.current;
 
-      const token =
-        localStorage.getItem(
-          "f1_access_token",
-        );
-
       if (
-        !token ||
         !currentQuery ||
         !currentData?.frames?.length
       ) {
@@ -593,31 +581,7 @@ export default function ReplayPage() {
     setPlaying(false);
   }, [loadedQuery]);
 
-  // ============================================================
-  // LOAD REPLAY
-  // ============================================================
-
-  const handleLoadReplay = () => {
-    playbackGenerationRef.current +=
-      1;
-
-    latestFrameIndexRef.current = 0;
-
-    setFrameIndex(0);
-    setPlaying(false);
-
-    if (!grandPrix) {
-      return;
-    }
-
-    setLoadedQuery({
-      year,
-      grandPrix,
-      sessionType,
-      fps,
-    });
-  };
-
+  
   // ============================================================
   // EXISTING PLAYBACK ENGINE
   // ============================================================
@@ -1030,9 +994,23 @@ export default function ReplayPage() {
   // ============================================================
   // KEYBOARD CONTROLS
   // ============================================================
+    // ============================================================
+  // AUTO-LOAD FROM URL PARAMS
+  // ============================================================
+
+  useEffect(() => {
+    if (!grandPrix) {
+      navigate("/replay");
+      return;
+    }
+
+    setLoadedQuery({ year, grandPrix, sessionType, fps });
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [year, grandPrix, sessionType, fps]);
 
   useEffect(() => {
     const handleKeyboard = (
+
       event: KeyboardEvent,
     ) => {
       if (
@@ -1153,7 +1131,7 @@ export default function ReplayPage() {
 
   return (
     <PageContainer
-      className="replay-page"
+      className="replay-page replay-live-page"
       wide
     >
       <div className="replay-shell">
@@ -1203,6 +1181,20 @@ export default function ReplayPage() {
                   : "SELECT REPLAY"}
             </div>
 
+            {data && (
+              <button
+                className="replay-telemetry-link"
+                type="button"
+                onClick={() =>
+                  navigate(
+                    `/replay/${year}-${data.meta.round}-${sessionType}/telemetry?year=${year}&grandPrix=${encodeURIComponent(eventName)}&sessionType=${sessionType}`,
+                  )
+                }
+              >
+                TELEMETRY
+              </button>
+            )}
+
           </header>
         </Reveal>
 
@@ -1249,61 +1241,45 @@ export default function ReplayPage() {
           </div>
 
         </section>
-
-        {/* SESSION SELECTOR */}
-
-        <details className="replay-selector-drawer">
-          <summary>
-            SESSION
-          </summary>
-
-          <div className="replay-selector-inner">
-
-            <ReplaySelector
-              grandPrix={
-                grandPrix
-              }
-
-              onGrandPrixChange={
-                setGrandPrix
-              }
-
-              year={year}
-
-              sessionType={
-                sessionType
-              }
-
-              fps={fps}
-
-              onYearChange={
-                setYear
-              }
-
-              onSessionChange={
-                setSessionType
-              }
-
-              onFpsChange={
-                setFps
-              }
-
-              onLoadReplay={
-                handleLoadReplay
-              }
-
-              loading={loading}
-            />
-
-          </div>
-        </details>
-
-        {loading && (
-          <ReplayStatus
-            type="loading"
-            message="Loading race replay…"
-          />
-        )}
+          {loading && (
+            <>
+              <ReplayStatus
+                type="loading"
+                message="Loading race replay…"
+              />
+              <section className="replay-loading-stage" aria-live="polite">
+                <div className="replay-loading-orbit" aria-hidden="true">
+                  <span />
+                  <span />
+                  <span />
+                </div>
+                <div className="replay-loading-copy">
+                  <span className="replay-loading-kicker">
+                    {year} / {eventName}
+                  </span>
+                  <strong>Preparing race control</strong>
+                  <p>
+                    Fetching circuit geometry, timing frames, and driver
+                    telemetry for your replay.
+                  </p>
+                </div>
+                <div className="replay-loading-metrics">
+                  <div>
+                    <span>TRACK DATA</span>
+                    <i />
+                  </div>
+                  <div>
+                    <span>TELEMETRY</span>
+                    <i />
+                  </div>
+                  <div>
+                    <span>RACE FRAMES</span>
+                    <i />
+                  </div>
+                </div>
+              </section>
+            </>
+          )}
 
         {error &&
           !loading && (
@@ -1391,41 +1367,7 @@ export default function ReplayPage() {
 
                 </main>
               </Reveal>
-
-              {/* REPLAY CONTROLS */}
-
-              <Reveal delay="short">
-
-                <ReplayControls
-                  frameIndex={
-                    frameIndex
-                  }
-
-                  totalFrames={
-                    totalFrames
-                  }
-
-                  frameRate={
-                    data.frame_rate
-                  }
-
-                  playing={
-                    playing
-                  }
-
-                  onPlayPause={
-                    handlePlayPause
-                  }
-
-                  onFrameChange={
-                    handleFrameChange
-                  }
-                />
-
-              </Reveal>
-
-              {/* SELECTED DRIVERS */}
-
+               {/* SELECTED DRIVERS */}
               <Reveal delay="short">
 
                 <section className="replay-driver-section">
@@ -1684,11 +1626,8 @@ export default function ReplayPage() {
                     </small>
 
                   </div>
-
-                  <div className="replay-timeline">
-
+                  <div className="replay-timeline-body">
                     <div className="replay-timeline-topline">
-
                       <div className="replay-timeline-live">
 
                         <span className="replay-timeline-live-dot" />
@@ -1895,147 +1834,53 @@ export default function ReplayPage() {
 
                     </div>
 
-                  </div>
+                    <div className="replay-controls-block">
 
+                      <ReplayControls
+                        frameIndex={frameIndex}
+                        totalFrames={totalFrames}
+                        frameRate={data.frame_rate}
+                        playing={playing}
+                        onPlayPause={handlePlayPause}
+                        onFrameChange={handleFrameChange}
+                      />
+
+                      <div className="replay-playback-meta">
+
+                        <div className="replay-speed">
+                          {[0.5, 1, 2, 4].map((value) => (
+                            <button
+                              key={value}
+                              type="button"
+                              className={speed === value ? "active" : ""}
+                              onClick={() => handleSpeedChange(value)}
+                            >
+                              {value}×
+                            </button>
+                          ))}
+                        </div>
+
+                        <div className="replay-keyboard">
+                          <span>
+                            SPACE
+                            <small>Play/Pause</small>
+                          </span>
+                          <span>
+                            <img src="/images/controls/arrow-left.png" alt="" className="replay-key-icon" />
+                            <img src="/images/controls/arrow-right.png" alt="" className="replay-key-icon" />
+                            <small>Seek</small>
+                          </span>
+                          <span>
+                            <img src="/images/controls/arrow-up.png" alt="" className="replay-key-icon" />
+                            <img src="/images/controls/arrow-down.png" alt="" className="replay-key-icon" />
+                            <small>Speed</small>
+                          </span>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
                 </section>
-
               </Reveal>
-
-              {/* PLAYBACK */}
-
-              <Reveal delay="medium">
-
-                <section className="replay-playback-section">
-
-                  <div className="replay-playback-main">
-
-                    <button
-                      type="button"
-                      className="replay-control-button"
-                      onClick={() =>
-                        handleFrameChange(
-                          frameIndex -
-                            fps * 5,
-                        )
-                      }
-                      aria-label="Seek backward 5 seconds"
-                      title="Seek backward 5 seconds"
-                    >
-                      <img
-                        src="/images/controls/rewind.png"
-                        alt="Rewind"
-                      />
-                    </button>
-
-                    <button
-                      type="button"
-                      className="replay-play-button"
-                      onClick={
-                        handlePlayPause
-                      }
-                      aria-label={
-                        playing
-                          ? "Pause replay"
-                          : "Play replay"
-                      }
-                      title={
-                        playing
-                          ? "Pause"
-                          : "Play"
-                      }
-                    >
-                      <img
-                        src={
-                          playing
-                            ? "/images/controls/pause.png"
-                            : "/images/controls/play.png"
-                        }
-                        alt={
-                          playing
-                            ? "Pause"
-                            : "Play"
-                        }
-                      />
-                    </button>
-
-                    <button
-                      type="button"
-                      className="replay-control-button"
-                      onClick={() =>
-                        handleFrameChange(
-                          frameIndex +
-                            fps * 5,
-                        )
-                      }
-                      aria-label="Seek forward 5 seconds"
-                      title="Seek forward 5 seconds"
-                    >
-                      <img
-                        src="/images/controls/forward.png"
-                        alt="Forward"
-                      />
-                    </button>
-
-                  </div>
-
-                  <div className="replay-speed">
-
-                    {[0.5, 1, 2, 4].map(
-                      (value) => (
-                        <button
-                          key={value}
-                          type="button"
-                          className={
-                            speed ===
-                            value
-                              ? "active"
-                              : ""
-                          }
-                          onClick={() =>
-                            handleSpeedChange(
-                              value,
-                            )
-                          }
-                        >
-                          {value}×
-                        </button>
-                      ),
-                    )}
-
-                  </div>
-
-                  <div className="replay-keyboard">
-
-                    <span>
-                      SPACE
-
-                      <small>
-                        Play/Pause
-                      </small>
-                    </span>
-
-                    <span>
-                      ← →
-
-                      <small>
-                        Seek
-                      </small>
-                    </span>
-
-                    <span>
-                      ↑ ↓
-
-                      <small>
-                        Speed
-                      </small>
-                    </span>
-
-                  </div>
-
-                </section>
-
-              </Reveal>
-
             </>
           )}
 

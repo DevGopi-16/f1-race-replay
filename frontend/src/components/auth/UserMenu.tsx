@@ -143,6 +143,7 @@ export default function UserMenu() {
           <img
             src={user.picture_url}
             alt=""
+            referrerPolicy="no-referrer"
             className="user-menu-avatar"
           />
         ) : (
@@ -172,6 +173,7 @@ export default function UserMenu() {
               <img
                 src={user.picture_url}
                 alt=""
+                referrerPolicy="no-referrer"
                 className="user-menu-profile-avatar"
               />
             ) : (

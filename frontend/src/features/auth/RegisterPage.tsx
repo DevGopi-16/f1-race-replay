@@ -12,16 +12,55 @@ export default function RegisterPage() {
   const [username, setUsername] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [confirmPassword, setConfirmPassword] =
+    useState("");
+  const [fieldErrors, setFieldErrors] = useState<{
+    email?: string;
+    password?: string;
+    confirmPassword?: string;
+  }>({});
   const [error, setError] = useState("");
 
   async function handleSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
     setError("");
 
+    const nextFieldErrors: typeof fieldErrors = {};
+    const normalizedEmail = email.trim();
+    const emailIsValid =
+      /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(
+        normalizedEmail,
+      );
+
+    if (!emailIsValid) {
+      nextFieldErrors.email =
+        "Enter a valid email address.";
+    }
+
+    if (
+      password.length < 8 ||
+      !/[A-Za-z]/.test(password) ||
+      !/\d/.test(password)
+    ) {
+      nextFieldErrors.password =
+        "Use at least 8 characters with a letter and a number.";
+    }
+
+    if (password !== confirmPassword) {
+      nextFieldErrors.confirmPassword =
+        "Passwords do not match.";
+    }
+
+    setFieldErrors(nextFieldErrors);
+
+    if (Object.keys(nextFieldErrors).length > 0) {
+      return;
+    }
+
     try {
       await signup({
         username: username.trim(),
-        email: email.trim(),
+        email: normalizedEmail,
         password,
       });
 
@@ -118,8 +157,47 @@ export default function RegisterPage() {
                 placeholder="you@example.com"
                 autoComplete="email"
                 required
+                aria-invalid={Boolean(fieldErrors.email)}
               />
             </div>
+
+            {fieldErrors.email && (
+              <small className="auth-error">
+                {fieldErrors.email}
+              </small>
+            )}
+          </label>
+
+          <label className="auth-field">
+            <span>Confirm password</span>
+
+            <div className="auth-input-wrap">
+              <span className="auth-input-icon">◈</span>
+
+              <input
+                type="password"
+                value={confirmPassword}
+                onChange={(event) => {
+                  setConfirmPassword(event.target.value);
+                  setFieldErrors((current) => ({
+                    ...current,
+                    confirmPassword: undefined,
+                  }));
+                }}
+                placeholder="Repeat your password"
+                autoComplete="new-password"
+                required
+                aria-invalid={Boolean(
+                  fieldErrors.confirmPassword,
+                )}
+              />
+            </div>
+
+            {fieldErrors.confirmPassword && (
+              <small className="auth-error">
+                {fieldErrors.confirmPassword}
+              </small>
+            )}
           </label>
 
           <label className="auth-field">
@@ -137,8 +215,15 @@ export default function RegisterPage() {
                 placeholder="Create a password"
                 autoComplete="new-password"
                 required
+                aria-invalid={Boolean(fieldErrors.password)}
               />
             </div>
+
+            {fieldErrors.password && (
+              <small className="auth-error">
+                {fieldErrors.password}
+              </small>
+            )}
           </label>
 
           {error && (
@@ -146,6 +231,15 @@ export default function RegisterPage() {
               {error}
             </div>
           )}
+
+          <div className="auth-terms">
+            By creating an account, you agree to our{" "}
+            <a href="/terms" target="_blank" rel="noreferrer">Terms</a>{" "}
+            and{" "}
+            <a href="/privacy-policy" target="_blank" rel="noreferrer">
+              Privacy Policy
+            </a>
+          </div>
 
           <button
             type="submit"

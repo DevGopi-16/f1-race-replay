@@ -1,0 +1,316 @@
+/* ---------- Quick strip ---------- */
+
+.season-strip {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+.season-pill,
+.season-cell {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+
+  color: var(--color-white-60, rgba(255, 255, 255, 0.6));
+  background: var(--color-white-05, rgba(255, 255, 255, 0.05));
+  border: 1px solid var(--color-white-08, rgba(255, 255, 255, 0.08));
+
+  font-family: var(--font-mono, ui-monospace, "SF Mono", Menlo, monospace);
+  cursor: pointer;
+
+  transition:
+    color 0.15s ease,
+    background 0.15s ease,
+    border-color 0.15s ease;
+}
+
+.season-pill {
+  min-height: 30px;
+  padding: 0 11px;
+  border-radius: 8px;
+  font-size: 0.75rem;
+  letter-spacing: 0;
+  gap: 6px;
+}
+
+.season-pill:hover,
+.season-cell:hover {
+  color: var(--color-white, #fff);
+  background: var(--color-white-08, rgba(255, 255, 255, 0.08));
+  border-color: var(--color-white-15, rgba(255, 255, 255, 0.15));
+}
+
+.season-pill.is-active,
+.season-cell.is-active {
+  color: #fff;
+  background: var(--color-accent, #e10600);
+  border-color: var(--color-accent, #e10600);
+}
+
+.season-all {
+  font-family: var(--font-body, inherit);
+  font-weight: 600;
+}
+
+.season-pill:focus-visible,
+.season-cell:focus-visible,
+.season-close:focus-visible {
+  outline: 2px solid var(--color-white, #fff);
+  outline-offset: 2px;
+}
+
+.season-dot {
+  width: 6px;
+  height: 6px;
+  flex-shrink: 0;
+  border-radius: 50%;
+  background: var(--era, currentColor);
+}
+
+/* ---------- Modal ---------- */
+
+.season-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 100000; /* above the floating nav (10001) */
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 24px;
+
+  background: rgba(0, 0, 0, 0.7);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+
+  animation: season-fade 0.18s ease;
+}
+
+.season-modal {
+  display: flex;
+  flex-direction: column;
+
+  width: min(100%, 720px);
+  max-height: min(100%, 860px);
+
+  background: #0a0a0a;
+  border: 1px solid var(--color-white-08, rgba(255, 255, 255, 0.08));
+  border-radius: 16px;
+  box-shadow: 0 30px 90px rgba(0, 0, 0, 0.7);
+
+  overflow: hidden;
+  animation: season-rise 0.2s ease;
+}
+
+.season-modal-header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 16px;
+
+  padding: 24px 32px 18px;
+  border-bottom: 1px solid var(--color-white-08, rgba(255, 255, 255, 0.08));
+}
+
+.season-modal-header h2 {
+  margin: 0;
+  color: #fff;
+  font-size: 1.5rem;
+  font-weight: 700;
+}
+
+.season-modal-header p {
+  margin: 4px 0 0;
+  color: var(--color-white-45, rgba(255, 255, 255, 0.45));
+  font-size: 0.95rem;
+}
+
+.season-close {
+  display: inline-flex;
+  padding: 6px;
+  color: var(--color-white-60, rgba(255, 255, 255, 0.6));
+  background: transparent;
+  border: 0;
+  border-radius: 8px;
+  cursor: pointer;
+}
+
+.season-close:hover {
+  color: #fff;
+}
+
+.season-modal-body {
+  flex: 1;
+  min-height: 0;
+  overflow-y: auto;
+  padding: 24px 32px 12px;
+}
+
+.season-decade + .season-decade {
+  margin-top: 26px;
+}
+
+.season-decade-head {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  margin-bottom: 14px;
+}
+
+.season-decade-head h3 {
+  position: relative;
+  margin: 0;
+  padding-left: 14px;
+
+  color: var(--color-white-75, rgba(255, 255, 255, 0.75));
+  font-family: var(--font-mono, ui-monospace, "SF Mono", Menlo, monospace);
+  font-size: 1rem;
+  font-weight: 700;
+  white-space: nowrap;
+}
+
+.season-decade-head h3::before {
+  content: "";
+  position: absolute;
+  left: 0;
+  top: 2px;
+  bottom: 2px;
+  width: 3px;
+  border-radius: 2px;
+  background: var(--color-accent, #e10600);
+}
+
+.season-decade-line {
+  flex: 1;
+  min-width: 12px;
+  height: 1px;
+  background: var(--color-white-08, rgba(255, 255, 255, 0.08));
+}
+
+.season-era-badges {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+  gap: 8px;
+}
+
+.season-era-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+
+  padding: 5px 12px;
+  border-radius: 999px;
+
+  color: var(--era);
+  background: color-mix(in srgb, var(--era) 12%, transparent);
+  border: 1px solid color-mix(in srgb, var(--era) 45%, transparent);
+
+  font-size: 0.78rem;
+  white-space: nowrap;
+}
+
+.season-grid {
+  display: grid;
+  grid-template-columns: repeat(10, minmax(0, 1fr));
+  gap: 8px;
+}
+
+.season-cell {
+  min-height: 44px;
+  padding: 0;
+  border-radius: 8px;
+  font-size: 0.95rem;
+}
+
+.season-legend {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px 22px;
+
+  padding: 16px 32px;
+  background: rgba(255, 255, 255, 0.02);
+  border-top: 1px solid var(--color-white-08, rgba(255, 255, 255, 0.08));
+}
+
+.season-legend-item {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  color: var(--color-white-60, rgba(255, 255, 255, 0.6));
+  font-size: 0.85rem;
+}
+
+.season-legend-item .season-dot {
+  width: 9px;
+  height: 9px;
+}
+
+@keyframes season-fade {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+@keyframes season-rise {
+  from { opacity: 0; transform: translateY(8px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+@media (max-width: 640px) {
+  .season-overlay {
+    padding: 10px;
+  }
+
+  .season-modal-header,
+  .season-modal-body,
+  .season-legend {
+    padding-left: 18px;
+    padding-right: 18px;
+  }
+
+  .season-grid {
+    grid-template-columns: repeat(5, minmax(0, 1fr));
+  }
+
+  .season-decade-head {
+    flex-wrap: wrap;
+  }
+
+  .season-decade-line {
+    display: none;
+  }
+
+  .season-era-badges {
+    justify-content: flex-start;
+    width: 100%;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .season-overlay,
+  .season-modal {
+    animation: none;
+  }
+}
+
+.season-cell:disabled {
+  opacity: 0.25;
+  cursor: not-allowed;
+  pointer-events: none;
+}
+
+.sd-legend-who {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  min-width: 0;
+}
+
+.sd-winner-driver {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}

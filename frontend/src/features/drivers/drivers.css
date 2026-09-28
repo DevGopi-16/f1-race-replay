@@ -1,0 +1,1661 @@
+/* PAGE CONTAINER */
+@keyframes drv-drift {
+  0%   { background-position: 0% 0%, 0% 0%; }
+  100% { background-position: 8% 6%, 0% 0%; }
+}
+
+.drivers-page {
+  width: 100%;
+  min-height: 100vh;
+  padding: 42px 42px 100px;
+  box-sizing: border-box;
+
+  color: var(--text-primary);
+
+  background:
+    radial-gradient(
+      circle at 80% 10%,
+      rgba(255, 255, 255, 0.035),
+      transparent 30%
+    ),
+    var(--surface-page);
+  background-size: 200% 200%, auto;
+
+  animation: drv-drift 18s ease-in-out infinite alternate;
+}
+
+.drivers-container {
+  width: min(1500px, 100%);
+  margin: 0 auto;
+}
+
+
+/* HEADER */
+
+.drivers-header {
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 30px;
+  margin-bottom: 30px;
+}
+
+.drivers-header-eyebrow {
+  margin: 0 0 10px;
+  color: var(--text-secondary);
+  font-size: 10px;
+  font-weight: 800;
+  letter-spacing: 0.24em;
+}
+
+.drivers-header-title h1 {
+  margin: 0;
+  color: var(--text-primary);
+  font-size: clamp(52px, 7vw, 92px);
+  line-height: 0.85;
+  font-weight: 900;
+  letter-spacing: -0.065em;
+}
+
+.drivers-header-controls {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.drivers-search {
+  width: 240px;
+  height: 44px;
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  padding: 0 14px;
+  box-sizing: border-box;
+  border: 1px solid var(--color-white-15);
+  border-radius: 8px;
+  background: var(--color-white-05);
+}
+
+.drivers-search-icon {
+  color: var(--text-muted);
+  font-size: 20px;
+}
+
+.drivers-search input {
+  width: 100%;
+  border: 0;
+  outline: 0;
+  background: transparent;
+  color: var(--text-primary);
+  font: inherit;
+  font-size: 13px;
+}
+
+.drivers-search input::placeholder {
+  color: var(--text-faint);
+}
+
+.drivers-year {
+  height: 44px;
+  min-width: 70px;
+  padding: 0 16px;
+  border: 1px solid var(--color-white-15);
+  border-radius: 8px;
+  background: var(--color-white-08);
+  color: var(--text-primary);
+  font: inherit;
+  font-size: 12px;
+  font-weight: 800;
+  cursor: pointer;
+}
+
+
+/* FEATURED DRIVER HERO */
+
+@keyframes drv-fade-up {
+  from { opacity: 0; transform: translateY(14px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes drv-float {
+  0%, 100% { transform: translateY(0); }
+  50%      { transform: translateY(-8px); }
+}
+
+@keyframes drv-banner-wipe {
+  0%   { clip-path: polygon(0 0, 6% 0, 0% 100%, 0% 100%); }
+  100% { clip-path: polygon(0 0, 106% 0, 100% 100%, 0% 100%); }
+}
+
+@keyframes drv-banner-wipe-edge {
+  0%   { left: -2%; opacity: 1; }
+  85%  { opacity: 1; }
+  100% { left: 100%; opacity: 0; }
+}
+
+.featured-driver {
+  position: relative;
+  width: 100%;
+  min-height: 620px;
+  margin: 0;
+  overflow: hidden;
+  border: 1px solid var(--color-white-08);
+  border-radius: 24px;
+  background: var(--surface-card);
+  box-shadow: 0 35px 100px rgba(0, 0, 0, 0.45);
+  isolation: isolate;
+
+  animation: drv-fade-up .6s cubic-bezier(.2,.8,.2,1) both;
+}
+
+.featured-driver-bg {
+  position: absolute;
+  inset: 0 0 100px 0;
+  z-index: 0;
+  background-repeat: no-repeat;
+  background-position: center center;
+  background-size: contain;
+  opacity: 1;
+  pointer-events: none;
+  overflow: hidden;
+
+  animation: drv-banner-wipe .85s cubic-bezier(.65,0,.35,1) both;
+}
+
+/* bright leading edge that "cuts" across as the wipe uncovers the banner */
+.featured-driver-bg::before {
+  content: "";
+  position: absolute;
+  top: -10%;
+  bottom: -10%;
+  width: 4px;
+  background: linear-gradient(180deg, transparent, rgba(255,255,255,0.85), transparent);
+  transform: skewX(-12deg);
+  z-index: 2;
+  pointer-events: none;
+  animation: drv-banner-wipe-edge .85s cubic-bezier(.65,0,.35,1) both;
+}
+
+.featured-driver-overlay {
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  pointer-events: none;
+  background:
+    linear-gradient(
+      to bottom,
+      transparent 0%,
+      transparent 60%,
+      rgba(0, 0, 0, 0.10) 82%,
+      rgba(0, 0, 0, 0.38) 100%
+    );
+}
+
+.featured-driver-content {
+  position: relative;
+  z-index: 5;
+  min-height: 520px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 70px 7% 105px;
+  box-sizing: border-box;
+}
+
+.featured-driver-copy {
+  position: relative;
+  z-index: 12;
+  width: 52%;
+  max-width: 550px;
+
+  animation: drv-fade-up .5s ease .5s both;
+}
+
+
+/* --- Featured driver position badge --- */
+
+.featured-driver-position {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 28px;
+  padding: 8px 13px;
+  border: 1px solid rgba(255, 255, 255, 0.13);
+  border-radius: 999px;
+  background: rgba(0, 0, 0, 0.18);
+  color: rgba(255, 255, 255, 0.60);
+  font-size: 10px;
+  font-weight: 800;
+  letter-spacing: 0.18em;
+  backdrop-filter: blur(8px);
+}
+
+.featured-driver-position strong {
+  color: var(--text-primary);
+}
+
+
+/* --- Featured driver name --- */
+
+.featured-driver-name span {
+  display: block;
+  margin-bottom: -5px;
+  color: var(--text-primary);
+  font-size: clamp(30px, 4vw, 52px);
+  font-weight: 500;
+  line-height: 1;
+  letter-spacing: -0.055em;
+}
+
+.featured-driver-name h2 {
+  margin: 0;
+  color: #4fa9c9;
+  font-family: var(--font-display);
+  font-size: clamp(58px, 8vw, 112px);
+  line-height: 0.85;
+  font-weight: 950;
+  letter-spacing: -0.07em;
+  text-shadow: 0 5px 25px rgba(0, 0, 0, 0.45);
+}
+
+/* --- Featured driver meta (team / country) --- */
+
+.featured-driver-meta {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  margin-top: 24px;
+  white-space: nowrap;
+}
+
+.featured-driver-team {
+  display: inline-flex;
+  align-items: center;
+  gap: 9px;
+  margin: 0;
+  color: var(--text-primary);
+  font-size: 15px;
+  font-weight: 700;
+  line-height: 1;
+  text-shadow: 0 2px 10px rgba(0, 0, 0, 0.85);
+}
+
+.featured-driver-team-icon {
+  width: 30px;
+  height: 30px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  border: 0;
+  border-radius: 0;
+  background: transparent;
+  box-shadow: none;
+}
+
+.featured-driver-team-icon img {
+  width: 30px;
+  height: 30px;
+  object-fit: contain;
+  filter: drop-shadow(0 4px 7px rgba(0, 0, 0, 0.45));
+}
+
+.featured-driver-meta-divider {
+  color: var(--text-muted);
+  font-size: 14px;
+  font-weight: 500;
+  line-height: 1;
+}
+
+.featured-driver-country {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  margin: 0;
+  color: var(--text-primary);
+  font-size: 15px;
+  font-weight: 700;
+  line-height: 1;
+  white-space: nowrap;
+  text-shadow: 0 2px 10px rgba(0, 0, 0, 0.85);
+}
+
+.featured-driver-flag {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 16px;
+  line-height: 1;
+}
+
+
+/* --- Driver code watermark --- */
+
+.featured-driver-code {
+  margin-top: 24px;
+  color: var(--text-faint);
+  font-family: var(--font-display);
+  font-size: 76px;
+  line-height: 0.8;
+  font-weight: 950;
+  letter-spacing: -0.08em;
+}
+
+/* --- Featured driver visual (photo) --- */
+
+.featured-driver-visual {
+  position: absolute;
+  z-index: 8;
+  top: 0;
+  right: 0;
+  bottom: 100px;
+  width: 52%;
+  height: auto;
+  display: flex;
+  align-items: flex-start;
+  justify-content: center;
+  overflow: hidden;
+  pointer-events: none;
+}
+
+.featured-driver-glow {
+  position: absolute;
+  z-index: 1;
+  width: 480px;
+  height: 480px;
+  right: 5%;
+  bottom: 5%;
+  border-radius: 50%;
+  background:
+    radial-gradient(
+      circle,
+      rgba(255, 255, 255, 0.16) 0%,
+      rgba(255, 255, 255, 0.07) 35%,
+      transparent 72%
+    );
+  filter: blur(45px);
+  pointer-events: none;
+}
+
+.featured-driver-image {
+  position: relative;
+  z-index: 3;
+
+  /* Scale height to push his legs below the container crop boundary */
+  width: auto;
+  height: 195%;
+
+  max-width: none;
+  max-height: none;
+
+  object-fit: contain;
+  object-position: center top;
+
+  display: block;
+
+  filter: drop-shadow(0 25px 35px rgba(0, 0, 0, 0.72));
+
+  transform: translateY(-10px);
+  transform-origin: center top;
+}
+
+.featured-driver:hover .featured-driver-image {
+  filter: drop-shadow(0 30px 40px rgba(0, 0, 0, 0.8));
+}
+
+
+/* --- Featured driver stats strip --- */
+
+.featured-driver-stats {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  z-index: 20;
+  display: grid;
+  grid-template-columns: repeat(5, minmax(0, 1fr));
+  min-height: 100px;
+  border-top: 1px solid var(--color-white-08);
+  background: var(--surface-card);
+  backdrop-filter: blur(18px);
+}
+
+.featured-stat {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 7px;
+  border-right: 1px solid var(--color-white-08);
+
+  animation: drv-fade-up .5s ease both;
+}
+
+.featured-stat:last-child { border-right: 0; }
+
+.featured-stat:nth-child(1) { animation-delay: .05s; }
+.featured-stat:nth-child(2) { animation-delay: .10s; }
+.featured-stat:nth-child(3) { animation-delay: .15s; }
+.featured-stat:nth-child(4) { animation-delay: .20s; }
+.featured-stat:nth-child(5) { animation-delay: .25s; }
+
+.featured-stat span {
+  color: var(--text-muted);
+  font-size: 9px;
+  font-weight: 800;
+  letter-spacing: 0.18em;
+}
+
+.featured-stat strong {
+  color: #fff;
+  font-family: var(--font-display);
+  font-size: 28px;
+  line-height: 1;
+  font-weight: 900;
+}
+
+/* SECTIONS */
+
+.drivers-section {
+  width: 100%;
+  margin-top: 42px;
+}
+
+.drivers-section + .drivers-section {
+  margin-top: 42px;
+}
+
+.drivers-section-heading {
+  margin-bottom: 18px;
+
+  animation: drv-fade-up .5s ease both;
+}
+
+.drivers-section-heading > span {
+  display: block;
+  margin-bottom: 8px;
+  color: rgba(255, 255, 255, 0.30);
+  font-size: 9px;
+  font-weight: 800;
+  letter-spacing: 0.22em;
+}
+
+.drivers-section-heading h2 {
+  margin: 0;
+  color: #fff;
+  font-family: var(--font-display);
+  font-size: 30px;
+  line-height: 1;
+  font-weight: 850;
+  letter-spacing: -0.045em;
+}
+
+/* Puts a control (e.g. the "Sort by" dropdown) on the same horizontal
+   line as a section heading. */
+.drivers-section-heading-row {
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 20px;
+  flex-wrap: wrap;
+  margin-bottom: 18px;
+}
+
+.drivers-section-heading-row .drivers-section-heading {
+  margin-bottom: 0;
+}
+
+
+/* TOP DRIVERS */
+
+@keyframes drv-pulse-glow {
+  0%, 100% {
+    box-shadow:
+      inset 3px 0 0 var(--team-color, #888),
+      0 0 0 1px var(--team-color, #888),
+      0 0 16px -6px var(--team-color, #888);
+  }
+  50% {
+    box-shadow:
+      inset 3px 0 0 var(--team-color, #888),
+      0 0 0 1px var(--team-color, #888),
+      0 0 30px -4px var(--team-color, #888);
+  }
+}
+
+.top-drivers {
+  display: flex;
+  align-items: center;
+  justify-content: flex-start;
+  gap: 10px;
+  width: 100%;
+}
+
+/* Kept for reuse if a prev/next control is reintroduced later — unused
+   now that Top Drivers no longer has arrow buttons. */
+.drivers-arrow {
+  width: 38px;
+  height: 165px;
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0;
+  border: 1px solid rgba(255, 255, 255, 0.09);
+  border-radius: 12px;
+  background: rgba(255, 255, 255, 0.035);
+  color: rgba(255, 255, 255, 0.60);
+  font-size: 17px;
+  line-height: 1;
+  cursor: pointer;
+  transition:
+    background 180ms ease,
+    color 180ms ease,
+    border-color 180ms ease,
+    transform 180ms ease;
+}
+
+.drivers-arrow:hover {
+  background: rgba(255, 255, 255, 0.08);
+  border-color: rgba(255, 255, 255, 0.18);
+  color: #fff;
+  transform: translateY(-2px);
+}
+
+.drivers-arrow:active { transform: translateY(0); }
+
+
+/* --- Top driver card --- */
+
+.top-driver-card {
+  position: relative;
+  flex: 1;
+  min-width: 0;
+  min-height: 165px;
+  display: flex;
+  align-items: center;
+  padding: 14px;
+  overflow: hidden;
+  border: 1px solid rgba(255, 255, 255, 0.10);
+  border-radius: 14px;
+  background:
+    linear-gradient(
+      135deg,
+      rgba(255, 255, 255, 0.065),
+      rgba(255, 255, 255, 0.018)
+    );
+  color: #fff;
+  text-align: left;
+  cursor: pointer;
+  box-shadow: inset 3px 0 0 var(--team-color, rgba(255, 255, 255, 0.25));
+
+  transition:
+    transform 180ms ease,
+    border-color 180ms ease,
+    background 180ms ease,
+    box-shadow 180ms ease;
+
+  animation: drv-fade-up .5s ease both;
+}
+
+.top-drivers .top-driver-card:nth-child(1) { animation-delay: .04s; }
+.top-drivers .top-driver-card:nth-child(2) { animation-delay: .09s; }
+.top-drivers .top-driver-card:nth-child(3) { animation-delay: .14s; }
+.top-drivers .top-driver-card:nth-child(4) { animation-delay: .19s; }
+.top-drivers .top-driver-card:nth-child(5) { animation-delay: .24s; }
+
+/* shine sweep on hover */
+.top-driver-card::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(115deg, transparent 30%, rgba(255,255,255,0.15) 45%, transparent 60%);
+  background-size: 250% 250%;
+  background-position: 200% 0%;
+  opacity: 0;
+  transition: opacity .3s, background-position .7s ease;
+  pointer-events: none;
+}
+
+.top-driver-card:hover::after {
+  opacity: 1;
+  background-position: -50% 0%;
+}
+
+/* Hover: full team-color glow (matches the Piastri highlight look) */
+.top-driver-card:hover {
+  transform: translateY(-4px);
+  border-color: var(--team-color, rgba(255, 255, 255, 0.25));
+  background:
+    linear-gradient(
+      135deg,
+      rgba(255, 255, 255, 0.09),
+      rgba(255, 255, 255, 0.025)
+    );
+  box-shadow:
+    inset 3px 0 0 var(--team-color, rgba(255, 255, 255, 0.25)),
+    0 0 0 1px var(--team-color, rgba(255, 255, 255, 0.25)),
+    0 0 28px -6px var(--team-color, rgba(255, 255, 255, 0.4)),
+    0 16px 34px rgba(0, 0, 0, 0.45);
+}
+
+/* Optional persistent highlight — apply via JS to keep a card glowing
+   without needing hover (e.g. the featured/selected driver). */
+.top-driver-card-selected {
+  border-color: var(--team-color, #fff);
+  animation: drv-pulse-glow 2.4s ease-in-out infinite, drv-fade-up .5s ease both;
+}
+
+
+/* --- Top driver image: cropped to head / shoulders / upper body / hands,
+   legs and feet always hidden regardless of the source photo's framing --- */
+
+.top-driver-image-wrap {
+  position: relative;
+  width: 115px;
+  height: 140px;
+  flex-shrink: 0;
+  display: flex;
+  align-items: flex-start;
+  justify-content: center;
+  overflow: hidden;
+  border-radius: 10px;
+}
+
+.top-driver-image-wrap::after {
+  content: "";
+  position: absolute;
+  left: 50%;
+  bottom: 0;
+  width: 85px;
+  height: 85px;
+  transform: translateX(-50%);
+  border-radius: 50%;
+  background: radial-gradient(circle, rgba(255, 255, 255, 0.10), transparent 70%);
+  z-index: 0;
+}
+
+.top-driver-image-wrap img {
+  position: relative;
+  z-index: 2;
+
+  /* object-fit: cover (not contain) + a fixed zoom + top anchor is what
+     guarantees every photo crops at the same point, regardless of
+     whether the source image is a tight bust shot or a full-body shot. */
+  width: 100%;
+  height: 170%;
+  max-width: none;
+  max-height: none;
+
+  object-fit: cover;
+  object-position: top center;
+
+  flex-shrink: 0;
+  transform: translateY(-5px);
+
+  filter: drop-shadow(0 15px 20px rgba(0, 0, 0, 0.55));
+  transition: transform .35s cubic-bezier(.2,.8,.2,1);
+}
+
+.top-driver-card:hover .top-driver-image-wrap img {
+  transform: translateY(-8px) scale(1.05);
+}
+
+
+/* --- Top driver info block --- */
+
+.top-driver-info {
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  margin-left: 6px;
+  padding-right: 20px;
+}
+
+.top-driver-position {
+  color: rgba(255, 255, 255, 0.35);
+  font-size: 9px;
+  font-weight: 800;
+  letter-spacing: 0.10em;
+  white-space: nowrap;
+}
+
+.top-driver-info strong {
+  display: block;
+  margin-top: 6px;
+  color: #fff;
+  font-family: var(--font-display);
+  font-size: clamp(18px, 1.7vw, 24px);
+  line-height: 1;
+  font-weight: 900;
+  letter-spacing: -0.05em;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.top-driver-info small {
+  display: block;
+  margin-top: 8px;
+  max-width: 115px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  color: rgba(255, 255, 255, 0.48);
+  font-size: 10px;
+}
+
+.top-driver-points {
+  display: flex;
+  align-items: baseline;
+  gap: 4px;
+  margin-top: 6px;
+  color: #fff;
+  font-size: 17px;
+  font-weight: 900;
+  letter-spacing: -0.02em;
+}
+
+.top-driver-points small {
+  color: rgba(255, 255, 255, 0.35);
+  font-size: 9px;
+  font-weight: 800;
+  letter-spacing: 0.10em;
+}
+
+
+/* --- Top driver team logo --- */
+
+.top-driver-team-logo {
+  position: absolute;
+  right: 12px;
+  top: 12px;
+  width: 32px;
+  height: 32px;
+  object-fit: contain;
+  opacity: 0.82;
+  border: 0;
+  border-radius: 0;
+  background: transparent;
+  box-shadow: none;
+  filter: drop-shadow(0 6px 10px rgba(0, 0, 0, 0.45));
+  transition: filter .3s, transform .3s;
+}
+
+.top-driver-card:hover .top-driver-team-logo {
+  opacity: 1;
+  filter: drop-shadow(0 0 8px var(--team-color, transparent)) brightness(1.1);
+  transform: scale(1.1);
+}
+
+
+/* --- Top driver card arrow --- */
+
+.top-driver-arrow {
+  position: absolute;
+  right: 12px;
+  bottom: 12px;
+  color: rgba(255, 255, 255, 0.28);
+  font-size: 14px;
+  line-height: 1;
+  transition: color 160ms ease, transform 160ms ease;
+}
+
+.top-driver-card:hover .top-driver-arrow {
+  color: #fff;
+  transform: translateX(3px);
+}
+
+
+/* ALL DRIVERS */
+
+.drivers-table {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  overflow: hidden;
+}
+
+.driver-row {
+  position: relative;
+  width: 100%;
+  min-height: 82px;
+  display: grid;
+  grid-template-columns:
+    70px
+    minmax(250px, 1.4fr)
+    minmax(180px, 1fr)
+    100px
+    32px;
+  align-items: center;
+  gap: 20px;
+  padding: 8px 18px;
+  box-sizing: border-box;
+
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 14px;
+  background: rgba(255, 255, 255, 0.025);
+  box-shadow: inset 3px 0 0 var(--team-color, rgba(255, 255, 255, 0.2));
+  overflow: hidden;
+
+  color: #fff;
+  text-align: left;
+  cursor: pointer;
+
+  transition: border-color 160ms ease, box-shadow 160ms ease, background 160ms ease;
+
+  animation: drv-fade-up .45s ease both;
+}
+
+.driver-row:nth-child(1) { animation-delay: .02s; }
+.driver-row:nth-child(2) { animation-delay: .05s; }
+.driver-row:nth-child(3) { animation-delay: .08s; }
+.driver-row:nth-child(4) { animation-delay: .11s; }
+.driver-row:nth-child(5) { animation-delay: .14s; }
+.driver-row:nth-child(6) { animation-delay: .17s; }
+.driver-row:nth-child(n+7) { animation-delay: .20s; }
+
+/* shine sweep across the row on hover */
+.driver-row::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(100deg, transparent 35%, rgba(255,255,255,0.08) 48%, transparent 62%);
+  background-size: 250% 250%;
+  background-position: 200% 0%;
+  opacity: 0;
+  transition: opacity .3s, background-position .8s ease;
+  pointer-events: none;
+}
+
+.driver-row:hover::after {
+  opacity: 1;
+  background-position: -50% 0%;
+}
+
+/* Hover: full team-color glow (matches the Piastri highlight look) */
+.driver-row:hover {
+  border-color: var(--team-color, rgba(255, 255, 255, 0.35));
+  background:
+    linear-gradient(
+      90deg,
+      rgba(255, 255, 255, 0.055),
+      rgba(255, 255, 255, 0.015)
+    );
+  box-shadow:
+    inset 3px 0 0 var(--team-color, rgba(255, 255, 255, 0.2)),
+    0 0 0 1px var(--team-color, rgba(255, 255, 255, 0.35)),
+    0 0 24px -6px var(--team-color, rgba(255, 255, 255, 0.4)),
+    0 10px 26px rgba(0, 0, 0, 0.35);
+}
+
+/* Optional persistent highlight — apply via JS (e.g. the featured/selected driver) */
+.driver-row-selected {
+  border-color: var(--team-color, #fff);
+  animation: drv-pulse-glow 2.4s ease-in-out infinite, drv-fade-up .45s ease both;
+}
+
+.driver-row-position {
+  color: rgba(255, 255, 255, 0.34);
+  font-size: 11px;
+  font-weight: 800;
+  letter-spacing: 0.06em;
+}
+
+.driver-row-driver {
+  min-width: 0;
+  display: flex;
+  align-items: center;
+  gap: 14px;
+}
+
+/* Same head-to-hands cropping treatment as the Top Drivers thumbnails,
+   so All Drivers rows are consistent too. */
+.driver-row-image {
+  position: relative;
+  width: 68px;
+  height: 68px;
+  flex-shrink: 0;
+  display: flex;
+  align-items: flex-start;
+  justify-content: center;
+  overflow: hidden;
+  border-radius: 8px;
+}
+
+.driver-row-image img {
+  width: 100%;
+  height: 170%;
+  max-width: none;
+  max-height: none;
+  object-fit: cover;
+  object-position: top center;
+  flex-shrink: 0;
+  display: block;
+  filter: drop-shadow(0 8px 12px rgba(0, 0, 0, 0.45));
+  transition: transform .35s cubic-bezier(.2,.8,.2,1);
+}
+
+.driver-row:hover .driver-row-image img {
+  transform: translateY(-3px) scale(1.07);
+}
+
+.driver-row-name-block {
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.driver-row-name-block strong {
+  overflow: hidden;
+  color: #fff;
+  font-family: var(--font-display);
+  font-size: 15px;
+  font-weight: 750;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+}
+
+.driver-row-name-block small {
+  color: rgba(255, 255, 255, 0.30);
+  font-size: 9px;
+  font-weight: 800;
+  letter-spacing: 0.14em;
+}
+
+.driver-row-team {
+  min-width: 0;
+  display: flex;
+  align-items: center;
+  gap: 11px;
+  color: rgba(255, 255, 255, 0.52);
+  font-size: 12px;
+}
+
+.driver-team-logo {
+  width: 38px;
+  height: 38px;
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: 0;
+  border-radius: 0;
+  background: transparent;
+  box-shadow: none;
+  padding: 0;
+}
+
+.driver-team-logo img {
+  width: 30px;
+  height: 30px;
+  object-fit: contain;
+  border: 0;
+  background: transparent;
+  box-shadow: none;
+  opacity: 0.92;
+  filter: drop-shadow(0 5px 8px rgba(0, 0, 0, 0.42));
+  transition: transform .3s cubic-bezier(.2,.8,.2,1), filter .3s;
+}
+
+.driver-row:hover .driver-team-logo img {
+  transform: scale(1.12);
+  filter: drop-shadow(0 0 8px var(--team-color, transparent)) brightness(1.1);
+}
+
+.driver-row-points {
+  display: flex;
+  align-items: baseline;
+  justify-content: flex-end;
+  gap: 5px;
+  color: #fff;
+  font-size: 14px;
+  font-weight: 800;
+  transition: transform .25s cubic-bezier(.2,.8,.2,1);
+}
+
+.driver-row:hover .driver-row-points {
+  transform: scale(1.06);
+}
+
+.driver-row-points small {
+  color: rgba(255, 255, 255, 0.28);
+  font-size: 8px;
+  letter-spacing: 0.10em;
+}
+
+.driver-row-arrow {
+  color: rgba(255, 255, 255, 0.25);
+  font-size: 17px;
+  transition: color 160ms ease, transform 160ms ease;
+}
+
+.driver-row:hover .driver-row-arrow {
+  color: #fff;
+  transform: translateX(3px);
+}
+
+
+/* --- Sort control (same row as the All Drivers heading) --- */
+
+.drivers-sort {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.drivers-sort label {
+  color: rgba(255, 255, 255, 0.40);
+  font-size: 10px;
+  font-weight: 800;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  white-space: nowrap;
+}
+
+.drivers-sort select {
+  height: 40px;
+  padding: 0 32px 0 14px;
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  border-radius: 8px;
+  background:
+    rgba(255, 255, 255, 0.05)
+    url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='6' viewBox='0 0 10 6'%3E%3Cpath d='M1 1l4 4 4-4' stroke='%23ffffff' stroke-opacity='0.5' stroke-width='1.5' fill='none' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E")
+    no-repeat right 12px center;
+  color: #fff;
+  font: inherit;
+  font-size: 12px;
+  font-weight: 700;
+  cursor: pointer;
+  outline: none;
+  appearance: none;
+  -webkit-appearance: none;
+  transition: border-color 160ms ease, background 160ms ease;
+}
+
+.drivers-sort select:hover {
+  border-color: rgba(255, 255, 255, 0.25);
+  background-color: rgba(255, 255, 255, 0.08);
+}
+
+.drivers-sort select:focus {
+  border-color: rgba(255, 255, 255, 0.35);
+}
+
+.drivers-sort select option {
+  background: #0c0c10;
+  color: #fff;
+}
+
+
+/* EMPTY STATE */
+
+.drivers-empty {
+  padding: 100px 20px;
+  color: rgba(255, 255, 255, 0.40);
+  text-align: center;
+}
+
+
+/* REUSABLE ANIMATION UTILITIES (optional — hook up via JS as needed) */
+
+@keyframes drv-view-enter {
+  from { opacity: 0; transform: translateY(14px) scale(0.985); }
+  to   { opacity: 1; transform: translateY(0) scale(1); }
+}
+
+@keyframes drv-skeleton-shimmer {
+  0%   { background-position: 100% 50%; }
+  100% { background-position: 0 50%; }
+}
+
+.drv-view-out {
+  opacity: 0;
+  transform: translateY(10px) scale(0.99);
+  transition: opacity .18s ease, transform .18s ease;
+}
+
+.drv-view-in {
+  animation: drv-view-enter .42s cubic-bezier(.2,.8,.2,1) both;
+}
+
+.drv-selected {
+  animation: drv-pulse-glow 2.4s ease-in-out infinite;
+}
+
+.drv-skeleton {
+  border-radius: 16px;
+  background: linear-gradient(
+    90deg,
+    rgba(255,255,255,0.04) 25%,
+    rgba(255,255,255,0.11) 37%,
+    rgba(255,255,255,0.04) 63%
+  );
+  background-size: 400% 100%;
+  animation: drv-skeleton-shimmer 1.4s ease infinite;
+}
+
+.drv-skeleton-hero { height: 320px; border-radius: 24px; }
+
+
+/* RESPONSIVE — 1100px */
+
+@media (max-width: 1100px) {
+
+  .drivers-page {
+    padding-left: 24px;
+    padding-right: 24px;
+  }
+
+  .drivers-arrow {
+    width: 34px;
+    height: 155px;
+    font-size: 14px;
+  }
+
+  .top-driver-card {
+    min-height: 155px;
+    padding: 10px;
+  }
+
+  .top-driver-image-wrap {
+    width: 76px;
+    height: 120px;
+  }
+
+  .top-driver-info {
+    margin-left: 4px;
+    padding-right: 18px;
+  }
+
+  .top-driver-info strong { font-size: 18px; }
+
+  .top-driver-info small {
+    max-width: 78px;
+    font-size: 9px;
+  }
+
+  .top-driver-team-logo {
+    width: 27px;
+    height: 27px;
+    right: 8px;
+    top: 8px;
+  }
+
+  .top-driver-arrow {
+    right: 9px;
+    bottom: 9px;
+    font-size: 13px;
+  }
+
+  .driver-row {
+    grid-template-columns:
+      55px
+      minmax(200px, 1.3fr)
+      minmax(150px, 1fr)
+      80px
+      25px;
+  }
+
+  .featured-driver-visual {
+    width: 50%;
+    right: 2%;
+  }
+}
+
+
+/* RESPONSIVE — 800px */
+
+@media (max-width: 800px) {
+
+  .drivers-header {
+    align-items: flex-start;
+    flex-direction: column;
+  }
+
+  .drivers-header-controls { width: 100%; }
+  .drivers-search { flex: 1; }
+
+  .featured-driver { min-height: 650px; }
+
+  .featured-driver-content {
+    min-height: 560px;
+    padding: 55px 28px 140px;
+  }
+
+  .featured-driver-copy { width: 100%; }
+
+  .featured-driver-visual {
+    right: -8%;
+    bottom: 100px;
+    width: 75%;
+    height: calc(100% - 105px);
+  }
+
+  .featured-driver-image { height: 145%; }
+  .featured-driver-meta { gap: 12px; }
+
+  .top-drivers {
+    display: flex;
+    gap: 12px;
+    overflow-x: auto;
+    padding-bottom: 8px;
+    scroll-snap-type: x mandatory;
+    scrollbar-width: none;
+    -webkit-overflow-scrolling: touch;
+  }
+
+  .top-drivers::-webkit-scrollbar { display: none; }
+  .top-drivers > .drivers-arrow { display: none; }
+
+  .top-driver-card {
+    flex: 0 0 260px;
+    min-width: 260px;
+    min-height: 170px;
+    scroll-snap-align: start;
+  }
+
+  .top-driver-image-wrap {
+    width: 90px;
+    height: 130px;
+  }
+
+  .top-driver-info strong { font-size: 24px; }
+
+  .driver-row {
+    grid-template-columns:
+      45px
+      minmax(180px, 1fr)
+      45px
+      70px
+      20px;
+  }
+
+  .driver-row-team > span:last-child { display: none; }
+
+  .driver-team-logo {
+    width: 34px;
+    height: 34px;
+    border: 0;
+    background: transparent;
+    box-shadow: none;
+  }
+
+  .driver-team-logo img {
+    width: 28px;
+    height: 28px;
+  }
+}
+
+
+/* RESPONSIVE — 600px */
+
+@media (max-width: 600px) {
+
+  .drivers-page { padding: 24px 14px 70px; }
+
+  .drivers-header-title h1 { font-size: 54px; }
+
+  .drivers-header-controls {
+    width: 100%;
+    flex-direction: row;
+  }
+
+  .drivers-search { width: auto; }
+
+  .featured-driver {
+    min-height: 650px;
+    border-radius: 18px;
+  }
+
+  .featured-driver-content {
+    min-height: 550px;
+    padding: 45px 22px 125px;
+  }
+
+  .featured-driver-visual {
+    right: -22%;
+    bottom: 100px;
+    width: 105%;
+    height: calc(100% - 110px);
+  }
+
+  .featured-driver-name span { font-size: 30px; }
+  .featured-driver-name h2 { font-size: 52px; }
+  .featured-driver-code { font-size: 52px; }
+  .featured-driver-meta { gap: 10px; }
+
+  .featured-driver-team,
+  .featured-driver-country { font-size: 13px; }
+
+  .featured-driver-team-icon {
+    width: 28px;
+    height: 28px;
+  }
+
+  .featured-driver-team-icon img {
+    width: 28px;
+    height: 28px;
+  }
+
+  .featured-driver-meta-divider { font-size: 13px; }
+  .featured-driver-flag { font-size: 15px; }
+
+  .featured-driver-stats { grid-template-columns: repeat(2, 1fr); }
+  .featured-stat { min-height: 62px; }
+  .featured-stat:last-child { grid-column: span 2; }
+
+  .top-driver-card {
+    flex: 0 0 280px;
+    min-width: 280px;
+    min-height: 175px;
+  }
+
+  .driver-row {
+    grid-template-columns:
+      35px
+      minmax(0, 1fr)
+      34px
+      55px
+      16px;
+    gap: 10px;
+    padding: 10px 8px;
+  }
+
+  .driver-row-image {
+    width: 46px;
+    height: 46px;
+  }
+
+  .driver-row-team { justify-content: center; }
+
+  .driver-team-logo {
+    width: 30px;
+    height: 30px;
+    border: 0;
+    background: transparent;
+    box-shadow: none;
+  }
+
+  .driver-team-logo img {
+    width: 26px;
+    height: 26px;
+  }
+
+  .driver-row-points { font-size: 12px; }
+
+  .drivers-section-heading-row { align-items: flex-start; }
+
+  .drivers-sort select {
+    height: 36px;
+    font-size: 11px;
+  }
+}
+
+
+/*  RESPONSIVE — 430px */
+
+@media (max-width: 430px) {
+
+  .drivers-header-title h1 { font-size: 48px; }
+
+  .featured-driver { min-height: 630px; }
+
+  .featured-driver-content { padding: 42px 20px 130px; }
+
+  .featured-driver-name span { font-size: 28px; }
+  .featured-driver-name h2 { font-size: 48px; }
+
+  .featured-driver-visual {
+    right: -28%;
+    bottom: 100px;
+    width: 115%;
+    height: calc(100% - 115px);
+  }
+
+  .featured-driver-meta { gap: 8px; }
+
+  .featured-driver-team,
+  .featured-driver-country { font-size: 12px; }
+
+  .featured-driver-team-icon {
+    width: 26px;
+    height: 26px;
+  }
+
+  .featured-driver-team-icon img {
+    width: 26px;
+    height: 26px;
+  }
+
+  .featured-driver-meta-divider { font-size: 12px; }
+  .featured-driver-flag { font-size: 14px; }
+
+  .featured-stat span { font-size: 8px; }
+  .featured-stat strong { font-size: 21px; }
+
+  .top-driver-card {
+    flex-basis: 260px;
+    min-width: 260px;
+    min-height: 165px;
+    padding: 12px;
+  }
+
+  .top-driver-image-wrap {
+    width: 78px;
+    height: 120px;
+  }
+
+  .top-driver-info { margin-left: 4px; }
+  .top-driver-info strong { font-size: 22px; }
+
+  .top-driver-info small {
+    max-width: 105px;
+    font-size: 9px;
+  }
+
+  .top-driver-team-logo {
+    width: 30px;
+    height: 30px;
+    right: 10px;
+    top: 10px;
+    border: 0;
+    background: transparent;
+    box-shadow: none;
+  }
+
+  .top-driver-arrow {
+    right: 11px;
+    bottom: 10px;
+  }
+}
+
+
+/* REDUCED MOTION */
+
+:root[data-theme="light"] .drivers-page {
+  background:
+    radial-gradient(
+      circle at 80% 10%,
+      rgba(255, 255, 255, 0.72),
+      transparent 30%
+    ),
+    var(--surface-page);
+}
+
+:root[data-theme="light"] .drivers-search,
+:root[data-theme="light"] .drivers-year,
+:root[data-theme="light"] .drivers-sort select {
+  border-color: var(--border-default);
+  background-color: var(--surface-input);
+  color: var(--text-primary);
+}
+
+:root[data-theme="light"] .drivers-search input::placeholder {
+  color: var(--text-muted);
+}
+
+:root[data-theme="light"] .drivers-year:hover,
+:root[data-theme="light"] .drivers-sort select:hover {
+  border-color: var(--border-strong);
+  background-color: var(--surface-hover);
+}
+
+:root[data-theme="light"] .drivers-year:focus,
+:root[data-theme="light"] .drivers-sort select:focus,
+:root[data-theme="light"] .drivers-search:focus-within {
+  border-color: var(--color-accent);
+  box-shadow: 0 0 0 3px var(--color-accent-soft);
+}
+
+:root[data-theme="light"] .featured-driver {
+  border-color: var(--border-default);
+  background: var(--surface-card);
+  box-shadow: var(--shadow-card);
+}
+
+:root[data-theme="light"] .featured-driver-overlay {
+  background:
+    linear-gradient(
+      to bottom,
+      transparent 0%,
+      transparent 68%,
+      rgba(17, 17, 17, 0.04) 84%,
+      rgba(17, 17, 17, 0.14) 100%
+    );
+}
+
+:root[data-theme="light"] .featured-driver-position {
+  border-color: var(--border-default);
+  background: rgba(255, 255, 255, 0.78);
+  color: var(--text-secondary);
+}
+
+:root[data-theme="light"] .featured-driver-name h2 {
+  text-shadow: 0 4px 18px rgba(17, 17, 17, 0.16);
+}
+
+:root[data-theme="light"] .featured-driver-team,
+:root[data-theme="light"] .featured-driver-country {
+  text-shadow: 0 2px 8px rgba(255, 255, 255, 0.9);
+}
+
+:root[data-theme="light"] .featured-driver-image {
+  filter: drop-shadow(0 18px 28px rgba(17, 17, 17, 0.20));
+}
+
+:root[data-theme="light"] .featured-driver:hover .featured-driver-image {
+  filter: drop-shadow(0 20px 30px rgba(17, 17, 17, 0.24));
+}
+
+:root[data-theme="light"] .featured-driver-stats {
+  border-top-color: var(--border-default);
+  background: rgba(255, 255, 255, 0.92);
+}
+
+:root[data-theme="light"] .featured-stat {
+  border-right-color: var(--border-default);
+}
+
+:root[data-theme="light"] .drivers-section-heading > span,
+:root[data-theme="light"] .top-driver-position,
+:root[data-theme="light"] .driver-row-position,
+:root[data-theme="light"] .drivers-sort label,
+:root[data-theme="light"] .drivers-empty {
+  color: var(--text-muted);
+}
+
+:root[data-theme="light"] .drivers-section-heading h2,
+:root[data-theme="light"] .featured-stat strong,
+:root[data-theme="light"] .top-driver-card,
+:root[data-theme="light"] .top-driver-info strong,
+:root[data-theme="light"] .top-driver-points,
+:root[data-theme="light"] .driver-row,
+:root[data-theme="light"] .driver-row-name-block strong,
+:root[data-theme="light"] .driver-row-points,
+:root[data-theme="light"] .drivers-sort select,
+:root[data-theme="light"] .drivers-arrow:hover,
+:root[data-theme="light"] .top-driver-card:hover .top-driver-arrow,
+:root[data-theme="light"] .driver-row:hover .driver-row-arrow {
+  color: var(--text-primary);
+}
+
+:root[data-theme="light"] .top-driver-card,
+:root[data-theme="light"] .driver-row {
+  border-color: var(--border-default);
+  background: var(--surface-card);
+  box-shadow: inset 3px 0 0 var(--team-color, var(--border-strong));
+}
+
+:root[data-theme="light"] .top-driver-card:hover,
+:root[data-theme="light"] .driver-row:hover {
+  border-color: var(--team-color, var(--border-strong));
+  background: var(--surface-hover);
+  box-shadow:
+    inset 3px 0 0 var(--team-color, var(--border-strong)),
+    0 8px 22px rgba(17, 17, 17, 0.10);
+}
+
+:root[data-theme="light"] .top-driver-info small,
+:root[data-theme="light"] .top-driver-points small,
+:root[data-theme="light"] .driver-row-name-block small,
+:root[data-theme="light"] .driver-row-team,
+:root[data-theme="light"] .driver-row-points small {
+  color: var(--text-secondary);
+}
+
+:root[data-theme="light"] .top-driver-arrow,
+:root[data-theme="light"] .driver-row-arrow,
+:root[data-theme="light"] .drivers-arrow {
+  color: var(--text-muted);
+}
+
+:root[data-theme="light"] .drivers-arrow {
+  border-color: var(--border-default);
+  background: var(--surface-card);
+}
+
+:root[data-theme="light"] .drivers-arrow:hover {
+  border-color: var(--border-strong);
+  background: var(--surface-hover);
+}
+
+:root[data-theme="light"] .drivers-sort select {
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='6' viewBox='0 0 10 6'%3E%3Cpath d='M1 1l4 4 4-4' stroke='%23111111' stroke-opacity='0.65' stroke-width='1.5' fill='none' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E");
+}
+
+:root[data-theme="light"] .drivers-sort select option {
+  background: var(--surface-card);
+  color: var(--text-primary);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .drivers-page,
+  .featured-driver,
+  .featured-driver-bg,
+  .featured-driver-bg::before,
+  .featured-driver-copy,
+  .featured-driver-image,
+  .featured-stat,
+  .top-driver-card,
+  .top-driver-card-selected,
+  .driver-row,
+  .driver-row-selected,
+  .drivers-section-heading,
+  .drv-view-in,
+  .drv-selected,
+  .drv-skeleton {
+    animation: none !important;
+  }
+
+  .top-driver-card:hover,
+  .top-driver-image-wrap img,
+  .top-driver-team-logo,
+  .driver-row-image img,
+  .driver-team-logo img,
+  .driver-row-points {
+    transition: none !important;
+    transform: none !important;
+  }
+}

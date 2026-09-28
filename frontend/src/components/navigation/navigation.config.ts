@@ -2,10 +2,12 @@ import {
   Activity,
   BarChart3,
   CarFront,
+  Calendar,
   Gauge,
   Home,
   Radio,
   Settings,
+  Swords,
   Users,
   Zap,
 } from "lucide-react";
@@ -42,7 +44,7 @@ export const primaryNavigation: NavigationItem[] = [
   },
 
   {
-    label: "Teams",
+    label: "Constructors",
     path: "/constructors",
     icon: CarFront,
   },
@@ -67,6 +69,18 @@ export const primaryNavigation: NavigationItem[] = [
 ];
 
 export const moreNavigation: NavigationItem[] = [
+  {
+    label: "Head-to-Head",
+    path: "/head-to-head",
+    icon: Swords,
+  },
+
+  {
+    label: "Calendar",
+    path: "/calendar",
+    icon: Calendar,
+  },
+
   {
     label: "Settings",
     path: "/settings",

@@ -1,1 +1,10 @@
 firebase-service-account.json
+.DS_Store
+logs/
+logcookies.txt
+cookies*.txt
+.env
+logs/
+cookies*.txt
+logcookies.txt
+sess_*.txt

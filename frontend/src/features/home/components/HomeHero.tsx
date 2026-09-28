@@ -1,5 +1,6 @@
 import Button from "../../../components/ui/Button";
 import Reveal from "../../../components/motion/Reveal";
+import { useEffect, useState } from "react";
 
 import type { NextSession } from "../home.types";
 
@@ -20,9 +21,46 @@ function formatStartTime(startUtc: string) {
   });
 }
 
+function getCountdown(startUtc: string): string {
+  const remaining = new Date(startUtc).getTime() - Date.now();
+
+  if (remaining <= 0) {
+    return "LIVE NOW";
+  }
+
+  const totalSeconds = Math.floor(remaining / 1000);
+  const days = Math.floor(totalSeconds / 86400);
+  const hours = Math.floor((totalSeconds % 86400) / 3600);
+  const minutes = Math.floor((totalSeconds % 3600) / 60);
+  const seconds = totalSeconds % 60;
+
+  if (days > 0) {
+    return `${days}d ${String(hours).padStart(2, "0")}h`;
+  }
+
+  return `${String(hours).padStart(2, "0")}:${String(minutes).padStart(
+    2,
+    "0",
+  )}:${String(seconds).padStart(2, "0")}`;
+}
+
 export default function HomeHero({
   data,
 }: HomeHeroProps) {
+  const [countdown, setCountdown] = useState(() =>
+    getCountdown(data.start_utc),
+  );
+
+  useEffect(() => {
+    const updateCountdown = () =>
+      setCountdown(getCountdown(data.start_utc));
+
+    updateCountdown();
+    const timer = window.setInterval(updateCountdown, 1000);
+
+    return () => window.clearInterval(timer);
+  }, [data.start_utc]);
+
   return (
     <section className="home-hero-new">
       <div className="home-hero-grid" />
@@ -92,6 +130,36 @@ export default function HomeHero({
           <small>
             {formatStartTime(data.start_utc)}
           </small>
+        </div>
+      </div>
+
+      <div className="home-hero-live-panel" aria-label="Next session status">
+        <div className="home-hero-live-panel-header">
+          <span className="home-live-dot" />
+          <span>LIVE RACE FEED</span>
+          <span className="home-hero-live-line" />
+        </div>
+
+        <div className="home-hero-live-event">
+          <span>{data.country}</span>
+          <strong>{data.event_name}</strong>
+          <small>{data.session_name}</small>
+        </div>
+
+        <div className="home-hero-countdown">
+          <span>{countdown === "LIVE NOW" ? "SESSION STATUS" : "STARTS IN"}</span>
+          <strong>{countdown}</strong>
+        </div>
+
+        <div className="home-hero-signal">
+          <span />
+          <span />
+          <span />
+          <span />
+          <span />
+          <span />
+          <span />
+          <span />
         </div>
       </div>
 

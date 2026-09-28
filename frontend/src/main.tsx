@@ -7,9 +7,12 @@ import { useAuthStore } from "./features/auth/auth.store";
 
 import "./styles/globals.css";
 import { initializeAppearance } from "./features/auth/appearance";
+import { subscribeToFirebaseAuth } from "./features/auth/firebase.auth";
 
 
-import "./styles/drivers.css";
+import "./features/drivers/drivers.css";
+import "./styles/calendar.css";
+import "./styles/sessions.css";
 
 initializeAppearance();
 
@@ -99,6 +102,21 @@ function AppBootstrap() {
 
   React.useEffect(() => {
     void restoreSession();
+
+    const unsubscribe =
+      subscribeToFirebaseAuth((firebaseUser) => {
+        void useAuthStore
+          .getState()
+          .syncFirebaseUser(firebaseUser)
+          .catch((error: unknown) => {
+            console.error(
+              "FIREBASE AUTH SYNC ERROR:",
+              error,
+            );
+          });
+      });
+
+    return unsubscribe;
   }, [restoreSession]);
 
   if (!isInitialized) {

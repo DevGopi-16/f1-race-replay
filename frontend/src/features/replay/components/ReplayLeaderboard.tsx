@@ -173,10 +173,6 @@ function formatSeconds(value: number | null): string {
     return "—";
   }
 
-  if (Math.abs(value) < 0.005) {
-    return "LEADER";
-  }
-
   return `+${value.toFixed(3)}`;
 }
 
@@ -263,11 +259,28 @@ export default function ReplayLeaderboard({
       const inPit =
         data.in_pit === true;
 
-      const backendInterval =
+      const rawInterval =
         numberValue(data.interval);
 
-      const backendLeaderGap =
+      const rawLeaderGap =
         numberValue(data.gap_to_leader);
+
+      /*
+       * Backend sometimes sends 0 (or near-0) for every driver
+       * instead of a real gap. That's only ever valid for the
+       * actual leader (position 1) — for anyone else, treat it
+       * as missing data so the rel_dist fallback below computes
+       * a real value instead of everyone showing "LEADER".
+       */
+      const backendInterval =
+        position === 1 || (rawInterval !== null && Math.abs(rawInterval) >= 0.005)
+          ? rawInterval
+          : null;
+
+      const backendLeaderGap =
+        position === 1 || (rawLeaderGap !== null && Math.abs(rawLeaderGap) >= 0.005)
+          ? rawLeaderGap
+          : null;
 
       liveDrivers.push({
         code,
@@ -281,19 +294,25 @@ export default function ReplayLeaderboard({
         tyre,
         tyreLife,
         intervalGap:
-          backendInterval !== null
-            ? formatSeconds(backendInterval)
-            : "—",
+          position === 1
+            ? "LEADER"
+            : backendInterval !== null
+              ? formatSeconds(backendInterval)
+              : "—",
         leaderGap:
-          backendLeaderGap !== null
-            ? formatSeconds(backendLeaderGap)
-            : "—",
+          position === 1
+            ? "LEADER"
+            : backendLeaderGap !== null
+              ? formatSeconds(backendLeaderGap)
+              : "—",
         hasTelemetry: true,
         relDist,
         status: getStatusLabel(
           driverStatuses?.[code],
         ),
       });
+
+     
     }
 
     /*
@@ -499,9 +518,7 @@ export default function ReplayLeaderboard({
                     : ""
                 )
               }
-              key=
-{driver.code}
-
+              key={driver.code}
               onClick={() => onDriverSelect?.(driver.code)}
               role="button"
               tabIndex={0}

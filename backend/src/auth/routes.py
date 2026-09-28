@@ -7,15 +7,20 @@ from urllib.parse import urlencode
 
 import requests
 
-from fastapi import APIRouter, Depends, HTTPException, status
+from fastapi import APIRouter, Depends, HTTPException, Request, Response, status
 from fastapi.responses import RedirectResponse
 from sqlalchemy.orm import Session
-
 from firebase_admin import auth as firebase_auth
 
 from .firebase_admin import firebase_app
 from . import models, schemas, security
+from src.auth.refresh_tokens.service import issue_refresh_token
+from src.auth.refresh_tokens.routes import set_refresh_cookie
 from .database import get_db
+from src.auth.rate_limit.dependency import check_rate_limit, record_failed_attempt, clear_rate_limit, get_client_ip
+from src.auth.security_log.logger import log_event
+from src.auth.refresh_tokens.service import revoke_one
+from src.auth.refresh_tokens.routes import REFRESH_COOKIE_NAME, clear_refresh_cookie
 from .dependencies import get_current_user
 
 
@@ -104,8 +109,14 @@ _X_OAUTH_STATES: dict[str, str] = {}
 )
 def signup(
     payload: schemas.UserCreate,
+    request: Request,
+    response: Response,
     db: Session = Depends(get_db),
 ):
+    client_ip = get_client_ip(request)
+    check_rate_limit("signup", client_ip, max_attempts=5, window_seconds=3600)
+    record_failed_attempt("signup", client_ip)
+
     if (
         db.query(models.User)
         .filter(models.User.email == payload.email)
@@ -115,7 +126,7 @@ def signup(
             status_code=400,
             detail="Email already registered",
         )
-
+    
     if (
         db.query(models.User)
         .filter(
@@ -140,9 +151,14 @@ def signup(
     db.commit()
     db.refresh(user)
 
+    log_event("signup", user_id=user.id, email=user.email)
+
     token = security.create_access_token(
         {"sub": str(user.id)}
     )
+    security.set_auth_cookie(response, token)
+    refresh_token = issue_refresh_token(db, user.id)
+    set_refresh_cookie(response, refresh_token.token)
 
     return schemas.Token(
         access_token=token,
@@ -160,8 +176,11 @@ def signup(
 )
 def login(
     payload: schemas.UserLogin,
+    response: Response,
     db: Session = Depends(get_db),
 ):
+    check_rate_limit("login", payload.email, max_attempts=5, window_seconds=900)
+
     user = (
         db.query(models.User)
         .filter(models.User.email == payload.email)
@@ -169,6 +188,8 @@ def login(
     )
 
     if not user or not user.hashed_password:
+        record_failed_attempt("login", payload.email)
+        log_event("login_failed", email=payload.email, reason="no_account")
         raise HTTPException(
             status_code=401,
             detail="Incorrect email or password",
@@ -178,14 +199,21 @@ def login(
         payload.password,
         user.hashed_password,
     ):
+        record_failed_attempt("login", payload.email)
+        log_event("login_failed", email=payload.email, reason="wrong_password")
         raise HTTPException(
             status_code=401,
             detail="Incorrect email or password",
         )
 
+    clear_rate_limit("login", payload.email)
+
     token = security.create_access_token(
         {"sub": str(user.id)}
     )
+    security.set_auth_cookie(response, token)
+    refresh_token = issue_refresh_token(db, user.id)
+    set_refresh_cookie(response, refresh_token.token)
 
     return schemas.Token(
         access_token=token,
@@ -203,6 +231,7 @@ def login(
 )
 def google_login(
     payload: schemas.GoogleAuthPayload,
+    response: Response,
     db: Session = Depends(get_db),
 ):
     try:
@@ -279,6 +308,9 @@ def google_login(
     token = security.create_access_token(
         {"sub": str(user.id)}
     )
+    security.set_auth_cookie(response, token)
+    refresh_token = issue_refresh_token(db, user.id)
+    set_refresh_cookie(response, refresh_token.token)
 
     return schemas.Token(
         access_token=token,
@@ -718,15 +750,17 @@ def x_callback(
         {"sub": str(user.id)}
     )
 
-    redirect_url = (
-        f"{FRONTEND_X_CALLBACK}"
-        f"#access_token={access_token}"
-    )
-
-    return RedirectResponse(
-        url=redirect_url,
+    redirect_response = RedirectResponse(
+        url=FRONTEND_X_CALLBACK,
         status_code=302,
     )
+    security.set_auth_cookie(
+        redirect_response,
+        access_token,
+    )
+    refresh_token = issue_refresh_token(db, user.id)
+    set_refresh_cookie(redirect_response, refresh_token.token)
+    return redirect_response
 
 
 # =========================================================
@@ -1295,15 +1329,17 @@ def discord_callback(
         {"sub": str(user.id)}
     )
 
-    redirect_url = (
-        f"{FRONTEND_DISCORD_CALLBACK}"
-        f"#access_token={access_token}"
-    )
-
-    return RedirectResponse(
-        url=redirect_url,
+    redirect_response = RedirectResponse(
+        url=FRONTEND_DISCORD_CALLBACK,
         status_code=302,
     )
+    security.set_auth_cookie(
+        redirect_response,
+        access_token,
+    )
+    refresh_token = issue_refresh_token(db, user.id)
+    set_refresh_cookie(redirect_response, refresh_token.token)
+    return redirect_response
 
 
 # =========================================================
@@ -1362,11 +1398,18 @@ def read_current_user(
 # =========================================================
 
 @router.post("/logout")
-def logout():
+def logout(request: Request, response: Response, db: Session = Depends(get_db)):
+    refresh_token = request.cookies.get(REFRESH_COOKIE_NAME)
+
+    if refresh_token:
+        revoke_one(db, refresh_token)
+
+    security.clear_auth_cookie(response)
+    clear_refresh_cookie(response)
+
     return {
         "detail": "Logged out"
     }
-
 
 # =========================================================
 # CURRENT ACTIVE USER
@@ -1378,4 +1421,3 @@ def get_current_active_user(
     ),
 ):
     return current_user
-

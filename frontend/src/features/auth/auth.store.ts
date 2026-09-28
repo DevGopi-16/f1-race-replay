@@ -9,6 +9,8 @@ import {
 } from "./auth.api";
 
 import { signInWithGoogleFirebase } from "./firebase.auth";
+import { signOutFirebase } from "./firebase.auth";
+import type { User as FirebaseUser } from "firebase/auth";
 
 import type {
   AuthUser,
@@ -16,11 +18,11 @@ import type {
   SignupPayload,
  } from "./auth.types";
 
-const ACCESS_TOKEN_KEY = "f1_access_token";
-
 interface AuthState {
   user: AuthUser | null;
   accessToken: string | null;
+  authProvider: "password" | "google" | "oauth" | null;
+  firebaseWasSignedIn: boolean;
   isLoading: boolean;
   isInitialized: boolean;
 
@@ -35,6 +37,9 @@ interface AuthState {
   googleLogin: () => Promise<AuthUser>;
 
   restoreSession: () => Promise<void>;
+  syncFirebaseUser: (
+    firebaseUser: FirebaseUser | null,
+  ) => Promise<void>;
 
   logout: () => Promise<void>;
 }
@@ -42,11 +47,9 @@ interface AuthState {
 export const useAuthStore = create<AuthState>(
   (set) => ({
     user: null,
-
-    accessToken:
-      localStorage.getItem(
-        ACCESS_TOKEN_KEY,
-      ),
+    accessToken: null,
+    authProvider: null,
+    firebaseWasSignedIn: false,
 
     isLoading: false,
 
@@ -61,15 +64,10 @@ export const useAuthStore = create<AuthState>(
         const response =
           await loginApi(payload);
 
-        localStorage.setItem(
-          ACCESS_TOKEN_KEY,
-          response.access_token,
-        );
-
         set({
           user: response.user,
-          accessToken:
-            response.access_token,
+          accessToken: null,
+          authProvider: "password",
           isLoading: false,
           isInitialized: true,
         });
@@ -93,15 +91,10 @@ export const useAuthStore = create<AuthState>(
         const response =
           await signupApi(payload);
 
-        localStorage.setItem(
-          ACCESS_TOKEN_KEY,
-          response.access_token,
-        );
-
         set({
           user: response.user,
-          accessToken:
-            response.access_token,
+          accessToken: null,
+          authProvider: "password",
           isLoading: false,
           isInitialized: true,
         });
@@ -130,15 +123,10 @@ export const useAuthStore = create<AuthState>(
             id_token: idToken,
           });
 
-        localStorage.setItem(
-          ACCESS_TOKEN_KEY,
-          response.access_token,
-        );
-
         set({
           user: response.user,
-          accessToken:
-            response.access_token,
+          accessToken: null,
+          authProvider: "google",
           isLoading: false,
           isInitialized: true,
         });
@@ -154,21 +142,6 @@ export const useAuthStore = create<AuthState>(
     },
 
     restoreSession: async () => {
-      const token =
-        localStorage.getItem(
-          ACCESS_TOKEN_KEY,
-        );
-
-      if (!token) {
-        set({
-          isInitialized: true,
-          user: null,
-          accessToken: null,
-        });
-
-        return;
-      }
-
       set({
         isLoading: true,
       });
@@ -179,21 +152,69 @@ export const useAuthStore = create<AuthState>(
 
         set({
           user,
-          accessToken: token,
+          accessToken: null,
           isLoading: false,
           isInitialized: true,
         });
       } catch {
-        localStorage.removeItem(
-          ACCESS_TOKEN_KEY,
-        );
-
         set({
           user: null,
           accessToken: null,
           isLoading: false,
           isInitialized: true,
         });
+      }
+    },
+
+    syncFirebaseUser: async (firebaseUser) => {
+      const currentProvider =
+        useAuthStore.getState().authProvider;
+
+      if (firebaseUser) {
+        set({
+          firebaseWasSignedIn: true,
+        });
+
+        if (currentProvider === "google") {
+          return;
+        }
+
+        const idToken =
+          await firebaseUser.getIdToken();
+        const response =
+          await googleLoginApi({
+            id_token: idToken,
+          });
+
+        set({
+          user: response.user,
+          accessToken: null,
+          authProvider: "google",
+          isLoading: false,
+          isInitialized: true,
+        });
+        return;
+      }
+
+      const firebaseWasSignedIn =
+        useAuthStore.getState().firebaseWasSignedIn;
+
+      if (
+        currentProvider === "google" ||
+        firebaseWasSignedIn
+      ) {
+        try {
+          await logoutApi();
+        } finally {
+          set({
+            user: null,
+            accessToken: null,
+            authProvider: null,
+            firebaseWasSignedIn: false,
+            isLoading: false,
+            isInitialized: true,
+          });
+        }
       }
     },
 
@@ -205,14 +226,22 @@ export const useAuthStore = create<AuthState>(
       try {
         await logoutApi();
       } catch {
-      } finally {
-        localStorage.removeItem(
-          ACCESS_TOKEN_KEY,
-        );
+      }
 
+      set({
+        authProvider: null,
+        firebaseWasSignedIn: false,
+      });
+
+      try {
+        await signOutFirebase();
+      } catch {
+      } finally {
         set({
           user: null,
           accessToken: null,
+          authProvider: null,
+          firebaseWasSignedIn: false,
           isLoading: false,
           isInitialized: true,
         });

@@ -8,7 +8,8 @@ from src.auth.dependencies import get_current_user
 from src.auth.models import User
 from src.auth.replay_history import ReplayHistory
 from src.auth.security import hash_password, verify_password
-
+from src.auth.refresh_tokens.service import revoke_all_for_user
+from src.auth.security_log.logger import log_event
 
 router = APIRouter(
     prefix="/auth",
@@ -36,6 +37,18 @@ class ProfileUpdate(BaseModel):
         default=None,
         max_length=100,
     )
+
+    units: str | None = Field(
+        default=None,
+        max_length=20,
+    )
+
+    accent_color: str | None = Field(
+        default=None,
+        max_length=20,
+    )
+
+    notifications_enabled: bool | None = None
 
 class ChangePasswordRequest(BaseModel):
     current_password: str | None = None
@@ -179,6 +192,19 @@ def update_profile(
             payload.favorite_team.strip() or None
         )
 
+    if payload.units is not None:
+        current_user.units = payload.units.strip() or None
+
+    if payload.accent_color is not None:
+        current_user.accent_color = (
+            payload.accent_color.strip() or None
+        )
+
+    if payload.notifications_enabled is not None:
+        current_user.notifications_enabled = int(
+            payload.notifications_enabled
+        )
+
     db.commit()
     db.refresh(current_user)
 
@@ -238,6 +264,9 @@ def change_password(
 
     db.commit()
     db.refresh(current_user)
+
+    revoke_all_for_user(db, current_user.id)
+    log_event("password_changed", user_id=current_user.id, email=current_user.email)
 
     return {
         "message": (
