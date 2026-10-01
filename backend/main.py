@@ -410,7 +410,6 @@ if DIST_ASSETS_DIR.exists():
 
 # --- OAuth Routes ---
 
-@app.on_event("startup")
 async def warm_driver_stats_cache():
     current_year = datetime.date.today().year
 
@@ -422,7 +421,6 @@ async def warm_driver_stats_cache():
     loop = asyncio.get_event_loop()
     loop.run_in_executor(None, _compute)
 
-@app.on_event("startup")
 async def warm_track_outline_cache():
     current_year = datetime.date.today().year
 
@@ -465,7 +463,6 @@ async def _periodic_stats_refresh_loop():
 
         loop.run_in_executor(None, _compute)
 
-@app.on_event("startup")
 async def warm_constructor_history_cache():
     current_year = datetime.date.today().year
 
@@ -785,7 +782,6 @@ def index():
     return FileResponse(index_file)
 
 
-@app.on_event("startup")
 async def warm_historical_seasons_cache():
     current_year = datetime.date.today().year
 
