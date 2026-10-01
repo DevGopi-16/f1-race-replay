@@ -80,17 +80,36 @@ export default function ContactPage() {
     if (!validate()) return;
 
     setStatus("submitting");
+
     try {
-      // TODO: wire to the real endpoint, e.g.:
-      // await fetch('/api/contact', {
-      //   method: 'POST',
-      //   headers: { 'Content-Type': 'application/json' },
-      //   body: JSON.stringify(form),
-      // });
-      await new Promise((resolve) => setTimeout(resolve, 700)); // stubbed
+      const response = await fetch("/api/contact", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          name: form.name.trim(),
+          email: form.email.trim(),
+          subject: form.subject,
+          message: form.message.trim(),
+        }),
+      });
+
+      const data = await response.json();
+
+      if (!response.ok) {
+        throw new Error(
+          typeof data?.detail === "string"
+            ? data.detail
+            : "Unable to send your message.",
+        );
+      }
+
       setStatus("success");
       setForm(initialForm);
-    } catch {
+      setErrors({});
+    } catch (error) {
+      console.error("Contact form error:", error);
       setStatus("error");
     }
   };
@@ -214,7 +233,7 @@ export default function ContactPage() {
                 </Button>
                 {status === "success" && (
                   <span className="contact-form-status" data-state="success">
-                    Sent — we'll be in touch soon.
+                    Message sent successfully. We'll get back to you soon.
                   </span>
                 )}
                 {status === "error" && (

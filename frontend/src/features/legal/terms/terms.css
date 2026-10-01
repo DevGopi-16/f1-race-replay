@@ -179,3 +179,28 @@
     padding: 18px 20px;
   }
 }
+
+@media (max-width: 768px) {
+  .terms-layout {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .terms-toc {
+    display: none;
+  }
+
+  .terms-content {
+    max-width: 100%;
+  }
+
+  .terms-page p,
+  .terms-content li {
+    font-size: max(14px, 1rem);
+  }
+}
+
+@media (max-width: 480px) {
+  .terms-page .legal-contact {
+    padding: 16px;
+  }
+}

@@ -1344,3 +1344,84 @@
   letter-spacing: .12em;
   cursor: pointer;
 }
+
+@media (max-width: 768px) {
+  .replay-page {
+    max-width: 100%;
+    padding-right: 16px;
+    padding-left: 16px;
+  }
+
+  .replay-live-page,
+  .replay-layout,
+  .replay-main-grid,
+  .replay-content-grid {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .replay-race-meta,
+  .replay-selection-summary {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .replay-track-panel,
+  .replay-leaderboard,
+  .replay-controls,
+  .replay-timeline-section {
+    min-width: 0;
+    max-width: 100%;
+  }
+
+  .replay-track-panel,
+  .replay-timeline-section {
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+  }
+
+  .replay-page button,
+  .replay-page input,
+  .replay-page select {
+    min-height: 44px;
+  }
+
+  .replay-page input,
+  .replay-page select {
+    font-size: 16px;
+  }
+
+  .replay-page img,
+  .replay-page svg,
+  .replay-page canvas {
+    max-width: 100%;
+  }
+
+  .replay-header h1,
+  .replay-intro h1 {
+    font-size: clamp(2.5rem, 10vw, 5rem);
+  }
+}
+
+@media (max-width: 480px) {
+  .replay-page {
+    padding-right: 12px;
+    padding-left: 12px;
+  }
+
+  .replay-race-meta,
+  .replay-selection-summary {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .replay-controls-main,
+  .replay-control-actions {
+    flex-wrap: wrap;
+  }
+
+  .replay-command-panel {
+    padding: 14px;
+  }
+
+  .replay-page button {
+    min-height: 44px;
+  }
+}

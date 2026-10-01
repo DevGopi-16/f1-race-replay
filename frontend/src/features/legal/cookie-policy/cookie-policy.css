@@ -208,3 +208,28 @@
     animation: none;
   }
 }
+
+@media (max-width: 768px) {
+  .tc-page .tc-layout {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .tc-page .tc-toc {
+    display: none;
+  }
+
+  .tc-page .tc-content {
+    max-width: 100%;
+  }
+
+  .tc-page .tc-content p,
+  .tc-page .tc-content li {
+    font-size: max(14px, 1rem);
+  }
+}
+
+@media (max-width: 480px) {
+  .tc-page .legal-contact {
+    padding: 16px;
+  }
+}

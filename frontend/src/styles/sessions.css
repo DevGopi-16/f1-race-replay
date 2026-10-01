@@ -794,3 +794,64 @@
   cursor: not-allowed;
   pointer-events: none;
 }
+
+@media (max-width: 768px) {
+  .sessions-page {
+    padding: 28px 16px 56px;
+  }
+
+  .sessions-grid,
+  .sessions-hero {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .sessions-hero-title {
+    font-size: clamp(2.3rem, 9vw, 4rem);
+  }
+
+  .sessions-hero-side {
+    min-width: 0;
+  }
+
+  .round-card-stats {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .round-card,
+  .sessions-hero,
+  .sessions-hero-track {
+    max-width: 100%;
+    min-width: 0;
+  }
+
+  .sessions-page button {
+    min-height: 44px;
+  }
+
+  .sessions-page img,
+  .sessions-page svg {
+    max-width: 100%;
+  }
+}
+
+@media (max-width: 480px) {
+  .sessions-page {
+    padding: 24px 12px 48px;
+  }
+
+  .sessions-tabs {
+    gap: 12px;
+  }
+
+  .round-card {
+    padding: 16px;
+  }
+
+  .round-card-stats {
+    gap: 10px;
+  }
+
+  .round-card-sessions {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}

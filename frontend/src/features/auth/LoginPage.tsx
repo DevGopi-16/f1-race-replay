@@ -86,13 +86,11 @@ export default function LoginPage() {
       </div>
 
       <header className="auth-top-brand">
-        <div
-          className="auth-logo"
-          aria-label="F1 Race Replay"
-        >
-          <span className="auth-logo-f">F</span>
-          <span className="auth-logo-plus">+</span>
-        </div>
+        <img
+          src="/images/logo-without-bg/favicon-removebg-preview.png"
+          alt="F1 Race Replay"
+          className="auth-brand-logo"
+        />
 
         <div className="auth-brand-text">
           <strong>RACE REPLAY</strong>

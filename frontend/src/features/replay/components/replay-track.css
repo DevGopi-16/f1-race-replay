@@ -576,4 +576,28 @@
     }
 }
 
+@media (max-width: 768px) {
+  .replay-track-panel,
+  .track-viewport {
+    min-width: 0;
+    max-width: 100%;
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+  }
 
+  .replay-track-canvas,
+  .track-viewport canvas,
+  .track-viewport svg {
+    max-width: 100%;
+  }
+
+  .replay-track-panel button {
+    min-height: 44px;
+  }
+}
+
+@media (max-width: 480px) {
+  .track-viewport {
+    padding-inline: 4px;
+  }
+}

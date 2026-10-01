@@ -396,5 +396,34 @@
   }
 }
 
+@media (max-width: 768px) {
+  .analytics-page {
+    padding-right: 16px;
+    padding-left: 16px;
+  }
+
+  .analytics-page input,
+  .analytics-page select {
+    min-height: 44px;
+    font-size: 16px;
+  }
+
+  .analytics-page img,
+  .analytics-page svg,
+  .analytics-page canvas {
+    max-width: 100%;
+  }
+
+  .analytics-section-heading h2 {
+    font-size: clamp(1.8rem, 7vw, 2.8rem);
+  }
+}
+
+@media (max-width: 480px) {
+  .analytics-page {
+    padding-right: 12px;
+    padding-left: 12px;
+  }
+}
 
 

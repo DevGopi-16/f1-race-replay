@@ -265,3 +265,44 @@
   @keyframes h2r-draw  { from { stroke-dashoffset: 100; } }
   @keyframes h2r-donut { from { stroke-dasharray: 0 100; } }
 }
+
+@media (max-width: 768px) {
+  .h2r {
+    width: min(100% - 32px, 1560px);
+  }
+
+  .h2r-grid,
+  .h2r-season,
+  .h2r-donuts {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .h2r-card {
+    min-width: 0;
+  }
+
+  .h2r img,
+  .h2r svg {
+    max-width: 100%;
+  }
+
+  .h2r button {
+    min-height: 44px;
+  }
+}
+
+@media (max-width: 480px) {
+  .h2r {
+    width: min(100% - 24px, 1560px);
+  }
+
+  .h2r-grid,
+  .h2r-season,
+  .h2r-donuts {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .h2r-hero {
+    padding-inline: 12px;
+  }
+}

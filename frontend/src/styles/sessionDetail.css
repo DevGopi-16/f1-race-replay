@@ -553,3 +553,62 @@
   filter: brightness(0) invert(1) !important;
 }
 
+@media (max-width: 768px) {
+  .sd-page {
+    padding: 96px 16px 56px;
+  }
+
+  .sd-container {
+    width: min(100%, 1320px);
+  }
+
+  .sd-hero,
+  .sd-legend-grid {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .sd-winner-row {
+    grid-template-columns: 60px minmax(0, 1fr);
+  }
+
+  .sd-winner-team {
+    display: none;
+  }
+
+  .sd-table-wrap,
+  .sd-results-table-wrap,
+  .sd-laps-wrap {
+    max-width: 100%;
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+  }
+
+  .sd-page button {
+    min-height: 44px;
+  }
+
+  .sd-page img,
+  .sd-page svg {
+    max-width: 100%;
+  }
+}
+
+@media (max-width: 480px) {
+  .sd-page {
+    padding-right: 12px;
+    padding-left: 12px;
+  }
+
+  .sd-hero {
+    padding: 14px;
+  }
+
+  .sd-topbar {
+    flex-wrap: wrap;
+    gap: 12px;
+  }
+
+  .sd-winner-row {
+    grid-template-columns: 48px minmax(0, 1fr);
+  }
+}

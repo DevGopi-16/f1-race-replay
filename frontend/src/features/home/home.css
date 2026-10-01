@@ -355,17 +355,17 @@
 }
 
 .home-destinations {
-  padding-top: 100px;
-  padding-bottom: 160px;
+  padding-top: 80px;
+  padding-bottom: 80px;
 }
 
 .home-section-heading {
   display: grid;
-  grid-template-columns: 1fr 1fr;
+  grid-template-columns: minmax(0, 1fr);
 
-  gap: 40px;
+  gap: 28px;
 
-  margin-bottom: 60px;
+  margin-bottom: 48px;
 }
 
 .home-section-heading h2 {
@@ -470,14 +470,15 @@
 
 
 .home-data-section {
-  padding-top: 100px;
-  padding-bottom: 180px;
+  padding-top: 40px;
+  padding-bottom: 120px;
+  padding-inline: 6%;
 }
 
 .home-data-content {
   max-width: 850px;
 
-  padding-top: 70px;
+  padding-top: 40px;
 }
 
 .home-data-content h2 {
@@ -507,11 +508,12 @@
   line-height: 1.75;
 }
 
+
 .home-footer-statement {
   position: relative;
 
   overflow: hidden;
-
+  padding-inline: 6%;
   background:
     linear-gradient(
       180deg,
@@ -733,8 +735,8 @@
 }
 
 .home-featured-section {
-  padding-top: 80px;
-  padding-bottom: 150px;
+  padding-top: 0;
+  padding-bottom: 100px;
 }
 
 .home-featured-race {
@@ -1649,8 +1651,8 @@
 
 .home-experience {
     position: relative;
-    min-height: 100vh;
-    padding: 150px 6% 110px;
+    min-height: 0;
+    padding: 150px 6% 60px;
     overflow: hidden;
     background:
       radial-gradient(circle at 72% 52%, rgba(225, 6, 0, 0.09), transparent 30%),
@@ -1714,7 +1716,7 @@
     margin: 0;
     color: var(--color-white);
     font-family: var(--font-display);
-    font-size: clamp(3.8rem, 8vw, 9rem);
+    font-size: clamp(3rem, 5.8vw, 8rem);
     line-height: 0.82;
     letter-spacing: -0.08em;
   }
@@ -2234,5 +2236,87 @@
 @media (prefers-reduced-motion: reduce) {
   .home-next-session-cta {
     transition: none;
+  }
+}
+
+@media (max-width: 768px) {
+  .home-page-new,
+  .home-hero-new {
+    min-height: 100dvh;
+  }
+
+  .home-intro-content,
+  .home-section-heading,
+  .home-next-session-main,
+  .home-experience-heading,
+  .home-experience-stage {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .home-featured-race {
+    min-height: 0;
+    padding: 28px 20px 190px;
+  }
+
+  .home-featured-stats,
+  .home-next-session-details,
+  .home-experience-stages {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .home-next-session-main {
+    min-height: 0;
+    padding: 36px 20px;
+  }
+
+  .home-hero-title {
+    font-size: clamp(3rem, 12vw, 5.5rem);
+  }
+
+  .home-hero-circuit-live {
+    width: 100%;
+    min-width: 0;
+    max-width: 100%;
+  }
+
+  .home-experience {
+    min-height: 0;
+    padding: 96px 16px 64px;
+  }
+
+  .home-hero-new img,
+  .home-hero-new svg,
+  .home-next-session svg,
+  .home-experience svg {
+    max-width: 100%;
+  }
+
+  .home-experience-heading p,
+  .home-experience-copy p,
+  .home-intro p {
+    font-size: max(14px, 0.9rem);
+  }
+}
+
+@media (max-width: 480px) {
+  .home-featured-race {
+    padding-right: 14px;
+    padding-left: 14px;
+  }
+
+  .home-featured-stats,
+  .home-next-session-details {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .home-next-session-main {
+    padding-right: 12px;
+    padding-left: 12px;
+  }
+
+  .home-hero-new,
+  .home-experience {
+    padding-right: 12px;
+    padding-left: 12px;
   }
 }

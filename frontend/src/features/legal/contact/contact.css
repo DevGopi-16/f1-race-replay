@@ -154,3 +154,37 @@
   color: #ffffff;
   flex-shrink: 0;
 }
+
+@media (max-width: 768px) {
+  .contact-body,
+  .contact-form-row {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .contact-field input,
+  .contact-field select,
+  .contact-field textarea {
+    min-height: 44px;
+    font-size: 16px;
+  }
+
+  .contact-form-footer {
+    align-items: flex-start;
+    flex-direction: column;
+  }
+
+  .contact-form button {
+    min-height: 44px;
+  }
+}
+
+@media (max-width: 480px) {
+  .contact-body {
+    gap: 20px;
+    padding-bottom: 48px;
+  }
+
+  .contact-form {
+    padding: 16px;
+  }
+}

@@ -314,3 +314,42 @@
   align-items: center;
   gap: 10px;
 }
+
+@media (max-width: 768px) {
+  .season-overlay {
+    padding: 12px;
+  }
+
+  .season-modal {
+    width: min(100%, 720px);
+    max-height: 90dvh;
+  }
+
+  .season-grid {
+    grid-template-columns: repeat(5, minmax(0, 1fr));
+  }
+
+  .season-pill,
+  .season-cell,
+  .season-close {
+    min-height: 44px;
+  }
+}
+
+@media (max-width: 480px) {
+  .season-overlay {
+    padding: 8px;
+  }
+
+  .season-modal-header,
+  .season-modal-body,
+  .season-legend {
+    padding-right: 12px;
+    padding-left: 12px;
+  }
+
+  .season-grid {
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    gap: 6px;
+  }
+}

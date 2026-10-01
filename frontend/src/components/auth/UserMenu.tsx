@@ -83,17 +83,6 @@ export default function UserMenu() {
     return (
       <div className="user-menu-auth-actions">
         <Link
-          to="/login"
-          className="user-menu-login"
-        >
-          <LogIn
-            size={15}
-            strokeWidth={1.8}
-          />
-          <span>Login</span>
-        </Link>
-
-        <Link
           to="/register"
           className="user-menu-register"
         >
@@ -101,7 +90,7 @@ export default function UserMenu() {
             size={15}
             strokeWidth={1.8}
           />
-          <span>Sign Up</span>
+          <span>SIGN UP — IT'S FREE</span>
         </Link>
       </div>
     );

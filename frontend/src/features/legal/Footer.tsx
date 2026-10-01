@@ -22,7 +22,7 @@ const year = new Date().getFullYear();
       <div className="site-footer__container">
         <div className="site-footer__brand-row">
           <img
-            src="/favicon.png"
+            src="/images/logo-without-bg/favicon-removebg-preview.png"
             alt="F1 Race Vision"
             className="site-footer__logo-img"
           />

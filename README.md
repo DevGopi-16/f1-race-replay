@@ -461,6 +461,12 @@ uvicorn main:app --reload --port 8000
 
 > ℹ️ First load per race takes longer — FastF1 downloads and caches session data locally. This includes the homepage dashboard's first request, which loads full telemetry for the latest race weekend before it's cached in memory. Live-timing and 3D track map features need an internet connection at runtime (Three.js is loaded from a CDN).
 
+### Authentication notes
+
+Access tokens are bound to their refresh-token session and are rejected as soon as that session is revoked by logout, logout-all, session revocation, or password change/reset. Deploying this check invalidates older access tokens that do not contain a session ID; users will need to sign in again.
+
+Password-reset tokens are tracked in the database and protected by a unique token ID, so each reset token can be consumed only once across restarts and backend workers. Expired usage records are purged opportunistically.
+
 <br/>
 
 ## ⚡ Performance

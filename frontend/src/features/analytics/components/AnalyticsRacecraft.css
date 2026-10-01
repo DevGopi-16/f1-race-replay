@@ -149,3 +149,17 @@
     font-size: 17px;
   }
 }
+
+@media (max-width: 768px) {
+  .racecraft-grid {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .racecraft-metrics {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .racecraft-card {
+    min-width: 0;
+  }
+}

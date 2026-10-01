@@ -1869,3 +1869,75 @@
 .profile-forgot-link:hover:not(:disabled) {
   opacity: 0.85;
 }
+
+@media (max-width: 768px) {
+  .profile-page {
+    padding: 24px 16px 56px;
+  }
+
+  .profile-layout,
+  .profile-main,
+  .profile-hero,
+  .profile-identity-grid {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .profile-sidebar,
+  .profile-main > *,
+  .profile-overview-card,
+  .profile-connections-card {
+    grid-column: 1 / -1;
+  }
+
+  .profile-metric-grid,
+  .profile-hero-kpis,
+  .profile-form-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .profile-section {
+    min-width: 0;
+    padding: 24px;
+  }
+
+  .profile-field input,
+  .profile-page select {
+    min-height: 44px;
+    font-size: 16px;
+  }
+
+  .profile-page button {
+    min-height: 44px;
+  }
+
+  .profile-page img,
+  .profile-page svg {
+    max-width: 100%;
+  }
+}
+
+@media (max-width: 480px) {
+  .profile-page {
+    padding: 20px 12px 48px;
+  }
+
+  .profile-section {
+    padding: 16px;
+  }
+
+  .profile-metric-grid,
+  .profile-hero-kpis,
+  .profile-form-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .profile-header,
+  .profile-header-actions,
+  .profile-connection-row {
+    flex-wrap: wrap;
+  }
+
+  .profile-field input {
+    width: 100%;
+  }
+}

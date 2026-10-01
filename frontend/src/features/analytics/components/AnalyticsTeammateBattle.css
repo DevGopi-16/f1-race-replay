@@ -484,3 +484,28 @@
     height: 3px;
   }
 }
+
+@media (max-width: 768px) {
+  .teammate-grid {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .teammate-card {
+    min-width: 0;
+  }
+
+  .teammate-stat-row {
+    grid-template-columns: minmax(0, 1fr) 68px minmax(0, 1fr);
+    gap: 8px;
+  }
+}
+
+@media (max-width: 480px) {
+  .teammate-card-header {
+    min-width: 0;
+  }
+
+  .teammate-driver-full-name {
+    overflow-wrap: anywhere;
+  }
+}

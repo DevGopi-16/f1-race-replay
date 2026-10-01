@@ -160,3 +160,36 @@
   padding-top: 0 !important;
   margin-top: 0 !important;
 }
+
+@media (max-width: 768px) {
+  .about-grid-2 {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .about-section,
+  .about-cta {
+    padding: 32px 0;
+  }
+
+  .about-capability {
+    min-height: 44px;
+    gap: 12px;
+  }
+
+  .about-body-lg,
+  .about-capability-description {
+    font-size: max(14px, 0.9rem);
+  }
+
+  .about-cta-row {
+    align-items: flex-start;
+    flex-direction: column;
+  }
+}
+
+@media (max-width: 480px) {
+  .about-section,
+  .about-cta {
+    padding: 24px 0;
+  }
+}

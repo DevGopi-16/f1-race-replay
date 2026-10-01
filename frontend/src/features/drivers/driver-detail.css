@@ -2458,3 +2458,98 @@ for brightness logo
   filter: brightness(0) invert(1) !important;
 }
 
+@media (max-width: 768px) {
+  .driver-detail-page {
+    padding: 24px 16px 56px;
+  }
+
+  .driver-detail-container {
+    width: 100%;
+    gap: 28px;
+  }
+
+  .driver-hero {
+    min-height: 0;
+  }
+
+  .driver-hero-content {
+    padding: 32px 16px 120px;
+  }
+
+  .driver-hero-name h1 {
+    font-size: clamp(2.5rem, 10vw, 5rem);
+  }
+
+  .driver-hero-stats,
+  .racecraft-grid,
+  .career-grid,
+  .driver-bio-facts {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .analytics-card {
+    grid-template-columns: minmax(0, 1fr);
+    min-width: 0;
+  }
+
+  .driver-section,
+  .driver-next-race {
+    min-width: 0;
+    padding: 20px;
+  }
+
+  .analytics-chart,
+  .quali-race-table,
+  .race-timeline {
+    max-width: 100%;
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+  }
+
+  .driver-detail-page button {
+    min-height: 44px;
+  }
+
+  .driver-detail-page img,
+  .driver-detail-page svg,
+  .analytics-svg {
+    max-width: 100%;
+  }
+}
+
+@media (max-width: 480px) {
+  .driver-detail-page {
+    padding: 20px 12px 48px;
+  }
+
+  .driver-hero-content {
+    padding-right: 12px;
+    padding-left: 12px;
+  }
+
+  .driver-hero-stats,
+  .racecraft-grid,
+  .career-grid,
+  .driver-bio-facts {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .driver-section,
+  .driver-next-race {
+    padding: 14px;
+  }
+
+  .driver-section-heading {
+    align-items: flex-start;
+    flex-direction: column;
+    gap: 12px;
+  }
+
+  .analytics-card {
+    padding: 14px;
+  }
+
+  .driver-hero-meta {
+    flex-wrap: wrap;
+  }
+}

@@ -474,3 +474,48 @@
     to   { opacity: 1; stroke-dashoffset: -100; }
   }
 }
+
+@media (max-width: 768px) {
+  .h2l {
+    width: min(100% - 32px, 1560px);
+    padding-top: 56px;
+  }
+
+  .h2l-board,
+  .h2l-cards {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .h2l-slot {
+    min-width: 0;
+  }
+
+  .h2l-title {
+    font-size: clamp(2.2rem, 9vw, 4.5rem);
+  }
+
+  .h2l img,
+  .h2l svg {
+    max-width: 100%;
+  }
+
+  .h2l button {
+    min-height: 44px;
+  }
+}
+
+@media (max-width: 480px) {
+  .h2l {
+    width: min(100% - 24px, 1560px);
+  }
+
+  .h2l-presets {
+    flex-wrap: wrap;
+    gap: 8px;
+  }
+
+  .h2l-presets button {
+    flex: 1 1 140px;
+    min-height: 44px;
+  }
+}

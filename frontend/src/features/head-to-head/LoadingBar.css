@@ -35,3 +35,19 @@
   background: #e10600;
   transition: width 0.2s ease-out;
 }
+
+@media (max-width: 768px) {
+  .h2h-loadbar {
+    width: min(100%, 460px);
+  }
+
+  .h2h-loadbar-track {
+    max-width: 100%;
+  }
+}
+
+@media (max-width: 480px) {
+  .h2h-loadbar {
+    padding-inline: 12px;
+  }
+}

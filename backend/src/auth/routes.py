@@ -157,11 +157,11 @@ def signup(
     log_event("signup", user_id=user.id, email=user.email)
     background_tasks.add_task(send_verification_email_task, user.id, user.email)
 
+    refresh_token = issue_refresh_token(db, user.id)
     token = security.create_access_token(
-        {"sub": str(user.id)}
+        {"sub": str(user.id), "sid": refresh_token.id}
     )
     security.set_auth_cookie(response, token)
-    refresh_token = issue_refresh_token(db, user.id)
     set_refresh_cookie(response, refresh_token.token)
 
     return schemas.Token(
@@ -212,11 +212,11 @@ def login(
 
     clear_rate_limit("login", payload.email)
 
+    refresh_token = issue_refresh_token(db, user.id)
     token = security.create_access_token(
-        {"sub": str(user.id)}
+        {"sub": str(user.id), "sid": refresh_token.id}
     )
     security.set_auth_cookie(response, token)
-    refresh_token = issue_refresh_token(db, user.id)
     set_refresh_cookie(response, refresh_token.token)
 
     return schemas.Token(
@@ -335,11 +335,11 @@ def google_login(
     db.commit()
     db.refresh(user)
 
+    refresh_token = issue_refresh_token(db, user.id)
     token = security.create_access_token(
-        {"sub": str(user.id)}
+        {"sub": str(user.id), "sid": refresh_token.id}
     )
     security.set_auth_cookie(response, token)
-    refresh_token = issue_refresh_token(db, user.id)
     set_refresh_cookie(response, refresh_token.token)
 
     return schemas.Token(
@@ -776,8 +776,9 @@ def x_callback(
     db.commit()
     db.refresh(user)
 
+    refresh_token = issue_refresh_token(db, user.id)
     access_token = security.create_access_token(
-        {"sub": str(user.id)}
+        {"sub": str(user.id), "sid": refresh_token.id}
     )
 
     redirect_response = RedirectResponse(
@@ -788,7 +789,6 @@ def x_callback(
         redirect_response,
         access_token,
     )
-    refresh_token = issue_refresh_token(db, user.id)
     set_refresh_cookie(redirect_response, refresh_token.token)
     return redirect_response
 
@@ -1377,8 +1377,9 @@ def discord_callback(
     db.commit()
     db.refresh(user)
 
+    refresh_token = issue_refresh_token(db, user.id)
     access_token = security.create_access_token(
-        {"sub": str(user.id)}
+        {"sub": str(user.id), "sid": refresh_token.id}
     )
 
     redirect_response = RedirectResponse(
@@ -1389,7 +1390,6 @@ def discord_callback(
         redirect_response,
         access_token,
     )
-    refresh_token = issue_refresh_token(db, user.id)
     set_refresh_cookie(redirect_response, refresh_token.token)
     return redirect_response
 

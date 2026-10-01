@@ -1668,3 +1668,227 @@ for brightness logo
   filter: brightness(0) invert(1) !important;
 }
 
+@media (max-width: 768px) {
+  .drivers-page {
+    max-width: 100%;
+    padding: 24px 16px 64px;
+  }
+
+  .drivers-header-title h1 {
+    font-size: clamp(2.5rem, 10vw, 4rem);
+  }
+
+  .drivers-search,
+  .drivers-search input {
+    max-width: 100%;
+    min-width: 0;
+  }
+
+  .drivers-search input {
+    font-size: 16px;
+  }
+
+  .drivers-table {
+    max-width: 100%;
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+  }
+
+  .driver-row {
+    min-width: 520px;
+  }
+
+  .drivers-page button,
+  .drivers-page select {
+    min-height: 44px;
+  }
+
+  .drivers-page img,
+  .drivers-page svg {
+    max-width: 100%;
+  }
+}
+
+@media (max-width: 480px) {
+  .drivers-page {
+    padding: 20px 12px 56px;
+  }
+
+  .drivers-header-controls {
+    align-items: stretch;
+    flex-direction: column;
+  }
+
+  .drivers-search,
+  .drivers-year {
+    width: 100%;
+  }
+
+  .drivers-table {
+    margin-inline: -12px;
+    padding-inline: 12px;
+  }
+
+  .driver-row {
+    min-width: 500px;
+  }
+}
+
+/* driver banner + page top spacing on tablet/phone */
+@media (max-width: 900px) {
+  .drivers-page {
+    padding-top: calc(var(--nav-height-mobile, 64px) + 40px);
+  }
+
+  .featured-driver {
+    min-height: 540px;
+  }
+
+  /* keep the text column clear of the driver photo */
+  .featured-driver .featured-driver-copy {
+    max-width: 60%;
+  }
+
+  .featured-driver .featured-driver-name h2 {
+    font-size: clamp(26px, 6vw, 42px);
+    line-height: 0.95;
+    white-space: normal;
+    overflow-wrap: break-word;
+  }
+
+  .featured-driver .featured-driver-name span {
+    font-size: clamp(20px, 4.5vw, 30px);
+  }
+
+  .featured-driver .featured-driver-code {
+    font-size: clamp(36px, 9vw, 64px);
+  }
+}
+
+@media (max-width: 480px) {
+  .featured-driver {
+    min-height: 500px;
+  }
+
+  .featured-driver .featured-driver-copy {
+    max-width: 58%;
+  }
+
+  .featured-driver .featured-driver-meta {
+    flex-wrap: wrap;
+    gap: 6px 10px;
+  }
+}
+
+/* banner fills the card instead of floating in the middle */
+@media (max-width: 900px) {
+  .featured-driver .featured-driver-bg {
+    background-size: cover;
+    background-position: right center;
+  }
+}
+
+/* stats strip becomes 2 columns here and is taller, so reserve more room below */
+@media (max-width: 640px) {
+  .featured-driver .featured-driver-content {
+    padding-bottom: 150px;
+  }
+
+  .featured-driver .featured-driver-visual {
+    bottom: 150px;
+  }
+
+  .featured-driver .featured-driver-bg {
+    inset: 0 0 150px 0;
+  }
+}
+
+/* shorter driver banner card */
+@media (max-width: 900px) {
+  .featured-driver {
+    min-height: 400px;
+  }
+
+  .featured-driver .featured-driver-content {
+    min-height: 400px;
+    padding: 36px 5% 84px;
+  }
+
+  /* slimmer stats strip, and the banner and photo stop above it */
+  .featured-driver .featured-driver-stats {
+    min-height: 76px;
+  }
+
+  .featured-driver .featured-driver-bg {
+    inset: 0 0 76px 0;
+  }
+
+  .featured-driver .featured-driver-visual {
+    bottom: 76px;
+  }
+
+  .featured-driver .featured-driver-position {
+    margin-bottom: 12px;
+  }
+
+  .featured-driver .featured-driver-code {
+    margin-top: 8px;
+    font-size: clamp(30px, 7vw, 52px);
+  }
+
+  .featured-driver .featured-stat {
+    gap: 4px;
+  }
+}
+
+/* phones: the stats strip is taller there, so only trim the top of the card */
+@media (max-width: 640px) {
+  .featured-driver {
+    min-height: 0;
+  }
+
+  .featured-driver .featured-driver-content {
+    min-height: 0;
+    padding-top: 28px;
+  }
+}
+
+/* driver photo: headroom, no side crop */
+@media (max-width: 900px) {
+  .featured-driver .featured-driver-visual {
+    top: 14px;
+  }
+
+  .featured-driver .featured-driver-visual .featured-driver-image {
+    height: 190%;
+    transform: none;
+    object-position: center top;
+  }
+}
+
+/* phones: size the photo by width so he isn't cropped at the sides */
+@media (max-width: 640px) {
+  .featured-driver .featured-driver-visual .featured-driver-image {
+    width: 115%;
+    height: auto;
+    max-width: none;
+  }
+}
+
+/* photo fades out at the bottom instead of ending in a hard line */
+@media (max-width: 900px) {
+  .featured-driver .featured-driver-visual {
+    -webkit-mask-image: linear-gradient(to bottom, #000 0%, #000 72%, transparent 100%);
+    mask-image: linear-gradient(to bottom, #000 0%, #000 72%, transparent 100%);
+  }
+
+  /* slightly shorter banner */
+  .featured-driver {
+    min-height: 370px;
+  }
+
+  .featured-driver .featured-driver-content {
+    min-height: 370px;
+    padding-top: 30px;
+  }
+}

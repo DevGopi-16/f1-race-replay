@@ -133,3 +133,23 @@
   .analytics-stat strong { font-size: 30px; }
   .analytics-stat-meta { font-size: 9px; }
 }
+
+@media (max-width: 768px) {
+  .analytics-overview {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .analytics-stat {
+    min-width: 0;
+  }
+}
+
+@media (max-width: 480px) {
+  .analytics-overview {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .analytics-stat {
+    padding: 12px;
+  }
+}
