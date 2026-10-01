@@ -42,7 +42,7 @@ const year = new Date().getFullYear();
             </a>
 
             <a
-              href="https://x.com/REPLACE_WITH_YOUR_HANDLE"
+              href="https://x.com/f1racevision"
               className="site-footer__icon"
               target="_blank"
               rel="noreferrer"

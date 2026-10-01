@@ -119,3 +119,38 @@
 .contact-form-status[data-state="success"] {
   color: #e10600;
 }
+
+.contact-soon {
+  display: inline-block;
+  margin-left: 8px;
+  padding: 2px 8px;
+  border-radius: 999px;
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--accent, #e10600);
+  border: 1px solid currentColor;
+  opacity: 0.85;
+}
+
+.contact-discord {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  opacity: 0.9;
+}
+
+.contact-discord-icon {
+  width: 22px;
+  height: 22px;
+  color: #5865f2; /* Discord blurple */
+  flex-shrink: 0;
+}
+
+.contact-x-icon {
+  width: 22px;
+  height: 22px;
+  color: #ffffff;
+  flex-shrink: 0;
+}

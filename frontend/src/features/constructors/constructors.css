@@ -10,6 +10,24 @@
   --cs-accent: #e10600;
 }
 
+/* ============================================================
+   LIGHT THEME — CONSTRUCTORS
+   Keep all constructor components theme-aware through the
+   existing --cs-* design tokens.
+   ============================================================ */
+
+:root[data-theme="light"] {
+  --cs-bg: #f5f6f8;
+  --cs-panel: rgba(255, 255, 255, 0.82);
+  --cs-panel-hover: rgba(255, 255, 255, 0.96);
+  --cs-border: rgba(15, 23, 42, 0.12);
+  --cs-border-soft: rgba(15, 23, 42, 0.08);
+  --cs-text: #111827;
+  --cs-text-dim: #475569;
+  --cs-text-faint: #64748b;
+  --cs-accent: #e10600;
+}
+
 * {
   box-sizing: border-box;
 }
@@ -567,5 +585,38 @@
     grid-template-columns: 24px 3px 40px 1fr auto;
     grid-template-areas: "pos color logo info info" "pos color logo pts wins";
     row-gap: 10px;
+  }
+}
+
+@media (max-width: 600px) {
+  .constructors-page {
+    padding: 16px 12px 48px;
+  }
+
+  .constructors-hero {
+    padding: 20px 16px;
+    gap: 18px;
+    border-radius: 16px;
+    backdrop-filter: none; /* big blur panels lag on phones */
+    -webkit-backdrop-filter: none;
+  }
+
+  .constructors-stat-strip {
+    gap: 10px;
+  }
+
+  .constructors-list {
+    gap: 8px;
+  }
+
+  .constructor-row {
+    grid-template-columns: 22px 3px 36px minmax(0, 1fr) auto;
+    column-gap: 10px;
+    padding: 12px;
+    min-height: 64px;
+  }
+
+  .constructor-chevron {
+    display: none;
   }
 }

@@ -90,3 +90,4 @@ frontend/dist/
 backend/cache/
 
 tree.txt
+frontend/src/auth/email_verification/__init__.py

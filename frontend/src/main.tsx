@@ -6,18 +6,15 @@ import App from "./app/App";
 import { useAuthStore } from "./features/auth/auth.store";
 
 import "./styles/globals.css";
+
 import { initializeAppearance } from "./features/auth/appearance";
 import { subscribeToFirebaseAuth } from "./features/auth/firebase.auth";
-
 
 import "./features/drivers/drivers.css";
 import "./styles/calendar.css";
 import "./styles/sessions.css";
 
 initializeAppearance();
-
-
-
 
 class F1ErrorBoundary extends React.Component<
   { children: React.ReactNode },
@@ -86,7 +83,6 @@ class F1ErrorBoundary extends React.Component<
   }
 }
 
-
 /* =========================================================
    APPLICATION BOOTSTRAP
 ========================================================= */
@@ -94,10 +90,6 @@ class F1ErrorBoundary extends React.Component<
 function AppBootstrap() {
   const restoreSession = useAuthStore(
     (state) => state.restoreSession,
-  );
-
-  const isInitialized = useAuthStore(
-    (state) => state.isInitialized,
   );
 
   React.useEffect(() => {
@@ -119,20 +111,10 @@ function AppBootstrap() {
     return unsubscribe;
   }, [restoreSession]);
 
-  if (!isInitialized) {
-    return (
-      <div
-        style={{
-          minHeight: "100vh",
-          background: "#050505",
-        }}
-      />
-    );
-  }
-
+  // Render the website immediately.
+  // Authentication is restored in the background.
   return <App />;
 }
-
 
 /* =========================================================
    GLOBAL ERROR HANDLING
@@ -148,7 +130,6 @@ window.addEventListener(
   },
 );
 
-
 /* =========================================================
    APPLICATION MOUNT
 ========================================================= */
@@ -162,3 +143,4 @@ ReactDOM.createRoot(
     </F1ErrorBoundary>
   </React.StrictMode>,
 );
+

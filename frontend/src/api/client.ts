@@ -1,3 +1,4 @@
+import { refreshAccessToken, shouldSkipRefresh } from "../features/auth/tokenRefresh";
 const API_BASE_URL = "";
 
 
@@ -34,6 +35,7 @@ async function parseResponse(
 export async function apiRequest<T>(
   endpoint: string,
   options: RequestInit = {},
+  _isRetry = false,
 ): Promise<T> {
   const headers = new Headers(
     options.headers,
@@ -63,6 +65,17 @@ export async function apiRequest<T>(
     ...options,
     headers,
   });
+
+  if (
+    response.status === 401 &&
+    !_isRetry &&
+    !shouldSkipRefresh(url)
+  ) {
+    const refreshed = await refreshAccessToken();
+    if (refreshed) {
+      return apiRequest<T>(endpoint, options, true);
+    }
+  }
 
   const data = await parseResponse(response);
 

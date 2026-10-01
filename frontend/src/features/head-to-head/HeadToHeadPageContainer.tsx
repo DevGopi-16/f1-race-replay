@@ -23,7 +23,7 @@ async function fetchHeadToHead(driverAId: string, driverBId: string) {
     throw new Error(`Failed to load head-to-head (${res.status}): ${await res.text()}`);
   }
 
-  const { driverA: a, driverB: b } = await res.json();
+  const { driverA: a, driverB: b, headToHeadRecord } = await res.json();
 
   return {
     driverA: toSummary(a),
@@ -33,7 +33,7 @@ async function fetchHeadToHead(driverAId: string, driverBId: string) {
       driverA: { performance_index: a.performance_index, circuit_dna: a.circuit_dna },
       driverB: { performance_index: b.performance_index, circuit_dna: b.circuit_dna },
     },
-    headToHeadRecord: null, // backend doesn't compute this yet
+    headToHeadRecord: headToHeadRecord ?? null,
     relativePerformance: { driverA: a.teammate_battle, driverB: b.teammate_battle },
     allTimeRankings: null, // backend doesn't compute this yet
     careerTrajectory: { driverA: a.season_journey, driverB: b.season_journey },

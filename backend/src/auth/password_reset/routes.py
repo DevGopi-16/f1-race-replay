@@ -53,7 +53,7 @@ def forgot_password(payload: ForgotPasswordRequest):
         if user:
             reset_token = create_access_token(
                 data={
-                    "sub": str(user.id),
+                    "uid": str(user.id),
                     "purpose": RESET_TOKEN_PURPOSE,
                     "jti": secrets.token_urlsafe(16),
                 },
@@ -111,7 +111,7 @@ def reset_password(payload: ResetPasswordRequest):
             detail="This reset link has already been used.",
         )
 
-    user_id = decoded.get("sub")
+    user_id = decoded.get("uid")
     if not user_id:
         raise HTTPException(
             status_code=400,

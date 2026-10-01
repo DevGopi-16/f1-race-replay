@@ -2449,3 +2449,12 @@
     transition: none !important;
   }
 }
+
+for brightness logo
+
+.sd-team-cell img.tl-logo[src*="/rb."],
+.sd-team-cell img.tl-logo[src*="cadillac"],
+.sd-team-cell img.tl-logo[src*="aston-martin"] {
+  filter: brightness(0) invert(1) !important;
+}
+

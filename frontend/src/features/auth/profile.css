@@ -1846,3 +1846,26 @@
     padding: 22px;
   }
 }
+
+.profile-forgot-link {
+  display: block;
+  margin-top: 8px;
+  background: none;
+  border: none;
+  padding: 0;
+  font-size: 13px;
+  color: var(--accent, #e10600);
+  text-decoration: underline;
+  cursor: pointer;
+  text-align: left;
+}
+
+.profile-forgot-link:disabled {
+  cursor: default;
+  opacity: 0.6;
+  text-decoration: none;
+}
+
+.profile-forgot-link:hover:not(:disabled) {
+  opacity: 0.85;
+}

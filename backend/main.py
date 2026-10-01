@@ -54,6 +54,7 @@ from src.auth.profile_routes import router as profile_router
 from src.auth.password_reset.routes import router as password_reset_router
 from src.auth.refresh_tokens.routes import router as refresh_tokens_router
 from src.auth.sessions.routes import router as sessions_router
+from src.auth.email_verification.routes import router as email_verification_router
 from src.auth.sessions.context import RequestContextMiddleware
 from src.live.session_watcher import run_forever as run_live_watcher
 from src.live.state import live_state
@@ -371,6 +372,7 @@ app.include_router(profile_router)
 app.include_router(password_reset_router)
 app.include_router(refresh_tokens_router)
 app.include_router(sessions_router)
+app.include_router(email_verification_router)
 app.include_router(h2h_router)
 
 # F1 API routers

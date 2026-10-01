@@ -132,6 +132,12 @@ function ConstructorsPage() {
     void load();
   }, []);
 
+  useEffect(() => {
+    if (selectedTeam) {
+      window.scrollTo({ top: 50, left: 0, behavior: "auto" });
+    }
+  }, [selectedTeam?.id]);
+
   const sortedTeams = useMemo(() => {
     const result = [...teams];
 

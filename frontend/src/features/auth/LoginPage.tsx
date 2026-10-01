@@ -331,6 +331,15 @@ export default function LoginPage() {
                 </div>
               </label>
 
+              <button
+                type="button"
+                className="auth-back-login"
+                style={{ textAlign: "right", marginTop: "-8px" }}
+                onClick={() => navigate("/forgot-password")}
+              >
+                Forgot password?
+              </button>
+
               {error && (
                 <div
                   className="auth-error"
