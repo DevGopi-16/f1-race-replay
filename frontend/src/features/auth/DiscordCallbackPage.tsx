@@ -46,12 +46,12 @@ export default function DiscordCallbackPage() {
 
     async function completeDiscordLogin() {
       try {
-        /*
-         * Discord backend redirects with:
-         *
-         * The backend sets the session cookie before redirecting
-         * to this page, so the browser sends it automatically.
-         */
+
+
+
+
+
+
 
         const searchParams = new URLSearchParams(
           window.location.search,
@@ -72,10 +72,10 @@ export default function DiscordCallbackPage() {
         await restoreSession();
 
         if (!cancelled) {
-          /*
-           * Remove the token from the browser URL after
-           * successful authentication.
-           */
+
+
+
+
 
           window.history.replaceState(
             null,

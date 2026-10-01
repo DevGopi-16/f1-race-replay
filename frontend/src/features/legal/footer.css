@@ -108,9 +108,9 @@
     flex-wrap: wrap;
   }
 }
-/* ============================================================
-   LIGHT THEME — FOOTER
-   ============================================================ */
+
+
+
 
 :root[data-theme="light"] .site-footer {
   background: #ffffff;

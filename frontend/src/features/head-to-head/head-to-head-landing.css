@@ -22,7 +22,7 @@
 
 .h2l > * { position: relative; z-index: 1; }
 
-/* ---- Hero ---- */
+
 .h2l-hero { max-width: 720px; }
 
 .h2l-title {
@@ -40,7 +40,7 @@
   color: var(--muted);
 }
 
-/* ---- Matchup board: the one memorable element ---- */
+
 .h2l-board {
   position: relative;
   z-index: 3;
@@ -105,7 +105,7 @@
   to   { opacity: 1; transform: none; }
 }
 
-/* centre divider */
+
 .h2l-vs {
   position: relative;
   display: flex;
@@ -139,10 +139,10 @@
   letter-spacing: 0.06em;
 }
 
-/* existing picker tweaks inside a slot */
+
 .h2l-slot .h2h-field { margin: 0; }
 
-/* ---- Status + presets ---- */
+
 .h2l-status {
   min-height: 24px;
   margin-top: 18px;
@@ -178,7 +178,7 @@
   outline-offset: 2px;
 }
 
-/* ---- What's in a comparison ---- */
+
 .h2l-learn { margin-top: 88px; }
 
 .h2l-learn h2 {
@@ -222,7 +222,7 @@
   color: rgba(243, 243, 245, 0.4);
 }
 
-/* ---- One page-load moment: the two slots converge on VS ---- */
+
 @media (prefers-reduced-motion: no-preference) {
   .h2l-slot.a { animation: h2l-from-left 0.7s cubic-bezier(0.2, 0.8, 0.2, 1) both; }
   .h2l-slot.b { animation: h2l-from-right 0.7s cubic-bezier(0.2, 0.8, 0.2, 1) both; }
@@ -233,7 +233,7 @@
 @keyframes h2l-from-right { from { opacity: 0; transform: translateX(40px); }  to { opacity: 1; transform: none; } }
 @keyframes h2l-pop        { from { opacity: 0; transform: scale(0.5); }        to { opacity: 1; transform: none; } }
 
-/* ---- Responsive ---- */
+
 @media (max-width: 900px) {
   .h2l { padding: 64px 20px 72px; }
   .h2l-board { grid-template-columns: 1fr; }
@@ -250,15 +250,15 @@
 }
 
 
-/* ===== Motion layer: paste at the very bottom of head-to-head-landing.css ===== */
+
 
 @media (prefers-reduced-motion: no-preference) {
 
-  /* ---- Page load: hero first, then the two slots converge, then the chips ---- */
+
   .h2l-title { animation: h2l-title-in 0.9s cubic-bezier(0.2, 0.8, 0.2, 1) backwards; }
   .h2l-sub   { animation: h2l-title-in 0.9s 0.15s cubic-bezier(0.2, 0.8, 0.2, 1) backwards; }
 
-  /* "backwards" (not "both") so hover transforms still work after the entrance ends */
+
   .h2l-slot.a { animation: h2l-from-left 0.7s 0.25s cubic-bezier(0.2, 0.8, 0.2, 1) backwards; }
   .h2l-slot.b { animation: h2l-from-right 0.7s 0.25s cubic-bezier(0.2, 0.8, 0.2, 1) backwards; }
 
@@ -274,21 +274,21 @@
   .h2l-presets button:nth-child(3) { animation-delay: 1.14s; }
   .h2l-presets button:nth-child(4) { animation-delay: 1.21s; }
 
-  /* ---- Ambient: slow drifting glow behind the hero ---- */
+
   .h2l::before { animation: h2l-drift 14s ease-in-out infinite alternate; }
 
-  /* ---- Divider: colour flows from A to B and back ---- */
+
   .h2l-vs::before {
     background: linear-gradient(var(--a), var(--b), var(--a), var(--b), var(--a));
     background-size: 100% 200%;
     animation: h2l-flow-y 3.2s linear infinite;
   }
 
-  /* ---- Empty slots: the big letter floats gently ---- */
+
   .h2l-stage-mark { animation: h2l-float 6s ease-in-out infinite; }
   .h2l-slot.b .h2l-stage-mark { animation-delay: -3s; }
 
-  /* ---- Responds to the person ---- */
+
   .h2l-slot {
     transition:
       transform 0.3s ease,
@@ -303,14 +303,14 @@
     box-shadow: 0 24px 60px -24px color-mix(in srgb, var(--c) 70%, transparent);
   }
 
-  /* driver picked: number drops in, then keeps floating */
+
   .h2l-slot.filled .h2l-stage-mark {
     animation:
       h2l-mark-in 0.55s cubic-bezier(0.2, 0.8, 0.2, 1) backwards,
       h2l-float 6s 0.55s ease-in-out infinite;
   }
 
-  /* a light sweep crosses the slot once when a driver is chosen */
+
   .h2l-slot.filled .h2l-stage::after {
     content: "";
     position: absolute;
@@ -321,7 +321,7 @@
     pointer-events: none;
   }
 
-  /* both drivers chosen: VS locks in red */
+
   .h2l-board:has(.h2l-slot.a.filled):has(.h2l-slot.b.filled) .h2l-vs b {
     background: var(--red);
     animation:
@@ -333,7 +333,7 @@
   .h2l-presets button:hover { transform: translateY(-2px); background: rgba(232, 56, 43, 0.1); }
   .h2l-presets button:active { transform: translateY(0) scale(0.97); }
 
-  /* ---- Feature cards reveal as they scroll into view ---- */
+
   @supports (animation-timeline: view()) {
     .h2l-card {
       animation: h2l-card-in linear both;
@@ -342,7 +342,7 @@
     }
   }
 
-  /* ---- Keyframes ---- */
+
   @keyframes h2l-title-in {
     from { opacity: 0; transform: translateY(22px); filter: blur(8px); }
     to   { opacity: 1; transform: none; filter: none; }
@@ -388,7 +388,7 @@
     to   { opacity: 1; transform: none; }
   }
 
-  /* mobile: the divider runs horizontally, so the flow runs sideways */
+
   @media (max-width: 900px) {
     .h2l-vs::before {
       background: linear-gradient(90deg, var(--a), var(--b), var(--a), var(--b), var(--a));
@@ -398,9 +398,9 @@
   }
 }
 
-/* ===== Hero animation: paste at the very bottom of head-to-head-landing.css ===== */
 
-/* Title: light-catching text (static white when motion is reduced) */
+
+
 .h2l-title {
   background: linear-gradient(100deg, #fff 0%, #fff 40%, #ff9b92 50%, #fff 60%, #fff 100%);
   background-size: 250% 100%;
@@ -411,7 +411,7 @@
   color: transparent;
 }
 
-/* Racing line, top right of the hero */
+
 .h2l > .h2l-track {
   position: absolute;
   top: 96px;
@@ -447,14 +447,14 @@
 }
 
 @media (prefers-reduced-motion: no-preference) {
-  /* shimmer sweeps across the headline, then rests */
+
   .h2l-title {
     animation:
       h2l-title-in 0.9s cubic-bezier(0.2, 0.8, 0.2, 1) backwards,
       h2l-shimmer 5s 1.4s ease-in-out infinite;
   }
 
-  /* the track outline draws itself, then a light laps it forever */
+
   .h2l-track-base {
     stroke-dasharray: 100;
     animation: h2l-draw 2.2s 0.4s ease-out backwards;

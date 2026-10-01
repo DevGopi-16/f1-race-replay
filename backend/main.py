@@ -18,6 +18,7 @@ from typing import Optional
 from starlette.middleware.gzip import GZipMiddleware
 
 from fastapi import FastAPI, HTTPException, Query, Depends
+from sqlalchemy import text
 from sqlalchemy.orm import Session
 from src.auth.database import get_db
 from src.auth.dependencies import get_current_user
@@ -55,6 +56,7 @@ from src.auth.sessions.routes import router as sessions_router
 from src.auth.email_verification.routes import router as email_verification_router
 from src.auth.contact.routes import router as contact_router
 from src.auth.sessions.context import RequestContextMiddleware
+from src.config.settings import CORS_ORIGINS
 from src.live.session_watcher import run_forever as run_live_watcher
 from src.live.state import live_state
 
@@ -341,14 +343,7 @@ app.add_middleware(GZipMiddleware, minimum_size=1000)
 
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=[
-        origin.strip()
-        for origin in os.getenv(
-            "FRONTEND_ORIGIN",
-            "http://localhost:5173",
-        ).split(",")
-        if origin.strip()
-    ],
+    allow_origins=CORS_ORIGINS,
     allow_methods=["*"],
     allow_headers=["*"],
     allow_credentials=True,
@@ -358,6 +353,13 @@ app.add_middleware(
 app.add_middleware(RequestContextMiddleware)
 
 Base.metadata.create_all(bind=engine)
+
+
+@app.get("/health")
+def health_check(db: Session = Depends(get_db)):
+    db.execute(text("SELECT 1"))
+    return {"status": "ok"}
+
 
 app.include_router(auth_router)
 app.include_router(replay_history_router)

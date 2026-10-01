@@ -74,7 +74,7 @@
   font-size: 0.68rem;
 }
 
-/* Primary */
+
 
 .ui-button-primary {
   color: var(--color-white);
@@ -92,7 +92,7 @@
     0 12px 40px var(--color-accent-glow);
 }
 
-/* Secondary */
+
 
 .ui-button-secondary {
   color: var(--color-white);
@@ -106,7 +106,7 @@
   background: var(--color-white-15);
 }
 
-/* Outline */
+
 
 .ui-button-outline {
   color: var(--color-white-75);
@@ -121,7 +121,7 @@
   border-color: var(--color-white-30);
 }
 
-/* Ghost */
+
 
 .ui-button-ghost {
   color: var(--color-white-60);

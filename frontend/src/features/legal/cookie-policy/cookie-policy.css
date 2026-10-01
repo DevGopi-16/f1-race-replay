@@ -1,10 +1,10 @@
-/* Terms & Conditions only — everything scoped under .tc-page */
+
 
 .legal-shell:has(.tc-page) {
   max-width: 1200px;
 }
 
-/* ---------- Two-column layout ---------- */
+
 .tc-page .tc-layout {
   display: grid;
   grid-template-columns: 240px minmax(0, 1fr);
@@ -30,7 +30,7 @@
   }
 }
 
-/* ---------- Sticky index ---------- */
+
 .tc-page .tc-toc {
   position: sticky;
   top: 120px;
@@ -99,7 +99,7 @@
   color: #e10600;
 }
 
-/* ---------- Sections ---------- */
+
 .tc-page .legal-section {
   padding: 28px 0 6px;
   scroll-margin-top: 120px;
@@ -117,7 +117,7 @@
   padding-bottom: 8px;
 }
 
-/* ---------- Text ---------- */
+
 .tc-page .tc-content p {
   font-size: 1rem;
   line-height: 1.75;
@@ -166,7 +166,7 @@
   text-decoration: underline;
 }
 
-/* ---------- Contact box ---------- */
+
 .tc-page .legal-contact {
   margin-top: 32px;
   padding: 22px 26px;
@@ -178,7 +178,7 @@
   font-size: 0.97rem;
 }
 
-/* ---------- Tablet / mobile: single column, hide index ---------- */
+
 @media (max-width: 960px) {
   .tc-page .tc-layout {
     grid-template-columns: 1fr;

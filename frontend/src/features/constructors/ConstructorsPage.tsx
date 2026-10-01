@@ -46,10 +46,10 @@ function ConstructorsPage() {
 
   const [nextRound, setNextRound] = useState<NextRoundInfo>(null);
 
-  /*
-   * null = constructor standings/list view
-   * team = constructor detail/profile view
-   */
+
+
+
+
   const [selectedTeam, setSelectedTeam] =
     useState<ConstructorTeam | null>(null);
 
@@ -91,18 +91,18 @@ function ConstructorsPage() {
         data.next_round ?? null,
       );
 
-      /*
-       * IMPORTANT:
-       *
-       * Do NOT automatically select the first team.
-       *
-       * When the page first loads:
-       * selectedTeam === null
-       * therefore only the constructor standings page is shown.
-       *
-       * If the user is already viewing a constructor and
-       * the data refreshes, keep that constructor selected.
-       */
+
+
+
+
+
+
+
+
+
+
+
+
       setSelectedTeam((current) => {
         if (!current) {
           return null;
@@ -168,11 +168,11 @@ function ConstructorsPage() {
     sortedTeams[0] ??
     null;
 
-  /*
-   * ============================================================
-   * LOADING STATE
-   * ============================================================
-   */
+
+
+
+
+
 
   if (loading) {
     return (
@@ -197,11 +197,11 @@ function ConstructorsPage() {
     );
   }
 
-  /*
-   * ============================================================
-   * ERROR STATE
-   * ============================================================
-   */
+
+
+
+
+
 
   if (error) {
     return (
@@ -229,17 +229,17 @@ function ConstructorsPage() {
     );
   }
 
-  /*
-   * ============================================================
-   * CONSTRUCTOR DETAIL VIEW
-   * ============================================================
-   *
-   * When a constructor is selected, ONLY the profile is rendered.
-   *
-   * The hero, standings and next-race list are intentionally
-   * hidden so the constructor list and constructor detail are
-   * NOT displayed together.
-   */
+
+
+
+
+
+
+
+
+
+
+
 
   if (selectedTeam) {
     return (
@@ -250,14 +250,14 @@ function ConstructorsPage() {
           year={YEAR}
           racesCompleted={racesCompleted}
           onBack={() => {
-            /*
-             * Return to constructor standings.
-             */
+
+
+
             setSelectedTeam(null);
 
-            /*
-             * Return to the top of the same /constructors page.
-             */
+
+
+
             window.scrollTo({
               top: 0,
               behavior: "smooth",
@@ -268,19 +268,19 @@ function ConstructorsPage() {
     );
   }
 
-  /*
-   * ============================================================
-   * CONSTRUCTOR STANDINGS / LIST VIEW
-   * ============================================================
-   *
-   * This is the default /constructors page.
-   *
-   * selectedTeam === null
-   *
-   * Clicking a constructor in ConstructorStandings calls
-   * setSelectedTeam(team), which switches the page to the
-   * ConstructorProfile view above.
-   */
+
+
+
+
+
+
+
+
+
+
+
+
+
 
   const nextRoundDisplay = formatNextRound(nextRound);
 

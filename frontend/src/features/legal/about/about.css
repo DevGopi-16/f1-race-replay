@@ -1,6 +1,6 @@
-/* About page — scoped styles only. Relies on the app's existing
-   global background/typography; no external font or shared theme
-   file, so nothing here can go missing on build. */
+
+
+
 
 .about-section {
   padding: 48px 0;
@@ -37,7 +37,7 @@
   }
 }
 
-/* ---------- Capability list (matches the destination-list idiom) ---------- */
+
 .about-capability-list {
   display: flex;
   flex-direction: column;
@@ -100,7 +100,7 @@
   transform: translate(2px, -2px);
 }
 
-/* ---------- Story stats ---------- */
+
 .about-stat-list {
   display: flex;
   flex-direction: column;
@@ -133,7 +133,7 @@
   font-size: 0.88rem;
 }
 
-/* ---------- CTA ---------- */
+
 .about-cta {
   padding: 48px 0 72px;
 }
@@ -151,7 +151,7 @@
   margin: 0;
 }
 
-/* Shared by About, FAQ and Contact: cancel the extra top gap under the floating nav */
+
 .info-page {
   padding-top: 24px !important;
 }

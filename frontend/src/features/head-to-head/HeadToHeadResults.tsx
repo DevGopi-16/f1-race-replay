@@ -38,7 +38,7 @@ export interface ResultsData {
   careerTrajectory: unknown;
 }
 
-// ---- Trajectory normaliser: tolerant of different backend field names ----
+
 
 interface Season { season: number; position: number | null; points: number | null; wins: number | null; team: string | null }
 
@@ -73,7 +73,7 @@ function seasonsOf(raw: unknown, key: "driverA" | "driverB"): Season[] {
     .filter((s) => Number.isFinite(s.season));
 }
 
-// ---- Small visual pieces ---------------------------------------------------
+
 
 function Radar({ axes, colorA, colorB }: { axes: { label: string; a: number; b: number }[]; colorA: string; colorB: string }) {
   const R = 108, C = 150, n = axes.length;
@@ -119,7 +119,7 @@ function VersusRow({ label, left, right, lt, rt }: { label: string; left: number
   );
 }
 
-// ---- Advanced charts ---------------------------------------------------------
+
 
 interface ArcSeries { label: string; color: string; values: (number | null)[] }
 
@@ -225,7 +225,7 @@ function Momentum({ years, deltas, colorA, colorB, nameA, nameB }: { years: numb
   );
 }
 
-// ---- Page ---------------------------------------------------------------------
+
 
 export default function HeadToHeadResults({ result, loading, onReset, onSwap }: { result: ResultsData; loading: boolean; onReset: () => void; onSwap?: () => void }) {
   const [mode, setMode] = useState<"race" | "qualifying">("race");
@@ -237,7 +237,7 @@ export default function HeadToHeadResults({ result, loading, onReset, onSwap }: 
   const b = result.driverB;
   const last = (d: Driver) => d.fullName.split(" ").slice(1).join(" ") || d.fullName;
 
-  // direct record
+
   const h = result.headToHeadRecord;
   const by = h?.by_season ?? {};
   const shared = h?.shared_races ?? 0;
@@ -251,7 +251,7 @@ export default function HeadToHeadResults({ result, loading, onReset, onSwap }: 
   const ledB = years.filter((y) => at(y, b, "race") > at(y, a, "race")).length;
   const verdict = rA === rB ? "All square" : `${last(rA > rB ? a : b)} leads`;
 
-  // career
+
   const ca = result.careerStats?.driverA, cb = result.careerStats?.driverB;
   const rate = (n?: number, s?: number) => (s ? Math.round(((n ?? 0) / s) * 1000) / 10 : 0);
   const per = (n?: number, s?: number) => (s ? Math.round(((n ?? 0) / s) * 10) / 10 : 0);
@@ -270,7 +270,7 @@ export default function HeadToHeadResults({ result, loading, onReset, onSwap }: 
     { label: "Podiums/yr", a: per(ca?.podiums, ca?.seasons), b: per(cb?.podiums, cb?.seasons) },
   ];
 
-  // trajectory
+
   const tA = seasonsOf(result.careerTrajectory, "driverA");
   const tB = seasonsOf(result.careerTrajectory, "driverB");
   const seasons = Array.from(new Set([...tA, ...tB].map((s) => s.season))).sort((x, y) => x - y);
@@ -286,7 +286,7 @@ export default function HeadToHeadResults({ result, loading, onReset, onSwap }: 
     });
   };
 
-  // auto-generated takeaways
+
   const yearsAsc = [...years].reverse();
   const leadName = last(rA >= rB ? a : b);
   const raceShare = rA + rB ? Math.round((Math.max(rA, rB) / (rA + rB)) * 100) : 50;
@@ -304,7 +304,7 @@ export default function HeadToHeadResults({ result, loading, onReset, onSwap }: 
 
   const share = async () => {
     const text = `${a.fullName} vs ${b.fullName}: races ${rA}–${rB}, qualifying ${qA}–${qB} over ${shared} shared races.`;
-    try { await navigator.clipboard.writeText(text); setCopied(true); setTimeout(() => setCopied(false), 1800); } catch { /* clipboard unavailable */ }
+    try { await navigator.clipboard.writeText(text); setCopied(true); setTimeout(() => setCopied(false), 1800); } catch {                             }
   };
 
   const Side = ({ d, side }: { d: Driver; side: "a" | "b" }) => {

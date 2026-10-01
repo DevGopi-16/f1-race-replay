@@ -134,12 +134,12 @@ ol {
 }
 
 
-/* phone safety net */
+
 html { -webkit-text-size-adjust: 100%; }
 body { overflow-x: clip; }
 img, svg, video, canvas { max-width: 100%; height: auto; }
 
 @media (max-width: 768px) {
   button, a, select, input { min-height: 44px; }
-  input, select, textarea { font-size: 16px; } /* stops iOS auto-zoom on focus */
+  input, select, textarea { font-size: 16px; }
 }

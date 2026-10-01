@@ -1,5 +1,5 @@
-/* Head-to-Head page — matches the dark glass / red-accent theme used
-   across driver-panel and constructors-panel. */
+
+
 
 .h2h-page {
   display: grid;
@@ -17,7 +17,7 @@
   }
 }
 
-/* ---- Header ---- */
+
 
 .h2h-eyebrow {
   font-size: 12px;
@@ -52,7 +52,7 @@
   margin: 0 0 16px;
 }
 
-/* ---- Preview grid ---- */
+
 
 .h2h-preview-grid {
   display: grid;
@@ -101,7 +101,7 @@
   color: #8f8f97;
 }
 
-/* ---- Sidebar ---- */
+
 
 .h2h-sidebar {
   display: flex;
@@ -160,7 +160,7 @@
   margin: 14px 0;
 }
 
-/* Search input */
+
 
 .h2h-search-wrap {
   position: relative;
@@ -232,7 +232,7 @@
   transition: background 0.2s ease, transform 0.2s ease;
 }
 
-/* team colour bar on the left */
+
 .h2h-dropdown-item::before {
   content: "";
   position: absolute;
@@ -313,7 +313,7 @@
   margin-left: auto;
 }
 
-/* Selected driver chip */
+
 
 .h2h-selected-driver {
   width: 100%;
@@ -334,7 +334,7 @@
   height: 24px;
   border-radius: 50%;
   object-fit: cover;
-  object-position: top center; 
+  object-position: top center;
   object-view-box: inset(0 0 58% 0);
 }
 
@@ -365,7 +365,7 @@
   color: #e2544a;
 }
 
-/* Disclaimer */
+
 
 .h2h-disclaimer {
   background: rgba(255, 255, 255, 0.02);
@@ -386,7 +386,7 @@
   margin-bottom: 8px;
 }
 
-/* ---- Results view (placeholder) ---- */
+
 
 .h2h-results-header {
   grid-column: 1 / -1;

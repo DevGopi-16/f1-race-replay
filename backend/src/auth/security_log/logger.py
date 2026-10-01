@@ -10,21 +10,22 @@ out of git (it is), restrict file access, and mention it in a privacy policy.
 
 import json
 import logging
+import sys
 import time
 from logging.handlers import RotatingFileHandler
 from pathlib import Path
 
+from src.config.settings import SECURITY_LOG_FILE
 from src.auth.sessions.context import get_ip_address, get_user_agent
 
-LOG_DIR = Path(__file__).resolve().parents[3] / "logs"
-LOG_FILE = LOG_DIR / "security_events.log"
+LOG_FILE = Path(SECURITY_LOG_FILE)
 
 _logger = logging.getLogger("security_events")
 _logger.setLevel(logging.INFO)
 _logger.propagate = False
 
 if not _logger.handlers:
-    LOG_DIR.mkdir(parents=True, exist_ok=True)
+    LOG_FILE.parent.mkdir(parents=True, exist_ok=True)
     _handler = RotatingFileHandler(
         LOG_FILE,
         maxBytes=5 * 1024 * 1024,
@@ -33,6 +34,9 @@ if not _logger.handlers:
     )
     _handler.setFormatter(logging.Formatter("%(message)s"))
     _logger.addHandler(_handler)
+    _stream_handler = logging.StreamHandler(sys.stdout)
+    _stream_handler.setFormatter(logging.Formatter("%(message)s"))
+    _logger.addHandler(_stream_handler)
 
 
 def log_event(event_type: str, **details) -> None:

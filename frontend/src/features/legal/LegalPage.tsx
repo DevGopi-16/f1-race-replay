@@ -10,11 +10,11 @@ interface LegalPageProps {
   children: React.ReactNode;
 }
 
-/**
- * Shared layout for all legal/policy pages (Privacy, Terms, Cookies).
- * Uses its own centered wrapper (.legal-shell) so layout does not
- * depend on any other stylesheet being loaded.
- */
+
+
+
+
+
 export default function LegalPage({
   title,
   lastUpdated,

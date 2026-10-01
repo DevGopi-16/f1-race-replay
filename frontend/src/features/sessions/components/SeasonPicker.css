@@ -1,4 +1,4 @@
-/* ---------- Quick strip ---------- */
+
 
 .season-strip {
   display: flex;
@@ -70,12 +70,12 @@
   background: var(--era, currentColor);
 }
 
-/* ---------- Modal ---------- */
+
 
 .season-overlay {
   position: fixed;
   inset: 0;
-  z-index: 100000; /* above the floating nav (10001) */
+  z-index: 100000;
 
   display: flex;
   align-items: center;

@@ -1,4 +1,4 @@
-/* ---------- Layout: centered, padded column ---------- */
+
 .coming-soon-shell {
   width: 100%;
   max-width: 1000px;
@@ -7,7 +7,7 @@
   box-sizing: border-box;
 }
 
-/* ---------- Coming soon pill ---------- */
+
 .coming-soon-pill {
   display: inline-flex;
   align-items: center;
@@ -43,7 +43,7 @@
   }
 }
 
-/* ---------- Sections ---------- */
+
 .coming-soon-section {
   padding: 24px 0 8px;
 }

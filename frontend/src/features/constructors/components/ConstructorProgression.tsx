@@ -514,7 +514,7 @@ function ConstructorProgression({
       cancelAnimationFrame(animationFrame);
       resizeObserver.disconnect();
     };
-    // eslint-disable-next-line react-hooks/exhaustive-deps
+
   }, [history, teamColor, chartMode]);
 
   function handlePointerMove(
@@ -586,7 +586,7 @@ function ConstructorProgression({
   }
 
 
-  
+
 
 
 

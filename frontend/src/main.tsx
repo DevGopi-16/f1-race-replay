@@ -83,9 +83,9 @@ class F1ErrorBoundary extends React.Component<
   }
 }
 
-/* =========================================================
-   APPLICATION BOOTSTRAP
-========================================================= */
+
+
+
 
 function AppBootstrap() {
   const restoreSession = useAuthStore(
@@ -111,14 +111,14 @@ function AppBootstrap() {
     return unsubscribe;
   }, [restoreSession]);
 
-  // Render the website immediately.
-  // Authentication is restored in the background.
+
+
   return <App />;
 }
 
-/* =========================================================
-   GLOBAL ERROR HANDLING
-========================================================= */
+
+
+
 
 window.addEventListener(
   "unhandledrejection",
@@ -130,9 +130,9 @@ window.addEventListener(
   },
 );
 
-/* =========================================================
-   APPLICATION MOUNT
-========================================================= */
+
+
+
 
 ReactDOM.createRoot(
   document.getElementById("root")!,

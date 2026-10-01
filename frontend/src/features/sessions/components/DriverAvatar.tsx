@@ -1,11 +1,11 @@
 import { useEffect, useState } from "react";
 
 interface DriverAvatarProps {
-  /** Jolpica driverId, e.g. "hamilton", "max_verstappen" */
+
   id?: string;
   code?: string;
   name: string;
-  /** If given, tries that season's headshot first (e.g. hamilton-2019.png) */
+
   year?: number;
   size?: number;
 }
@@ -18,10 +18,10 @@ function initialsOf(name: string, code?: string): string {
   return (code ?? name).slice(0, 2).toUpperCase();
 }
 
-/**
- * Shows /drivers/<id>-<year>.png, then /drivers/<id>.png, then /drivers/<id>.jpg,
- * and finally the driver's initials if none of them exist.
- */
+
+
+
+
 export default function DriverAvatar({
   id,
   code,

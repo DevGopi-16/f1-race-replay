@@ -151,7 +151,7 @@ function DriverSearchInput({
       } finally {
         if (!cancelled) setLoading(false);
       }
-    }, 200); // debounce
+    }, 200);
     return () => {
       cancelled = true;
       clearTimeout(timeout);
@@ -258,14 +258,14 @@ export default function HeadToHeadPage({
     }
   }
 
-  // Once both drivers picked, auto-trigger the comparison.
+
   useEffect(() => {
     if (canCompare) {
       handleCompare();
     } else {
       setResult(null);
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
+
   }, [driverA?.driverId, driverB?.driverId]);
 
   if (result) {
@@ -311,7 +311,7 @@ export default function HeadToHeadPage({
   );
 }
 
-// ---- Data helpers -----------------------------------------------------
+
 
 interface SeasonEntry {
   season: number;
@@ -355,7 +355,7 @@ function pickYearLabels(years: number[], count = 6) {
 
 const signed = (v: number) => (v > 0 ? `+${v}` : String(v));
 
-// ---- Results view -------------------------------------------------------
+
 
 function HeadToHeadResultsView({
   result,
@@ -367,7 +367,7 @@ function HeadToHeadResultsView({
   onReset: () => void;
 }) {
   const [viewMode, setViewMode] = useState<"visual" | "detail">("visual");
-  const [seasonIndex, setSeasonIndex] = useState(0); // 0 = latest season
+  const [seasonIndex, setSeasonIndex] = useState(0);
   const [slideDir, setSlideDir] = useState<"next" | "prev">("next");
 
   const a = result.driverA;
@@ -375,7 +375,7 @@ function HeadToHeadResultsView({
   const driverAName = a.fullName.split(" ").at(-1) ?? a.fullName;
   const driverBName = b.fullName.split(" ").at(-1) ?? b.fullName;
 
-  // ---- Direct head-to-head record
+
   const h2h = result.headToHeadRecord;
   const bySeason = h2h?.by_season ?? {};
   const sharedRaces = h2h?.shared_races ?? 0;
@@ -397,7 +397,7 @@ function HeadToHeadResultsView({
   const qualiAt = (year: number, d: DriverSummary) => bySeason[String(year)]?.qualifying?.[d.code] ?? 0;
   const latestShared = sharedYears.at(-1);
 
-  // ---- Career stats
+
   const ca = result.careerStats?.driverA;
   const cb = result.careerStats?.driverB;
   const rate = (n?: number, s?: number) => (s ? Math.round(((n ?? 0) / s) * 1000) / 10 : 0);
@@ -419,7 +419,7 @@ function HeadToHeadResultsView({
     { label: "Race starts", left: ca?.starts ?? 0, right: cb?.starts ?? 0 },
   ];
 
-  // ---- Driver DNA (derived from career stats)
+
   const dnaSource = [
     { label: "Win rate", detail: "Races won per start", left: rate(ca?.wins, ca?.starts), right: rate(cb?.wins, cb?.starts), suffix: "%", unit: " pts" },
     { label: "Podium rate", detail: "Podiums per start", left: rate(ca?.podiums, ca?.starts), right: rate(cb?.podiums, cb?.starts), suffix: "%", unit: " pts" },
@@ -443,7 +443,7 @@ function HeadToHeadResultsView({
   const dnaLeadA = dna.filter((row) => row.lead === 1).length;
   const dnaLeadB = dna.filter((row) => row.lead === -1).length;
 
-  // ---- Teammate-relative (derived from shared seasons)
+
   const seasonsLedA = sharedYears.filter((y) => raceAt(y, a) > raceAt(y, b)).length;
   const seasonsLedB = sharedYears.filter((y) => raceAt(y, b) > raceAt(y, a)).length;
   const relativeRows = [
@@ -455,10 +455,10 @@ function HeadToHeadResultsView({
     return { ...row, total, shareA: total ? (row.left / total) * 100 : 50 };
   });
 
-  // ---- Career trajectory (from backend)
+
   const trajA = normalizeTrajectory(result.careerTrajectory, "driverA");
   const trajB = normalizeTrajectory(result.careerTrajectory, "driverB");
-  const seasons = Array.from(new Set([...trajA, ...trajB].map((s) => s.season))).sort((x, y) => y - x); // latest first
+  const seasons = Array.from(new Set([...trajA, ...trajB].map((s) => s.season))).sort((x, y) => y - x);
   const trajYears = seasons.length ? range(seasons[seasons.length - 1], seasons[0]) : [];
   const activeIndex = Math.min(seasonIndex, Math.max(seasons.length - 1, 0));
   const activeSeason = seasons[activeIndex];
@@ -848,7 +848,7 @@ function HeadToHeadResultsView({
   );
 }
 
-// ---- Small presentational helpers ------------------------------------------
+
 
 function leaderText(
   m: { label: string; left: number; right: number },
@@ -896,7 +896,7 @@ function BarChart({ label, left, right }: { label: string; left: string; right: 
   );
 }
 
-// ---- Generic data-driven line chart -----------------------------------------
+
 
 interface ChartSeries {
   label: string;

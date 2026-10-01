@@ -16,10 +16,9 @@ import {
   getDriverFull,
   type DriverPanelData,
 } from "../../api/drivers";
+import { API_BASE_URL } from "../../api/config";
 
 const YEAR = 2026;
-
-const API_ORIGIN = "http://127.0.0.1:8000";
 
 import { TEAM_COLORS } from "../../constants/teamColors";
 
@@ -38,9 +37,9 @@ const TEAM_DISPLAY_NAMES: Record<string, string> = {
   Cadillac: "Cadillac Formula 1 Team",
 };
 
-/* =========================================================
-   FLAGS
-========================================================= */
+
+
+
 
 const NATIONALITY_FLAGS: Record<string, string> = {
   British: "🇬🇧",
@@ -162,9 +161,9 @@ function getRaceFlag(
   return "";
 }
 
-/* =========================================================
-   HELPERS
-========================================================= */
+
+
+
 
 function assetUrl(path?: string | null): string {
   if (!path) return "";
@@ -176,14 +175,14 @@ function assetUrl(path?: string | null): string {
     return path;
   }
 
-  // Static assets under /images/... live in the frontend's own
-  // public/ folder (served by Vite), not the backend — so don't
-  // prefix those with the backend origin.
+
+
+
   if (path.startsWith("/images/")) {
     return path;
   }
 
-  return `${API_ORIGIN}/${path.replace(/^\/+/, "")}`;
+  return `${API_BASE_URL}/${path.replace(/^\/+/, "")}`;
 }
 
 function getString(
@@ -320,9 +319,9 @@ function formatNumber(
   return fallback;
 }
 
-/* =========================================================
-   COUNT-UP NUMBER ANIMATION
-========================================================= */
+
+
+
 
 function useCountUp(
   target: number,
@@ -372,9 +371,9 @@ function useCountUp(
   return value;
 }
 
-/* =========================================================
-   TYPES
-========================================================= */
+
+
+
 
 type HistoryEntry = {
   round: number;
@@ -423,9 +422,9 @@ type PerformanceMetric = {
   value: unknown;
 };
 
-/* =========================================================
-   ADVANCED ANALYTICS
-========================================================= */
+
+
+
 
 type ChartKey =
   | "points"
@@ -829,9 +828,9 @@ function DriverAnalytics({
   );
 }
 
-/* =========================================================
-   PAGE
-========================================================= */
+
+
+
 
 export default function DriverDetailPage() {
   const { code } =
@@ -854,9 +853,9 @@ export default function DriverDetailPage() {
   const [error, setError] =
     useState("");
 
-  /* =======================================================
-     LOAD DRIVER
-  ======================================================= */
+
+
+
 
   useEffect(() => {
     if (!driverCode) {
@@ -910,15 +909,15 @@ export default function DriverDetailPage() {
     };
   }, [driverCode]);
 
-  /* scroll to top on driver change */
+
   useEffect(() => {
     window.scrollTo(0, 0);
   }, [driverCode]);
 
 
-  /* =======================================================
-     DATA
-  ======================================================= */
+
+
+
 
   const history = useMemo(
     () =>
@@ -997,10 +996,10 @@ export default function DriverDetailPage() {
       [driver],
     );
 
-  /* =======================================================
-     COUNT-UP TARGETS (must run every render, before
-     any early return, so hook order stays stable)
-  ======================================================= */
+
+
+
+
 
   const heroPoints = driver
     ? getNumber(driver, ["points"])
@@ -1033,11 +1032,11 @@ export default function DriverDetailPage() {
   const animatedPoles =
     useCountUp(heroPoles);
 
-  /* =======================================================
-     SCROLL-TRIGGERED REVEAL
-     Sections fade/slide in as they enter the viewport,
-     instead of all animating on page load.
-  ======================================================= */
+
+
+
+
+
 
   useEffect(() => {
     if (!driver) return;
@@ -1083,9 +1082,9 @@ export default function DriverDetailPage() {
       observer.disconnect();
   }, [driver]);
 
-  /* =======================================================
-     LOADING
-  ======================================================= */
+
+
+
 
   if (loading) {
     return (
@@ -1101,9 +1100,9 @@ export default function DriverDetailPage() {
     );
   }
 
-  /* =======================================================
-     ERROR
-  ======================================================= */
+
+
+
 
   if (error || !driver) {
     return (
@@ -1135,9 +1134,9 @@ export default function DriverDetailPage() {
     );
   }
 
-  /* =======================================================
-     BASIC DRIVER DATA
-  ======================================================= */
+
+
+
 
   const name = getString(
     driver,
@@ -1164,7 +1163,7 @@ export default function DriverDetailPage() {
   );
   const teamDisplayName =
   TEAM_DISPLAY_NAMES[team] || team;
-  
+
   const teamColor =
     TEAM_COLORS[team] ||
     "#4fa9c9";
@@ -1256,9 +1255,9 @@ export default function DriverDetailPage() {
     ["age"],
   );
 
-  /* =======================================================
-     SOCIAL
-  ======================================================= */
+
+
+
 
   const socialObject =
     getObject(
@@ -1284,9 +1283,9 @@ export default function DriverDetailPage() {
       "youtube",
     );
 
-  /* =======================================================
-     PERFORMANCE INDEX
-  ======================================================= */
+
+
+
 
   const performanceMetrics:
     PerformanceMetric[] = [
@@ -1328,9 +1327,9 @@ export default function DriverDetailPage() {
     },
   ];
 
-  /* =======================================================
-     TEAMMATE BATTLE
-  ======================================================= */
+
+
+
 
   const teammateDriver =
     teammateBattle?.driver &&
@@ -1437,9 +1436,9 @@ export default function DriverDetailPage() {
       null,
   };
 
-  /* =======================================================
-     CIRCUIT DNA
-  ======================================================= */
+
+
+
 
   const circuitRatings =
     circuitDna?.ratings &&
@@ -1449,9 +1448,9 @@ export default function DriverDetailPage() {
       ? (circuitDna.ratings as CircuitRating[])
       : [];
 
-  /* =======================================================
-     TEAMMATE COMPARISON
-  ======================================================= */
+
+
+
 
   const teammateMetrics = [
     {
@@ -1532,9 +1531,9 @@ export default function DriverDetailPage() {
     },
   ];
 
-  /* =======================================================
-     RENDER
-  ======================================================= */
+
+
+
 
   return (
     <main className="driver-detail-page">
@@ -1548,9 +1547,9 @@ export default function DriverDetailPage() {
         }
       >
 
-        {/* =================================================
-            DRIVER HERO
-        ================================================= */}
+        {
+
+                                                            }
 
         <section className="driver-hero">
 
@@ -1730,9 +1729,9 @@ export default function DriverDetailPage() {
 
         </section>
 
-        {/* =================================================
-            HORIZONTAL TICKER BANNER
-        ================================================= */}
+        {
+
+                                                            }
 
         <div className="driver-ticker">
           <div className="driver-ticker-track">
@@ -1805,9 +1804,9 @@ export default function DriverDetailPage() {
           </div>
         </div>
 
-        {/* =================================================
-            01 — BIOGRAPHY
-        ================================================= */}
+        {
+
+                                                            }
         {description && (
           <DriverBio
             firstName={firstName}
@@ -1822,9 +1821,9 @@ export default function DriverDetailPage() {
 
 
 
-        {/* =================================================
-            02 — TEAM & CAR
-        ================================================= */}
+        {
+
+                                                            }
         <DriverTeamCard
           teamLogo={teamLogo}
           teamDisplayName={teamDisplayName}
@@ -1833,9 +1832,9 @@ export default function DriverDetailPage() {
           assetUrl={assetUrl}
         />
 
-        {/* =================================================
-            03 — SOCIAL
-        ================================================= */}
+        {
+
+                                                            }
 
         {(instagramUrl ||
           xUrl ||
@@ -1892,9 +1891,9 @@ export default function DriverDetailPage() {
           </section>
         )}
 
-        {/* =================================================
-            04 — PERFORMANCE INDEX
-        ================================================= */}
+        {
+
+                                                            }
 
         {performanceIndex && (
           <section className="driver-section">
@@ -1997,9 +1996,9 @@ export default function DriverDetailPage() {
           </section>
         )}
 
-        {/* =================================================
-            05 — FORM
-        ================================================= */}
+        {
+
+                                                            }
 
         {last9.length > 0 && (
           <section className="driver-section">
@@ -2070,9 +2069,9 @@ export default function DriverDetailPage() {
           </section>
         )}
 
-        {/* =================================================
-            06 — QUALIFYING TO RACE
-        ================================================= */}
+        {
+
+                                                            }
 
         {history.length > 0 && (
           <section className="driver-section">
@@ -2160,9 +2159,9 @@ export default function DriverDetailPage() {
           </section>
         )}
 
-        {/* =================================================
-            07 — TEAMMATE COMPARISON
-        ================================================= */}
+        {
+
+                                                            }
 
         {teammateBattle && (
           <section className="driver-section teammate-comparison-section">
@@ -2356,9 +2355,9 @@ export default function DriverDetailPage() {
           </section>
         )}
 
-        {/* =================================================
-            08 — RACECRAFT
-        ================================================= */}
+        {
+
+                                                            }
 
         {racecraft && (
           <section className="driver-section">
@@ -2443,9 +2442,9 @@ export default function DriverDetailPage() {
           </section>
         )}
 
-        {/* =================================================
-            09 — CIRCUIT DNA
-        ================================================= */}
+        {
+
+                                                            }
 
         {circuitDna &&
           circuitRatings.length > 0 && (
@@ -2513,9 +2512,9 @@ export default function DriverDetailPage() {
             </section>
           )}
 
-        {/* =================================================
-            10 — SEASON JOURNEY
-        ================================================= */}
+        {
+
+                                                            }
 
         {seasonJourney.length > 0 && (
           <section className="driver-section">
@@ -2577,9 +2576,9 @@ export default function DriverDetailPage() {
           </section>
         )}
 
-        {/* =================================================
-            11 — ADVANCED ANALYTICS
-        ================================================= */}
+        {
+
+                                                            }
 
         {history.length > 1 && (
           <DriverAnalytics
@@ -2587,9 +2586,9 @@ export default function DriverDetailPage() {
           />
         )}
 
-        {/* =================================================
-            12 — RACE TIMELINE
-        ================================================= */}
+        {
+
+                                                            }
 
         {history.length > 0 && (
           <section className="driver-section">
@@ -2654,9 +2653,9 @@ export default function DriverDetailPage() {
           </section>
         )}
 
-        {/* =================================================
-            13 — CAREER
-        ================================================= */}
+        {
+
+                                                            }
 
         {career && (
           <section className="driver-section">
@@ -2758,9 +2757,9 @@ export default function DriverDetailPage() {
           </section>
         )}
 
-        {/* =================================================
-            NEXT RACE
-        ================================================= */}
+        {
+
+                                                            }
 
         {nextRaces.length > 0 && (
           <section className="driver-next-race">

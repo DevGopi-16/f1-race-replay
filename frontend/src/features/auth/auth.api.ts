@@ -5,13 +5,14 @@ import type {
   LoginPayload,
   SignupPayload,
 } from "./auth.types";
+import { API_BASE_URL } from "../../api/config";
 import { refreshAccessToken, shouldSkipRefresh } from "./tokenRefresh";
 
-const AUTH_BASE = "/auth";
+const AUTH_BASE = `${API_BASE_URL}/auth`;
 
-/* =========================================================
-   PROFILE TYPES
-========================================================= */
+
+
+
 
 export interface UserProfile {
   id: number;
@@ -36,9 +37,9 @@ export interface UpdateProfilePayload {
   favorite_team?: string;
 }
 
-/* =========================================================
-   AUTH REQUEST
-========================================================= */
+
+
+
 
 async function authRequest<T>(
   endpoint: string,
@@ -65,7 +66,7 @@ async function authRequest<T>(
   if (
     response.status === 401 &&
     !_isRetry &&
-    !shouldSkipRefresh(url)
+    !shouldSkipRefresh(endpoint)
   ) {
     const refreshed = await refreshAccessToken();
     if (refreshed) {
@@ -100,9 +101,9 @@ async function authRequest<T>(
   return data as T;
 }
 
-/* =========================================================
-   SIGN UP
-========================================================= */
+
+
+
 
 export function signup(
   payload: SignupPayload,
@@ -120,9 +121,9 @@ export function signup(
   );
 }
 
-/* =========================================================
-   LOGIN
-========================================================= */
+
+
+
 
 export function login(
   payload: LoginPayload,
@@ -140,9 +141,9 @@ export function login(
   );
 }
 
-/* =========================================================
-   GOOGLE LOGIN
-========================================================= */
+
+
+
 
 export function googleLogin(
   payload: GooglePayload,
@@ -399,9 +400,9 @@ export async function getProfileStats(): Promise<ProfileStats> {
   return authRequest<ProfileStats>("/profile/stats");
 }
 
-/* =========================================================
-   USER SETTINGS
-========================================================= */
+
+
+
 
 export interface UserSettings {
   default_driver_comp: string;

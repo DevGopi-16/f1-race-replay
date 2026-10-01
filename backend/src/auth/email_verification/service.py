@@ -6,7 +6,7 @@ import resend
 
 from src.auth.security import create_access_token
 from src.auth.security_log.logger import log_event
-from src.config.settings import RESEND_API_KEY, FRONTEND_ORIGIN
+from src.config.settings import EMAIL_FROM, FRONTEND_BASE_URL, RESEND_API_KEY
 
 resend.api_key = RESEND_API_KEY
 
@@ -32,10 +32,10 @@ def send_verification_email(to_email: str, token: str) -> None:
     if not RESEND_API_KEY:
         raise RuntimeError("RESEND_API_KEY must be set to send verification emails")
 
-    link = f"{FRONTEND_ORIGIN}/verify-email?token={token}"
+    link = f"{FRONTEND_BASE_URL}/verify-email?token={token}"
 
     resend.Emails.send({
-        "from": "F1 Race Replay <onboarding@resend.dev>",
+        "from": EMAIL_FROM,
         "to": [to_email],
         "subject": "Verify your email",
         "html": f"""

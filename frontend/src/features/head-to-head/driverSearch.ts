@@ -1,6 +1,6 @@
 import Fuse from "fuse.js";
 
-// ---- Shape as it comes from /api/drivers/all -----------------------------
+
 
 interface DriverRecord {
   driverId: string;
@@ -21,7 +21,7 @@ interface DriverRecord {
   id: string;
 }
 
-// ---- Shape the H2H page expects (DriverSummary) --------------------------
+
 
 export interface DriverSummary {
   driverId: string;
@@ -36,34 +36,34 @@ export interface DriverSummary {
 function toSummary(d: DriverRecord): DriverSummary {
   return {
     driverId: d.driverId,
-    // No 3-letter code in the data — derive one (first 3 letters of
-    // surname, F1-style). Replace with a real `code` field if you add one.
+
+
     code: d.familyName.slice(0, 3).toUpperCase(),
     number: d.number,
     fullName: `${d.givenName} ${d.familyName}`,
-    // No constructor/team name in this file — wire this up if you have
-    // a separate teams.json or a `team` field elsewhere.
+
+
     team: d.carName ?? "",
     teamColor: d.teamColor,
     headshotUrl: d.image,
   };
 }
 
-// ---- Lazy-loaded, cached roster + Fuse index ------------------------------
+
 
 let driversPromise: Promise<DriverRecord[]> | null = null;
 let fusePromise: Promise<Fuse<DriverRecord>> | null = null;
 
 function loadDrivers(): Promise<DriverRecord[]> {
   if (!driversPromise) {
-    driversPromise = fetch("/api/drivers/all")
+    driversPromise = fetch(`${API_BASE_URL}/api/drivers/all`)
       .then((res) => {
         if (!res.ok) throw new Error("Failed to load driver roster");
         return res.json();
       })
       .catch((err) => {
-        // Reset so a later call can retry instead of being stuck on a
-        // rejected promise forever.
+
+
         driversPromise = null;
         throw err;
       });
@@ -81,7 +81,7 @@ async function getFuse(): Promise<Fuse<DriverRecord>> {
             { name: "familyName", weight: 0.5 },
             { name: "number", weight: 0.1 },
           ],
-          threshold: 0.4, // 0 = exact match only, 1 = match almost anything.
+          threshold: 0.4,
           ignoreLocation: true,
           minMatchCharLength: 2,
         }),
@@ -96,7 +96,7 @@ export async function searchDrivers(query: string): Promise<DriverSummary[]> {
 
   const drivers = await loadDrivers();
 
-  // Exact number match (e.g. searching "44" or "1")
+
   const asNumber = Number(trimmed);
   if (!Number.isNaN(asNumber)) {
     const numberMatch = drivers.filter((d) => d.number === asNumber);
@@ -109,3 +109,4 @@ export async function searchDrivers(query: string): Promise<DriverSummary[]> {
     .slice(0, 8)
     .map((result) => toSummary(result.item));
 }
+import { API_BASE_URL } from "../../api/config";

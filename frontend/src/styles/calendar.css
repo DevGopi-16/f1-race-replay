@@ -730,7 +730,7 @@
   }
 }
 
-/* ===== Season progress bar ===== */
+
 
 .calendar-progress {
   display: flex;
@@ -874,7 +874,7 @@
   }
 }
 
-/* ===== Cursor spotlight effect ===== */
+
 
 .calendar-grid {
   position: relative;
@@ -999,8 +999,8 @@
   }
 }
 
-/* stop the decorative glow from widening the page */
+
 .calendar-page {
-  overflow-x: hidden; /* fallback for older browsers */
-  overflow-x: clip;   /* preferred: clips without breaking sticky elements */
+  overflow-x: hidden;
+  overflow-x: clip;
 }

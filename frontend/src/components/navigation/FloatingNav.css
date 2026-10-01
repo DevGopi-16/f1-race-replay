@@ -256,9 +256,9 @@
   transform: translateY(0);
 }
 
-/* ============================================================
-   LIGHT THEME — MORE MENU
-   ============================================================ */
+
+
+
 
 :root[data-theme="light"] .floating-nav-more-menu {
   background: linear-gradient(
@@ -1092,18 +1092,18 @@
   background: var(--color-white-08);
 }
 
-/* fix: hide the link row before it collides with the hamburger */
+
 @media (max-width: 960px) {
   .floating-nav-links {
     display: none;
   }
 
   .floating-nav-actions {
-    margin-left: auto; /* keeps the hamburger on the right once links are gone */
+    margin-left: auto;
   }
 }
 
-/* safety: the pill can never be wider than the screen, hamburger never shrinks */
+
 .floating-nav {
   max-width: 100%;
 }
@@ -1113,12 +1113,12 @@
   flex-shrink: 0;
 }
 
-/* open menu must sit above the floating nav pill (which is z-index 10001) */
+
 .mobile-nav-overlay {
   z-index: 10100;
 }
 
-/* mobile menu: let the panel scroll so the user menu and footer are reachable */
+
 .mobile-nav-panel {
   height: 100%;
   max-height: 100dvh;
@@ -1128,7 +1128,7 @@
   padding-bottom: calc(var(--space-6) + env(safe-area-inset-bottom, 0px));
 }
 
-/* keep the logo and close button visible while scrolling */
+
 .mobile-nav-header {
   position: sticky;
   top: 0;
@@ -1136,13 +1136,13 @@
   background: var(--color-bg);
 }
 
-/* content just flows; the panel does the scrolling */
+
 .mobile-nav-content {
   flex: 0 0 auto;
   overflow: visible;
 }
 
-/* mobile menu: show the user's name (UserMenu.css hides it at <=1100px) */
+
 .mobile-nav-user .user-menu-name {
   display: block;
   flex: 1;
@@ -1157,7 +1157,7 @@
   opacity: 1;
 }
 
-/* mobile menu: tighter rows, narrower panel */
+
 .mobile-nav-panel {
   width: min(82vw, 340px);
 }

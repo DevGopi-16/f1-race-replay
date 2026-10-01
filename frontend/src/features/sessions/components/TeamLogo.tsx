@@ -1,8 +1,8 @@
 import { useEffect, useMemo, useState } from "react";
 
-// Team-name keyword -> logo file name (without extension).
-// Only teams whose name has stayed the same are mapped, so a 1970 "Lotus"
-// row never gets a modern logo of a different team.
+
+
+
 const TEAM_SLUGS: [RegExp, string][] = [
   [/red bull/i, "red-bull"],
   [/racing bulls|^rb\b|visa cash app/i, "rb"],
@@ -28,7 +28,7 @@ function slugFor(team: string): string | null {
   return null;
 }
 
-/** ferrari -> [ferrari.png, ferrari.svg, ...]; red-bull -> red-bull / red_bull / redbull */
+
 function candidatesFor(slug: string): string[] {
   const names = Array.from(
     new Set([slug, slug.replace(/-/g, "_"), slug.replace(/-/g, "")]),
@@ -37,7 +37,7 @@ function candidatesFor(slug: string): string[] {
 }
 
 interface TeamLogoProps {
-  /** Team name as returned by the API, e.g. "Ferrari", "Haas F1 Team" */
+
   name: string;
   size?: number;
 }
@@ -55,7 +55,7 @@ export default function TeamLogo({ name, size = 22 }: TeamLogoProps) {
   }, [name]);
 
   const src = candidates[index];
-  if (!src) return null; // no logo for this team: the team name is still shown
+  if (!src) return null;
 
   return (
     <img

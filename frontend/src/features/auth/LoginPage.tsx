@@ -4,6 +4,7 @@ import {
 } from "react";
 
 import { useNavigate } from "react-router-dom";
+import { API_BASE_URL } from "../../api/config";
 import { useAuthStore } from "./auth.store";
 import "./auth.css";
 
@@ -172,7 +173,7 @@ export default function LoginPage() {
                 className="auth-provider"
                 onClick={() => {
                   window.location.href =
-                    "http://127.0.0.1:8000/auth/discord/login";
+                    `${API_BASE_URL}/auth/discord/login`;
                 }}
               >
                 <span className="auth-provider-icon discord-icon">
@@ -202,7 +203,7 @@ export default function LoginPage() {
                 className="auth-provider"
                 onClick={() => {
                   window.location.href =
-                    "http://127.0.0.1:8000/auth/x/login";
+                    `${API_BASE_URL}/auth/x/login`;
                 }}
               >
                 <span className="auth-provider-icon x-icon">

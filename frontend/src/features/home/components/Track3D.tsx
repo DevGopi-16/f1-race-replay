@@ -5,22 +5,22 @@ type Pt = [number, number] | { x: number; y: number };
 
 export type Track3DDriver = {
   code: string;
-  /** seconds behind the leader (leader = 0) */
+
   gapSeconds: number;
-  /** optional team colour, e.g. "#3671C6" */
+
   color?: string;
 };
 
 type Props = {
-  /** URL of the circuit SVG (e.g. from getCircuitSvgUrl). The track path is read from it. */
+
   url?: string | null;
-  /** Shown if the SVG can't be loaded or has no usable path */
+
   fallback?: ReactNode;
-  /** Circuit outline from your API: [[x,y],...] or [{x,y},...] (raw lap trace is fine) */
+
   points?: Pt[];
-  /** ...or an SVG path string ("M0 0 C ... Z") if the API already gives one */
+
   path?: string;
-  /** Set true if y grows upward in your data (typical for telemetry x/y) */
+
   flipY?: boolean;
   drivers?: Track3DDriver[];
   lapSeconds?: number;
@@ -30,7 +30,7 @@ type Props = {
 
 const svgCache = new Map<string, string>();
 
-/** Pull the main track outline out of a circuit SVG file. */
+
 function pathFromSvgText(text: string): string {
   const doc = new DOMParser().parseFromString(text, "image/svg+xml");
   let best = "";
@@ -51,7 +51,7 @@ function pathFromSvgText(text: string): string {
   }
   if (!best) return "";
 
-  // keep one continuous loop so the cars never jump between sub-paths
+
   const first = best.trim().split(/(?=[Mm])/)[0];
   return /[zZ]\s*$/.test(first) ? first : `${first} Z`;
 }
@@ -156,7 +156,7 @@ export default function Track3D({
   const [hud, setHud] = useState({ lap: "0:00.000", speed: 0, sector: 1 });
   const [geo, setGeo] = useState({ x: 0, y: 0, w: 100, h: 100, u: 1, sx: 0, sy: 0, angle: 0 });
 
-  // measure the real path so any circuit, in any coordinate system, fits and scales
+
   useLayoutEffect(() => {
     const road = roadRef.current;
     if (!road || !d) return;
@@ -194,7 +194,7 @@ export default function Track3D({
     const bb = road.getBBox();
     const u = Math.max(bb.width, bb.height) / 620;
 
-    // Speed profile: slow in corners, fast on straights, smoothed so cars brake and accelerate gradually
+
     const N = 480;
     const seg = len / N;
     const samples = Array.from({ length: N }, (_, i) => road.getPointAtLength(i * seg));
@@ -213,7 +213,7 @@ export default function Track3D({
         return sum / 9;
       });
     }
-    // time to reach each sample, scaled so one full lap takes lapSeconds
+
     const cum = new Float64Array(N + 1);
     for (let i = 0; i < N; i++) cum[i + 1] = cum[i] + seg / spd[i];
     const scale = lapSeconds / cum[N];

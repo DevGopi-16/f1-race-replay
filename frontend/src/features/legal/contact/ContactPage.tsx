@@ -82,7 +82,7 @@ export default function ContactPage() {
     setStatus("submitting");
 
     try {
-      const response = await fetch("/api/contact", {
+      const response = await fetch(`${API_BASE_URL}/api/contact`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -130,7 +130,7 @@ export default function ContactPage() {
             <div className="contact-info">
               <div className="contact-info-block">
                 <h2>Email</h2>
-                {/* placeholder — replace with real address */}
+                {                                             }
                 <a href="mailto:f1racevision.contact@gmail.com">
                   f1racevision.contact@gmail.com
                 </a>
@@ -138,7 +138,7 @@ export default function ContactPage() {
                   For support, bug reports, press and partnership enquiries. We
                   typically replay within 1–2 business days, but it may take longer during a race weekend.
                 </p>
-                
+
               </div>
 
               <Divider />
@@ -249,3 +249,4 @@ export default function ContactPage() {
     </PageTransition>
   );
 }
+import { API_BASE_URL } from "../../../api/config";

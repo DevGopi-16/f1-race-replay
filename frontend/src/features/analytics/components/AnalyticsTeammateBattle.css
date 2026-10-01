@@ -179,7 +179,7 @@
   white-space: nowrap;
 }
 
-/* Driver header — layout */
+
 .teammate-driver-header {
   appearance: none;
   border: 0;
@@ -289,7 +289,7 @@
   opacity: 0.75;
 }
 
-/* Driver header — accent-driven hover glow (must come after layout block above) */
+
 .teammate-driver-header {
   --teammate-accent: rgba(255, 255, 255, 0.7);
   position: relative;

@@ -654,7 +654,7 @@ export default function ProfilePage() {
 
       <div className="profile-shell">
 
-        {/* PAGE HEADER */}
+        {                 }
 
         <header className="profile-header">
           <div className="profile-header-copy">
@@ -685,11 +685,11 @@ export default function ProfilePage() {
 
         <div className="profile-layout">
 
-          {/* SIDEBAR */}
+          {             }
 
           <aside className="profile-sidebar">
 
-            {/* PROFILE HERO */}
+            {                  }
 
             <section className="profile-card profile-hero">
 
@@ -769,7 +769,7 @@ export default function ProfilePage() {
 
             </section>
 
-            {/* ACCOUNT OVERVIEW */}
+            {                      }
 
             <section className="profile-section profile-overview-card">
               <div className="profile-section-heading">
@@ -849,7 +849,7 @@ export default function ProfilePage() {
 
           </aside>
 
-          {/* MAIN CONTENT */}
+          {                  }
 
           <div className="profile-main">
 
@@ -882,7 +882,7 @@ export default function ProfilePage() {
               </div>
             </section>
 
-            {/* 2026 SEASON SUMMARY */}
+            {                         }
 
             <section className="profile-section profile-span-2 profile-season-section">
 
@@ -1110,7 +1110,7 @@ export default function ProfilePage() {
 
             </section>
 
-            {/* ACHIEVEMENTS */}
+            {                  }
 
             <section className="profile-section profile-span-2 profile-achievements-section">
               <div className="profile-section-heading">
@@ -1229,7 +1229,7 @@ export default function ProfilePage() {
 
             </section>
 
-            {/* ACCOUNT SETTINGS */}
+            {                      }
 
             <section className="profile-section">
               <div className="profile-section-heading">
@@ -1457,7 +1457,7 @@ export default function ProfilePage() {
               )}
             </section>
 
-            {/* SECURITY */}
+            {              }
 
             <section className="profile-section">
               <div className="profile-section-heading">
@@ -1719,7 +1719,7 @@ export default function ProfilePage() {
               </form>
             </section>
 
-            {/* SESSIONS */}
+            {              }
 
             <section className="profile-section">
               <div className="profile-section-heading">

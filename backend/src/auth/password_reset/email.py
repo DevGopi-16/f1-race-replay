@@ -3,7 +3,7 @@ Sends password reset emails via Resend.
 """
 
 import resend
-from src.config.settings import RESEND_API_KEY, FRONTEND_ORIGIN
+from src.config.settings import EMAIL_FROM, FRONTEND_BASE_URL, RESEND_API_KEY
 
 resend.api_key = RESEND_API_KEY
 
@@ -14,10 +14,10 @@ def send_password_reset_email(to_email: str, reset_token: str) -> None:
             "RESEND_API_KEY must be set to send password reset emails"
         )
 
-    reset_link = f"{FRONTEND_ORIGIN}/reset-password?token={reset_token}"
+    reset_link = f"{FRONTEND_BASE_URL}/reset-password?token={reset_token}"
 
     resend.Emails.send({
-        "from": "F1 Race Replay <onboarding@resend.dev>",
+        "from": EMAIL_FROM,
         "to": [to_email],
         "subject": "Reset your password",
         "html": f"""

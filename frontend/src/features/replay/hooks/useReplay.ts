@@ -29,7 +29,6 @@ type ReplayQueryLike = {
 export function useReplay(query?: ReplayQueryLike | null) {
   const [data, setData] = useState<any>(null);
 
-  const [frames, setFrames] = useState<any[]>([]);
   const [meta, setMeta] = useState<any>(null);
   const [track, setTrack] = useState<any>(null);
   const [events, setEvents] = useState<any[]>([]);
@@ -58,7 +57,7 @@ export function useReplay(query?: ReplayQueryLike | null) {
   const [error, setError] =
     useState<string | null>(null);
 
-  /* REFS */
+
 
   const loadingRef =
     useRef(false);
@@ -75,7 +74,7 @@ export function useReplay(query?: ReplayQueryLike | null) {
   const queryGenerationRef =
     useRef(0);
 
-  /* MOUNT / UNMOUNT */
+
 
   useEffect(() => {
     mountedRef.current = true;
@@ -86,13 +85,12 @@ export function useReplay(query?: ReplayQueryLike | null) {
     };
   }, []);
 
-  /* RESET INTERNAL STATE */
+
   const resetInternalState = useCallback(() => {
     framesRef.current = [];
     loadedStartsRef.current.clear();
 
     setData(null);
-    setFrames([]);
     setMeta(null);
     setTrack(null);
     setEvents([]);
@@ -106,7 +104,7 @@ export function useReplay(query?: ReplayQueryLike | null) {
     setError(null);
   }, []);
 
-  /* LOAD ONE CHUNK */
+
   const loadChunk = useCallback(
     async (
       year: number,
@@ -117,14 +115,14 @@ export function useReplay(query?: ReplayQueryLike | null) {
       generation: number,
     ) => {
 
-      /* Do not load the same chunk twice.*/
+
       if (
         loadedStartsRef.current.has(start)
       ) {
         return null;
       }
 
-      /* if this request belongs to an old replay, silently abandon it.*/
+
       if (
         generation !==
         queryGenerationRef.current
@@ -157,9 +155,9 @@ export function useReplay(query?: ReplayQueryLike | null) {
             }
           );
 
-        /*
-         * Ignore stale requests.
-         */
+
+
+
 
         if (
           generation !==
@@ -179,9 +177,9 @@ export function useReplay(query?: ReplayQueryLike | null) {
 
         return chunk;
       } catch (err) {
-        /*
-         * Allow retry if this chunk failed.
-         */
+
+
+
 
         loadedStartsRef.current.delete(
           start,
@@ -193,7 +191,7 @@ export function useReplay(query?: ReplayQueryLike | null) {
     [],
   );
 
-  /* APPEND CHUNK */
+
 
   const appendChunk = useCallback(
     (
@@ -204,13 +202,8 @@ export function useReplay(query?: ReplayQueryLike | null) {
         return;
       }
 
-      const nextFrames = [
-        ...framesRef.current,
-        ...chunk.frames,
-      ];
-
-      framesRef.current =
-        nextFrames;
+      const nextFrames = framesRef.current;
+      nextFrames.push(...chunk.frames);
 
       if (firstChunk) {
         setMeta(
@@ -253,60 +246,21 @@ export function useReplay(query?: ReplayQueryLike | null) {
           );
         }
       }
-      setFrames(
-        nextFrames,
-      );
-
       setLoadedFrames(
         nextFrames.length,
       );
-      setData(
-        (previous: any) => ({
-          ...(previous ?? chunk),
-
-          frames:
-            nextFrames,
-          frame_rate:
-            Number(
-              chunk.frame_rate ??
-                previous?.frame_rate ??
-                8,
-            ),
-
-          meta:
-            chunk.meta ??
-            previous?.meta,
-
-          track:
-            chunk.track ??
-            previous?.track,
-
-          events:
-            chunk.events ??
-            previous?.events ??
-            [],
-
-          driver_colors:
-            chunk.driver_colors ??
-            previous?.driver_colors ??
-            {},
-
-          max_tyre_life:
-            chunk.max_tyre_life ??
-            previous?.max_tyre_life ??
-            {},
-
-          driver_statuses:
-            chunk.driver_statuses ??
-            previous?.driver_statuses ??
-            {},
-        }),
-      );
+      if (firstChunk) {
+        setData({
+          ...chunk,
+          frames: nextFrames,
+          frame_rate: Number(chunk.frame_rate ?? 8),
+        });
+      }
     },
     [],
   );
 
-  /* LOAD COMPLETE REPLAY */
+
   const loadReplay = useCallback(
     async (
       year: number,
@@ -338,7 +292,6 @@ export function useReplay(query?: ReplayQueryLike | null) {
 
       if (mountedRef.current) {
         setData(null);
-        setFrames([]);
         setMeta(null);
         setTrack(null);
         setEvents([]);
@@ -402,7 +355,7 @@ export function useReplay(query?: ReplayQueryLike | null) {
           setLoading(false);
         }
 
-        /* BACKGROUND LOADING */
+
         for (
           let start =
             CHUNK_SIZE;
@@ -511,7 +464,7 @@ export function useReplay(query?: ReplayQueryLike | null) {
     ],
   );
 
-  /* RESET REPLAY */
+
 
   const resetReplay =
     useCallback(() => {
@@ -524,7 +477,7 @@ export function useReplay(query?: ReplayQueryLike | null) {
       resetInternalState,
     ]);
 
-  /*AUTOMATIC LOAD */
+
   const queryKey =
     query
       ? JSON.stringify(query)
@@ -589,7 +542,7 @@ export function useReplay(query?: ReplayQueryLike | null) {
 
   return {
     data,
-    frames,
+    frames: framesRef.current,
     meta,
     track,
     events,

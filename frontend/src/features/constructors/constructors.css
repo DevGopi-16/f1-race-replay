@@ -10,12 +10,6 @@
   --cs-accent: #e10600;
 }
 
-/* ============================================================
-   LIGHT THEME — CONSTRUCTORS
-   Keep all constructor components theme-aware through the
-   existing --cs-* design tokens.
-   ============================================================ */
-
 :root[data-theme="light"] {
   --cs-bg: #f5f6f8;
   --cs-panel: rgba(255, 255, 255, 0.82);
@@ -73,9 +67,9 @@
   to { opacity: 1; transform: translateY(0); }
 }
 
-/* ============================================================
-   HERO
-   ============================================================ */
+
+
+
 
 
 .constructors-hero {
@@ -176,7 +170,7 @@
   transition: width 1s cubic-bezier(0.16, 1, 0.3, 1);
 }
 
-/* ---------- LEADER CARD ---------- */
+
 
 .constructors-leader-content {
   width: 100%;
@@ -213,7 +207,7 @@
 
   margin-bottom: 10px;
 
-  /* Line only follows the text width */
+
   padding-bottom: 7px;
   border-bottom: 2px solid var(--team-color, var(--cs-accent));
 }
@@ -283,9 +277,9 @@
   padding: 7px 14px;
 }
 
-/* ============================================================
-   STAT STRIP
-   ============================================================ */
+
+
+
 
 .constructors-stat-strip {
   display: grid;
@@ -332,9 +326,9 @@
   color: var(--cs-text-faint);
 }
 
-/* ============================================================
-   STANDINGS
-   ============================================================ */
+
+
+
 
 .constructors-section {
   background: var(--cs-panel);
@@ -417,7 +411,7 @@
   box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.08);
 }
 
-/* ---------- ROWS ---------- */
+
 
 .constructors-list {
   display: flex;
@@ -563,9 +557,9 @@
   color: var(--cs-text);
 }
 
-/* ============================================================
-   RESPONSIVE
-   ============================================================ */
+
+
+
 
 @media (max-width: 960px) {
   .constructors-page {
@@ -597,7 +591,7 @@
     padding: 20px 16px;
     gap: 18px;
     border-radius: 16px;
-    backdrop-filter: none; /* big blur panels lag on phones */
+    backdrop-filter: none;
     -webkit-backdrop-filter: none;
   }
 

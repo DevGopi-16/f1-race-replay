@@ -1,9 +1,9 @@
 import html
-import os
 
 import resend
 from fastapi import APIRouter, HTTPException
 from pydantic import BaseModel, EmailStr, Field
+from src.config.settings import CONTACT_TO_EMAIL, EMAIL_FROM, RESEND_API_KEY
 
 
 router = APIRouter(prefix="/api/contact", tags=["Contact"])
@@ -18,24 +18,13 @@ class ContactRequest(BaseModel):
 
 @router.post("")
 def send_contact_message(payload: ContactRequest):
-    api_key = os.getenv("RESEND_API_KEY")
-
-    if not api_key:
+    if not RESEND_API_KEY:
         raise HTTPException(
             status_code=500,
             detail="Email service is not configured.",
         )
 
-    from_email = os.getenv(
-        "CONTACT_FROM_EMAIL",
-        "onboarding@resend.dev",
-    )
-    to_email = os.getenv(
-        "CONTACT_TO_EMAIL",
-        "f1racevision.contact@gmail.com",
-    )
-
-    resend.api_key = api_key
+    resend.api_key = RESEND_API_KEY
 
     name = payload.name.strip()
     email = str(payload.email)
@@ -50,8 +39,8 @@ def send_contact_message(payload: ContactRequest):
     try:
         resend.Emails.send(
             {
-                "from": from_email,
-                "to": [to_email],
+                "from": EMAIL_FROM,
+                "to": [CONTACT_TO_EMAIL],
                 "reply_to": [email],
                 "subject": f"[F1 Race Vision] {subject} — {name}",
                 "html": f"""

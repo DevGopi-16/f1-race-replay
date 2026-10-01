@@ -24,7 +24,7 @@ const SESSION_DEFS: SessionDef[] = [
   { key: "R", label: "Race", shortLabel: "R" },
 ];
 
-// Telemetry/timing data only exists from 2018 onwards.
+
 const REPLAY_MIN_YEAR = 2018;
 
 const TABS: { key: Tab; label: string }[] = [
@@ -143,8 +143,8 @@ export default function SessionsPage() {
     };
   }, [year]);
 
-  // The weekend the hero card highlights: nearest upcoming, or if the
-  // whole season is in the past, the most recently completed one.
+
+
   const heroWeekend = useMemo(() => {
     if (weekends.length === 0) return null;
 
@@ -163,7 +163,7 @@ export default function SessionsPage() {
 
     if (best) return best;
 
-    // everything's in the past — fall back to the latest round
+
     return [...weekends].sort((a, b) => {
       const da = parseWeekendDate(a.date)?.getTime() ?? 0;
       const db = parseWeekendDate(b.date)?.getTime() ?? 0;
@@ -389,7 +389,7 @@ export default function SessionsPage() {
                   className="sessions-hero-cta"
                   disabled={!replayAvailable}
 
-                
+
                   onClick={() =>
                     handleOpenSession(
                       heroWeekend,

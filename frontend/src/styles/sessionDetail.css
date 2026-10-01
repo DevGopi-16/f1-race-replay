@@ -1,6 +1,6 @@
 .sd-page {
   min-height: 100vh;
-  padding: 12px 0 80px; /* clears the fixed floating nav */
+  padding: 12px 0 80px;
 }
 
 .sd-container {
@@ -47,7 +47,7 @@
   color: #ff5b67;
 }
 
-/* ----- section labels ----- */
+
 
 .sd-label {
   display: flex;
@@ -94,7 +94,7 @@
   flex-wrap: wrap;
 }
 
-/* ----- hero ----- */
+
 
 .sd-hero {
   display: grid;
@@ -252,7 +252,7 @@
   font-weight: 600;
 }
 
-/* ----- panels + tabs ----- */
+
 
 .sd-panel {
   overflow: hidden;
@@ -304,7 +304,7 @@
   font-size: 0.9rem;
 }
 
-/* ----- legends ----- */
+
 
 .sd-legend-grid {
   display: grid;
@@ -399,7 +399,7 @@
   color: var(--color-white-45, rgba(255, 255, 255, 0.45));
 }
 
-/* ----- results table ----- */
+
 
 .sd-table-wrap {
   overflow-x: auto;
@@ -469,7 +469,7 @@
   background: rgba(139, 92, 246, 0.2);
 }
 
-/* ----- responsive ----- */
+
 
 @media (max-width: 900px) {
   .sd-hero {

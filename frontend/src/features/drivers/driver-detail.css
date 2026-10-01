@@ -1667,8 +1667,8 @@
   transform: translateY(-2px);
 }
 
-/* LIGHT THEME — preserve the dark presentation above and retune only the
-   Driver Detail surfaces, text, overlays, and controls for light contrast. */
+
+
 
 :root[data-theme="light"] .driver-detail-page {
   background:
@@ -1999,9 +1999,9 @@
   }
 }
 
-/* =========================================================
-   DRIVER DETAIL — ADVANCED DATA ROOM
-========================================================= */
+
+
+
 
   .driver-detail-page {
     position: relative;

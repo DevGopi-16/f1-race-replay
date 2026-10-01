@@ -10,6 +10,7 @@ import {
 import type {
   ReplayDriverColors,
   ReplayFrame,
+  ReplayOverlayState,
   ReplayTrack as ReplayTrackData,
 } from "../replay.types";
 
@@ -22,6 +23,7 @@ interface ReplayTrackProps {
   playing: boolean;
   frameRate: number;
   driverColors: ReplayDriverColors;
+  overlays: ReplayOverlayState;
 }
 
 interface Point {
@@ -196,44 +198,71 @@ function getBounds(
   };
 }
 
-function getStartFinish(
-  track: ReplayTrackData,
-): [Point, Point] | null {
-  if (
-    !Array.isArray(track.start_finish) ||
-    track.start_finish.length < 2
-  ) {
-    return null;
-  }
+const SECTOR_COLORS = ["#E8312A", "#3DA5E0", "#F5D31F"] as const;
+const DRS_OFFSET_SIDE: 1 | -1 = 1;
 
-  const a = track.start_finish[0];
-  const b = track.start_finish[1];
-
-  if (
-    !Array.isArray(a) ||
-    !Array.isArray(b) ||
-    a.length < 2 ||
-    b.length < 2 ||
-    typeof a[0] !== "number" ||
-    typeof a[1] !== "number" ||
-    typeof b[0] !== "number" ||
-    typeof b[1] !== "number"
-  ) {
-    return null;
-  }
-
-  return [
-    { x: a[0], y: a[1] },
-    { x: b[0], y: b[1] },
-  ];
+interface MapTransform {
+  scale: number;
+  offsetX: number;
+  offsetY: number;
 }
 
+interface MapGeometry {
+  path: string;
+  scale: number;
+  ribbonWidth: number;
+  sectorRanges: { start: number; length: number }[];
+  drsPaths: { path: string }[];
+}
 
-const SECTOR_COLORS = {
-  1: "#ff3344",
-  2: "#3b82f6",
-  3: "#ffd23f",
-};
+function toTrackPoint(value: unknown): Point | null {
+  if (
+    value &&
+    typeof value === "object" &&
+    "x" in value &&
+    "y" in value &&
+    typeof value.x === "number" &&
+    typeof value.y === "number" &&
+    Number.isFinite(value.x) &&
+    Number.isFinite(value.y)
+  ) {
+    return { x: value.x, y: value.y };
+  }
+
+  return null;
+}
+
+export function hasReplayDrsZones(track: ReplayTrackData): boolean {
+  return Boolean(
+    Array.isArray(track.drs_zones) &&
+      track.drs_zones.some(
+      (zone) =>
+        Boolean(zone) &&
+        toTrackPoint(zone.start) !== null &&
+        toTrackPoint(zone.end) !== null,
+      ),
+  );
+}
+
+function getPathString(points: Point[]): string {
+  return points
+    .map((point, index) =>
+      `${index === 0 ? "M" : "L"}${point.x.toFixed(2)},${point.y.toFixed(2)}`,
+    )
+    .join(" ");
+}
+
+function getCumulativeLengths(points: Point[]): number[] {
+  const cumulative = [0];
+
+  for (let index = 1; index < points.length; index++) {
+    const dx = points[index].x - points[index - 1].x;
+    const dy = points[index].y - points[index - 1].y;
+    cumulative.push(cumulative[index - 1] + Math.hypot(dx, dy));
+  }
+
+  return cumulative;
+}
 
 function getNumericValue(value: unknown): number | null {
   return typeof value === "number" && Number.isFinite(value)
@@ -350,6 +379,64 @@ function getTrackDistanceIndex(
   return 0;
 }
 
+const ReplaySectorLayer = memo(function ReplaySectorLayer({
+  geometry,
+  visible,
+}: {
+  geometry: MapGeometry;
+  visible: boolean;
+}) {
+  return (
+    <g
+      className={visible ? undefined : "replay-map-layer-hidden"}
+      aria-hidden="true"
+    >
+      {geometry.sectorRanges.map(({ start, length }, index) => (
+        <path
+          key={index}
+          d={geometry.path}
+          pathLength={1000}
+          fill="none"
+          stroke={SECTOR_COLORS[index]}
+          strokeWidth={geometry.ribbonWidth * 0.27}
+          strokeLinecap="butt"
+          strokeLinejoin="round"
+          strokeDasharray={`${length} ${Math.max(0, 1000 - length)}`}
+          strokeDashoffset={-start}
+        />
+      ))}
+    </g>
+  );
+});
+
+const ReplayDrsLayer = memo(function ReplayDrsLayer({
+  geometry,
+  visible,
+}: {
+  geometry: MapGeometry;
+  visible: boolean;
+}) {
+  return (
+    <g
+      className={visible ? undefined : "replay-map-layer-hidden"}
+      aria-hidden="true"
+    >
+      {geometry.drsPaths.map(({ path }, index) => (
+        <path
+          key={index}
+          d={path}
+          fill="none"
+          stroke="#4CC23A"
+          strokeWidth={Math.max(1.5, geometry.ribbonWidth * 0.22)}
+          strokeLinecap="round"
+          strokeLinejoin="round"
+          strokeDasharray={`${1.5 * geometry.scale} ${3.5 * geometry.scale}`}
+        />
+      ))}
+    </g>
+  );
+});
+
 const ReplayTrack = memo(function ReplayTrack({
   track,
   frames,
@@ -357,10 +444,8 @@ const ReplayTrack = memo(function ReplayTrack({
   playing,
   frameRate,
   driverColors,
+  overlays,
 }: ReplayTrackProps) {
-  const [showSectors, setShowSectors] = useState(true);
-  const [showDRS, setShowDRS] = useState(true);
-
   const canvasRef =
     useRef<HTMLCanvasElement | null>(null);
 
@@ -372,30 +457,36 @@ const ReplayTrack = memo(function ReplayTrack({
     height: 0,
     dpr: 1,
   });
+  const [viewportSize, setViewportSize] = useState({
+    width: 0,
+    height: 0,
+  });
 
-  /*
-   * Current logical frame.
-   */
+
+
+
   const frameIndexRef =
     useRef(frameIndex);
 
-  /*
-   * Cached canvas track path.
-   */
-  const trackPathRef =
-    useRef<Path2D | null>(null);
 
-  const startFinishRef =
-    useRef<[Point, Point] | null>(null);
 
-  /*
-   * ---------------------------------------------------------
-   * STATIC TRACK DATA
-   * ---------------------------------------------------------
-   */
+
+
+
   const points = useMemo(
     () => getTrackPoints(track),
     [track],
+  );
+
+  const driverColorByCode = useMemo(
+    () =>
+      Object.fromEntries(
+        Object.keys(driverColors).map((code) => [
+          code,
+          getDriverColor(driverColors, code),
+        ]),
+      ),
+    [driverColors],
   );
 
   const bounds = useMemo(
@@ -403,30 +494,25 @@ const ReplayTrack = memo(function ReplayTrack({
     [track, points],
   );
 
-  const startFinish = useMemo(
-    () => getStartFinish(track),
-    [track],
-  );
 
-  /*
-   * ---------------------------------------------------------
-   * FRAME INDEX SYNC
-   * ---------------------------------------------------------
-   *
-   * React frameIndex is the single source of truth.
-   *
-   * ReplayTrack does not advance time and does not
-   * interpolate between telemetry frames.
-   */
+
+
+
+
+
+
+
+
+
   useEffect(() => {
     frameIndexRef.current = frameIndex;
   }, [frameIndex]);
 
-  /*
-   * ---------------------------------------------------------
-   * CANVAS RESIZE
-   * ---------------------------------------------------------
-   */
+
+
+
+
+
   const resizeCanvas = useCallback(() => {
     const canvas =
       canvasRef.current;
@@ -464,6 +550,7 @@ const ReplayTrack = memo(function ReplayTrack({
       height,
       dpr,
     };
+    setViewportSize({ width, height });
 
     canvas.width =
       Math.floor(width * dpr);
@@ -493,11 +580,6 @@ const ReplayTrack = memo(function ReplayTrack({
       0,
     );
 
-    /*
-     * Rebuild cached track path after resize.
-     */
-    trackPathRef.current =
-      null;
   }, []);
 
   useEffect(() => {
@@ -532,11 +614,11 @@ const ReplayTrack = memo(function ReplayTrack({
     };
   }, [resizeCanvas]);
 
-  /*
-   * ---------------------------------------------------------
-   * TRACK TRANSFORM
-   * ---------------------------------------------------------
-   */
+
+
+
+
+
   const getTransform = useCallback(() => {
     const {
       width,
@@ -615,11 +697,7 @@ const ReplayTrack = memo(function ReplayTrack({
   const transformPoint = useCallback(
     (
       point: Point,
-      transform: {
-        scale: number;
-        offsetX: number;
-        offsetY: number;
-      },
+      transform: MapTransform,
     ): Point => ({
       x:
         transform.offsetX +
@@ -634,62 +712,150 @@ const ReplayTrack = memo(function ReplayTrack({
     [bounds],
   );
 
-  /*
-   * ---------------------------------------------------------
-   * TRACK PATH CACHE
-   * ---------------------------------------------------------
-   */
-  const buildTrackPath = useCallback(
-    (
-      transform: {
-        scale: number;
-        offsetX: number;
-        offsetY: number;
-      },
-    ) => {
-      if (
-        points.length < 2
-      ) {
-        return null;
+  const mapGeometry = useMemo<MapGeometry | null>(() => {
+    const transform = getTransform();
+
+    if (!transform || points.length < 2 || !bounds) {
+      return null;
+    }
+
+    const mappedPoints = points.map((point) =>
+      transformPoint(point, transform),
+    );
+    const path = getPathString(mappedPoints);
+    const cumulative = getCumulativeLengths(mappedPoints);
+    const totalLength = cumulative[cumulative.length - 1];
+    const normalizedLength = 1000;
+    const segments = track.sector_segments;
+    let boundaries: [number, number] | null = null;
+
+    if (
+      Array.isArray(segments) &&
+      segments.length >= 2 &&
+      segments[0]?.centerline?.length &&
+      segments[1]?.centerline?.length
+    ) {
+      const firstEnd = segments[0].centerline.at(-1);
+      const secondEnd = segments[1].centerline.at(-1);
+
+      if (firstEnd && secondEnd) {
+        const firstIndex = findNearestPointIndex(points, {
+          x: firstEnd[0],
+          y: firstEnd[1],
+        });
+        const secondIndex = findNearestPointIndex(points, {
+          x: secondEnd[0],
+          y: secondEnd[1],
+        });
+
+        boundaries = [
+          cumulative[firstIndex] / Math.max(1, totalLength) * normalizedLength,
+          cumulative[secondIndex] / Math.max(1, totalLength) * normalizedLength,
+        ];
+      }
+    }
+
+
+
+    const [firstBoundary, secondBoundary] = boundaries ?? [
+      normalizedLength / 3,
+      (normalizedLength * 2) / 3,
+    ];
+    const sectorRanges = [
+      { start: 0, length: firstBoundary },
+      { start: firstBoundary, length: Math.max(0, secondBoundary - firstBoundary) },
+      { start: secondBoundary, length: Math.max(0, normalizedLength - secondBoundary) },
+    ];
+    const drawnTrackSize = Math.min(
+      (bounds.maxX - bounds.minX) * transform.scale,
+      (bounds.maxY - bounds.minY) * transform.scale,
+    );
+    const scaleFactor = drawnTrackSize / 350;
+    const ribbonWidth = Math.max(8, 12 * scaleFactor);
+    const centroid = mappedPoints.reduce(
+      (sum, point) => ({
+        x: sum.x + point.x / mappedPoints.length,
+        y: sum.y + point.y / mappedPoints.length,
+      }),
+      { x: 0, y: 0 },
+    );
+    const drsZones = Array.isArray(track.drs_zones)
+      ? track.drs_zones
+      : [];
+    const drsPaths = drsZones.flatMap((zone) => {
+      if (!zone) {
+        return [];
       }
 
-      const path =
-        new Path2D();
+      const start = toTrackPoint(zone.start);
+      const end = toTrackPoint(zone.end);
 
-      for (
-        let i = 0;
-        i < points.length;
-        i++
-      ) {
-        const p =
-          transformPoint(
-            points[i],
-            transform,
-          );
+      if (!start || !end) {
+        return [];
+      }
 
-        if (i === 0) {
-          path.moveTo(
-            p.x,
-            p.y,
-          );
-        } else {
-          path.lineTo(
-            p.x,
-            p.y,
-          );
+      const startIndex = findNearestPointIndex(points, start);
+      const endIndex = findNearestPointIndex(points, end);
+      const indices: number[] = [];
+      let index = startIndex;
+
+      while (indices.length < points.length) {
+        indices.push(index);
+        if (index === endIndex) break;
+        index = (index + 1) % points.length;
+      }
+
+      if (indices.length < 2) {
+        return [];
+      }
+
+      const offsetPoints = indices.map((pointIndex) => {
+        const previous = mappedPoints[
+          (pointIndex - 1 + mappedPoints.length) % mappedPoints.length
+        ];
+        const current = mappedPoints[pointIndex];
+        const next = mappedPoints[(pointIndex + 1) % mappedPoints.length];
+        const tangentX = next.x - previous.x;
+        const tangentY = next.y - previous.y;
+        const tangentLength = Math.max(1, Math.hypot(tangentX, tangentY));
+        let normalX = -tangentY / tangentLength;
+        let normalY = tangentX / tangentLength;
+        const towardCenterX = centroid.x - current.x;
+        const towardCenterY = centroid.y - current.y;
+
+        if (normalX * towardCenterX + normalY * towardCenterY < 0) {
+          normalX *= -1;
+          normalY *= -1;
         }
-      }
 
-      return path;
-    },
-    [points, transformPoint],
-  );
+        normalX *= DRS_OFFSET_SIDE;
+        normalY *= DRS_OFFSET_SIDE;
+        const offset = ribbonWidth / 2 + 6 * scaleFactor;
+        return {
+          x: current.x + normalX * offset,
+          y: current.y + normalY * offset,
+        };
+      });
 
-  /*
-   * ---------------------------------------------------------
-   * DRAW
-   * ---------------------------------------------------------
-   */
+      return [{
+        path: getPathString(offsetPoints),
+      }];
+    });
+
+    return {
+      path,
+      scale: scaleFactor,
+      ribbonWidth,
+      sectorRanges,
+      drsPaths,
+    };
+  }, [bounds, getTransform, points, track.drs_zones, track.sector_segments, transformPoint, viewportSize]);
+
+
+
+
+
+
   const draw = useCallback(
     (
       visualFrame: number,
@@ -738,19 +904,6 @@ const ReplayTrack = memo(function ReplayTrack({
         height,
       );
 
-      /*
-       * Background
-       */
-      ctx.fillStyle =
-        "#07090d";
-
-      ctx.fillRect(
-        0,
-        0,
-        width,
-        height,
-      );
-
       if (
         points.length < 2 ||
         !bounds
@@ -780,289 +933,11 @@ const ReplayTrack = memo(function ReplayTrack({
         return;
       }
 
-      /*
-       * -------------------------------------------------------
-       * SECTORS + DRS
-       * -------------------------------------------------------
-       */
 
-      const drawColoredTrack = (
-        color: string,
-        start: number,
-        end: number,
-      ) => {
-        if (points.length < 2) return;
 
-        const safeStart = Math.max(
-          0,
-          Math.min(points.length - 1, Math.floor(start)),
-        );
 
-        const safeEnd = Math.max(
-          safeStart + 1,
-          Math.min(points.length - 1, Math.ceil(end)),
-        );
 
-        ctx.save();
 
-        ctx.strokeStyle = color;
-        ctx.lineWidth = 4.5;
-        ctx.lineCap = "round";
-        ctx.lineJoin = "round";
-        ctx.globalAlpha = 0.95;
-
-        ctx.beginPath();
-
-        for (let i = safeStart; i <= safeEnd; i++) {
-          const p = transformPoint(
-            points[i],
-            transform,
-          );
-
-          if (i === safeStart) {
-            ctx.moveTo(p.x, p.y);
-          } else {
-            ctx.lineTo(p.x, p.y);
-          }
-        }
-
-        ctx.stroke();
-        ctx.restore();
-      };
-
-      /*
-       * Sector colours are painted ON the circuit.
-       * Cars remain completely independent dots.
-       */
-      if (showSectors) {
-        const total = points.length;
-
-        drawColoredTrack(
-          SECTOR_COLORS[1],
-          0,
-          total / 3,
-        );
-
-        drawColoredTrack(
-          SECTOR_COLORS[2],
-          total / 3,
-          (total * 2) / 3,
-        );
-
-        drawColoredTrack(
-          SECTOR_COLORS[3],
-          (total * 2) / 3,
-          total - 1,
-        );
-      }
-
-      /*
-       * DRS zones.
-       *
-       * Supports common backend formats:
-       * [
-       *   {start: 100, end: 180},
-       *   {start: 400, end: 470}
-       * ]
-       */
-      if (showDRS) {
-        const rawDRS = track.drs_zones;
-
-        if (Array.isArray(rawDRS)) {
-          for (const zone of rawDRS) {
-            if (
-              !zone ||
-              typeof zone !== "object"
-            ) {
-              continue;
-            }
-
-            const z =
-              zone as Record<string, unknown>;
-
-            const rawStart = z.start;
-            const rawEnd = z.end;
-
-            /*
-             * Backend track_geometry.py sends:
-             *
-             * {
-             *   start: {x: ..., y: ...},
-             *   end:   {x: ..., y: ...}
-             * }
-             *
-             * Convert those coordinates to the
-             * nearest points on the rendered track.
-             */
-
-            if (
-              !rawStart ||
-              !rawEnd ||
-              typeof rawStart !== "object" ||
-              typeof rawEnd !== "object"
-            ) {
-              continue;
-            }
-
-            const startObj =
-              rawStart as Record<string, unknown>;
-
-            const endObj =
-              rawEnd as Record<string, unknown>;
-
-            if (
-              typeof startObj.x !== "number" ||
-              typeof startObj.y !== "number" ||
-              typeof endObj.x !== "number" ||
-              typeof endObj.y !== "number"
-            ) {
-              continue;
-            }
-
-            const startIndex =
-              findNearestPointIndex(
-                points,
-                {
-                  x: startObj.x,
-                  y: startObj.y,
-                },
-              );
-
-            const endIndex =
-              findNearestPointIndex(
-                points,
-                {
-                  x: endObj.x,
-                  y: endObj.y,
-                },
-              );
-
-            drawColoredTrack(
-              "#00e5ff",
-              Math.min(
-                startIndex,
-                endIndex,
-              ),
-              Math.max(
-                startIndex,
-                endIndex,
-              ),
-            );
-          }
-        }
-      }
-
-      /*
-       * -------------------------------------------------------
-       * TRACK
-       * -------------------------------------------------------
-       */
-      if (
-        !trackPathRef.current
-      ) {
-        trackPathRef.current =
-          buildTrackPath(
-            transform,
-          );
-      }
-
-      const trackPath =
-        trackPathRef.current;
-
-      if (trackPath) {
-        /*
-         * Glow
-         */
-        ctx.save();
-
-        ctx.strokeStyle =
-          "rgba(255,255,255,0.10)";
-
-        ctx.lineWidth = 9;
-
-        ctx.lineCap =
-          "round";
-
-        ctx.lineJoin =
-          "round";
-
-        ctx.shadowBlur = 14;
-
-        ctx.shadowColor =
-          "rgba(255,255,255,0.15)";
-
-        ctx.stroke(trackPath);
-
-        ctx.restore();
-
-        /*
-         * Main track
-         */
-        ctx.save();
-
-        ctx.strokeStyle =
-          "rgba(255,255,255,0.78)";
-
-        ctx.lineWidth = 2.2;
-
-        ctx.lineCap =
-          "round";
-
-        ctx.lineJoin =
-          "round";
-
-        ctx.stroke(trackPath);
-
-        ctx.restore();
-      }
-
-      /*
-       * -------------------------------------------------------
-       * START / FINISH
-       * -------------------------------------------------------
-       */
-      if (startFinish) {
-        const a =
-          transformPoint(
-            startFinish[0],
-            transform,
-          );
-
-        const b =
-          transformPoint(
-            startFinish[1],
-            transform,
-          );
-
-        ctx.save();
-
-        ctx.strokeStyle =
-          "rgba(255,255,255,0.9)";
-
-        ctx.lineWidth = 4;
-
-        ctx.beginPath();
-
-        ctx.moveTo(
-          a.x,
-          a.y,
-        );
-
-        ctx.lineTo(
-          b.x,
-          b.y,
-        );
-
-        ctx.stroke();
-
-        ctx.restore();
-      }
-
-      /*
-       * -------------------------------------------------------
-       * FRAME SELECTION
-       * -------------------------------------------------------
-       */
       const maxFrame =
         Math.max(
           0,
@@ -1109,23 +984,23 @@ const ReplayTrack = memo(function ReplayTrack({
         return;
       }
 
-      /*
-       * -------------------------------------------------------
-       * CARS
-       * -------------------------------------------------------
-       *
-       * No collision solver.
-       *
-       * No expensive geometry calculation.
-       *
-       * Only:
-       *
-       *   telemetry → transform → circle
-       */
-      const driverCodes =
-        Object.keys(
-          frameA.drivers,
-        );
+
+
+
+
+
+
+
+
+
+
+
+
+
+      const driverCodes = Object.keys(frameA.drivers);
+      ctx.font = "700 9px system-ui, sans-serif";
+      ctx.textAlign = "center";
+      ctx.textBaseline = "middle";
 
       for (
         let i = 0;
@@ -1157,12 +1032,12 @@ const ReplayTrack = memo(function ReplayTrack({
         let y =
           driverA.y;
 
-        /*
-         * Interpolate ONLY during playback.
-         *
-         * Manual seeking uses fraction = 0,
-         * therefore it always draws the exact frame.
-         */
+
+
+
+
+
+
         if (
           interpolate &&
           driverB &&
@@ -1188,166 +1063,25 @@ const ReplayTrack = memo(function ReplayTrack({
             transform,
           );
 
-        const color =
-          getDriverColor(
-            driverColors,
-            code,
-          );
-
-        /*
-         * Glow
-         */
-        ctx.save();
-
+        const color = driverColorByCode[code] ?? "#ffffff";
         ctx.beginPath();
-
         ctx.arc(
           position.x,
           position.y,
-          8,
+          6,
           0,
           Math.PI * 2,
         );
-
-        ctx.fillStyle =
-          color;
-
-        ctx.globalAlpha =
-          0.16;
-
-        ctx.shadowBlur = 12;
-
-        ctx.shadowColor =
-          color;
-
-        ctx.fill();
-
-        ctx.restore();
-
-        /*
-         * Driver dot marker
-         *
-         * Simple, clean circuit-map marker:
-         * - team/driver colour
-         * - white outer ring
-         * - no car silhouette
-         * - same exact track position
-         */
-        ctx.save();
-
-        const markerRadius = 4.5;
-
-        /*
-         * White outer ring.
-         */
-        ctx.beginPath();
-
-        ctx.arc(
-          position.x,
-          position.y,
-          markerRadius + 1.5,
-          0,
-          Math.PI * 2,
-        );
-
         ctx.fillStyle = "rgba(255,255,255,0.95)";
         ctx.fill();
-
-        /*
-         * Coloured driver dot.
-         */
         ctx.beginPath();
-
-        ctx.arc(
-          position.x,
-          position.y,
-          markerRadius,
-          0,
-          Math.PI * 2,
-        );
-
+        ctx.arc(position.x, position.y, 4.5, 0, Math.PI * 2);
         ctx.fillStyle = color;
         ctx.fill();
 
-        ctx.restore();
-      }
 
-      /*
-       * -------------------------------------------------------
-       * DRIVER LABELS
-       * -------------------------------------------------------
-       *
-       * Labels intentionally use a deterministic small
-       * offset instead of running collision optimization
-       * every frame.
-       *
-       * This is dramatically cheaper and prevents labels
-       * from constantly shuffling during playback.
-       */
-      for (
-        let i = 0;
-        i < driverCodes.length;
-        i++
-      ) {
-        const code =
-          driverCodes[i];
 
-        const driverA =
-          frameA.drivers[code];
 
-        if (
-          !driverA ||
-          typeof driverA.x !== "number" ||
-          typeof driverA.y !== "number" ||
-          !Number.isFinite(driverA.x) ||
-          !Number.isFinite(driverA.y)
-        ) {
-          continue;
-        }
-
-        const driverB =
-          frameB?.drivers?.[code];
-
-        let x =
-          driverA.x;
-
-        let y =
-          driverA.y;
-
-        if (
-          interpolate &&
-          driverB &&
-          typeof driverB.x === "number" &&
-          typeof driverB.y === "number" &&
-          Number.isFinite(driverB.x) &&
-          Number.isFinite(driverB.y)
-        ) {
-          x =
-            driverA.x +
-            (driverB.x - driverA.x) *
-              fraction;
-
-          y =
-            driverA.y +
-            (driverB.y - driverA.y) *
-              fraction;
-        }
-
-        const position =
-          transformPoint(
-            { x, y },
-            transform,
-          );
-
-        const color =
-          getDriverColor(
-            driverColors,
-            code,
-          );
-
-        /*
-         * Stable alternating offsets.
-         */
         const row =
           i % 3;
 
@@ -1398,17 +1132,10 @@ const ReplayTrack = memo(function ReplayTrack({
             ),
           );
 
-        ctx.save();
-
-        /*
-         * Background
-         */
         ctx.fillStyle =
           "rgba(5,7,11,0.90)";
-
         ctx.strokeStyle =
           color;
-
         ctx.lineWidth = 1;
 
         ctx.beginPath();
@@ -1437,20 +1164,8 @@ const ReplayTrack = memo(function ReplayTrack({
 
         ctx.stroke();
 
-        /*
-         * Text
-         */
         ctx.fillStyle =
           "#ffffff";
-
-        ctx.font =
-          "700 9px system-ui, sans-serif";
-
-        ctx.textAlign =
-          "center";
-
-        ctx.textBaseline =
-          "middle";
 
         ctx.fillText(
           code,
@@ -1460,52 +1175,62 @@ const ReplayTrack = memo(function ReplayTrack({
             labelHeight / 2,
         );
 
-        ctx.restore();
       }
     },
     [
       bounds,
-      buildTrackPath,
-      driverColors,
+      driverColorByCode,
       frames,
       getTransform,
       points,
-      startFinish,
       transformPoint,
     ],
   );
 
-  /*
-   * ---------------------------------------------------------
-   * EXACT FRAME RENDER
-   * ---------------------------------------------------------
-   *
-   * ReplayPage owns playback timing.
-   *
-   * ReplayTrack is ONLY a renderer:
-   *
-   *   frameIndex 100 -> draw frame 100
-   *   frameIndex 101 -> draw frame 101
-   *
-   * There is intentionally:
-   *
-   *   - no requestAnimationFrame
-   *   - no interpolation
-   *   - no visual playback clock
-   *   - no stale animation callback
-   *
-   * This makes timeline seeking deterministic.
-   */
+
+
+
+
   useEffect(() => {
     if (!frames.length) {
       return;
     }
 
-    draw(frameIndex, false);
+    const reduceMotion = window.matchMedia(
+      "(prefers-reduced-motion: reduce)",
+    ).matches;
+
+    if (!playing || reduceMotion || frameRate <= 0) {
+      draw(frameIndex, false);
+      return;
+    }
+
+    const startTime = performance.now();
+    let animationId = 0;
+
+    const animate = (now: number) => {
+      const interpolatedFrame = Math.min(
+        frames.length - 1,
+        frameIndex + ((now - startTime) * frameRate) / 1000,
+      );
+
+      draw(interpolatedFrame, true);
+
+      if (interpolatedFrame < frames.length - 1) {
+        animationId = requestAnimationFrame(animate);
+      }
+    };
+
+    animationId = requestAnimationFrame(animate);
+
+    return () => {
+      cancelAnimationFrame(animationId);
+    };
   }, [
     draw,
     frameIndex,
-    frames.length,
+    frameRate,
+    playing,
   ]);
 
   return (
@@ -1518,6 +1243,44 @@ const ReplayTrack = memo(function ReplayTrack({
           ref={canvasRef}
           className="replay-track-canvas"
         />
+
+        {mapGeometry && (
+          <svg
+            className="replay-track-map-svg"
+            viewBox={`0 0 ${viewportSize.width} ${viewportSize.height}`}
+            preserveAspectRatio="none"
+            aria-hidden="true"
+            style={{
+              width: `${viewportSize.width}px`,
+              height: `${viewportSize.height}px`,
+            }}
+          >
+            <path
+              d={mapGeometry.path}
+              fill="none"
+              stroke="rgba(255,255,255,0.15)"
+              strokeWidth={mapGeometry.ribbonWidth + 2}
+              strokeLinecap="round"
+              strokeLinejoin="round"
+            />
+            <path
+              d={mapGeometry.path}
+              fill="none"
+              stroke="#171b22"
+              strokeWidth={mapGeometry.ribbonWidth}
+              strokeLinecap="round"
+              strokeLinejoin="round"
+            />
+            <ReplaySectorLayer
+              geometry={mapGeometry}
+              visible={overlays.sectors}
+            />
+            <ReplayDrsLayer
+              geometry={mapGeometry}
+              visible={overlays.drs}
+            />
+          </svg>
+        )}
 
         <div className="track-overlay">
           <span>

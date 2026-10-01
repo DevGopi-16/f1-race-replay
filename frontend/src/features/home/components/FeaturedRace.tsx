@@ -6,14 +6,14 @@ import { getCircuitSvgUrl } from "../../schedule/circuitAssets";
 import { LiveCircuit } from "./LiveCircuit";
 import Track3D, { type Track3DDriver } from "./Track3D";
 
-/**
- * Optional live-race extras. Add these to NextSession in home.types.ts
- * when your API sends them, then delete this type. Without them the 3D
- * track still renders, just without cars and the lap HUD.
- */
+
+
+
+
+
 const DEFAULT_LAP_SECONDS = 92.4;
 
-/** Placeholder field until your API sends real drivers (gap = seconds behind the leader). */
+
 const DEFAULT_DRIVERS: Track3DDriver[] = [
   { code: "VER", gapSeconds: 0 },
   { code: "NOR", gapSeconds: 2.341 },

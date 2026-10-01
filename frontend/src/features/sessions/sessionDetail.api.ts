@@ -90,8 +90,8 @@ export function getSessionDetail(
   year: number,
   round: number,
 ): Promise<SessionDetail> {
-  // Sprints only exist from 2021. For non-sprint weekends the backend just
-  // returns sprint: null (finished races are cached, so this costs one call once).
+
+
   const sprint = year >= 2021;
   return apiGet<SessionDetail>(
     `/api/session-detail?year=${year}&round=${round}&sprint=${sprint}`,

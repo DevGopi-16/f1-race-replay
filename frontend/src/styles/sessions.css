@@ -16,7 +16,7 @@
   margin: 0 auto;
 }
 
-/* ---------- Header ---------- */
+
 
 .sessions-header {
   display: flex;
@@ -93,7 +93,7 @@
   background: var(--color-accent);
 }
 
-/* ---------- Tabs ---------- */
+
 
 .sessions-tabs {
   display: flex;
@@ -140,7 +140,7 @@
   background: var(--color-accent);
 }
 
-/* ---------- Loading / error / empty ---------- */
+
 
 .sessions-loading,
 .sessions-error,
@@ -186,7 +186,7 @@
   letter-spacing: 0;
 }
 
-/* ---------- Hero ---------- */
+
 
 .sessions-hero-label {
   display: flex;
@@ -488,7 +488,7 @@
   opacity: 0.85;
 }
 
-/* ---------- Search ---------- */
+
 
 .sessions-search {
   display: flex;
@@ -524,7 +524,7 @@
   color: var(--color-white-30);
 }
 
-/* ---------- Round grid ---------- */
+
 
 .sessions-grid {
   display: grid;
@@ -743,7 +743,7 @@
   color: var(--color-accent);
 }
 
-/* ---------- Responsive ---------- */
+
 
 @media (max-width: 860px) {
   .sessions-hero {

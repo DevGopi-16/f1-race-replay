@@ -1,8 +1,3 @@
-/* ==========================================================
-   F1 REPLAY — CLEAN COMPACT THEME
-   Dark red/black. Same class names as before — drop-in replace.
-   ========================================================== */
-
 :root {
   --replay-bg: #07090d;
   --replay-surface: #0d1015;
@@ -42,8 +37,6 @@
   flex-direction: column;
   gap: var(--replay-gap);
 }
-
-/* ---------- HEADER + RACE META (combined into one compact bar) ---------- */
 
 .replay-header {
   display: grid;
@@ -103,8 +96,6 @@
 .replay-race-lap strong { color: var(--replay-text); font-size: 14px; }
 .replay-clock { font-family: "SFMono-Regular", Consolas, monospace; }
 
-/* ---------- SESSION SELECTOR DRAWER ---------- */
-
 .replay-selector-drawer {
   border: 1px solid var(--replay-border);
   border-radius: var(--replay-radius);
@@ -145,8 +136,6 @@
 }
 .replay-selector button:hover, .replay-load-button:hover { background: var(--replay-accent-bright); }
 .replay-selector button:disabled { opacity: 0.55; cursor: wait; }
-
-/* ---------- STATUS ---------- */
 
 .replay-status {
   padding: 12px 16px; border-radius: var(--replay-radius);
@@ -435,8 +424,6 @@
   }
 }
 
-/* ---------- MAIN GRID: TRACK + LEADERBOARD ---------- */
-
 .replay-main-grid {
   display: grid;
   grid-template-columns: minmax(0,1fr) 300px;
@@ -466,8 +453,6 @@
   border: 1px solid var(--replay-border); border-radius: var(--replay-radius);
   background: var(--replay-surface); overflow: hidden;
 }
-
-/* ---------- LEADERBOARD (rendered by ReplayLeaderboard.tsx) ---------- */
 
 .replay-leaderboard { width: 100%; height: 100%; display: flex; flex-direction: column; overflow: hidden; }
 .replay-panel-heading {
@@ -535,8 +520,6 @@
 .replay-driver-row.is-selected:hover { background: #f2f2f2; }
 .replay-driver-row.replay-driver-no-telemetry { opacity: 0.5; }
 .replay-empty-grid { padding: 24px 12px; text-align: center; font-size: 10px; color: var(--replay-dim); }
-
-/* ---------- SELECTED DRIVERS ---------- */
 
 .replay-driver-section {
   padding: 14px 16px;
@@ -612,8 +595,6 @@
 .replay-selected-telemetry-fill.tyre { background: linear-gradient(90deg, var(--replay-green), var(--replay-yellow)); }
 .replay-selected-telemetry-value { font-size: 8px; font-weight: 800; color: var(--replay-muted); text-align: right; }
 
-/* ---------- WEATHER / STATUS / RACE INFO ---------- */
-
 .replay-info-grid { display: grid; grid-template-columns: repeat(3, minmax(0,1fr)); gap: var(--replay-gap); }
 .replay-info-panel {
   padding: 12px 14px; min-height: 100px;
@@ -657,8 +638,6 @@
 .replay-race-info { display: grid; grid-template-columns: repeat(4, 1fr); gap: 6px; }
 .replay-race-info > div { padding: 7px 8px; border: 1px solid var(--replay-border); border-radius: 7px; background: var(--replay-surface-2); }
 .replay-race-info strong { display: block; margin-top: 4px; font-size: 13px; font-weight: 850; font-variant-numeric: tabular-nums; }
-
-/* ---------- TIMELINE ---------- */
 
 .replay-timeline-section {
   display: flex;
@@ -732,8 +711,6 @@
 }
 .replay-timeline-footer b { margin-right: 5px; color: var(--replay-muted); font-size: 7px; }
 
-/* ---------- PLAYBACK BAR ---------- */
-
 .replay-playback-section {
   display: flex; align-items: center; justify-content: space-between; gap: 16px;
   padding: 10px 16px; border: 1px solid var(--replay-border); border-radius: var(--replay-radius); background: var(--replay-surface);
@@ -763,8 +740,7 @@
 .replay-keyboard small { font-size: 7px; color: var(--replay-dim); font-weight: 600; }
 .replay-key-icon { width: 12px; height: 12px; object-fit: contain; opacity: 0.6; margin: 0 1px; }
 
-/* Best-effort: flatten whatever ReplayControls renders into the row.
-   Send me ReplayControls.tsx for a real fix — this only strips the outer box. */
+
 .replay-playback-section {
   flex-wrap: wrap;
 }
@@ -778,13 +754,13 @@
   flex: 1 1 auto;
   min-width: 220px;
 }
-/* ---------- SCROLLBARS ---------- */
+
 
 .replay-page ::-webkit-scrollbar { width: 6px; height: 6px; }
 .replay-page ::-webkit-scrollbar-track { background: transparent; }
 .replay-page ::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.12); border-radius: 99px; }
 
-/* ---------- RESPONSIVE ---------- */
+
 
 @media (max-width: 1000px) {
   .replay-header { grid-template-columns: 1fr auto; }
@@ -807,8 +783,6 @@
     animation-duration: 0.01ms !important; transition-duration: 0.01ms !important;
   }
 }
-
-/* ---------- ReplayControls internals ---------- */
 
 .replay-controls-main {
   display: flex;
@@ -894,6 +868,192 @@
   .replay-frame-info { display: none; }
 }
 
+.replay-overlay-controls {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-top: 12px;
+}
+
+.replay-overlay-toggle {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  min-width: 104px;
+  min-height: 44px;
+  padding: 0 12px;
+  border: 1px solid var(--replay-border-strong);
+  border-radius: 7px;
+  background: var(--replay-surface-3);
+  color: var(--replay-muted);
+  cursor: pointer;
+  font: inherit;
+  font-size: 10px;
+  font-weight: 800;
+  letter-spacing: 0.08em;
+  transition: background 0.15s ease, border-color 0.15s ease, color 0.15s ease;
+}
+
+.replay-overlay-toggle.active {
+  border-color: rgba(53, 208, 127, 0.55);
+  background: rgba(53, 208, 127, 0.12);
+  color: var(--replay-text);
+}
+
+.replay-overlay-toggle-sectors.active {
+  border-color: rgba(61, 165, 224, 0.55);
+  background: rgba(61, 165, 224, 0.12);
+}
+
+.replay-overlay-toggle:disabled {
+  cursor: not-allowed;
+  opacity: 0.48;
+}
+
+.replay-overlay-toggle:focus-visible {
+  outline: 2px solid var(--replay-accent-bright);
+  outline-offset: 3px;
+}
+
+.replay-overlay-toggle small {
+  color: var(--replay-dim);
+  font-size: 9px;
+  font-weight: 800;
+}
+
+.replay-overlay-drs-dot,
+.replay-overlay-sector-dots i {
+  display: inline-block;
+  width: 7px;
+  height: 7px;
+  flex: 0 0 7px;
+  border-radius: 50%;
+}
+
+.replay-overlay-drs-dot {
+  background: #4CC23A;
+  box-shadow: 0 0 7px rgba(76, 194, 58, 0.55);
+}
+
+.replay-overlay-sector-dots {
+  display: inline-flex;
+  gap: 3px;
+}
+
+.replay-overlay-sector-dots i:nth-child(1) { background: #E8312A; }
+.replay-overlay-sector-dots i:nth-child(2) { background: #3DA5E0; }
+.replay-overlay-sector-dots i:nth-child(3) { background: #F5D31F; }
+
+.replay-overlay-controls {
+  width: calc((100% - 16px) / 3);
+  margin-left: auto;
+}
+
+.replay-overlay-toggle {
+  flex: 1 1 0;
+  min-width: 0;
+}
+
+.replay-controls-info-grid {
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  align-items: start;
+  gap: 6px 8px;
+  margin-top: 0;
+}
+
+.replay-controls-info-grid .replay-info-panel {
+  min-height: 0;
+  padding: 4px 8px 6px;
+}
+
+.replay-controls-info-grid .replay-info-title {
+  margin-bottom: 4px;
+  font-size: 8px;
+}
+
+.replay-controls-info-grid .replay-info-items,
+.replay-controls-info-grid .replay-race-info {
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+
+  gap: 3px;
+}
+
+.replay-controls-info-grid .replay-info-items > div,
+.replay-controls-info-grid .replay-race-info > div {
+  padding: 3px 5px;
+}
+
+.replay-controls-info-grid .replay-weather-item {
+  gap: 5px;
+}
+
+.replay-controls-info-grid .replay-weather-icon {
+  width: 22px;
+  height: 22px;
+  flex-basis: 22px;
+  border-radius: 6px;
+}
+
+.replay-controls-info-grid .replay-weather-icon img {
+  width: 14px;
+  height: 14px;
+}
+
+.replay-controls-info-grid .replay-weather-copy small,
+.replay-controls-info-grid .replay-info-items small,
+.replay-controls-info-grid .replay-race-info small {
+  font-size: 7px;
+}
+
+.replay-controls-info-grid .replay-weather-copy strong,
+.replay-controls-info-grid .replay-race-info strong {
+  font-size: 11px;
+}
+
+.replay-controls-info-grid .replay-status-list {
+  gap: 3px;
+}
+
+.replay-controls-info-grid .replay-status-list > div {
+  padding: 4px 6px;
+}
+
+.replay-controls-info-grid .replay-status-list > div strong {
+  margin-top: 2px;
+  font-size: 9px;
+}
+
+@media (max-width: 768px) {
+  .replay-controls-info-grid {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .replay-overlay-controls {
+    width: 100%;
+  }
+
+  .replay-overlay-toggle {
+    flex: 1 1 120px;
+  }
+}
+
+@media (max-width: 480px) {
+  .replay-overlay-controls {
+    gap: 6px;
+  }
+
+  .replay-controls-info-grid .replay-info-items {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .replay-overlay-toggle {
+    transition: none;
+  }
+}
+
 
 .replay-timeline-laps > div {
   padding: 4px 0;
@@ -913,8 +1073,6 @@
   border-radius: 6px;
   background: var(--replay-surface-2);
 }
-
-/* ---------- ORBITRON + ANIMATION ---------- */
 
 .replay-header-brand strong,
 .replay-race-meta strong,
@@ -943,7 +1101,6 @@
   to { opacity: 1; transform: translateY(0); }
 }
 
-/* Entrance animation for the whole shell */
 .replay-shell > * {
   animation: replayFadeUp 0.5s ease both;
 }
@@ -952,8 +1109,6 @@
 .replay-shell > *:nth-child(3) { animation-delay: 0.14s; }
 .replay-shell > *:nth-child(4) { animation-delay: 0.2s; }
 .replay-shell > *:nth-child(5) { animation-delay: 0.26s; }
-
-/* ---------- REPLAY SELECT COMMAND CENTER ---------- */
 
 .replay-page {
   position: relative;
@@ -1326,7 +1481,6 @@
   to { opacity: 1; transform: translateY(0); }
 }
 
-/* Pulsing glow on the brand mark and accent bar */
 .replay-brand-mark {
   animation: replayBrandPulse 2s ease-in-out infinite;
 }

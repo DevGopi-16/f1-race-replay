@@ -1,19 +1,3 @@
-"""
-Audit driver images and (optionally) keep only photos of drivers in a race suit.
-
-    python3 scripts/audit_driver_images.py                 # report only
-    python3 scripts/audit_driver_images.py --verify        # suit check, moves failures to drivers/rejected/
-    python3 scripts/audit_driver_images.py --sheet         # write scripts/review.html (open in a browser)
-    python3 scripts/audit_driver_images.py --trust senna   # mark a hand-saved photo as OK
-
-Trusted without checking: manifest source starts with "formula1.com" (official
-headshots from import_headshots.py), "manual" (set with --trust), or the image
-already carries a "suit_verified" score.  Everything else is unverified.
-
-Nothing is deleted: rejected images are moved to frontend/public/drivers/rejected/
-so you can move one back if the check was wrong (then run --trust <driverId>).
-"""
-
 import argparse
 import html
 import json
@@ -24,7 +8,7 @@ from download_driver_images import MANIFEST, OUT, all_drivers
 
 ROOT = Path(__file__).resolve().parents[1]
 REJECTED = OUT / "rejected"
-EXTS = (".png", ".jpg")  # the only extensions DriverAvatar tries
+EXTS = (".png", ".jpg")
 TRUSTED_SOURCES = ("formula1.com", "manual")
 
 
@@ -98,7 +82,7 @@ def main() -> None:
     scores: dict[str, float] = {}
 
     if args.verify:
-        from suit_check import suit_score  # imported here so plain audits don't need torch
+        from suit_check import suit_score
 
         REJECTED.mkdir(parents=True, exist_ok=True)
         for driver_id in names:

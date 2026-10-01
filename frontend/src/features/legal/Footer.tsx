@@ -1,10 +1,10 @@
 import React from "react";
 import "./footer.css";
 
-/**
- * Site-wide footer. Render this once in your app shell/layout
- * (AppShell.tsx) so it appears on every page, not just the homepage.
- */
+
+
+
+
 const FOOTER_LINKS = [
   { label: "About", href: "/about" },
   { label: "FAQ", href: "/faq" },

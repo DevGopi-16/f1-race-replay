@@ -35,7 +35,7 @@
   font-size: 13px;
 }
 
-/* ---------- TABLE WRAP / SCROLL ---------- */
+
 
 .constructor-race-table-wrap {
   overflow-x: auto;
@@ -126,7 +126,7 @@
   color: var(--cs-text-dim, #9199a8);
 }
 
-/* ---------- EVENT ---------- */
+
 
 .constructor-race-event {
   display: flex;
@@ -158,7 +158,7 @@
   margin-top: 2px;
 }
 
-/* ---------- POSITION BADGES ---------- */
+
 
 .constructor-race-position {
   display: flex;
@@ -214,7 +214,7 @@
   opacity: 0.35;
 }
 
-/* ---------- DRIVERS ---------- */
+
 
 .constructor-race-drivers {
   display: flex;
@@ -260,7 +260,7 @@
   color: var(--cs-text-dim, #9199a8);
 }
 
-/* ---------- POINTS ---------- */
+
 
 .constructor-race-points {
   display: flex;
@@ -303,7 +303,7 @@
 .constructor-race-row:hover .constructor-race-points-track span {
   box-shadow: 0 0 8px currentColor;
 }
-/* ---------- TOTAL ---------- */
+
 
 .constructor-race-total {
   display: flex;
@@ -327,7 +327,7 @@
   margin-top: 2px;
 }
 
-/* ---------- MOBILE NOTE ---------- */
+
 
 .constructor-race-mobile-note {
   display: none;
@@ -376,7 +376,7 @@
   border-color: rgba(255, 255, 255, 0.15);
 }
 
-/* ---------- PHONE: table rows become cards ---------- */
+
 @media (max-width: 700px) {
   .constructor-race-table-wrap {
     overflow-x: visible;
@@ -390,7 +390,7 @@
 
   .constructor-race-table-head,
   .constructor-race-mobile-note {
-    display: none; /* column labels and the "scroll sideways" hint aren't needed */
+    display: none;
   }
 
   .constructor-race-table-body {
@@ -415,7 +415,7 @@
   }
 
   .constructor-race-row:hover {
-    transform: none; /* the slide-right hover feels odd on touch */
+    transform: none;
   }
 
   .constructor-race-row > :nth-child(1) { grid-area: round; }

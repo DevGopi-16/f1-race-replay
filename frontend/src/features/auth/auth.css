@@ -1048,7 +1048,7 @@
   }
 }
 
-/* REGISTER FOOTER LINKS */
+
 
 .auth-switch {
   margin: 22px 0 0;
@@ -1160,9 +1160,9 @@
   }
 }
 
-/* ============================================================
-   REAL F1 LOGO — AUTH PAGES
-   ============================================================ */
+
+
+
 
 .auth-top-brand .auth-brand-logo {
   width: 78px !important;
@@ -1185,7 +1185,7 @@
 
   flex: 0 0 78px !important;
 
-  /* F1-style breathing light */
+
   animation: authImageLogoGlow 2.8s ease-in-out infinite;
 }
 
@@ -1207,7 +1207,7 @@
 }
 
 
-/* Keep the complete brand small and clean */
+
 .auth-top-brand {
   display: flex;
   align-items: center;
@@ -1218,7 +1218,7 @@
   height: auto;
 }
 
-/* Brand text beside the logo */
+
 .auth-top-brand .auth-brand-text {
   display: flex;
   flex-direction: column;

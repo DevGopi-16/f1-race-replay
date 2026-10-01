@@ -1,7 +1,8 @@
 import HeadToHeadPage from "./HeadToHeadPage";
 import { searchDrivers } from "./driverSearch";
+import { API_BASE_URL } from "../../api/config";
 
-// Map a backend driver object to the DriverSummary shape the page expects.
+
 function toSummary(d: any) {
   return {
     driverId: d.driverId,
@@ -17,7 +18,7 @@ function toSummary(d: any) {
 async function fetchHeadToHead(driverAId: string, driverBId: string) {
   const year = new Date().getFullYear();
   const res = await fetch(
-    `/api/head-to-head?driverA=${encodeURIComponent(driverAId)}&driverB=${encodeURIComponent(driverBId)}&year=${year}`,
+    `${API_BASE_URL}/api/head-to-head?driverA=${encodeURIComponent(driverAId)}&driverB=${encodeURIComponent(driverBId)}&year=${year}`,
   );
   if (!res.ok) {
     throw new Error(`Failed to load head-to-head (${res.status}): ${await res.text()}`);
@@ -35,7 +36,7 @@ async function fetchHeadToHead(driverAId: string, driverBId: string) {
     },
     headToHeadRecord: headToHeadRecord ?? null,
     relativePerformance: { driverA: a.teammate_battle, driverB: b.teammate_battle },
-    allTimeRankings: null, // backend doesn't compute this yet
+    allTimeRankings: null,
     careerTrajectory: { driverA: a.season_journey, driverB: b.season_journey },
   };
 }

@@ -411,6 +411,30 @@
   }
 }
 
+.replay-track-map-svg {
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  width: 100%;
+  height: 100%;
+  overflow: visible;
+  pointer-events: none;
+}
+
+.replay-map-layer-hidden {
+  display: none;
+}
+
+.replay-track-canvas {
+  z-index: 2;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .replay-track-map-svg {
+    transition: none;
+  }
+}
+
 .leaderboard-row {
     display: grid !important;
     grid-template-columns:
@@ -490,7 +514,7 @@
     flex-shrink: 0;
 }
 
-/* RET / DNS must never consume the gap column */
+
 .lb-badge.ret,
 .lb-badge.dns,
 .lb-status.ret,
@@ -500,7 +524,7 @@
     margin: 0 !important;
 }
 
-/* Retired / DNS rows */
+
 .leaderboard-row.retired,
 .leaderboard-row.dns {
     grid-template-columns:
@@ -512,7 +536,7 @@
         44px !important;
 }
 
-/* Prevent long delta values from pushing other columns */
+
 .leaderboard-row .delta,
 .leaderboard-row .time-gap,
 .leaderboard-row .relative-gap {
@@ -524,7 +548,7 @@
     text-align: right;
 }
 
-/* Mobile */
+
 @media (max-width: 700px) {
     .leaderboard-row {
         grid-template-columns:

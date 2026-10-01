@@ -1,5 +1,7 @@
 import { refreshAccessToken, shouldSkipRefresh } from "../features/auth/tokenRefresh";
-const API_BASE_URL = "";
+import { API_BASE_URL } from "./config";
+
+export { API_BASE_URL } from "./config";
 
 
 export class ApiError extends Error {
@@ -69,7 +71,7 @@ export async function apiRequest<T>(
   if (
     response.status === 401 &&
     !_isRetry &&
-    !shouldSkipRefresh(url)
+    !shouldSkipRefresh(endpoint)
   ) {
     const refreshed = await refreshAccessToken();
     if (refreshed) {

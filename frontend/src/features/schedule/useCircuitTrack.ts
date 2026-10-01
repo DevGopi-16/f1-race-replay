@@ -65,7 +65,7 @@ export function useCircuitTrack(url: string | null): {
         }
       })
       .catch((err) => {
-        // eslint-disable-next-line no-console
+
         console.warn(`[circuit-track] failed to load "${url}":`, err);
         cache.set(url, null);
         if (!cancelled) {

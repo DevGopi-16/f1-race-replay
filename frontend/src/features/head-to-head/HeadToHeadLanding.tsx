@@ -16,7 +16,7 @@ interface LandingCard {
   body: string;
 }
 
-// Search terms only: each one is resolved through the real driver search on click.
+
 const PRESETS: { label: string; a: string; b: string }[] = [
   { label: "Hamilton vs Verstappen", a: "Hamilton", b: "Verstappen" },
   { label: "Senna vs Prost", a: "Senna", b: "Prost" },

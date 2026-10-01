@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import type { ReplaySessionType } from "../replay.types";
+import { API_BASE_URL } from "../../../api/config";
 
 interface ReplayEvent {
   name: string;
@@ -66,7 +67,7 @@ export default function ReplaySelector({
 
       try {
         const response = await fetch(
-          `/api/replay/events?year=${year}`,
+          `${API_BASE_URL}/api/replay/events?year=${year}`,
         );
 
         if (!response.ok) {

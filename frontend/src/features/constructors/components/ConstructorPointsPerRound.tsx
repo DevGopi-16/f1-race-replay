@@ -126,7 +126,7 @@ function ConstructorPointsPerRound({
           3,
         );
 
-      // Background
+
       context.fillStyle =
         "rgba(255, 255, 255, 0.012)";
 
@@ -137,7 +137,7 @@ function ConstructorPointsPerRound({
         height,
       );
 
-      // Horizontal grid
+
       const gridLines = 5;
 
       context.font =

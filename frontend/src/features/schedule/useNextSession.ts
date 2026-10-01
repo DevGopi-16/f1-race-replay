@@ -43,7 +43,7 @@ export function useNextSession() {
           return;
         }
 
-        // empty object means no more sessions this year — try next year
+
         const next = await getNextSession(year + 1);
         if (!cancelled && "start_utc" in next) {
           setSession(next as NextSessionData);

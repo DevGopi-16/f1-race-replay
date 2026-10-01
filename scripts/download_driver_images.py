@@ -1,24 +1,3 @@
-"""
-Download a face portrait for each F1 driver into
-frontend/public/drivers/<driverId>.jpg and write manifest.json.
-
-Source: images linked from the driver's Wikipedia article, but only when the
-original file is hosted on Wikimedia Commons and its license allows reuse and
-adaptation (CC0, CC BY, CC BY-SA, or public domain). License and attribution
-metadata are saved in manifest.json. Non-free and unknown-license files are
-skipped. A clear face is detected and cropped to a square around it. Drivers
-without a usable photo are listed in missing.txt.
-
-Setup (once, inside your venv):
-    pip install opencv-python-headless
-
-Run from the project root:
-    python3 scripts/download_driver_images.py --only vettel hamilton   # test
-    python3 scripts/download_driver_images.py                          # everyone
-
-Re-running skips drivers that already have an image.
-"""
-
 import argparse
 import html
 import json
@@ -82,7 +61,7 @@ def wiki_image_url(wiki_page_url: str) -> str | None:
 def get_with_retry(url: str, params: dict | None = None, tries: int = 4) -> requests.Response:
     for attempt in range(tries):
         r = requests.get(url, params=params, headers=HEADERS, timeout=30)
-        if r.status_code == 429:  # rate limited: wait and retry
+        if r.status_code == 429:
             if attempt == tries - 1:
                 r.raise_for_status()
             retry_after = r.headers.get("Retry-After")
@@ -102,7 +81,6 @@ def get_with_retry(url: str, params: dict | None = None, tries: int = 4) -> requ
 SKIP_WORDS = ("logo", "flag", "signature", "icon", "fia_", "platinum", "badge")
 
 def wiki_image_urls(wiki_page_url: str, limit: int = 8) -> list[str]:
-    """Lead image first, then the other photos used on the article."""
     title = unquote(urlparse(wiki_page_url).path.rsplit("/", 1)[-1]).replace("_", " ")
     urls: list[str] = []
     lead = wiki_image_url(wiki_page_url)
@@ -155,7 +133,6 @@ def _reusable_license(name: str) -> bool:
 
 
 def commons_image_metadata(url: str) -> dict[str, str] | None:
-    """Return attribution data only when Commons confirms a reusable license."""
     filename = _filename_from_image_url(url)
     if not filename:
         return None
@@ -190,7 +167,6 @@ def commons_image_metadata(url: str) -> dict[str, str] | None:
 
 
 def crop_face(content: bytes, size: int = 400) -> bytes | None:
-    """Return a square JPEG centred on the main face, or None if no clear face."""
     import cv2
     import numpy as np
 
@@ -212,18 +188,12 @@ def crop_face(content: bytes, size: int = 400) -> bytes | None:
 
     x, y, w, h = max(faces, key=lambda f: f[2] * f[3])
 
-    # Face too small relative to the photo = crowd / action shot
     if w < width * 0.08:
         return None
 
-    # A real face is roughly square; a very stretched box is usually a
-    # false positive (e.g. locking onto a mustache or sunglasses instead
-    # of the whole face), which produces an extreme, wrongly-centred crop.
     if not (0.75 <= w / h <= 1.35):
         return None
 
-    # Reject if no eyes are found inside the box - a strong sign the
-    # detector matched the wrong region.
     eye_cascade = cv2.CascadeClassifier(
         cv2.data.haarcascades + "haarcascade_eye.xml"
     )
@@ -232,9 +202,9 @@ def crop_face(content: bytes, size: int = 400) -> bytes | None:
     if len(eyes) == 0:
         return None
 
-    cx, cy = x + w / 2, y + h / 2 + h * 0.15  # slightly lower to include shoulders
+    cx, cy = x + w / 2, y + h / 2 + h * 0.15
     half = int(min(w * 1.1, cx, cy, width - cx, height - cy))
-    if half < w * 0.7:  # face touches the edge of the photo
+    if half < w * 0.7:
         return None
 
     crop = img[int(cy) - half:int(cy) + half, int(cx) - half:int(cx) + half]
@@ -257,7 +227,7 @@ def main() -> None:
 
     if not args.no_face_filter:
         try:
-            import cv2  # noqa: F401
+            import cv2
         except ImportError:
             raise SystemExit(
                 "OpenCV is missing. Run: pip install opencv-python-headless"
@@ -307,7 +277,7 @@ def main() -> None:
                     continue
 
                 raw = get_with_retry(url).content
-                time.sleep(1.5)  # stay under Wikimedia's rate limit
+                time.sleep(1.5)
                 if args.no_face_filter:
                     content = raw
                     filename = f"{driver_id}{Path(urlparse(url).path).suffix.lower() or '.jpg'}"
@@ -347,7 +317,7 @@ def main() -> None:
         except Exception as e:
             print(f"  failed: {name}: {e}")
 
-        time.sleep(0.5)  # be polite
+        time.sleep(0.5)
 
         if args.limit and downloaded >= args.limit:
             break

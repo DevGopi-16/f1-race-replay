@@ -55,11 +55,11 @@
   }
 }
 
-/* ============================================================
-   PAGE / FOOTER LAYOUT FIX
-   Content should size to its actual page content.
-   Footer follows naturally without a forced viewport-sized gap.
-   ============================================================ */
+
+
+
+
+
 
 .app-shell {
   display: flex;

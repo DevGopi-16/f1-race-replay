@@ -19,8 +19,8 @@ export default function ForgotPasswordPage() {
 
     try {
       await forgotPassword(email.trim());
-      // Backend always returns the same message whether or not the
-      // account exists, so this doesn't reveal anything either way.
+
+
       setSent(true);
     } catch (err) {
       setError(

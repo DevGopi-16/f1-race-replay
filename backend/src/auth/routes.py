@@ -51,13 +51,13 @@ DISCORD_REDIRECT_URI = os.getenv(
 
 FRONTEND_DISCORD_CALLBACK = os.getenv(
     "FRONTEND_DISCORD_CALLBACK",
-    "http://localhost:5173/auth/discord/callback",
+    f"{os.getenv('FRONTEND_BASE_URL', 'http://localhost:5173').rstrip('/')}/auth/discord/callback",
 )
 
 # Used when Discord is being connected from the Profile page.
 FRONTEND_PROFILE_URL = os.getenv(
     "FRONTEND_PROFILE_URL",
-    "http://localhost:5173/profile",
+    f"{os.getenv('FRONTEND_BASE_URL', 'http://localhost:5173').rstrip('/')}/profile",
 )
 
 
@@ -80,7 +80,7 @@ X_REDIRECT_URI = os.getenv(
 
 FRONTEND_X_CALLBACK = os.getenv(
     "FRONTEND_X_CALLBACK",
-    "http://localhost:5173/auth/x/callback",
+    f"{os.getenv('FRONTEND_BASE_URL', 'http://localhost:5173').rstrip('/')}/auth/x/callback",
 )
 
 

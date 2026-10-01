@@ -331,7 +331,7 @@ export default function TermsAndConditions() {
     };
 
     update();
-    // capture=true so it also works if AppShell scrolls an inner container
+
     window.addEventListener("scroll", update, true);
     window.addEventListener("resize", update);
     return () => {

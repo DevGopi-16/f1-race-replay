@@ -44,7 +44,7 @@ const TEAM_BANNER_FILES: Record<string, string> = {
 function getTeamBannerUrl(team: ConstructorTeam) {
   const name = team.name.trim().toLowerCase();
 
-  // exact match first, then partial match (e.g. "haas f1 team" contains "haas")
+
   const key =
     TEAM_BANNER_FILES[name] !== undefined
       ? name
