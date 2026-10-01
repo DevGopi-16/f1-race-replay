@@ -1,11 +1,11 @@
 import type { AnalyticsResponse } from "./analytics.types";
+import { API_BASE_URL } from "../../api/config";
 
-const API_ORIGIN = "http://127.0.0.1:8000";
 export const YEAR = 2026;
 
 export async function fetchAnalytics(): Promise<AnalyticsResponse> {
   const response = await fetch(
-    `${API_ORIGIN}/api/analytics?year=${YEAR}`,
+    `${API_BASE_URL}/api/analytics?year=${YEAR}`,
   );
 
   if (!response.ok) {

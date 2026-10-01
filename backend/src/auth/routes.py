@@ -19,6 +19,8 @@ from src.auth.refresh_tokens.routes import set_refresh_cookie
 from .database import get_db
 from src.auth.rate_limit.dependency import check_rate_limit, record_failed_attempt, clear_rate_limit, get_client_ip
 from src.auth.security_log.logger import log_event
+from fastapi import BackgroundTasks
+from src.auth.email_verification.service import send_verification_email_task
 from src.auth.refresh_tokens.service import revoke_one
 from src.auth.refresh_tokens.routes import REFRESH_COOKIE_NAME, clear_refresh_cookie
 from .dependencies import get_current_user
@@ -44,18 +46,18 @@ DISCORD_CLIENT_SECRET = os.getenv(
 
 DISCORD_REDIRECT_URI = os.getenv(
     "DISCORD_REDIRECT_URI",
-    "http://127.0.0.1:8000/auth/discord/callback",
+    "http://localhost:8000/auth/discord/callback",
 )
 
 FRONTEND_DISCORD_CALLBACK = os.getenv(
     "FRONTEND_DISCORD_CALLBACK",
-    "http://localhost:5173/auth/discord/callback",
+    f"{os.getenv('FRONTEND_BASE_URL', 'http://localhost:5173').rstrip('/')}/auth/discord/callback",
 )
 
 # Used when Discord is being connected from the Profile page.
 FRONTEND_PROFILE_URL = os.getenv(
     "FRONTEND_PROFILE_URL",
-    "http://localhost:5173/profile",
+    f"{os.getenv('FRONTEND_BASE_URL', 'http://localhost:5173').rstrip('/')}/profile",
 )
 
 
@@ -73,12 +75,12 @@ X_CLIENT_SECRET = os.getenv(
 
 X_REDIRECT_URI = os.getenv(
     "X_REDIRECT_URI",
-    "http://127.0.0.1:8000/auth/x/callback",
+    "http://localhost:8000/auth/x/callback",
 )
 
 FRONTEND_X_CALLBACK = os.getenv(
     "FRONTEND_X_CALLBACK",
-    "http://localhost:5173/auth/x/callback",
+    f"{os.getenv('FRONTEND_BASE_URL', 'http://localhost:5173').rstrip('/')}/auth/x/callback",
 )
 
 
@@ -111,6 +113,7 @@ def signup(
     payload: schemas.UserCreate,
     request: Request,
     response: Response,
+    background_tasks: BackgroundTasks,
     db: Session = Depends(get_db),
 ):
     client_ip = get_client_ip(request)
@@ -152,12 +155,13 @@ def signup(
     db.refresh(user)
 
     log_event("signup", user_id=user.id, email=user.email)
+    background_tasks.add_task(send_verification_email_task, user.id, user.email)
 
+    refresh_token = issue_refresh_token(db, user.id)
     token = security.create_access_token(
-        {"sub": str(user.id)}
+        {"sub": str(user.id), "sid": refresh_token.id}
     )
     security.set_auth_cookie(response, token)
-    refresh_token = issue_refresh_token(db, user.id)
     set_refresh_cookie(response, refresh_token.token)
 
     return schemas.Token(
@@ -208,11 +212,11 @@ def login(
 
     clear_rate_limit("login", payload.email)
 
+    refresh_token = issue_refresh_token(db, user.id)
     token = security.create_access_token(
-        {"sub": str(user.id)}
+        {"sub": str(user.id), "sid": refresh_token.id}
     )
     security.set_auth_cookie(response, token)
-    refresh_token = issue_refresh_token(db, user.id)
     set_refresh_cookie(response, refresh_token.token)
 
     return schemas.Token(
@@ -264,6 +268,7 @@ def google_login(
         )
 
     picture = decoded_token.get("picture")
+    google_email_verified = bool(decoded_token.get("email_verified"))
 
     user = (
         db.query(models.User)
@@ -274,13 +279,34 @@ def google_login(
     )
 
     if user is None and email:
-        user = (
+        existing = (
             db.query(models.User)
             .filter(
                 models.User.email == email
             )
             .first()
         )
+
+        if existing is not None:
+            # Only merge into an existing email account if both sides are
+            # verified: Google vouches for the address, and the existing
+            # account's address was proven by its owner. Otherwise someone
+            # could pre-register a victim's email and inherit their login.
+            if not (google_email_verified and existing.email_verified):
+                log_event(
+                    "google_link_refused",
+                    email=email,
+                    reason="email_not_verified",
+                )
+                raise HTTPException(
+                    status_code=409,
+                    detail=(
+                        "An account with this email already exists. "
+                        "Log in with your password and verify your email, "
+                        "or use a different sign-in method."
+                    ),
+                )
+            user = existing
 
     if user is None:
         user = models.User(
@@ -292,6 +318,7 @@ def google_login(
             hashed_password=None,
             google_id=google_id,
             picture_url=picture,
+            email_verified=google_email_verified,
         )
 
         db.add(user)
@@ -302,14 +329,17 @@ def google_login(
         if picture:
             user.picture_url = picture
 
+        if google_email_verified and email and user.email == email:
+            user.email_verified = True
+
     db.commit()
     db.refresh(user)
 
+    refresh_token = issue_refresh_token(db, user.id)
     token = security.create_access_token(
-        {"sub": str(user.id)}
+        {"sub": str(user.id), "sid": refresh_token.id}
     )
     security.set_auth_cookie(response, token)
-    refresh_token = issue_refresh_token(db, user.id)
     set_refresh_cookie(response, refresh_token.token)
 
     return schemas.Token(
@@ -746,8 +776,9 @@ def x_callback(
     db.commit()
     db.refresh(user)
 
+    refresh_token = issue_refresh_token(db, user.id)
     access_token = security.create_access_token(
-        {"sub": str(user.id)}
+        {"sub": str(user.id), "sid": refresh_token.id}
     )
 
     redirect_response = RedirectResponse(
@@ -758,7 +789,6 @@ def x_callback(
         redirect_response,
         access_token,
     )
-    refresh_token = issue_refresh_token(db, user.id)
     set_refresh_cookie(redirect_response, refresh_token.token)
     return redirect_response
 
@@ -1262,6 +1292,7 @@ def discord_callback(
         )
 
     email = discord_user.get("email")
+    discord_email_verified = bool(discord_user.get("verified"))
 
     username = (
         discord_user.get("global_name")
@@ -1291,13 +1322,30 @@ def discord_callback(
     )
 
     if user is None and email:
-        user = (
+        existing = (
             db.query(models.User)
             .filter(
                 models.User.email == email
             )
             .first()
         )
+
+        if existing is not None:
+            # Same rule as Google: only merge when both sides are verified.
+            if not (discord_email_verified and existing.email_verified):
+                log_event(
+                    "discord_link_refused",
+                    email=email,
+                    reason="email_not_verified",
+                )
+                return RedirectResponse(
+                    url=(
+                        f"{FRONTEND_DISCORD_CALLBACK}"
+                        "?error=email_already_registered"
+                    ),
+                    status_code=302,
+                )
+            user = existing
 
     if user is None:
         user = models.User(
@@ -1309,6 +1357,7 @@ def discord_callback(
             hashed_password=None,
             discord_id=discord_id,
             picture_url=picture_url,
+            email_verified=bool(email) and discord_email_verified,
         )
 
         db.add(user)
@@ -1321,12 +1370,16 @@ def discord_callback(
 
         if email and not user.email:
             user.email = email
+            user.email_verified = discord_email_verified
+        elif email and user.email == email and discord_email_verified:
+            user.email_verified = True
 
     db.commit()
     db.refresh(user)
 
+    refresh_token = issue_refresh_token(db, user.id)
     access_token = security.create_access_token(
-        {"sub": str(user.id)}
+        {"sub": str(user.id), "sid": refresh_token.id}
     )
 
     redirect_response = RedirectResponse(
@@ -1337,7 +1390,6 @@ def discord_callback(
         redirect_response,
         access_token,
     )
-    refresh_token = issue_refresh_token(db, user.id)
     set_refresh_cookie(redirect_response, refresh_token.token)
     return redirect_response
 

@@ -256,6 +256,40 @@
   transform: translateY(0);
 }
 
+
+
+
+
+:root[data-theme="light"] .floating-nav-more-menu {
+  background: linear-gradient(
+    155deg,
+    rgba(255, 255, 255, 0.98),
+    rgba(246, 247, 249, 0.98)
+  );
+
+  border-color: rgba(15, 23, 42, 0.12);
+
+  box-shadow:
+    0 24px 70px rgba(15, 23, 42, 0.18);
+}
+
+:root[data-theme="light"] .floating-nav-more-menu .floating-nav-link {
+  color: #1a1a1a;
+}
+
+:root[data-theme="light"] .floating-nav-more-menu .floating-nav-link svg {
+  color: currentColor;
+}
+
+:root[data-theme="light"] .floating-nav-more-menu .floating-nav-link:hover {
+  color: #e10600;
+  background: rgba(225, 6, 0, 0.06);
+}
+
+:root[data-theme="light"] .floating-nav-more-menu .floating-nav-link.active {
+  color: #e10600;
+}
+
 .floating-nav-more-menu .floating-nav-link {
   justify-content: flex-start;
   width: 100%;
@@ -1057,3 +1091,94 @@
   border-color: var(--color-white-15);
   background: var(--color-white-08);
 }
+
+
+@media (max-width: 960px) {
+  .floating-nav-links {
+    display: none;
+  }
+
+  .floating-nav-actions {
+    margin-left: auto;
+  }
+}
+
+
+.floating-nav {
+  max-width: 100%;
+}
+
+.floating-nav-actions,
+.floating-nav-menu-button {
+  flex-shrink: 0;
+}
+
+
+.mobile-nav-overlay {
+  z-index: 10100;
+}
+
+
+.mobile-nav-panel {
+  height: 100%;
+  max-height: 100dvh;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  -webkit-overflow-scrolling: touch;
+  padding-bottom: calc(var(--space-6) + env(safe-area-inset-bottom, 0px));
+}
+
+
+.mobile-nav-header {
+  position: sticky;
+  top: 0;
+  z-index: 2;
+  background: var(--color-bg);
+}
+
+
+.mobile-nav-content {
+  flex: 0 0 auto;
+  overflow: visible;
+}
+
+
+.mobile-nav-user .user-menu-name {
+  display: block;
+  flex: 1;
+  min-width: 0;
+  max-width: none;
+  margin-left: 12px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  text-align: left;
+  color: var(--color-white-90, #fff);
+  opacity: 1;
+}
+
+
+.mobile-nav-panel {
+  width: min(82vw, 340px);
+}
+
+.mobile-nav-panel .mobile-nav-content {
+  gap: 2px;
+}
+
+.mobile-nav-panel .mobile-nav-content .floating-nav-link {
+  min-height: 46px;
+  padding: 0 16px;
+  margin: 0;
+  font-size: 0.8rem;
+}
+
+.mobile-nav-panel .mobile-nav-divider {
+  margin: 8px 0;
+}
+
+.mobile-nav-panel .mobile-nav-header {
+  padding-bottom: 12px;
+  margin-bottom: 8px;
+}
+

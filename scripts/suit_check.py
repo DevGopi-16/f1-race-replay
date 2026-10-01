@@ -1,17 +1,3 @@
-"""
-Zero-shot check: does this photo show a person in an F1 race suit / team kit?
-
-Uses OpenAI's CLIP model locally (free, no API key). First run downloads the
-model (~600 MB) and caches it.
-
-Setup (once, inside your venv):
-    pip install torch transformers pillow
-
-Usage:
-    from suit_check import suit_score
-    p = suit_score("frontend/public/drivers/hamilton.png")   # 0.0 - 1.0
-"""
-
 import io
 from functools import lru_cache
 from pathlib import Path
@@ -50,10 +36,6 @@ def _load():
 
 
 def suit_score(image) -> float:
-    """Probability (0-1) that the image shows a person in a race suit.
-
-    `image` can be a path, raw bytes, or a PIL image.
-    """
     torch, model, processor = _load()
 
     if isinstance(image, (bytes, bytearray)):

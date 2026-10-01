@@ -1,4 +1,4 @@
-/* PAGE CONTAINER */
+
 @keyframes drv-drift {
   0%   { background-position: 0% 0%, 0% 0%; }
   100% { background-position: 8% 6%, 0% 0%; }
@@ -30,7 +30,7 @@
 }
 
 
-/* HEADER */
+
 
 .drivers-header {
   display: flex;
@@ -110,7 +110,7 @@
 }
 
 
-/* FEATURED DRIVER HERO */
+
 
 @keyframes drv-fade-up {
   from { opacity: 0; transform: translateY(14px); }
@@ -162,7 +162,7 @@
   animation: drv-banner-wipe .85s cubic-bezier(.65,0,.35,1) both;
 }
 
-/* bright leading edge that "cuts" across as the wipe uncovers the banner */
+
 .featured-driver-bg::before {
   content: "";
   position: absolute;
@@ -212,7 +212,7 @@
 }
 
 
-/* --- Featured driver position badge --- */
+
 
 .featured-driver-position {
   display: inline-flex;
@@ -235,7 +235,7 @@
 }
 
 
-/* --- Featured driver name --- */
+
 
 .featured-driver-name span {
   display: block;
@@ -258,7 +258,7 @@
   text-shadow: 0 5px 25px rgba(0, 0, 0, 0.45);
 }
 
-/* --- Featured driver meta (team / country) --- */
+
 
 .featured-driver-meta {
   display: flex;
@@ -329,7 +329,7 @@
 }
 
 
-/* --- Driver code watermark --- */
+
 
 .featured-driver-code {
   margin-top: 24px;
@@ -341,7 +341,7 @@
   letter-spacing: -0.08em;
 }
 
-/* --- Featured driver visual (photo) --- */
+
 
 .featured-driver-visual {
   position: absolute;
@@ -381,7 +381,7 @@
   position: relative;
   z-index: 3;
 
-  /* Scale height to push his legs below the container crop boundary */
+
   width: auto;
   height: 195%;
 
@@ -404,7 +404,7 @@
 }
 
 
-/* --- Featured driver stats strip --- */
+
 
 .featured-driver-stats {
   position: absolute;
@@ -454,7 +454,7 @@
   font-weight: 900;
 }
 
-/* SECTIONS */
+
 
 .drivers-section {
   width: 100%;
@@ -490,8 +490,8 @@
   letter-spacing: -0.045em;
 }
 
-/* Puts a control (e.g. the "Sort by" dropdown) on the same horizontal
-   line as a section heading. */
+
+
 .drivers-section-heading-row {
   display: flex;
   align-items: flex-end;
@@ -506,7 +506,7 @@
 }
 
 
-/* TOP DRIVERS */
+
 
 @keyframes drv-pulse-glow {
   0%, 100% {
@@ -531,8 +531,8 @@
   width: 100%;
 }
 
-/* Kept for reuse if a prev/next control is reintroduced later — unused
-   now that Top Drivers no longer has arrow buttons. */
+
+
 .drivers-arrow {
   width: 38px;
   height: 165px;
@@ -565,7 +565,7 @@
 .drivers-arrow:active { transform: translateY(0); }
 
 
-/* --- Top driver card --- */
+
 
 .top-driver-card {
   position: relative;
@@ -604,7 +604,7 @@
 .top-drivers .top-driver-card:nth-child(4) { animation-delay: .19s; }
 .top-drivers .top-driver-card:nth-child(5) { animation-delay: .24s; }
 
-/* shine sweep on hover */
+
 .top-driver-card::after {
   content: "";
   position: absolute;
@@ -622,7 +622,7 @@
   background-position: -50% 0%;
 }
 
-/* Hover: full team-color glow (matches the Piastri highlight look) */
+
 .top-driver-card:hover {
   transform: translateY(-4px);
   border-color: var(--team-color, rgba(255, 255, 255, 0.25));
@@ -639,16 +639,16 @@
     0 16px 34px rgba(0, 0, 0, 0.45);
 }
 
-/* Optional persistent highlight — apply via JS to keep a card glowing
-   without needing hover (e.g. the featured/selected driver). */
+
+
 .top-driver-card-selected {
   border-color: var(--team-color, #fff);
   animation: drv-pulse-glow 2.4s ease-in-out infinite, drv-fade-up .5s ease both;
 }
 
 
-/* --- Top driver image: cropped to head / shoulders / upper body / hands,
-   legs and feet always hidden regardless of the source photo's framing --- */
+
+
 
 .top-driver-image-wrap {
   position: relative;
@@ -679,9 +679,9 @@
   position: relative;
   z-index: 2;
 
-  /* object-fit: cover (not contain) + a fixed zoom + top anchor is what
-     guarantees every photo crops at the same point, regardless of
-     whether the source image is a tight bust shot or a full-body shot. */
+
+
+
   width: 100%;
   height: 170%;
   max-width: none;
@@ -702,7 +702,7 @@
 }
 
 
-/* --- Top driver info block --- */
+
 
 .top-driver-info {
   min-width: 0;
@@ -764,7 +764,7 @@
 }
 
 
-/* --- Top driver team logo --- */
+
 
 .top-driver-team-logo {
   position: absolute;
@@ -789,7 +789,7 @@
 }
 
 
-/* --- Top driver card arrow --- */
+
 
 .top-driver-arrow {
   position: absolute;
@@ -807,7 +807,7 @@
 }
 
 
-/* ALL DRIVERS */
+
 
 .drivers-table {
   display: flex;
@@ -855,7 +855,7 @@
 .driver-row:nth-child(6) { animation-delay: .17s; }
 .driver-row:nth-child(n+7) { animation-delay: .20s; }
 
-/* shine sweep across the row on hover */
+
 .driver-row::after {
   content: "";
   position: absolute;
@@ -873,7 +873,7 @@
   background-position: -50% 0%;
 }
 
-/* Hover: full team-color glow (matches the Piastri highlight look) */
+
 .driver-row:hover {
   border-color: var(--team-color, rgba(255, 255, 255, 0.35));
   background:
@@ -889,7 +889,7 @@
     0 10px 26px rgba(0, 0, 0, 0.35);
 }
 
-/* Optional persistent highlight — apply via JS (e.g. the featured/selected driver) */
+
 .driver-row-selected {
   border-color: var(--team-color, #fff);
   animation: drv-pulse-glow 2.4s ease-in-out infinite, drv-fade-up .45s ease both;
@@ -909,8 +909,8 @@
   gap: 14px;
 }
 
-/* Same head-to-hands cropping treatment as the Top Drivers thumbnails,
-   so All Drivers rows are consistent too. */
+
+
 .driver-row-image {
   position: relative;
   width: 68px;
@@ -1037,7 +1037,7 @@
 }
 
 
-/* --- Sort control (same row as the All Drivers heading) --- */
+
 
 .drivers-sort {
   display: flex;
@@ -1089,7 +1089,7 @@
 }
 
 
-/* EMPTY STATE */
+
 
 .drivers-empty {
   padding: 100px 20px;
@@ -1098,7 +1098,7 @@
 }
 
 
-/* REUSABLE ANIMATION UTILITIES (optional — hook up via JS as needed) */
+
 
 @keyframes drv-view-enter {
   from { opacity: 0; transform: translateY(14px) scale(0.985); }
@@ -1139,7 +1139,7 @@
 .drv-skeleton-hero { height: 320px; border-radius: 24px; }
 
 
-/* RESPONSIVE — 1100px */
+
 
 @media (max-width: 1100px) {
 
@@ -1205,7 +1205,7 @@
 }
 
 
-/* RESPONSIVE — 800px */
+
 
 @media (max-width: 800px) {
 
@@ -1289,7 +1289,7 @@
 }
 
 
-/* RESPONSIVE — 600px */
+
 
 @media (max-width: 600px) {
 
@@ -1394,7 +1394,7 @@
 }
 
 
-/*  RESPONSIVE — 430px */
+
 
 @media (max-width: 430px) {
 
@@ -1472,7 +1472,7 @@
 }
 
 
-/* REDUCED MOTION */
+
 
 :root[data-theme="light"] .drivers-page {
   background:
@@ -1657,5 +1657,238 @@
   .driver-row-points {
     transition: none !important;
     transform: none !important;
+  }
+}
+
+for brightness logo
+
+.sd-team-cell img.tl-logo[src*="/rb."],
+.sd-team-cell img.tl-logo[src*="cadillac"],
+.sd-team-cell img.tl-logo[src*="aston-martin"] {
+  filter: brightness(0) invert(1) !important;
+}
+
+@media (max-width: 768px) {
+  .drivers-page {
+    max-width: 100%;
+    padding: 24px 16px 64px;
+  }
+
+  .drivers-header-title h1 {
+    font-size: clamp(2.5rem, 10vw, 4rem);
+  }
+
+  .drivers-search,
+  .drivers-search input {
+    max-width: 100%;
+    min-width: 0;
+  }
+
+  .drivers-search input {
+    font-size: 16px;
+  }
+
+  .drivers-table {
+    max-width: 100%;
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+  }
+
+  .driver-row {
+    min-width: 520px;
+  }
+
+  .drivers-page button,
+  .drivers-page select {
+    min-height: 44px;
+  }
+
+  .drivers-page img,
+  .drivers-page svg {
+    max-width: 100%;
+  }
+}
+
+@media (max-width: 480px) {
+  .drivers-page {
+    padding: 20px 12px 56px;
+  }
+
+  .drivers-header-controls {
+    align-items: stretch;
+    flex-direction: column;
+  }
+
+  .drivers-search,
+  .drivers-year {
+    width: 100%;
+  }
+
+  .drivers-table {
+    margin-inline: -12px;
+    padding-inline: 12px;
+  }
+
+  .driver-row {
+    min-width: 500px;
+  }
+}
+
+
+@media (max-width: 900px) {
+  .drivers-page {
+    padding-top: calc(var(--nav-height-mobile, 64px) + 40px);
+  }
+
+  .featured-driver {
+    min-height: 540px;
+  }
+
+
+  .featured-driver .featured-driver-copy {
+    max-width: 60%;
+  }
+
+  .featured-driver .featured-driver-name h2 {
+    font-size: clamp(26px, 6vw, 42px);
+    line-height: 0.95;
+    white-space: normal;
+    overflow-wrap: break-word;
+  }
+
+  .featured-driver .featured-driver-name span {
+    font-size: clamp(20px, 4.5vw, 30px);
+  }
+
+  .featured-driver .featured-driver-code {
+    font-size: clamp(36px, 9vw, 64px);
+  }
+}
+
+@media (max-width: 480px) {
+  .featured-driver {
+    min-height: 500px;
+  }
+
+  .featured-driver .featured-driver-copy {
+    max-width: 58%;
+  }
+
+  .featured-driver .featured-driver-meta {
+    flex-wrap: wrap;
+    gap: 6px 10px;
+  }
+}
+
+
+@media (max-width: 900px) {
+  .featured-driver .featured-driver-bg {
+    background-size: cover;
+    background-position: right center;
+  }
+}
+
+
+@media (max-width: 640px) {
+  .featured-driver .featured-driver-content {
+    padding-bottom: 150px;
+  }
+
+  .featured-driver .featured-driver-visual {
+    bottom: 150px;
+  }
+
+  .featured-driver .featured-driver-bg {
+    inset: 0 0 150px 0;
+  }
+}
+
+
+@media (max-width: 900px) {
+  .featured-driver {
+    min-height: 400px;
+  }
+
+  .featured-driver .featured-driver-content {
+    min-height: 400px;
+    padding: 36px 5% 84px;
+  }
+
+
+  .featured-driver .featured-driver-stats {
+    min-height: 76px;
+  }
+
+  .featured-driver .featured-driver-bg {
+    inset: 0 0 76px 0;
+  }
+
+  .featured-driver .featured-driver-visual {
+    bottom: 76px;
+  }
+
+  .featured-driver .featured-driver-position {
+    margin-bottom: 12px;
+  }
+
+  .featured-driver .featured-driver-code {
+    margin-top: 8px;
+    font-size: clamp(30px, 7vw, 52px);
+  }
+
+  .featured-driver .featured-stat {
+    gap: 4px;
+  }
+}
+
+
+@media (max-width: 640px) {
+  .featured-driver {
+    min-height: 0;
+  }
+
+  .featured-driver .featured-driver-content {
+    min-height: 0;
+    padding-top: 28px;
+  }
+}
+
+
+@media (max-width: 900px) {
+  .featured-driver .featured-driver-visual {
+    top: 14px;
+  }
+
+  .featured-driver .featured-driver-visual .featured-driver-image {
+    height: 190%;
+    transform: none;
+    object-position: center top;
+  }
+}
+
+
+@media (max-width: 640px) {
+  .featured-driver .featured-driver-visual .featured-driver-image {
+    width: 115%;
+    height: auto;
+    max-width: none;
+  }
+}
+
+
+@media (max-width: 900px) {
+  .featured-driver .featured-driver-visual {
+    -webkit-mask-image: linear-gradient(to bottom, #000 0%, #000 72%, transparent 100%);
+    mask-image: linear-gradient(to bottom, #000 0%, #000 72%, transparent 100%);
+  }
+
+
+  .featured-driver {
+    min-height: 370px;
+  }
+
+  .featured-driver .featured-driver-content {
+    min-height: 370px;
+    padding-top: 30px;
   }
 }

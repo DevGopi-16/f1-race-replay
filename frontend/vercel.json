@@ -1,0 +1,28 @@
+{
+  "rewrites": [
+    {
+      "source": "/auth/discord/callback",
+      "destination": "/index.html"
+    },
+    {
+      "source": "/auth/x/callback",
+      "destination": "/index.html"
+    },
+    {
+      "source": "/api/:path*",
+      "destination": "https://REPLACE-ME.up.railway.app/api/:path*"
+    },
+    {
+      "source": "/auth/:path*",
+      "destination": "https://REPLACE-ME.up.railway.app/auth/:path*"
+    },
+    {
+      "source": "/static/:path*",
+      "destination": "https://REPLACE-ME.up.railway.app/static/:path*"
+    },
+    {
+      "source": "/((?!api(?:/|$)|auth(?:/|$)|static(?:/|$)|assets(?:/|$)).*)",
+      "destination": "/index.html"
+    }
+  ]
+}

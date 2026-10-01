@@ -391,3 +391,30 @@
   .analytics-driver-identity strong { font-size: 11px; }
   .analytics-driver-identity span { font-size: 8px; }
 }
+
+@media (max-width: 768px) {
+  .analytics-table-wrap {
+    max-width: 100%;
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+  }
+
+  .analytics-table {
+    min-width: 680px;
+  }
+
+  .analytics-sort-select,
+  .analytics-sort-option {
+    min-height: 44px;
+  }
+}
+
+@media (max-width: 480px) {
+  .analytics-table-wrap {
+    margin-inline: -12px;
+  }
+
+  .analytics-table {
+    min-width: 640px;
+  }
+}

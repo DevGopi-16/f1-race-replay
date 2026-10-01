@@ -1,5 +1,5 @@
-/* Head-to-Head page — matches the dark glass / red-accent theme used
-   across driver-panel and constructors-panel. */
+
+
 
 .h2h-page {
   display: grid;
@@ -17,7 +17,7 @@
   }
 }
 
-/* ---- Header ---- */
+
 
 .h2h-eyebrow {
   font-size: 12px;
@@ -52,7 +52,7 @@
   margin: 0 0 16px;
 }
 
-/* ---- Preview grid ---- */
+
 
 .h2h-preview-grid {
   display: grid;
@@ -101,7 +101,7 @@
   color: #8f8f97;
 }
 
-/* ---- Sidebar ---- */
+
 
 .h2h-sidebar {
   display: flex;
@@ -160,7 +160,7 @@
   margin: 14px 0;
 }
 
-/* Search input */
+
 
 .h2h-search-wrap {
   position: relative;
@@ -228,10 +228,70 @@
   cursor: pointer;
   color: #e8e8ea;
   font-size: 13px;
+  position: relative;
+  transition: background 0.2s ease, transform 0.2s ease;
 }
 
-.h2h-dropdown-item:hover {
-  background: rgba(255, 255, 255, 0.05);
+
+.h2h-dropdown-item::before {
+  content: "";
+  position: absolute;
+  left: 0;
+  top: 20%;
+  bottom: 20%;
+  width: 3px;
+  border-radius: 3px;
+  background: var(--team-color, #e2544a);
+  transform: scaleY(0);
+  transition: transform 0.2s ease;
+}
+
+.h2h-dropdown-item:hover,
+.h2h-dropdown-item:focus-visible {
+  background: linear-gradient(
+    90deg,
+    color-mix(in srgb, var(--team-color, #e2544a) 22%, transparent),
+    transparent 70%
+  );
+  transform: translateX(2px);
+  outline: none;
+}
+
+.h2h-dropdown-item:hover::before,
+.h2h-dropdown-item:focus-visible::before {
+  transform: scaleY(1);
+}
+
+.h2h-dropdown-item:hover .h2h-dropdown-photo,
+.h2h-dropdown-item:focus-visible .h2h-dropdown-photo {
+  border-color: var(--team-color, #e2544a);
+  box-shadow: 0 0 10px color-mix(in srgb, var(--team-color, #e2544a) 60%, transparent);
+}
+
+.h2h-dropdown-item:hover .h2h-dropdown-name,
+.h2h-dropdown-item:focus-visible .h2h-dropdown-name {
+  color: #fff;
+}
+.h2h-dropdown-photo {
+  position: relative;
+  width: 34px;
+  height: 34px;
+  flex-shrink: 0;
+  border-radius: 50%;
+  overflow: hidden;
+  background: #161616;
+  border: 2px solid rgba(255, 255, 255, 0.15);
+  transition: border-color 0.2s ease, box-shadow 0.2s ease;
+}
+
+.h2h-dropdown-photo img {
+  position: absolute;
+  top: 0;
+  left: 50%;
+  height: 260%;
+  width: auto;
+  max-width: none;
+  transform: translateX(-50%);
 }
 
 .h2h-dropdown-swatch {
@@ -253,7 +313,7 @@
   margin-left: auto;
 }
 
-/* Selected driver chip */
+
 
 .h2h-selected-driver {
   width: 100%;
@@ -274,6 +334,8 @@
   height: 24px;
   border-radius: 50%;
   object-fit: cover;
+  object-position: top center;
+  object-view-box: inset(0 0 58% 0);
 }
 
 .h2h-selected-name {
@@ -303,7 +365,7 @@
   color: #e2544a;
 }
 
-/* Disclaimer */
+
 
 .h2h-disclaimer {
   background: rgba(255, 255, 255, 0.02);
@@ -324,7 +386,7 @@
   margin-bottom: 8px;
 }
 
-/* ---- Results view (placeholder) ---- */
+
 
 .h2h-results-header {
   grid-column: 1 / -1;
@@ -397,4 +459,56 @@
   color: #8a8a92;
   padding: 60px 0;
   text-align: center;
+}
+
+@media (max-width: 768px) {
+  .h2h,
+  .h2h-results,
+  .h2h-results-grid {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .h2h-results-grid {
+    gap: 14px;
+  }
+
+  .h2h-field,
+  .h2h-search-wrap,
+  .h2h-search-input {
+    max-width: 100%;
+  }
+
+  .h2h-search-input {
+    min-height: 44px;
+    font-size: 16px;
+  }
+
+  .h2h-result-section {
+    min-width: 0;
+    overflow-x: auto;
+  }
+
+  .h2h button {
+    min-height: 44px;
+  }
+
+  .h2h img,
+  .h2h svg {
+    max-width: 100%;
+  }
+}
+
+@media (max-width: 480px) {
+  .h2h-results-grid {
+    gap: 12px;
+  }
+
+  .h2h-result-section {
+    padding: 14px;
+  }
+
+  .h2h-matchup {
+    flex-wrap: wrap;
+    font-size: clamp(1rem, 5vw, 1.25rem);
+  }
 }

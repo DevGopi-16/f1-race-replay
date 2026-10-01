@@ -1,11 +1,11 @@
-/* Terms & Conditions only — everything scoped under .terms-page */
 
-/* Widen the shared shell for this page only */
+
+
 .legal-shell:has(.terms-page) {
   max-width: 1200px;
 }
 
-/* ---------- Two-column layout ---------- */
+
 .terms-layout {
   display: grid;
   grid-template-columns: 240px minmax(0, 1fr);
@@ -17,7 +17,7 @@
   max-width: 780px;
 }
 
-/* ---------- Sticky index ---------- */
+
 .terms-toc {
   position: sticky;
   top: 120px;
@@ -76,7 +76,7 @@
   color: #e10600;
 }
 
-/* ---------- Sections ---------- */
+
 .terms-page .legal-section {
   padding: 28px 0 6px;
   scroll-margin-top: 120px;
@@ -94,7 +94,7 @@
   padding-bottom: 8px;
 }
 
-/* ---------- Text ---------- */
+
 .terms-page p {
   font-size: 1rem;
   line-height: 1.75;
@@ -143,7 +143,7 @@
   text-decoration: underline;
 }
 
-/* ---------- Contact box ---------- */
+
 .terms-page .legal-contact {
   margin-top: 32px;
   padding: 22px 26px;
@@ -155,7 +155,7 @@
   font-size: 0.97rem;
 }
 
-/* ---------- Tablet / mobile: single column, hide index ---------- */
+
 @media (max-width: 960px) {
   .terms-layout {
     grid-template-columns: 1fr;
@@ -177,5 +177,30 @@
 
   .terms-page .legal-contact {
     padding: 18px 20px;
+  }
+}
+
+@media (max-width: 768px) {
+  .terms-layout {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .terms-toc {
+    display: none;
+  }
+
+  .terms-content {
+    max-width: 100%;
+  }
+
+  .terms-page p,
+  .terms-content li {
+    font-size: max(14px, 1rem);
+  }
+}
+
+@media (max-width: 480px) {
+  .terms-page .legal-contact {
+    padding: 16px;
   }
 }

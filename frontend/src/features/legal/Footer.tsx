@@ -1,10 +1,10 @@
 import React from "react";
 import "./footer.css";
 
-/**
- * Site-wide footer. Render this once in your app shell/layout
- * (AppShell.tsx) so it appears on every page, not just the homepage.
- */
+
+
+
+
 const FOOTER_LINKS = [
   { label: "About", href: "/about" },
   { label: "FAQ", href: "/faq" },
@@ -22,7 +22,7 @@ const year = new Date().getFullYear();
       <div className="site-footer__container">
         <div className="site-footer__brand-row">
           <img
-            src="/favicon.png"
+            src="/images/logo-without-bg/favicon-removebg-preview.png"
             alt="F1 Race Vision"
             className="site-footer__logo-img"
           />
@@ -42,7 +42,7 @@ const year = new Date().getFullYear();
             </a>
 
             <a
-              href="https://x.com/REPLACE_WITH_YOUR_HANDLE"
+              href="https://x.com/f1racevision"
               className="site-footer__icon"
               target="_blank"
               rel="noreferrer"

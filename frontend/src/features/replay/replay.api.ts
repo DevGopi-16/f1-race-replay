@@ -5,27 +5,27 @@ import type {
   ReplaySessionType,
 } from "./replay.types";
 
-/* =========================================================
-   TYPES
-========================================================= */
+
+
+
 
 export interface ReplayRequest {
   year: number;
 
-  /**
-   * Frontend uses camelCase.
-   *
-   * Converted to backend:
-   * grand_prix
-   */
+
+
+
+
+
+
   grandPrix: string;
 
-  /**
-   * Frontend uses camelCase.
-   *
-   * Converted to backend:
-   * session_type
-   */
+
+
+
+
+
+
   sessionType: ReplaySessionType;
 
   fps?: number;
@@ -50,15 +50,15 @@ export interface ReplayChunkResponse
   count?: number;
 }
 
-/* =========================================================
-   GET REPLAY EVENTS
-========================================================= */
 
-/**
- * Backend:
- *
- * GET /api/replay/events?year=2026
- */
+
+
+
+
+
+
+
+
 export function getReplayEvents(
   year: number,
 ) {
@@ -72,23 +72,23 @@ export function getReplayEvents(
   );
 }
 
-/* =========================================================
-   GET INITIAL REPLAY
-========================================================= */
 
-/**
- * Backend:
- *
- * GET /api/replay
- *
- * Example:
- *
- * /api/replay
- *   ?year=2026
- *   &grand_prix=Dutch%20Grand%20Prix
- *   &session_type=R
- *   &fps=8
- */
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 export function getReplay(
   params: ReplayRequest,
 ) {
@@ -115,25 +115,25 @@ export function getReplay(
   );
 }
 
-/* =========================================================
-   GET REPLAY CHUNK
-========================================================= */
 
-/**
- * Backend:
- *
- * GET /api/replay/chunk
- *
- * Example:
- *
- * /api/replay/chunk
- *   ?year=2026
- *   &grand_prix=Dutch%20Grand%20Prix
- *   &session_type=R
- *   &start=0
- *   &count=500
- *   &fps=8
- */
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 export function getReplayChunk(
   params: ReplayRequest & {
     start: number;

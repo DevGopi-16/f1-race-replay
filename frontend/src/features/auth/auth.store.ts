@@ -11,6 +11,7 @@ import {
 import { signInWithGoogleFirebase } from "./firebase.auth";
 import { signOutFirebase } from "./firebase.auth";
 import type { User as FirebaseUser } from "firebase/auth";
+import { setOnAuthExpired } from "./tokenRefresh";
 
 import type {
   AuthUser,
@@ -249,3 +250,14 @@ export const useAuthStore = create<AuthState>(
     },
   }),
 );
+
+setOnAuthExpired(() => {
+  useAuthStore.setState({
+    user: null,
+    accessToken: null,
+    authProvider: null,
+    firebaseWasSignedIn: false,
+    isLoading: false,
+    isInitialized: true,
+  });
+});

@@ -35,13 +35,22 @@ const TEAM_BANNER_FILES: Record<string, string> = {
   mclaren: "mclaren.png",
   mercedes: "mercedes.png",
   "racing bulls": "racingbulls.png",
+  "rb f1": "racingbulls.png",
+  vcarb: "racingbulls.png",
   "red bull": "redbull.png",
   williams: "Williams.png",
 };
 
 function getTeamBannerUrl(team: ConstructorTeam) {
-  const key = team.name.trim().toLowerCase();
-  const file = TEAM_BANNER_FILES[key];
+  const name = team.name.trim().toLowerCase();
+
+
+  const key =
+    TEAM_BANNER_FILES[name] !== undefined
+      ? name
+      : Object.keys(TEAM_BANNER_FILES).find((k) => name.includes(k));
+
+  const file = key ? TEAM_BANNER_FILES[key] : undefined;
   return file ? `/images/teambanner/${file}` : null;
 }
 

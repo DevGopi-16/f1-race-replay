@@ -53,7 +53,7 @@ def forgot_password(payload: ForgotPasswordRequest):
         if user:
             reset_token = create_access_token(
                 data={
-                    "sub": str(user.id),
+                    "uid": str(user.id),
                     "purpose": RESET_TOKEN_PURPOSE,
                     "jti": secrets.token_urlsafe(16),
                 },
@@ -105,13 +105,7 @@ def reset_password(payload: ResetPasswordRequest):
             detail="This reset link is invalid.",
         )
 
-    if is_used(jti):
-        raise HTTPException(
-            status_code=400,
-            detail="This reset link has already been used.",
-        )
-
-    user_id = decoded.get("sub")
+    user_id = decoded.get("uid")
     if not user_id:
         raise HTTPException(
             status_code=400,
@@ -127,6 +121,12 @@ def reset_password(payload: ResetPasswordRequest):
     db = SessionLocal()
 
     try:
+        if is_used(db, jti):
+            raise HTTPException(
+                status_code=400,
+                detail="This reset link has already been used.",
+            )
+
         user = db.query(User).filter(User.id == user_id).first()
 
         if not user:
@@ -135,10 +135,15 @@ def reset_password(payload: ResetPasswordRequest):
                 detail="This reset link is invalid.",
             )
 
+        if not mark_used(db, jti):
+            raise HTTPException(
+                status_code=400,
+                detail="This reset link has already been used.",
+            )
+
         user.hashed_password = hash_password(payload.new_password)
         db.commit()
 
-        mark_used(jti)
         revoke_all_for_user(db, user.id)
         if user.email:
             clear_rate_limit("login", user.email)

@@ -4,6 +4,7 @@ import {
 } from "react";
 
 import { useNavigate } from "react-router-dom";
+import { API_BASE_URL } from "../../api/config";
 import { useAuthStore } from "./auth.store";
 import "./auth.css";
 
@@ -86,13 +87,11 @@ export default function LoginPage() {
       </div>
 
       <header className="auth-top-brand">
-        <div
-          className="auth-logo"
-          aria-label="F1 Race Replay"
-        >
-          <span className="auth-logo-f">F</span>
-          <span className="auth-logo-plus">+</span>
-        </div>
+        <img
+          src="/images/logo-without-bg/favicon-removebg-preview.png"
+          alt="F1 Race Replay"
+          className="auth-brand-logo"
+        />
 
         <div className="auth-brand-text">
           <strong>RACE REPLAY</strong>
@@ -174,7 +173,7 @@ export default function LoginPage() {
                 className="auth-provider"
                 onClick={() => {
                   window.location.href =
-                    "http://127.0.0.1:8000/auth/discord/login";
+                    `${API_BASE_URL}/auth/discord/login`;
                 }}
               >
                 <span className="auth-provider-icon discord-icon">
@@ -204,7 +203,7 @@ export default function LoginPage() {
                 className="auth-provider"
                 onClick={() => {
                   window.location.href =
-                    "http://127.0.0.1:8000/auth/x/login";
+                    `${API_BASE_URL}/auth/x/login`;
                 }}
               >
                 <span className="auth-provider-icon x-icon">
@@ -330,6 +329,15 @@ export default function LoginPage() {
                   />
                 </div>
               </label>
+
+              <button
+                type="button"
+                className="auth-back-login"
+                style={{ textAlign: "right", marginTop: "-8px" }}
+                onClick={() => navigate("/forgot-password")}
+              >
+                Forgot password?
+              </button>
 
               {error && (
                 <div

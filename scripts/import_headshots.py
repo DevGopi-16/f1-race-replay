@@ -1,20 +1,3 @@
-"""
-Import the output of JustJoostNL/f1-headshots into your project.
-
-The tool saves images as  out/headshots/<year>/<TLA>.png  (e.g. 2024/HAM.png).
-This script maps each 3-letter code to the Jolpica driverId for that season and
-copies the files into frontend/public/drivers/ as:
-
-    <driverId>.png            newest available headshot for the driver
-    <driverId>-<year>.png     the headshot from that specific season
-
-It replaces an older Wikipedia image (<driverId>.jpg) if there is one.
-
-Run from the project root, with your venv active:
-    python3 scripts/import_headshots.py
-    python3 scripts/import_headshots.py --src /tmp/f1-headshots/out/headshots
-"""
-
 import argparse
 import json
 import shutil
@@ -32,7 +15,6 @@ MANIFEST = OUT / "manifest.json"
 
 
 def season_codes(year: int) -> dict[str, tuple[str, str]]:
-    """{TLA: (driverId, full name)} for every driver who raced that season."""
     r = requests.get(
         f"{JOLPICA}/{year}/drivers.json",
         params={"limit": 100},
@@ -67,7 +49,7 @@ def main() -> None:
     year_dirs = sorted(
         (p for p in src.iterdir() if p.is_dir() and p.name.isdigit()),
         key=lambda p: int(p.name),
-        reverse=True,  # newest first, so the newest headshot becomes <driverId>.png
+        reverse=True,
     )
 
     latest_done: set[str] = set()
@@ -85,7 +67,7 @@ def main() -> None:
 
         print(f"{year}: {len(list(year_dir.glob('*.png')))} images")
 
-        for png in sorted(year_dir.glob("*.png")):  # by_ref/ subfolder is skipped
+        for png in sorted(year_dir.glob("*.png")):
             info = codes.get(png.stem)
             if not info:
                 unmatched.append(f"{year}/{png.stem}")

@@ -27,6 +27,8 @@ if AUTH_COOKIE_SAMESITE not in {"lax", "strict", "none"}:
     raise RuntimeError(
         "AUTH_COOKIE_SAMESITE must be one of: lax, strict, none"
     )
+if AUTH_COOKIE_SAMESITE == "none":
+    AUTH_COOKIE_SECURE = True
 ALGORITHM = "HS256"
 ACCESS_TOKEN_EXPIRE_MINUTES = 15  # short-lived; refresh tokens extend the session
 

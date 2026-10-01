@@ -104,9 +104,9 @@
   line-height: 1.7;
 }
 
-/* ============================================================
-   LAYOUT — sidebar + horizontal main grid
-   ============================================================ */
+
+
+
 
 .profile-layout {
   display: grid;
@@ -175,8 +175,8 @@
   line-height: 1.5;
 }
 
-/* single, orchestrated entrance — sidebar cards and main sections
-   settle into place in sequence on first paint */
+
+
 
 .profile-sidebar > *,
 .profile-main > * {
@@ -238,9 +238,9 @@
   box-shadow: 0 22px 46px rgba(0,0,0,0.22);
 }
 
-/* ============================================================
-   HERO — sidebar identity card
-   ============================================================ */
+
+
+
 
 .profile-hero {
   display: flex;
@@ -463,9 +463,9 @@
   letter-spacing: -0.04em;
 }
 
-/* ============================================================
-   SECTIONS — shared shell
-   ============================================================ */
+
+
+
 
 .profile-section {
   padding: 28px;
@@ -492,9 +492,9 @@
   letter-spacing: -0.02em;
 }
 
-/* ============================================================
-   SIDEBAR — account overview list
-   ============================================================ */
+
+
+
 
 .profile-overview-list {
   display: grid;
@@ -530,9 +530,9 @@
   color: var(--color-accent);
 }
 
-/* ============================================================
-   IDENTITY / PREFERENCE CARDS
-   ============================================================ */
+
+
+
 
 .profile-identity-grid {
   display: grid;
@@ -561,9 +561,9 @@
   font-size: 19px;
 }
 
-/* ============================================================
-   CONNECTIONS
-   ============================================================ */
+
+
+
 
 .profile-connections {
   display: grid;
@@ -668,9 +668,9 @@
   text-align: center;
 }
 
-/* ============================================================
-   FORMS
-   ============================================================ */
+
+
+
 
 .profile-form {
   display: grid;
@@ -993,9 +993,9 @@
     grid-template-columns: 1fr;
   }
 
-  /* ============================================================
-     WEB PROFILE — wide editorial page treatment
-     ============================================================ */
+
+
+
 
   @media (min-width: 901px) {
     .profile-page {
@@ -1172,9 +1172,9 @@
 }
 
 
-/* ============================================================
-   ACHIEVEMENTS
-   ============================================================ */
+
+
+
 
 .profile-achievements-section {
   overflow: hidden;
@@ -1346,9 +1346,9 @@
   }
 }
 
-/* ============================================================
-   2026 SEASON SUMMARY
-   ============================================================ */
+
+
+
 
 .profile-season-section {
   overflow: hidden;
@@ -1661,9 +1661,9 @@
   }
 }
 
-/* ============================================================
-   ACCOUNT SETTINGS
-   ============================================================ */
+
+
+
 
 .profile-field select {
   width: 100%;
@@ -1844,5 +1844,100 @@
   .profile-metric-card {
     min-height: 148px;
     padding: 22px;
+  }
+}
+
+.profile-forgot-link {
+  display: block;
+  margin-top: 8px;
+  background: none;
+  border: none;
+  padding: 0;
+  font-size: 13px;
+  color: var(--accent, #e10600);
+  text-decoration: underline;
+  cursor: pointer;
+  text-align: left;
+}
+
+.profile-forgot-link:disabled {
+  cursor: default;
+  opacity: 0.6;
+  text-decoration: none;
+}
+
+.profile-forgot-link:hover:not(:disabled) {
+  opacity: 0.85;
+}
+
+@media (max-width: 768px) {
+  .profile-page {
+    padding: 24px 16px 56px;
+  }
+
+  .profile-layout,
+  .profile-main,
+  .profile-hero,
+  .profile-identity-grid {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .profile-sidebar,
+  .profile-main > *,
+  .profile-overview-card,
+  .profile-connections-card {
+    grid-column: 1 / -1;
+  }
+
+  .profile-metric-grid,
+  .profile-hero-kpis,
+  .profile-form-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .profile-section {
+    min-width: 0;
+    padding: 24px;
+  }
+
+  .profile-field input,
+  .profile-page select {
+    min-height: 44px;
+    font-size: 16px;
+  }
+
+  .profile-page button {
+    min-height: 44px;
+  }
+
+  .profile-page img,
+  .profile-page svg {
+    max-width: 100%;
+  }
+}
+
+@media (max-width: 480px) {
+  .profile-page {
+    padding: 20px 12px 48px;
+  }
+
+  .profile-section {
+    padding: 16px;
+  }
+
+  .profile-metric-grid,
+  .profile-hero-kpis,
+  .profile-form-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .profile-header,
+  .profile-header-actions,
+  .profile-connection-row {
+    flex-wrap: wrap;
+  }
+
+  .profile-field input {
+    width: 100%;
   }
 }

@@ -53,7 +53,9 @@ def refresh_access_token(request: Request, response: Response, db: Session = Dep
     if not new_token:
         raise HTTPException(status_code=401, detail="Session expired. Please log in again.")
 
-    new_access_token = create_access_token(data={"sub": str(new_token.user_id)})
+    new_access_token = create_access_token(
+        data={"sub": str(new_token.user_id), "sid": new_token.id}
+    )
 
     set_auth_cookie(response, new_access_token)
     set_refresh_cookie(response, new_token.token)

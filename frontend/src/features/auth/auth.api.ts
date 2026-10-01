@@ -5,12 +5,14 @@ import type {
   LoginPayload,
   SignupPayload,
 } from "./auth.types";
+import { API_BASE_URL } from "../../api/config";
+import { refreshAccessToken, shouldSkipRefresh } from "./tokenRefresh";
 
-const AUTH_BASE = "/auth";
+const AUTH_BASE = `${API_BASE_URL}/auth`;
 
-/* =========================================================
-   PROFILE TYPES
-========================================================= */
+
+
+
 
 export interface UserProfile {
   id: number;
@@ -35,16 +37,19 @@ export interface UpdateProfilePayload {
   favorite_team?: string;
 }
 
-/* =========================================================
-   AUTH REQUEST
-========================================================= */
+
+
+
 
 async function authRequest<T>(
   endpoint: string,
   options: RequestInit = {},
+  _isRetry = false,
 ): Promise<T> {
+  const url = `${AUTH_BASE}${endpoint}`;
+
   const response = await fetch(
-    `${AUTH_BASE}${endpoint}`,
+    url,
     {
       credentials: "include",
 
@@ -57,6 +62,17 @@ async function authRequest<T>(
       },
     },
   );
+
+  if (
+    response.status === 401 &&
+    !_isRetry &&
+    !shouldSkipRefresh(endpoint)
+  ) {
+    const refreshed = await refreshAccessToken();
+    if (refreshed) {
+      return authRequest<T>(endpoint, options, true);
+    }
+  }
 
   const contentType =
     response.headers.get("content-type") ?? "";
@@ -85,9 +101,9 @@ async function authRequest<T>(
   return data as T;
 }
 
-/* =========================================================
-   SIGN UP
-========================================================= */
+
+
+
 
 export function signup(
   payload: SignupPayload,
@@ -105,9 +121,9 @@ export function signup(
   );
 }
 
-/* =========================================================
-   LOGIN
-========================================================= */
+
+
+
 
 export function login(
   payload: LoginPayload,
@@ -125,9 +141,9 @@ export function login(
   );
 }
 
-/* =========================================================
-   GOOGLE LOGIN
-========================================================= */
+
+
+
 
 export function googleLogin(
   payload: GooglePayload,
@@ -146,6 +162,55 @@ export function googleLogin(
   );
 }
 
+
+export function forgotPassword(email: string) {
+  return authRequest<{ message: string }>("/forgot-password", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ email }),
+  });
+}
+
+export function resetPassword(token: string, newPassword: string) {
+  return authRequest<{ message: string }>("/reset-password", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ token, new_password: newPassword }),
+  });
+}
+
+export function verifyEmail(token: string) {
+  return authRequest<{ message: string }>("/verify-email", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ token }),
+  });
+}
+
+export function resendVerificationEmail() {
+  return authRequest<{ message: string }>("/send-verification", {
+    method: "POST",
+  });
+}
+
+export interface UserSession {
+  id: number;
+  device: string;
+  ip_address: string | null;
+  signed_in_at: string | null;
+  last_active_at: string | null;
+  is_current: boolean;
+}
+
+export function getSessions() {
+  return authRequest<UserSession[]>("/sessions");
+}
+
+export function revokeSession(sessionId: number) {
+  return authRequest<{ message: string }>(`/sessions/${sessionId}`, {
+    method: "DELETE",
+  });
+}
 
 export function getCurrentUser() {
   return authRequest<AuthUser>("/me");
@@ -335,9 +400,9 @@ export async function getProfileStats(): Promise<ProfileStats> {
   return authRequest<ProfileStats>("/profile/stats");
 }
 
-/* =========================================================
-   USER SETTINGS
-========================================================= */
+
+
+
 
 export interface UserSettings {
   default_driver_comp: string;

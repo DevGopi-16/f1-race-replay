@@ -87,13 +87,14 @@ export default function RegisterPage() {
       </div>
 
       <div className="auth-top-brand">
-        <div className="auth-logo">
-          <span className="auth-logo-f">F1</span>
-          <span className="auth-logo-plus">+</span>
-        </div>
-
+        <img
+          src="/images/logo-without-bg/favicon-removebg-preview.png"
+          alt="F1 Race Replay"
+          className="auth-brand-logo"
+        />
+        
         <div className="auth-brand-text">
-          <strong>RACE</strong>
+          <strong>F1 Race</strong>
           <span>REPLAY</span>
         </div>
       </div>

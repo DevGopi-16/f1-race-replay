@@ -41,7 +41,7 @@
   margin: 4px 0 0;
 }
 
-/* ---------- Form ---------- */
+
 .contact-form {
   background: rgba(237, 239, 242, 0.03);
   border: 1px solid rgba(237, 239, 242, 0.1);
@@ -118,4 +118,73 @@
 
 .contact-form-status[data-state="success"] {
   color: #e10600;
+}
+
+.contact-soon {
+  display: inline-block;
+  margin-left: 8px;
+  padding: 2px 8px;
+  border-radius: 999px;
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--accent, #e10600);
+  border: 1px solid currentColor;
+  opacity: 0.85;
+}
+
+.contact-discord {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  opacity: 0.9;
+}
+
+.contact-discord-icon {
+  width: 22px;
+  height: 22px;
+  color: #5865f2;
+  flex-shrink: 0;
+}
+
+.contact-x-icon {
+  width: 22px;
+  height: 22px;
+  color: #ffffff;
+  flex-shrink: 0;
+}
+
+@media (max-width: 768px) {
+  .contact-body,
+  .contact-form-row {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .contact-field input,
+  .contact-field select,
+  .contact-field textarea {
+    min-height: 44px;
+    font-size: 16px;
+  }
+
+  .contact-form-footer {
+    align-items: flex-start;
+    flex-direction: column;
+  }
+
+  .contact-form button {
+    min-height: 44px;
+  }
+}
+
+@media (max-width: 480px) {
+  .contact-body {
+    gap: 20px;
+    padding-bottom: 48px;
+  }
+
+  .contact-form {
+    padding: 16px;
+  }
 }

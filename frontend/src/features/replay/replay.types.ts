@@ -40,14 +40,30 @@ export interface ReplayCorner {
   y: number;
 }
 
+export interface ReplayOverlayState {
+  drs: boolean;
+  sectors: boolean;
+}
+
+export interface ReplayDRSZone {
+  zone?: number;
+  start?: ReplayTrackPoint;
+  end?: ReplayTrackPoint;
+}
+
+export interface ReplaySectorSegment {
+  id?: number;
+  centerline?: [number, number][];
+}
+
 export interface ReplayTrack {
   centerline?: [number, number][];
   inner?: [number, number][];
   outer?: [number, number][];
   start_finish?: unknown;
   sectors?: unknown;
-  sector_segments?: unknown;
-  drs_zones?: unknown;
+  sector_segments?: ReplaySectorSegment[];
+  drs_zones?: ReplayDRSZone[];
   bounds?: unknown;
   corners?: ReplayCorner[];
 

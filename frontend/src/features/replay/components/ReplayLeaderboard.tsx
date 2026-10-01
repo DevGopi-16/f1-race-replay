@@ -160,14 +160,14 @@ function getStatusLabel(
   return "";
 }
 
-/*
- * Format a gap in seconds.
- *
- * Examples:
- * +0.421
- * +1.284
- * +12.531
- */
+
+
+
+
+
+
+
+
 function formatSeconds(value: number | null): string {
   if (value === null || !Number.isFinite(value)) {
     return "—";
@@ -265,13 +265,13 @@ export default function ReplayLeaderboard({
       const rawLeaderGap =
         numberValue(data.gap_to_leader);
 
-      /*
-       * Backend sometimes sends 0 (or near-0) for every driver
-       * instead of a real gap. That's only ever valid for the
-       * actual leader (position 1) — for anyone else, treat it
-       * as missing data so the rel_dist fallback below computes
-       * a real value instead of everyone showing "LEADER".
-       */
+
+
+
+
+
+
+
       const backendInterval =
         position === 1 || (rawInterval !== null && Math.abs(rawInterval) >= 0.005)
           ? rawInterval
@@ -312,12 +312,12 @@ export default function ReplayLeaderboard({
         ),
       });
 
-     
+
     }
 
-    /*
-     * Race order first.
-     */
+
+
+
     liveDrivers.sort((a, b) => {
       if (a.hasTelemetry !== b.hasTelemetry) {
         return a.hasTelemetry ? -1 : 1;
@@ -336,13 +336,13 @@ export default function ReplayLeaderboard({
       return a.position - b.position;
     });
 
-    /*
-     * If backend gap values are missing, calculate a visual
-     * relative gap from RelativeDistance.
-     *
-     * This gives the I/L controls something useful to display
-     * even when the backend only sends rel_dist.
-     */
+
+
+
+
+
+
+
     const telemetryDrivers = liveDrivers.filter(
       (driver) => driver.hasTelemetry,
     );
@@ -353,15 +353,15 @@ export default function ReplayLeaderboard({
 
     if (leader) {
       for (const driver of telemetryDrivers) {
-        /*
-         * L = gap to leader.
-         *
-         * RelativeDistance wraps around the lap, so calculate
-         * the shortest forward distance to the leader.
-         *
-         * This is a fallback only. If backend gap_to_leader exists,
-         * that value remains authoritative.
-         */
+
+
+
+
+
+
+
+
+
         if (
           driver.leaderGap === "—" &&
           driver.relDist !== null &&
@@ -379,11 +379,11 @@ export default function ReplayLeaderboard({
             delta = 1 - delta;
           }
 
-          /*
-           * Relative distance is not time.
-           * We therefore do NOT pretend this is a precise
-           * seconds value. Display it as a relative gap.
-           */
+
+
+
+
+
           driver.leaderGap =
             driver.code === leader.code
               ? "LEADER"
@@ -392,12 +392,12 @@ export default function ReplayLeaderboard({
       }
     }
 
-    /*
-     * I = interval to the car immediately ahead.
-     *
-     * When backend interval is unavailable, use relative distance
-     * as a visual fallback.
-     */
+
+
+
+
+
+
     for (let i = 0; i < telemetryDrivers.length; i++) {
       const driver = telemetryDrivers[i];
 
@@ -586,10 +586,10 @@ export default function ReplayLeaderboard({
 
 
 
-              {/*
-               * Full driver name intentionally removed.
-               * Only the 3-letter F1 code is displayed.
-               */}
+              {
+
+
+                 }
 
               <span className="replay-driver-gap">
                 {displayGap}

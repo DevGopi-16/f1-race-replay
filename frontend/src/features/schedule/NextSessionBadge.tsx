@@ -37,7 +37,7 @@ export function useNextSession() {
     getNextSession(year)
       .then((data) => {
         if (cancelled) return;
-        // empty object means no more sessions this year — try next year
+
         if (!("start_utc" in data)) {
           return getNextSession(year + 1).then((next) => {
             if (!cancelled && "start_utc" in next) {

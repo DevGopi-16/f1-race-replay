@@ -133,7 +133,7 @@ export default function AboutPage() {
                 <div className="about-space-sm" />
                 <h2 className="about-section-title">Started on a garage table.</h2>
                 <p className="about-body-lg">
-                  {/* placeholder founding story — swap in the real one */}
+                  {                                                       }
                   F1 Race Vision began as a side project between two
                   engineers tired of squinting at timing screens on race
                   weekends. What started as a spreadsheet of sector deltas

@@ -182,3 +182,24 @@
     font-size: 14px;
   }
 }
+
+@media (max-width: 768px) {
+  .performance-grid {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .performance-card {
+    min-width: 0;
+  }
+
+  .performance-card img,
+  .performance-card svg {
+    max-width: 100%;
+  }
+}
+
+@media (max-width: 480px) {
+  .performance-card {
+    padding: 14px;
+  }
+}

@@ -179,7 +179,7 @@
   white-space: nowrap;
 }
 
-/* Driver header — layout */
+
 .teammate-driver-header {
   appearance: none;
   border: 0;
@@ -289,7 +289,7 @@
   opacity: 0.75;
 }
 
-/* Driver header — accent-driven hover glow (must come after layout block above) */
+
 .teammate-driver-header {
   --teammate-accent: rgba(255, 255, 255, 0.7);
   position: relative;
@@ -482,5 +482,30 @@
 
   .teammate-stat-bar {
     height: 3px;
+  }
+}
+
+@media (max-width: 768px) {
+  .teammate-grid {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .teammate-card {
+    min-width: 0;
+  }
+
+  .teammate-stat-row {
+    grid-template-columns: minmax(0, 1fr) 68px minmax(0, 1fr);
+    gap: 8px;
+  }
+}
+
+@media (max-width: 480px) {
+  .teammate-card-header {
+    min-width: 0;
+  }
+
+  .teammate-driver-full-name {
+    overflow-wrap: anywhere;
   }
 }

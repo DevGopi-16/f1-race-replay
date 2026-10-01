@@ -1,4 +1,4 @@
-/* ---------- Layout: centered, padded column ---------- */
+
 .coming-soon-shell {
   width: 100%;
   max-width: 1000px;
@@ -7,7 +7,7 @@
   box-sizing: border-box;
 }
 
-/* ---------- Coming soon pill ---------- */
+
 .coming-soon-pill {
   display: inline-flex;
   align-items: center;
@@ -43,7 +43,7 @@
   }
 }
 
-/* ---------- Sections ---------- */
+
 .coming-soon-section {
   padding: 24px 0 8px;
 }
@@ -97,5 +97,36 @@
 @media (prefers-reduced-motion: reduce) {
   .coming-soon-dot {
     animation: none;
+  }
+}
+
+@media (max-width: 768px) {
+  .coming-soon-shell {
+    width: 100%;
+    padding: 24px 16px 56px;
+  }
+
+  .coming-soon-actions {
+    gap: 12px;
+  }
+
+  .coming-soon-actions > * {
+    min-height: 44px;
+  }
+
+  .coming-soon-shell img,
+  .coming-soon-shell svg {
+    max-width: 100%;
+  }
+}
+
+@media (max-width: 480px) {
+  .coming-soon-shell {
+    padding: 20px 12px 48px;
+  }
+
+  .coming-soon-actions {
+    align-items: stretch;
+    flex-direction: column;
   }
 }

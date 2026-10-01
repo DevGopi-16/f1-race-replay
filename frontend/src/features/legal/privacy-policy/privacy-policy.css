@@ -1,11 +1,11 @@
-/* Privacy Policy only — everything scoped under .privacy-page */
 
-/* Widen the shared shell for this page only */
+
+
 .legal-shell:has(.privacy-page) {
   max-width: 1200px;
 }
 
-/* ---------- Two-column layout ---------- */
+
 .privacy-layout {
   display: grid;
   grid-template-columns: 240px minmax(0, 1fr);
@@ -17,7 +17,7 @@
   max-width: 780px;
 }
 
-/* ---------- Sticky index ---------- */
+
 .privacy-toc {
   position: sticky;
   top: 120px;
@@ -80,7 +80,7 @@
   color: #e10600;
 }
 
-/* ---------- Sections ---------- */
+
 .privacy-page .legal-section {
   padding: 28px 0 6px;
   scroll-margin-top: 120px;
@@ -98,7 +98,7 @@
   padding-bottom: 8px;
 }
 
-/* ---------- Text ---------- */
+
 .privacy-page p {
   font-size: 1rem;
   line-height: 1.75;
@@ -147,7 +147,7 @@
   text-decoration: underline;
 }
 
-/* ---------- Contact box ---------- */
+
 .privacy-page .legal-contact {
   margin-top: 32px;
   padding: 22px 26px;
@@ -159,7 +159,7 @@
   font-size: 0.97rem;
 }
 
-/* ---------- Tablet / mobile: single column, hide index ---------- */
+
 @media (max-width: 960px) {
   .privacy-layout {
     grid-template-columns: 1fr;
@@ -181,5 +181,30 @@
 
   .privacy-page .legal-contact {
     padding: 18px 20px;
+  }
+}
+
+@media (max-width: 768px) {
+  .privacy-layout {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .privacy-toc {
+    display: none;
+  }
+
+  .privacy-content {
+    max-width: 100%;
+  }
+
+  .privacy-page p,
+  .privacy-content li {
+    font-size: max(14px, 1rem);
+  }
+}
+
+@media (max-width: 480px) {
+  .privacy-page .legal-contact {
+    padding: 16px;
   }
 }

@@ -1,3 +1,6 @@
+import type { ReactNode } from "react";
+import type { ReplayOverlayState } from "../replay.types";
+
 interface ReplayControlsProps {
   frameIndex: number;
   totalFrames: number;
@@ -5,6 +8,10 @@ interface ReplayControlsProps {
   playing: boolean;
   onPlayPause: () => void;
   onFrameChange: (index: number) => void;
+  overlays: ReplayOverlayState;
+  drsAvailable: boolean;
+  onOverlayToggle: (overlay: keyof ReplayOverlayState) => void;
+  children?: ReactNode;
 }
 
 function formatTime(seconds: number) {
@@ -31,6 +38,10 @@ export default function ReplayControls({
   playing,
   onPlayPause,
   onFrameChange,
+  overlays,
+  drsAvailable,
+  onOverlayToggle,
+  children,
 }: ReplayControlsProps) {
   const maxFrame = Math.max(0, totalFrames - 1);
   const safeFrame = Math.min(Math.max(0, frameIndex), maxFrame);
@@ -110,8 +121,46 @@ export default function ReplayControls({
         </div>
 
       </div>
+
+      <div
+        className="replay-overlay-controls"
+        role="group"
+        aria-label="Map overlays"
+      >
+        <button
+          type="button"
+          className={`replay-overlay-toggle replay-overlay-toggle-drs${overlays.drs ? " active" : ""}`}
+          onClick={() => onOverlayToggle("drs")}
+          disabled={!drsAvailable}
+          aria-disabled={!drsAvailable}
+          aria-pressed={overlays.drs}
+          aria-label={overlays.drs ? "Hide DRS zones" : "Show DRS zones"}
+          title={drsAvailable ? undefined : "DRS data unavailable for this circuit"}
+        >
+          <span className="replay-overlay-drs-dot" aria-hidden="true" />
+          <span>DRS</span>
+          <small>D</small>
+        </button>
+        <button
+          type="button"
+          className={`replay-overlay-toggle replay-overlay-toggle-sectors${overlays.sectors ? " active" : ""}`}
+          onClick={() => onOverlayToggle("sectors")}
+          aria-pressed={overlays.sectors}
+          aria-label={overlays.sectors ? "Hide sectors" : "Show sectors"}
+          title={overlays.sectors ? "Hide sectors" : "Show sectors"}
+        >
+          <span className="replay-overlay-sector-dots" aria-hidden="true">
+            <i />
+            <i />
+            <i />
+          </span>
+          <span>SECTORS</span>
+          <small>S</small>
+        </button>
+      </div>
+
+      {children}
     </section>
   );
 }
 
-    

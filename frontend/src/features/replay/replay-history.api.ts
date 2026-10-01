@@ -1,6 +1,7 @@
 import type { ReplaySessionType } from "./replay.types";
+import { API_BASE_URL } from "../../api/config";
 
-const AUTH_BASE = "/auth";
+const AUTH_BASE = `${API_BASE_URL}/auth`;
 
 export interface ReplayHistory {
   id: number;

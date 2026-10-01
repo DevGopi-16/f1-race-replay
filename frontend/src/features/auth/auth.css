@@ -1048,7 +1048,7 @@
   }
 }
 
-/* REGISTER FOOTER LINKS */
+
 
 .auth-switch {
   margin: 22px 0 0;
@@ -1115,4 +1115,125 @@
   text-align: center;
     margin-top: 20px;
   }
+}
+
+@media (max-width: 768px) {
+  .auth-page {
+    min-height: 100dvh;
+    padding: 88px 16px 64px;
+  }
+
+  .auth-card {
+    width: min(100%, 440px);
+    max-width: 100%;
+  }
+
+  .auth-provider,
+  .auth-submit,
+  .auth-home,
+  .auth-back-login {
+    min-height: 44px;
+  }
+
+  .auth-field input {
+    min-height: 44px;
+    font-size: 16px;
+  }
+
+  .auth-grid,
+  .auth-light {
+    max-width: 100%;
+  }
+}
+
+@media (max-width: 480px) {
+  .auth-page {
+    padding: 82px 12px 56px;
+  }
+
+  .auth-card {
+    padding: 24px 16px 20px;
+  }
+
+  .auth-heading h1 {
+    font-size: clamp(1.8rem, 8vw, 2.3rem);
+  }
+}
+
+
+
+
+
+.auth-top-brand .auth-brand-logo {
+  width: 78px !important;
+  height: 58px !important;
+
+  max-width: 78px !important;
+  max-height: 58px !important;
+
+  min-width: 78px !important;
+  min-height: 58px !important;
+
+  display: block !important;
+  position: relative !important;
+
+  object-fit: contain !important;
+  object-position: center !important;
+
+  margin: 0 !important;
+  padding: 0 !important;
+
+  flex: 0 0 78px !important;
+
+
+  animation: authImageLogoGlow 2.8s ease-in-out infinite;
+}
+
+@keyframes authImageLogoGlow {
+  0%,
+  100% {
+    opacity: 0.78;
+    filter:
+      drop-shadow(0 0 3px rgba(225, 6, 0, 0.25))
+      drop-shadow(0 0 7px rgba(225, 6, 0, 0.08));
+  }
+
+  50% {
+    opacity: 1;
+    filter:
+      drop-shadow(0 0 5px rgba(225, 6, 0, 0.55))
+      drop-shadow(0 0 14px rgba(225, 6, 0, 0.22));
+  }
+}
+
+
+
+.auth-top-brand {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 14px;
+
+  width: auto;
+  height: auto;
+}
+
+
+.auth-top-brand .auth-brand-text {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+
+  line-height: 1;
+}
+
+.auth-top-brand .auth-brand-text strong {
+  font-size: 10px;
+  letter-spacing: 0.16em;
+}
+
+.auth-top-brand .auth-brand-text span {
+  margin-top: 4px;
+  font-size: 7px;
+  letter-spacing: 0.18em;
 }

@@ -577,5 +577,15 @@
     "name": "Bernd Schneider",
     "source": "http://en.wikipedia.org/wiki/Bernd_Schneider_(racecar_driver)",
     "suit_verified": 0.98
+  },
+  "fangio": {
+    "file": "fangio.jpg",
+    "name": "Juan Fangio",
+    "source": "https://commons.wikimedia.org/wiki/File:Fangio_in_1955_(cropped).jpg",
+    "license": "CC BY 4.0",
+    "license_url": "https://creativecommons.org/licenses/by/4.0",
+    "artist": "Bj\u00f8rn Fj\u00f8rtoft",
+    "credit": "National Archives of Norway (Riksarkivet)",
+    "source_file": "Fangio_in_1955_(cropped).jpg"
   }
 }

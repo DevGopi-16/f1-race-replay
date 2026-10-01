@@ -61,6 +61,12 @@ class User(Base):
         default=False,
     )
 
+    email_verified = Column(
+        Boolean,
+        default=False,
+        nullable=False,
+    )
+
     favorite_driver = Column(
         String,
         default="VER",

@@ -95,6 +95,15 @@ export default function FloatingNav() {
     setMobileOpen(false);
   };
 
+  useEffect(() => {
+    if (!mobileOpen) return;
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key === "Escape") setMobileOpen(false);
+    };
+    window.addEventListener("keydown", onKey);
+    return () => window.removeEventListener("keydown", onKey);
+  }, [mobileOpen]);
+
   return (
     <>
       <header
@@ -118,7 +127,7 @@ export default function FloatingNav() {
             </span>
 
             <span className="brand-name">
-              RACE REPLAY
+              RACE VISION
             </span>
           </NavLink>
 
@@ -183,7 +192,7 @@ export default function FloatingNav() {
               type="button"
               className="floating-nav-menu-button"
               onClick={() =>
-                setMobileOpen(true)
+                setMobileOpen((open) => !open)
               }
               aria-label="Open navigation"
               aria-expanded={mobileOpen}
@@ -204,6 +213,9 @@ export default function FloatingNav() {
             : ""
         }`}
         aria-hidden={!mobileOpen}
+        onClick={(e) => {
+          if (e.target === e.currentTarget) closeMobile();
+        }}
       >
         <div className="mobile-nav-panel">
           <div className="mobile-nav-header">

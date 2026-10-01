@@ -4,6 +4,34 @@ import { useNavigate } from "react-router-dom";
 
 import { useAuthStore } from "./auth.store";
 
+function describeDiscordError(code: string): string {
+  switch (code) {
+    case "email_already_registered":
+      return (
+        "An account with this email already exists. Log in with " +
+        "your password and verify your email, or use a different " +
+        "sign-in method."
+      );
+    case "missing_code":
+    case "missing_state":
+    case "invalid_state":
+      return "Discord authorization failed. Please try again.";
+    case "discord_secret_not_configured":
+      return "Discord sign-in isn't available right now.";
+    case "discord_token_request_failed":
+    case "discord_token_exchange_failed":
+    case "invalid_discord_token_response":
+    case "discord_user_fetch_failed":
+    case "invalid_discord_user_response":
+    case "missing_discord_id":
+      return "Something went wrong connecting to Discord. Please try again.";
+    case "access_denied":
+      return "Discord authorization was cancelled.";
+    default:
+      return "Unable to complete Discord login.";
+  }
+}
+
 export default function DiscordCallbackPage() {
   const navigate = useNavigate();
 
@@ -18,12 +46,12 @@ export default function DiscordCallbackPage() {
 
     async function completeDiscordLogin() {
       try {
-        /*
-         * Discord backend redirects with:
-         *
-         * The backend sets the session cookie before redirecting
-         * to this page, so the browser sends it automatically.
-         */
+
+
+
+
+
+
 
         const searchParams = new URLSearchParams(
           window.location.search,
@@ -37,17 +65,17 @@ export default function DiscordCallbackPage() {
 
         if (oauthError) {
           throw new Error(
-            "Discord authorization was cancelled.",
+            describeDiscordError(oauthError),
           );
         }
 
         await restoreSession();
 
         if (!cancelled) {
-          /*
-           * Remove the token from the browser URL after
-           * successful authentication.
-           */
+
+
+
+
 
           window.history.replaceState(
             null,

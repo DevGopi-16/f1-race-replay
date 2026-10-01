@@ -730,7 +730,7 @@
   }
 }
 
-/* ===== Season progress bar ===== */
+
 
 .calendar-progress {
   display: flex;
@@ -874,7 +874,7 @@
   }
 }
 
-/* ===== Cursor spotlight effect ===== */
+
 
 .calendar-grid {
   position: relative;
@@ -904,4 +904,103 @@
 .calendar-card {
   position: relative;
   z-index: 2;
+}
+
+@media (max-width: 768px) {
+  .calendar-page {
+    min-height: 100dvh;
+    padding: 0 16px 64px;
+  }
+
+  .calendar-header {
+    align-items: flex-start;
+    flex-direction: column;
+    min-height: 0;
+    gap: 20px;
+  }
+
+  .calendar-header-title h1 {
+    font-size: clamp(2.4rem, 10vw, 4rem);
+  }
+
+  .calendar-grid {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .calendar-inspector {
+    grid-template-columns: 58px minmax(0, 1fr);
+    gap: 14px;
+  }
+
+  .calendar-inspector-date {
+    grid-column: 2;
+    min-width: 0;
+  }
+
+  .calendar-next-panel {
+    grid-template-columns: 72px minmax(0, 1fr);
+    gap: 14px;
+    padding: 16px;
+  }
+
+  .calendar-next-panel-art {
+    width: 72px;
+    height: 72px;
+  }
+
+  .calendar-next-panel-countdown {
+    grid-column: 2;
+    min-width: 0;
+    padding: 12px 0 0;
+    border-top: 1px solid rgba(255,255,255,0.14);
+    border-left: 0;
+  }
+
+  .calendar-page button,
+  .calendar-page select {
+    min-height: 44px;
+  }
+
+  .calendar-page select {
+    font-size: 16px;
+  }
+
+  .calendar-page img,
+  .calendar-page svg {
+    max-width: 100%;
+  }
+}
+
+@media (max-width: 480px) {
+  .calendar-page {
+    padding: 0 12px 52px;
+  }
+
+  .calendar-progress {
+    padding: 16px;
+  }
+
+  .calendar-inspector,
+  .calendar-next-panel {
+    padding: 14px;
+  }
+
+  .calendar-year-switch {
+    max-width: 100%;
+  }
+
+  .calendar-grid-toolbar {
+    align-items: stretch;
+  }
+
+  .calendar-filter {
+    display: flex;
+    flex-wrap: wrap;
+  }
+}
+
+
+.calendar-page {
+  overflow-x: hidden;
+  overflow-x: clip;
 }

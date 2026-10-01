@@ -75,8 +75,8 @@ const TEAM_LOGOS: Record<string, string> = {
   cadillac: "/images/teams/cadillac.png",
 };
 
-// 2026 team accent colors — used to drive the --team-color CSS variable
-// that drivers.css reads for the left-edge card/row accents.
+
+
 const TEAM_COLORS: Record<string, string> = {
   mercedes: "#27F4D2",
   ferrari: "#E8002D",
@@ -254,7 +254,7 @@ function teamLogo(driver: DriverPanelData): string {
   );
 }
 
-// Resolves this driver's team accent color for the --team-color CSS var.
+
 function teamColor(driver: DriverPanelData): string {
   const team = driverTeam(driver).toLowerCase();
 
@@ -265,9 +265,9 @@ function teamColor(driver: DriverPanelData): string {
   return match?.[1] ?? DEFAULT_TEAM_COLOR;
 }
 
-// Builds the inline style object that carries --team-color onto an
-// element. Cast to CSSProperties since custom properties aren't part
-// of the official React style typing.
+
+
+
 function teamColorStyle(driver: DriverPanelData): CSSProperties {
   return { "--team-color": teamColor(driver) } as CSSProperties;
 }
@@ -385,7 +385,7 @@ export default function DriversPage() {
     <main className="drivers-page">
       <div className="drivers-container">
 
-        {/*   HEADER */}
+        {              }
 
         <header className="drivers-header">
           <div className="drivers-header-title">
@@ -414,7 +414,7 @@ export default function DriversPage() {
           </div>
         </header>
 
-        {/* LOADING*/}
+        {            }
 
         {loading && (
           <section className="drivers-step1-loading">
@@ -422,7 +422,7 @@ export default function DriversPage() {
           </section>
         )}
 
-        {/* ERROR */}
+        {           }
 
         {!loading && error && (
           <section className="drivers-step1-error">
@@ -431,11 +431,11 @@ export default function DriversPage() {
           </section>
         )}
 
-        {/* PAGE */}
+        {          }
 
         {!loading && !error && featured && (
           <>
-            {/* FEATURED DRIVER */}
+            {                     }
 
             <section className="featured-driver" style={teamColorStyle(featured)} onClick={() => navigate(`/drivers/${featured.code}`)}>
               <div
@@ -559,7 +559,7 @@ export default function DriversPage() {
               </div>
             </section>
 
-            {/* TOP DRIVERS */}
+            {                 }
 
             <section className="drivers-section">
 
@@ -637,7 +637,7 @@ export default function DriversPage() {
               </div>
             </section>
 
-            {/* ALL DRIVERS */}
+            {                 }
 
             <section className="drivers-section">
 

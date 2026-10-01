@@ -12,6 +12,8 @@ import {
   Eye,
   EyeOff,
   UserRound,
+  Monitor,
+  LogOut,
 } from "lucide-react";
 
 import {
@@ -22,11 +24,15 @@ import {
   changePassword,
   getUserSettings,
   updateUserSettings,
+  getSessions,
+  revokeSession,
+  forgotPassword,
   type UserProfile,
   type ProfileStats,
   type Achievement,
   type SeasonSummary,
   type UserSettings,
+  type UserSession,
 } from "./auth.api";
 
 import "./profile.css";
@@ -37,6 +43,22 @@ import {
   useState,
   type FormEvent,
 } from "react";
+
+function formatRelativeTime(iso: string | null): string {
+  if (!iso) return "Unknown";
+
+  const diffMs = Date.now() - new Date(iso).getTime();
+  const diffMin = Math.floor(diffMs / 60000);
+
+  if (diffMin < 1) return "Just now";
+  if (diffMin < 60) return `${diffMin} min ago`;
+
+  const diffHr = Math.floor(diffMin / 60);
+  if (diffHr < 24) return `${diffHr} hr${diffHr === 1 ? "" : "s"} ago`;
+
+  const diffDay = Math.floor(diffHr / 24);
+  return `${diffDay} day${diffDay === 1 ? "" : "s"} ago`;
+}
 
 function formatWatchTime(seconds: number): string {
   if (!Number.isFinite(seconds) || seconds <= 0) {
@@ -136,6 +158,49 @@ export default function ProfilePage() {
   const [showConfirmPassword, setShowConfirmPassword] =
     useState(false);
 
+  const [sessions, setSessions] =
+    useState<UserSession[] | null>(null);
+
+  const [sessionsError, setSessionsError] =
+    useState("");
+
+  const [revokingSessionId, setRevokingSessionId] =
+    useState<number | null>(null);
+
+  const [forgotSending, setForgotSending] =
+    useState(false);
+
+  const [forgotMessage, setForgotMessage] =
+    useState("");
+
+  async function handleForgotPassword() {
+    if (!profile?.email) {
+      setPasswordError(
+        "No email is on file for this account, so a reset link can't be sent.",
+      );
+      return;
+    }
+
+    setForgotSending(true);
+    setPasswordError("");
+    setForgotMessage("");
+
+    try {
+      await forgotPassword(profile.email);
+      setForgotMessage(
+        "If this email is on your account, a reset link has been sent. Check your inbox.",
+      );
+    } catch (err) {
+      setPasswordError(
+        err instanceof Error
+          ? err.message
+          : "Unable to send a reset link right now.",
+      );
+    } finally {
+      setForgotSending(false);
+    }
+  }
+
   async function loadProfile(
     showLoading = true,
   ) {
@@ -171,6 +236,51 @@ export default function ProfilePage() {
   useEffect(() => {
     loadProfile();
   }, []);
+
+  useEffect(() => {
+    let active = true;
+
+    getSessions()
+      .then((data) => {
+        if (active) {
+          setSessions(data);
+        }
+      })
+      .catch((err) => {
+        if (active) {
+          setSessionsError(
+            err instanceof Error
+              ? err.message
+              : "Unable to load your sessions.",
+          );
+        }
+      });
+
+    return () => {
+      active = false;
+    };
+  }, []);
+
+  async function handleRevokeSession(sessionId: number) {
+    setRevokingSessionId(sessionId);
+    setSessionsError("");
+
+    try {
+      await revokeSession(sessionId);
+      setSessions(
+        (current) =>
+          current?.filter((s) => s.id !== sessionId) ?? null,
+      );
+    } catch (err) {
+      setSessionsError(
+        err instanceof Error
+          ? err.message
+          : "Unable to revoke that session.",
+      );
+    } finally {
+      setRevokingSessionId(null);
+    }
+  }
 
   useEffect(() => {
     let active = true;
@@ -544,7 +654,7 @@ export default function ProfilePage() {
 
       <div className="profile-shell">
 
-        {/* PAGE HEADER */}
+        {                 }
 
         <header className="profile-header">
           <div className="profile-header-copy">
@@ -575,11 +685,11 @@ export default function ProfilePage() {
 
         <div className="profile-layout">
 
-          {/* SIDEBAR */}
+          {             }
 
           <aside className="profile-sidebar">
 
-            {/* PROFILE HERO */}
+            {                  }
 
             <section className="profile-card profile-hero">
 
@@ -659,7 +769,7 @@ export default function ProfilePage() {
 
             </section>
 
-            {/* ACCOUNT OVERVIEW */}
+            {                      }
 
             <section className="profile-section profile-overview-card">
               <div className="profile-section-heading">
@@ -739,7 +849,7 @@ export default function ProfilePage() {
 
           </aside>
 
-          {/* MAIN CONTENT */}
+          {                  }
 
           <div className="profile-main">
 
@@ -772,7 +882,7 @@ export default function ProfilePage() {
               </div>
             </section>
 
-            {/* 2026 SEASON SUMMARY */}
+            {                         }
 
             <section className="profile-section profile-span-2 profile-season-section">
 
@@ -1000,7 +1110,7 @@ export default function ProfilePage() {
 
             </section>
 
-            {/* ACHIEVEMENTS */}
+            {                  }
 
             <section className="profile-section profile-span-2 profile-achievements-section">
               <div className="profile-section-heading">
@@ -1119,7 +1229,7 @@ export default function ProfilePage() {
 
             </section>
 
-            {/* ACCOUNT SETTINGS */}
+            {                      }
 
             <section className="profile-section">
               <div className="profile-section-heading">
@@ -1347,7 +1457,7 @@ export default function ProfilePage() {
               )}
             </section>
 
-            {/* SECURITY */}
+            {              }
 
             <section className="profile-section">
               <div className="profile-section-heading">
@@ -1432,7 +1542,21 @@ export default function ProfilePage() {
                           )}
                         </button>
                       </div>
+
                     </label>
+                  )}
+
+                  {profile?.has_password && (
+                    <button
+                      type="button"
+                      className="profile-forgot-link"
+                      onClick={handleForgotPassword}
+                      disabled={forgotSending}
+                    >
+                      {forgotSending
+                        ? "Sending reset link..."
+                        : "Forgot your password?"}
+                    </button>
                   )}
 
                   <label className="profile-field">
@@ -1545,6 +1669,13 @@ export default function ProfilePage() {
                   </div>
                 )}
 
+                {forgotMessage && (
+                  <div className="profile-form-success">
+                    <CheckCircle2 size={16} />
+                    <span>{forgotMessage}</span>
+                  </div>
+                )}
+
                 {passwordMessage && (
                   <div className="profile-form-success">
                     <CheckCircle2 size={16} />
@@ -1586,6 +1717,115 @@ export default function ProfilePage() {
 
                 </div>
               </form>
+            </section>
+
+            {              }
+
+            <section className="profile-section">
+              <div className="profile-section-heading">
+                <div>
+                  <span className="profile-section-label">
+                    ACTIVE SESSIONS
+                  </span>
+
+                  <h2>
+                    Signed-in devices
+                  </h2>
+                </div>
+
+                <Monitor size={20} />
+              </div>
+
+              {sessionsError && (
+                <div className="profile-form-error">
+                  {sessionsError}
+                </div>
+              )}
+
+              {sessions === null && !sessionsError && (
+                <div className="profile-security-card">
+                  <div>
+                    <strong>
+                      Loading sessions
+                    </strong>
+
+                    <p>
+                      Retrieving your active sessions...
+                    </p>
+                  </div>
+
+                  <LoaderCircle
+                    size={20}
+                    className="profile-button-spinner"
+                  />
+                </div>
+              )}
+
+              {sessions !== null && sessions.length === 0 && (
+                <div className="profile-security-card">
+                  <div>
+                    <strong>
+                      No active sessions
+                    </strong>
+
+                    <p>
+                      You're not signed in anywhere right now.
+                    </p>
+                  </div>
+                </div>
+              )}
+
+              {sessions !== null &&
+                sessions.map((session) => (
+                  <div
+                    key={session.id}
+                    className="profile-security-card"
+                  >
+                    <div>
+                      <strong>
+                        {session.device}
+                        {session.is_current && (
+                          <span className="profile-mini-pill profile-mini-pill-live" style={{ marginLeft: 10 }}>
+                            THIS DEVICE
+                          </span>
+                        )}
+                      </strong>
+
+                      <p>
+                        Signed in {formatRelativeTime(session.signed_in_at)}
+                        {" · "}
+                        Last active {formatRelativeTime(session.last_active_at)}
+                        {session.ip_address && (
+                          <>
+                            {" · "}
+                            {session.ip_address}
+                          </>
+                        )}
+                      </p>
+                    </div>
+
+                    {!session.is_current && (
+                      <button
+                        type="button"
+                        className="profile-save-button"
+                        onClick={() => handleRevokeSession(session.id)}
+                        disabled={revokingSessionId === session.id}
+                      >
+                        {revokingSessionId === session.id ? (
+                          <LoaderCircle
+                            size={17}
+                            className="profile-button-spinner"
+                          />
+                        ) : (
+                          <>
+                            <LogOut size={17} />
+                            REVOKE
+                          </>
+                        )}
+                      </button>
+                    )}
+                  </div>
+                ))}
             </section>
 
           </div>

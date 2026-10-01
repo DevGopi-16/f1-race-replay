@@ -14,12 +14,17 @@ import Reveal from "../../components/motion/Reveal";
 import { useReplay } from "./hooks/useReplay";
 
 import ReplayStatus from "./components/ReplayStatus";
-import ReplayTrack from "./components/ReplayTrack";
+import ReplayTrack, {
+  hasReplayDrsZones,
+} from "./components/ReplayTrack";
 import ReplayLeaderboard from "./components/ReplayLeaderboard";
 import ReplayDriverFocus from "./components/ReplayDriverFocus";
 import ReplayControls from "./components/ReplayControls";
 
-import type { ReplaySessionType } from "./replay.types";
+import type {
+  ReplayOverlayState,
+  ReplaySessionType,
+} from "./replay.types";
 
 import { saveReplayHistory } from "./replay-history.api";
 
@@ -28,10 +33,65 @@ import "./replay.css";
 export default function ReplayPage() {
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
+  const [overlays, setOverlays] = useState<ReplayOverlayState>(() => {
+    const defaults: ReplayOverlayState = {
+      drs: true,
+      sectors: true,
+    };
 
-  // ============================================================
-  // DRIVER SELECTION
-  // ============================================================
+    try {
+      const stored = window.localStorage.getItem("replay-live-overlays");
+
+      if (!stored) {
+        return defaults;
+      }
+
+      const parsed: unknown = JSON.parse(stored);
+
+      if (
+        parsed &&
+        typeof parsed === "object" &&
+        "drs" in parsed &&
+        "sectors" in parsed &&
+        typeof parsed.drs === "boolean" &&
+        typeof parsed.sectors === "boolean"
+      ) {
+        return {
+          drs: parsed.drs,
+          sectors: parsed.sectors,
+        };
+      }
+    } catch {
+      return defaults;
+    }
+
+    return defaults;
+  });
+
+  const toggleReplayOverlay = useCallback(
+    (overlay: keyof ReplayOverlayState) => {
+      setOverlays((current) => ({
+        ...current,
+        [overlay]: !current[overlay],
+      }));
+    },
+    [],
+  );
+
+  useEffect(() => {
+    try {
+      window.localStorage.setItem(
+        "replay-live-overlays",
+        JSON.stringify(overlays),
+      );
+    } catch {
+
+    }
+  }, [overlays]);
+
+
+
+
 
   const [selectedDrivers, setSelectedDrivers] =
     useState<string[]>([]);
@@ -56,9 +116,9 @@ export default function ReplayPage() {
     });
   };
 
-  // ============================================================
-  // REPLAY STATE
-  // ============================================================
+
+
+
   const year = Number(searchParams.get("year") ?? 2026);
 
   const grandPrix = searchParams.get("grandPrix") ?? "";
@@ -88,9 +148,9 @@ export default function ReplayPage() {
   const playbackGenerationRef =
     useRef(0);
 
-  // ============================================================
-  // REPLAY DATA
-  // ============================================================
+
+
+
 
   const query = useMemo(
     () => loadedQuery,
@@ -102,14 +162,21 @@ export default function ReplayPage() {
     loading,
     error,
     driverStatuses,
+    totalFrames: expectedFrameCount,
   } = useReplay(query);
 
-  // ============================================================
-  // REPLAY METADATA
-  // ============================================================
+
+
+
 
   const totalFrames =
     data?.frames?.length ?? 0;
+
+  const availableFrameCountRef = useRef(totalFrames);
+  availableFrameCountRef.current = totalFrames;
+
+  const expectedFrameCountRef = useRef(expectedFrameCount);
+  expectedFrameCountRef.current = expectedFrameCount;
 
   const currentFrame =
     data?.frames?.[frameIndex] ?? null;
@@ -146,12 +213,12 @@ export default function ReplayPage() {
         0,
     );
 
-  // ============================================================
-  // REPLAY HISTORY REFS
-  //
-  // These are updated on every render so history persistence
-  // always sees the newest replay state.
-  // ============================================================
+
+
+
+
+
+
 
   const latestFrameIndexRef =
     useRef(frameIndex);
@@ -174,19 +241,19 @@ export default function ReplayPage() {
   const historyLastSaveTimeRef =
     useRef(0);
 
-  /*
-   * Every history request is placed into this promise chain.
-   *
-   * This prevents:
-   *
-   *   normal save -> completion save
-   *
-   * from racing each other.
-   */
+
+
+
+
+
+
+
+
+
   const historySaveQueueRef =
     useRef<Promise<void>>(Promise.resolve());
 
-  // Keep latest values available to callbacks/unmount handlers.
+
   latestFrameIndexRef.current =
     frameIndex;
 
@@ -202,9 +269,9 @@ export default function ReplayPage() {
   latestMetaRef.current =
     meta;
 
-  // ============================================================
-  // REPLAY HISTORY PERSISTENCE
-  // ============================================================
+
+
+
 
   const persistReplayHistory = useCallback(
     (
@@ -225,9 +292,9 @@ export default function ReplayPage() {
       const currentFps =
         latestFpsRef.current;
 
-      // ----------------------------------------------------------
-      // Only authenticated users have replay history.
-      // ----------------------------------------------------------
+
+
+
 
       if (!currentQuery) {
         return Promise.resolve();
@@ -237,9 +304,9 @@ export default function ReplayPage() {
         return Promise.resolve();
       }
 
-      // ----------------------------------------------------------
-      // Resolve race round.
-      // ----------------------------------------------------------
+
+
+
 
       const round =
         Number(
@@ -271,11 +338,11 @@ export default function ReplayPage() {
           ),
         );
 
-      // ----------------------------------------------------------
-      // Progress is based on replay timeline position.
-      //
-      // Do NOT use playback speed here.
-      // ----------------------------------------------------------
+
+
+
+
+
 
       const normalizedProgress =
         completed
@@ -291,10 +358,10 @@ export default function ReplayPage() {
               )
             : 0;
 
-      /*
-       * Duration represents the actual replay timeline position.
-       * Playback speed must not change this value.
-       */
+
+
+
+
       const durationSeconds =
         total > 1
           ? normalizedFrameIndex /
@@ -304,9 +371,9 @@ export default function ReplayPage() {
             )
           : 0;
 
-      // ----------------------------------------------------------
-      // Avoid duplicate non-completed writes.
-      // ----------------------------------------------------------
+
+
+
 
       if (
         !completed &&
@@ -328,15 +395,15 @@ export default function ReplayPage() {
         completed,
       };
 
-      // ----------------------------------------------------------
-      // Queue this save behind any previous save.
-      // ----------------------------------------------------------
+
+
+
 
       const savePromise =
         historySaveQueueRef.current
           .catch(() => {
-            // Previous history failure must not block
-            // future history saves.
+
+
           })
           .then(async () => {
             try {
@@ -350,9 +417,9 @@ export default function ReplayPage() {
               historyLastSaveTimeRef.current =
                 Date.now();
             } catch (historyError) {
-              /*
-               * History must NEVER break replay playback.
-               */
+
+
+
               console.warn(
                 "[ReplayPage] Failed to save replay history:",
                 historyError,
@@ -368,12 +435,12 @@ export default function ReplayPage() {
     [],
   );
 
-  // ============================================================
-  // SAVE INITIAL REPLAY
-  //
-  // Once a replay has loaded, create/update its history record
-  // at the current starting position.
-  // ============================================================
+
+
+
+
+
+
 
   useEffect(() => {
     if (
@@ -394,16 +461,16 @@ export default function ReplayPage() {
     void persistReplayHistory(false);
   }, [
     loadedQuery,
-    data?.frames?.length,
+    data,
     persistReplayHistory,
   ]);
 
-  // ============================================================
-  // PERIODIC HISTORY SAVE
-  //
-  // Uses frameIndex changes from the existing playback engine.
-  // No second timer / animation loop is created.
-  // ============================================================
+
+
+
+
+
+
 
   useEffect(() => {
     if (
@@ -429,13 +496,13 @@ export default function ReplayPage() {
     frameIndex,
     playing,
     loadedQuery,
-    data?.frames?.length,
+    data,
     persistReplayHistory,
   ]);
 
-  // ============================================================
-  // SAVE WHEN REPLAY FINISHES
-  // ============================================================
+
+
+
 
   useEffect(() => {
     if (
@@ -452,22 +519,22 @@ export default function ReplayPage() {
       lastFrame > 0 &&
       frameIndex === lastFrame
     ) {
-      /*
-       * Because saves are queued, this completion save will
-       * execute after any previous periodic save.
-       */
+
+
+
+
       void persistReplayHistory(true);
     }
   }, [
     frameIndex,
     loadedQuery,
-    data?.frames?.length,
+    data,
     persistReplayHistory,
   ]);
 
-  // ============================================================
-  // SAVE BEFORE LEAVING THE REPLAY PAGE
-  // ============================================================
+
+
+
 
   useEffect(() => {
     return () => {
@@ -540,12 +607,12 @@ export default function ReplayPage() {
             )
           : 0;
 
-      /*
-       * Directly queue the latest position.
-       *
-       * This is intentionally independent from React state
-       * because the component is already unmounting.
-       */
+
+
+
+
+
+
       void saveReplayHistory({
         year: currentQuery.year,
         round,
@@ -567,9 +634,9 @@ export default function ReplayPage() {
     };
   }, []);
 
-  // ============================================================
-  // RESET WHEN LOADED REPLAY CHANGES
-  // ============================================================
+
+
+
 
   useEffect(() => {
     playbackGenerationRef.current +=
@@ -581,10 +648,10 @@ export default function ReplayPage() {
     setPlaying(false);
   }, [loadedQuery]);
 
-  
-  // ============================================================
-  // EXISTING PLAYBACK ENGINE
-  // ============================================================
+
+
+
+
 
   useEffect(() => {
     if (
@@ -596,9 +663,6 @@ export default function ReplayPage() {
 
     const generation =
       ++playbackGenerationRef.current;
-
-    const total =
-      data.frames.length;
 
     const frameDuration =
       1000 /
@@ -613,11 +677,12 @@ export default function ReplayPage() {
           0,
           frameIndex,
         ),
-        total - 1,
+        availableFrameCountRef.current - 1,
       );
 
-    const startTime =
+    let startTime =
       performance.now();
+    let bufferingStartedAt: number | null = null;
 
     let rafId: number | null =
       null;
@@ -647,20 +712,31 @@ export default function ReplayPage() {
       const nextFrame =
         startFrame + offset;
 
-      if (
-        nextFrame >=
-        total - 1
-      ) {
+      const expectedLastFrame =
+        Math.max(0, expectedFrameCountRef.current - 1);
+
+      if (nextFrame >= expectedLastFrame) {
         latestFrameIndexRef.current =
-          total - 1;
+          expectedLastFrame;
 
         setFrameIndex(
-          total - 1,
+          expectedLastFrame,
         );
 
         setPlaying(false);
 
         return;
+      }
+
+      if (nextFrame >= availableFrameCountRef.current) {
+        bufferingStartedAt ??= now;
+        rafId = requestAnimationFrame(animate);
+        return;
+      }
+
+      if (bufferingStartedAt !== null) {
+        startTime += now - bufferingStartedAt;
+        bufferingStartedAt = null;
       }
 
       if (
@@ -705,12 +781,12 @@ export default function ReplayPage() {
     playing,
     fps,
     speed,
-    data?.frames?.length,
+    data,
   ]);
 
-  // ============================================================
-  // DRIVER / FRAME DATA
-  // ============================================================
+
+
+
 
   const currentDriverCodes =
     Object.keys(
@@ -746,8 +822,8 @@ export default function ReplayPage() {
         0,
     );
 
-  // Keep these frame values available for the existing
-  // replay data structure / future replay UI.
+
+
   const drs =
     Number(
       primaryDriver?.drs ??
@@ -800,9 +876,9 @@ export default function ReplayPage() {
         false,
     );
 
-  // ============================================================
-  // TIME / PROGRESS
-  // ============================================================
+
+
+
 
   const formatTime = (
     seconds: number,
@@ -850,11 +926,11 @@ export default function ReplayPage() {
     )}`;
   };
 
-  /*
-   * UI playback time changes with playback speed.
-   *
-   * History duration does NOT use this value.
-   */
+
+
+
+
+
   const replaySeconds =
     totalFrames > 1
       ? (frameIndex /
@@ -875,9 +951,9 @@ export default function ReplayPage() {
         100
       : 0;
 
-  // ============================================================
-  // PLAY / PAUSE
-  // ============================================================
+
+
+
 
   const handlePlayPause = () => {
     if (
@@ -918,9 +994,9 @@ export default function ReplayPage() {
       const nextPlaying =
         !current;
 
-      /*
-       * Save immediately when pausing.
-       */
+
+
+
       if (
         current &&
         !nextPlaying
@@ -934,9 +1010,9 @@ export default function ReplayPage() {
     });
   };
 
-  // ============================================================
-  // FRAME / SEEK
-  // ============================================================
+
+
+
 
   const handleFrameChange = (
     index: number,
@@ -958,10 +1034,10 @@ export default function ReplayPage() {
         ),
       );
 
-    /*
-     * Update the ref immediately so history persistence sees
-     * the new position even before React renders again.
-     */
+
+
+
+
     latestFrameIndexRef.current =
       nextFrame;
 
@@ -978,9 +1054,9 @@ export default function ReplayPage() {
     );
   };
 
-  // ============================================================
-  // SPEED
-  // ============================================================
+
+
+
 
   const handleSpeedChange = (
     value: number,
@@ -991,12 +1067,12 @@ export default function ReplayPage() {
     setSpeed(value);
   };
 
-  // ============================================================
-  // KEYBOARD CONTROLS
-  // ============================================================
-    // ============================================================
-  // AUTO-LOAD FROM URL PARAMS
-  // ============================================================
+
+
+
+
+
+
 
   useEffect(() => {
     if (!grandPrix) {
@@ -1005,7 +1081,7 @@ export default function ReplayPage() {
     }
 
     setLoadedQuery({ year, grandPrix, sessionType, fps });
-    // eslint-disable-next-line react-hooks/exhaustive-deps
+
   }, [year, grandPrix, sessionType, fps]);
 
   useEffect(() => {
@@ -1013,16 +1089,32 @@ export default function ReplayPage() {
 
       event: KeyboardEvent,
     ) => {
-      if (
-        event.target instanceof
-          HTMLInputElement ||
-        event.target instanceof
-          HTMLTextAreaElement ||
-        event.target instanceof
-          HTMLSelectElement
+    const target = event.target;
+
+    if (
+      target instanceof HTMLInputElement ||
+      target instanceof HTMLTextAreaElement ||
+      target instanceof HTMLSelectElement ||
+      (target instanceof HTMLElement && target.isContentEditable)
       ) {
         return;
       }
+
+    if (!event.altKey && !event.ctrlKey && !event.metaKey) {
+      const key = event.key.toLowerCase();
+
+      if (key === "d") {
+        if (data?.track && hasReplayDrsZones(data.track)) {
+          toggleReplayOverlay("drs");
+        }
+        return;
+      }
+
+      if (key === "s") {
+        toggleReplayOverlay("sectors");
+        return;
+      }
+    }
 
       if (
         event.code === "Space"
@@ -1125,9 +1217,9 @@ export default function ReplayPage() {
     };
   });
 
-  // ============================================================
-  // RENDER
-  // ============================================================
+
+
+
 
   return (
     <PageContainer
@@ -1136,7 +1228,7 @@ export default function ReplayPage() {
     >
       <div className="replay-shell">
 
-        {/* HEADER */}
+        {            }
 
         <Reveal>
           <header className="replay-header">
@@ -1198,7 +1290,7 @@ export default function ReplayPage() {
           </header>
         </Reveal>
 
-        {/* RACE META */}
+        {               }
 
         <section className="replay-race-meta">
 
@@ -1294,7 +1386,7 @@ export default function ReplayPage() {
           !error && (
             <>
 
-              {/* TRACK + LEADERBOARD */}
+              {                         }
 
               <Reveal>
                 <main className="replay-main-grid">
@@ -1315,6 +1407,7 @@ export default function ReplayPage() {
                       track={
                         data.track
                       }
+                      overlays={overlays}
 
                       frames={
                         data.frames
@@ -1329,7 +1422,7 @@ export default function ReplayPage() {
                       }
 
                       frameRate={
-                        data.frame_rate
+                        fps * speed
                       }
 
                       driverColors={
@@ -1367,250 +1460,9 @@ export default function ReplayPage() {
 
                 </main>
               </Reveal>
-               {/* SELECTED DRIVERS */}
-              <Reveal delay="short">
-
-                <section className="replay-driver-section">
-
-                  <div className="replay-section-heading">
-
-                    <span>
-                      SELECTED DRIVERS
-                    </span>
-
-                    <small>
-                      UP TO 3
-                    </small>
-
-                  </div>
-
-                  <ReplayDriverFocus
-                    frame={
-                      currentFrame
-                    }
-
-                    driverColors={
-                      data.driver_colors
-                    }
-
-                    selectedDrivers={
-                      selectedDrivers
-                    }
-
-                    onDriverSelect={
-                      toggleSelectedDriver
-                    }
-                  />
-
-                </section>
-
-              </Reveal>
-
-              {/* WEATHER / STATUS / RACE INFO */}
+              {                   }
 
               <Reveal delay="short">
-
-                <section className="replay-info-grid">
-
-                  <div className="replay-info-panel">
-
-                    <span className="replay-info-title">
-                      WEATHER
-                    </span>
-
-                    <div className="replay-info-items">
-
-                      <div className="replay-weather-item replay-weather-track">
-
-                        <div className="replay-weather-icon">
-                          <img
-                            src="/images/weather/thermometer.png"
-                            alt=""
-                          />
-                        </div>
-
-                        <div className="replay-weather-copy">
-                          <small>
-                            TRACK
-                          </small>
-
-                          <strong>
-                            42°C
-                          </strong>
-                        </div>
-
-                      </div>
-
-                      <div className="replay-weather-item replay-weather-air">
-
-                        <div className="replay-weather-icon">
-                          <img
-                            src="/images/weather/rain.png"
-                            alt=""
-                          />
-                        </div>
-
-                        <div className="replay-weather-copy">
-                          <small>
-                            AIR
-                          </small>
-
-                          <strong>
-                            27°C
-                          </strong>
-                        </div>
-
-                      </div>
-
-                      <div className="replay-weather-item replay-weather-humid">
-
-                        <div className="replay-weather-icon">
-                          <img
-                            src="/images/weather/drop.png"
-                            alt=""
-                          />
-                        </div>
-
-                        <div className="replay-weather-copy">
-                          <small>
-                            HUMID
-                          </small>
-
-                          <strong>
-                            61%
-                          </strong>
-                        </div>
-
-                      </div>
-
-                      <div className="replay-weather-item replay-weather-wind">
-
-                        <div className="replay-weather-icon">
-                          <img
-                            src="/images/weather/wind.png"
-                            alt=""
-                          />
-                        </div>
-
-                        <div className="replay-weather-copy">
-                          <small>
-                            WIND
-                          </small>
-
-                          <strong>
-                            11 km/h
-                          </strong>
-                        </div>
-
-                      </div>
-
-                    </div>
-
-                  </div>
-
-                  <div className="replay-info-panel">
-
-                    <span className="replay-info-title">
-                      TRACK STATUS
-                    </span>
-
-                    <div className="replay-status-list">
-
-                      <div>
-                        <span className="status-green" />
-                        GREEN
-                      </div>
-
-                      <div>
-                        SC
-                        <strong>
-                          NONE
-                        </strong>
-                      </div>
-
-                      <div>
-                        VSC
-                        <strong>
-                          OFF
-                        </strong>
-                      </div>
-
-                      <div>
-                        FLAGS
-                        <strong>
-                          NONE
-                        </strong>
-                      </div>
-
-                    </div>
-
-                  </div>
-
-                  <div className="replay-info-panel">
-
-                    <span className="replay-info-title">
-                      RACE INFO
-                    </span>
-
-                    <div className="replay-race-info">
-
-                      <div>
-                        <small>
-                          LAP
-                        </small>
-
-                        <strong>
-                          {lap || "--"} /{" "}
-                          {totalLaps}
-                        </strong>
-                      </div>
-
-                      <div>
-                        <small>
-                          TIME
-                        </small>
-
-                        <strong>
-                          {formatTime(
-                            replaySeconds,
-                          )}
-                        </strong>
-                      </div>
-
-                      <div>
-                        <small>
-                          SPEED
-                        </small>
-
-                        <strong>
-                          {Math.round(
-                            speedValue,
-                          )}{" "}
-                          km/h
-                        </strong>
-                      </div>
-
-                      <div>
-                        <small>
-                          SECTOR
-                        </small>
-
-                        <strong>
-                          2
-                        </strong>
-                      </div>
-
-                    </div>
-
-                  </div>
-
-                </section>
-
-              </Reveal>
-
-              {/* RACE TIMELINE */}
-
-              <Reveal delay="medium">
 
                 <section className="replay-timeline-section">
 
@@ -1843,7 +1695,62 @@ export default function ReplayPage() {
                         playing={playing}
                         onPlayPause={handlePlayPause}
                         onFrameChange={handleFrameChange}
-                      />
+                        overlays={overlays}
+                        drsAvailable={hasReplayDrsZones(data.track)}
+                        onOverlayToggle={toggleReplayOverlay}
+                      >
+                        <section className="replay-info-grid replay-controls-info-grid">
+                          <div className="replay-info-panel">
+                            <span className="replay-info-title">WEATHER</span>
+                            <div className="replay-info-items">
+                              <div className="replay-weather-item replay-weather-track">
+                                <div className="replay-weather-icon">
+                                  <img src="/images/weather/thermometer.png" alt="" />
+                                </div>
+                                <div className="replay-weather-copy"><small>TRACK</small><strong>42°C</strong></div>
+                              </div>
+                              <div className="replay-weather-item replay-weather-air">
+                                <div className="replay-weather-icon">
+                                  <img src="/images/weather/rain.png" alt="" />
+                                </div>
+                                <div className="replay-weather-copy"><small>AIR</small><strong>27°C</strong></div>
+                              </div>
+                              <div className="replay-weather-item replay-weather-humid">
+                                <div className="replay-weather-icon">
+                                  <img src="/images/weather/drop.png" alt="" />
+                                </div>
+                                <div className="replay-weather-copy"><small>HUMID</small><strong>61%</strong></div>
+                              </div>
+                              <div className="replay-weather-item replay-weather-wind">
+                                <div className="replay-weather-icon">
+                                  <img src="/images/weather/wind.png" alt="" />
+                                </div>
+                                <div className="replay-weather-copy"><small>WIND</small><strong>11 km/h</strong></div>
+                              </div>
+                            </div>
+                          </div>
+
+                          <div className="replay-info-panel">
+                            <span className="replay-info-title">TRACK STATUS</span>
+                            <div className="replay-status-list">
+                              <div><span className="status-green" />GREEN</div>
+                              <div>SC<strong>NONE</strong></div>
+                              <div>VSC<strong>OFF</strong></div>
+                              <div>FLAGS<strong>NONE</strong></div>
+                            </div>
+                          </div>
+
+                          <div className="replay-info-panel">
+                            <span className="replay-info-title">RACE INFO</span>
+                            <div className="replay-race-info">
+                              <div><small>LAP</small><strong>{lap || "--"} / {totalLaps}</strong></div>
+                              <div><small>TIME</small><strong>{formatTime(replaySeconds)}</strong></div>
+                              <div><small>SPEED</small><strong>{Math.round(speedValue)} km/h</strong></div>
+                              <div><small>SECTOR</small><strong>2</strong></div>
+                            </div>
+                          </div>
+                        </section>
+                      </ReplayControls>
 
                       <div className="replay-playback-meta">
 
@@ -1880,7 +1787,48 @@ export default function ReplayPage() {
                     </div>
                   </div>
                 </section>
+
               </Reveal>
+
+              {                      }
+              <Reveal delay="short">
+
+                <section className="replay-driver-section">
+
+                  <div className="replay-section-heading">
+
+                    <span>
+                      SELECTED DRIVERS
+                    </span>
+
+                    <small>
+                      UP TO 3
+                    </small>
+
+                  </div>
+
+                  <ReplayDriverFocus
+                    frame={
+                      currentFrame
+                    }
+
+                    driverColors={
+                      data.driver_colors
+                    }
+
+                    selectedDrivers={
+                      selectedDrivers
+                    }
+
+                    onDriverSelect={
+                      toggleSelectedDriver
+                    }
+                  />
+
+                </section>
+
+              </Reveal>
+
             </>
           )}
 

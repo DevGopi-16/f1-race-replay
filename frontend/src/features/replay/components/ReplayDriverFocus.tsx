@@ -139,9 +139,9 @@ export default function ReplayDriverFocus({
   selectedDrivers = [],
   onDriverSelect,
 }: Props) {
-  /*
-   * Build the live driver list directly from the current replay frame.
-   */
+
+
+
   const availableDrivers = useMemo(() => {
     if (!frame?.drivers) {
       return [];
@@ -164,18 +164,18 @@ export default function ReplayDriverFocus({
     driverColors,
   ]);
 
-  /*
-   * IMPORTANT:
-   * Selection comes ONLY from ReplayPage.
-   *
-   * Leaderboard click
-   *      ↓
-   * ReplayPage.selectedDrivers
-   *      ↓
-   * ReplayDriverFocus
-   *      ↓
-   * selected driver cards
-   */
+
+
+
+
+
+
+
+
+
+
+
+
   const activeSelectedDrivers = useMemo(
     () =>
       (selectedDrivers ?? [])
@@ -225,7 +225,7 @@ export default function ReplayDriverFocus({
   return (
     <section className="replay-driver-focus">
 
-      {/* HEADER */}
+      {            }
       <div className="replay-driver-focus-header">
         <div>
           <span>DRIVER FOCUS</span>
@@ -237,7 +237,7 @@ export default function ReplayDriverFocus({
         </small>
       </div>
 
-      {/* DRIVER SELECTOR */}
+      {                     }
       <div className="replay-driver-picker">
         {availableDrivers.map(
           (driver) => {
@@ -283,7 +283,7 @@ export default function ReplayDriverFocus({
         )}
       </div>
 
-      {/* SELECTED DRIVER CARDS */}
+      {                           }
       <div className="replay-driver-cards">
 
         {selectedDriverData.length === 0 && (
@@ -303,7 +303,7 @@ export default function ReplayDriverFocus({
               key={driver.code}
             >
 
-              {/* DRIVER HEADER */}
+              {                   }
               <div className="replay-driver-card-header">
 
                 <div className="replay-driver-card-identity">
@@ -330,7 +330,7 @@ export default function ReplayDriverFocus({
 
               </div>
 
-              {/* RUNNING */}
+              {             }
               <div className="replay-driver-metric-row">
                 <span>RUNNING</span>
                 <strong>
@@ -338,7 +338,7 @@ export default function ReplayDriverFocus({
                 </strong>
               </div>
 
-              {/* SPEED */}
+              {           }
               <div className="replay-driver-metric-row">
                 <span>SPEED</span>
                 <strong>
@@ -350,7 +350,7 @@ export default function ReplayDriverFocus({
                 </strong>
               </div>
 
-              {/* TYRE */}
+              {          }
               <div className="replay-driver-metric-row">
                 <span>TYRE</span>
                 <strong>
@@ -364,7 +364,7 @@ export default function ReplayDriverFocus({
                 </strong>
               </div>
 
-              {/* THROTTLE */}
+              {              }
               <div className="replay-driver-metric-row">
                 <span>THROTTLE</span>
                 <strong>
@@ -376,7 +376,7 @@ export default function ReplayDriverFocus({
                 </strong>
               </div>
 
-              {/* BRAKE */}
+              {           }
               <div className="replay-driver-metric-row">
                 <span>BRAKE</span>
                 <strong>
@@ -388,13 +388,13 @@ export default function ReplayDriverFocus({
                 </strong>
               </div>
 
-              {/* =================================================
-                  TELEMETRY BARS
-                  ================================================= */}
+              {
+
+                                                                      }
 
               <div className="replay-selected-telemetry-bars">
 
-                {/* THROTTLE */}
+                {              }
                 <div className="replay-selected-telemetry-row">
 
                   <span className="replay-selected-telemetry-label">
@@ -427,7 +427,7 @@ export default function ReplayDriverFocus({
                 </div>
 
 
-                {/* BRAKE */}
+                {           }
                 <div className="replay-selected-telemetry-row">
 
                   <span className="replay-selected-telemetry-label">
@@ -460,7 +460,7 @@ export default function ReplayDriverFocus({
                 </div>
 
 
-                {/* TYRE LIFE */}
+                {               }
                 <div className="replay-selected-telemetry-row">
 
                   <span className="replay-selected-telemetry-label">

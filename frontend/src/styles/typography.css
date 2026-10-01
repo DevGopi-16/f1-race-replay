@@ -131,7 +131,7 @@
   color: var(--color-white-60);
 }
 
-/* Prevent huge display text from overflowing narrow screens */
+
 
 @media (max-width: 768px) {
   .display-xl {

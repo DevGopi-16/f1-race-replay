@@ -1,0 +1,146 @@
+.t3d {
+  --accent: var(--color-accent, #e10600);
+  position: relative;
+  width: 100%;
+  aspect-ratio: 680 / 490;
+  min-height: 280px;
+  color: var(--color-white, #fff);
+  font-family: var(--font-mono, monospace);
+}
+
+.t3d-stage {
+  position: absolute;
+  inset: 0;
+  display: grid;
+  place-items: center;
+  perspective: 1200px;
+}
+
+.t3d-plane {
+  --bx: 56deg;
+  --bz: -26deg;
+  --tx: 0deg;
+  --ty: 0deg;
+  --s: 0.88;
+  position: relative;
+  width: 100%;
+  aspect-ratio: 680 / 490;
+  transform-style: preserve-3d;
+  transform: scale(var(--s)) rotateX(calc(var(--bx) + var(--ty))) rotateZ(calc(var(--bz) + var(--tx)));
+  transition: transform 700ms cubic-bezier(0.2, 0.7, 0.2, 1);
+}
+
+.t3d.is-top .t3d-plane {
+  --bx: 0deg;
+  --bz: 0deg;
+  --s: 0.98;
+}
+
+.t3d-layer {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  overflow: visible;
+  fill: none;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+.t3d-glow { stroke: var(--accent); stroke-width: calc(34px * var(--u, 1)); opacity: 0.35; filter: blur(calc(16px * var(--u, 1))); }
+.t3d-wall { stroke: #3a0d0c; stroke-width: calc(19px * var(--u, 1)); }
+.t3d-kerb { stroke: rgba(255, 255, 255, 0.55); stroke-width: calc(20px * var(--u, 1)); }
+.t3d-asphalt { stroke: #17171b; stroke-width: calc(16px * var(--u, 1)); }
+.t3d-sector { stroke-width: calc(2.4px * var(--u, 1)); opacity: 0.9; stroke-linecap: butt; }
+.t3d-sector-1 { stroke: var(--accent); }
+.t3d-sector-2 { stroke: rgba(255, 255, 255, 0.85); }
+.t3d-sector-3 { stroke: #7da5ff; }
+.t3d-racing-line { stroke: rgba(255, 255, 255, 0.28); stroke-width: calc(1.2px * var(--u, 1)); stroke-dasharray: calc(3px * var(--u, 1)) calc(9px * var(--u, 1)); }
+.t3d-trail { stroke: var(--accent); stroke-width: calc(6px * var(--u, 1)); filter: drop-shadow(0 0 calc(8px * var(--u, 1)) var(--accent)); }
+.t3d-start { stroke: #fff; stroke-width: calc(6px * var(--u, 1)); stroke-dasharray: calc(3px * var(--u, 1)) calc(3px * var(--u, 1)); stroke-linecap: butt; }
+.t3d-car-shadow { fill: rgba(0, 0, 0, 0.7); filter: blur(calc(3px * var(--u, 1))); }
+
+.t3d-car circle { stroke: #fff; stroke-width: calc(2px * var(--u, 1)); filter: drop-shadow(0 0 calc(8px * var(--u, 1)) var(--accent)); }
+.t3d-car-0 circle { fill: var(--accent); }
+.t3d-car-1 circle { fill: #f5f5f5; }
+.t3d-car-2 circle { fill: #7da5ff; }
+.t3d-car text { fill: #fff; font-size: calc(11px * var(--u, 1)); font-weight: 700; paint-order: stroke; stroke: #000; stroke-width: calc(3px * var(--u, 1)); }
+
+.t3d-hud {
+  position: absolute;
+  display: grid;
+  gap: 5px;
+  padding: 9px 12px;
+  border-left: 2px solid var(--accent);
+  background: rgba(8, 8, 10, 0.72);
+  backdrop-filter: blur(10px);
+  pointer-events: none;
+}
+.t3d-hud span { color: var(--color-white-35, rgba(255, 255, 255, 0.35)); font-size: 0.46rem; letter-spacing: 0.12em; }
+.t3d-hud strong { font-size: 0.95rem; font-variant-numeric: tabular-nums; }
+.t3d-hud small { font-size: 0.5rem; color: var(--color-white-35, rgba(255, 255, 255, 0.35)); }
+.t3d-hud-lap { left: 0; bottom: 0; }
+.t3d-hud-speed { right: 0; bottom: 0; }
+.t3d-hud-speed strong { color: var(--accent); }
+
+.t3d-sectors {
+  position: absolute;
+  left: 0;
+  top: 0;
+  display: flex;
+  gap: 4px;
+  pointer-events: none;
+}
+.t3d-sectors i {
+  padding: 5px 9px;
+  font-style: normal;
+  font-size: 0.5rem;
+  letter-spacing: 0.1em;
+  color: var(--color-white-35, rgba(255, 255, 255, 0.35));
+  border: 1px solid var(--color-white-10, rgba(255, 255, 255, 0.1));
+  transition: color 200ms, border-color 200ms, background 200ms;
+}
+.t3d-sectors i.is-on { color: #fff; border-color: var(--accent); background: rgba(225, 6, 0, 0.14); }
+
+.t3d-views {
+  position: absolute;
+  right: 0;
+  top: 0;
+  display: flex;
+  border: 1px solid var(--color-white-10, rgba(255, 255, 255, 0.1));
+}
+.t3d-views button {
+  padding: 6px 12px;
+  border: 0;
+  background: transparent;
+  color: var(--color-white-35, rgba(255, 255, 255, 0.45));
+  font: inherit;
+  font-size: 0.5rem;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  cursor: pointer;
+  transition: color 200ms, background 200ms;
+}
+.t3d-views button[aria-pressed="true"] { color: #fff; background: var(--accent); }
+.t3d-views button:focus-visible { outline: 2px solid #fff; outline-offset: -2px; }
+
+@media (max-width: 600px) {
+  .t3d { min-height: 240px; }
+  .t3d-plane { --bx: 50deg; --s: 0.95; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .t3d-plane { transition: none; }
+}
+
+.t3d-empty {
+  display: grid;
+  place-items: center;
+  height: 100%;
+  color: var(--color-white-25, rgba(255, 255, 255, 0.25));
+  font-size: 0.5rem;
+  letter-spacing: 0.14em;
+}
+
+.home-next-session-track { align-items: flex-end; }
+.home-next-session-track .t3d { margin-top: 170px; max-width: 640px; }

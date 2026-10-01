@@ -18,6 +18,7 @@ from typing import Optional
 from starlette.middleware.gzip import GZipMiddleware
 
 from fastapi import FastAPI, HTTPException, Query, Depends
+from sqlalchemy import text
 from sqlalchemy.orm import Session
 from src.auth.database import get_db
 from src.auth.dependencies import get_current_user
@@ -25,7 +26,6 @@ from fastapi.responses import FileResponse, JSONResponse, RedirectResponse, HTML
 from pydantic import BaseModel
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.staticfiles import StaticFiles
-
 
 # Internal Source Modules 
 from src.domain.track_geometry import build_track_geometry, extract_race_events, point_at_distance, get_track_outline, get_cached_track_outline
@@ -44,7 +44,6 @@ from src.domain.next_session import get_next_session
 from src.domain.serialize import serialize_frames, serialize_replay_frames, serialize_driver_colors
 from src.api.head_to_head import router as h2h_router
 
-
 from src.auth.routes import router as auth_router, get_current_active_user
 from src.auth.database import Base, engine, SessionLocal
 from src.auth.models import User
@@ -54,7 +53,10 @@ from src.auth.profile_routes import router as profile_router
 from src.auth.password_reset.routes import router as password_reset_router
 from src.auth.refresh_tokens.routes import router as refresh_tokens_router
 from src.auth.sessions.routes import router as sessions_router
+from src.auth.email_verification.routes import router as email_verification_router
+from src.auth.contact.routes import router as contact_router
 from src.auth.sessions.context import RequestContextMiddleware
+from src.config.settings import CORS_ORIGINS
 from src.live.session_watcher import run_forever as run_live_watcher
 from src.live.state import live_state
 
@@ -77,13 +79,7 @@ from src.api.settings import router as settings_router
 _REPLAY_TELEMETRY_CACHE = {}
 _REPLAY_SERIALIZED_CACHE = {}
 
-
-
 def _find_local_replay_cache(year, round_number, session_type="R"):
-    """
-    Find an existing computed replay telemetry pickle without
-    contacting FastF1 for telemetry.
-    """
     computed_dir = (
         Path(__file__).resolve().parent
         / "computed_data"
@@ -347,14 +343,7 @@ app.add_middleware(GZipMiddleware, minimum_size=1000)
 
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=[
-        origin.strip()
-        for origin in os.getenv(
-            "FRONTEND_ORIGIN",
-            "http://localhost:5173",
-        ).split(",")
-        if origin.strip()
-    ],
+    allow_origins=CORS_ORIGINS,
     allow_methods=["*"],
     allow_headers=["*"],
     allow_credentials=True,
@@ -365,12 +354,21 @@ app.add_middleware(RequestContextMiddleware)
 
 Base.metadata.create_all(bind=engine)
 
+
+@app.get("/health")
+def health_check(db: Session = Depends(get_db)):
+    db.execute(text("SELECT 1"))
+    return {"status": "ok"}
+
+
 app.include_router(auth_router)
 app.include_router(replay_history_router)
 app.include_router(profile_router)
 app.include_router(password_reset_router)
 app.include_router(refresh_tokens_router)
 app.include_router(sessions_router)
+app.include_router(email_verification_router)
+app.include_router(contact_router)
 app.include_router(h2h_router)
 
 # F1 API routers

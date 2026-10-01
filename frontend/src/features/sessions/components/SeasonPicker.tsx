@@ -7,10 +7,10 @@ interface Era {
   label: string;
   color: string;
   from: number;
-  to: number; // inclusive; use 9999 for "ongoing"
+  to: number;
 }
 
-// Newest first. Edit the years or colors here if you disagree with a boundary.
+
 const ERAS: Era[] = [
   { key: "active-aero", label: "Active Aero Era", color: "#8b5cf6", from: 2026, to: 9999 },
   { key: "ground-effect", label: "Ground Effect Era", color: "#e10600", from: 2022, to: 2025 },
@@ -34,7 +34,7 @@ interface SeasonPickerProps {
   minYear?: number;
   maxYear?: number;
   recentCount?: number;
-  availableYears?: number[]; // optional list of years that are actually available; if provided, only these years will be selectable
+  availableYears?: number[];
 }
 
 export function SeasonPicker({
@@ -56,7 +56,7 @@ export function SeasonPicker({
 
 
 
-  // If the selected year is older than the quick pills, show it as an extra pill.
+
   const stripYears = recent.includes(year) ? recent : [...recent, year];
 
   const decades = useMemo(() => {

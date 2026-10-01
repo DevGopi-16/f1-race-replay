@@ -1,6 +1,5 @@
 import type { ConstructorsPanelResponse } from "./constructors.types";
-
-const API_ORIGIN = "http://127.0.0.1:8000";
+import { API_BASE_URL } from "../../api/config";
 
 export async function getConstructorsPanel(
   year: number,
@@ -15,7 +14,7 @@ export async function getConstructorsPanel(
   }
 
   const response = await fetch(
-    `${API_ORIGIN}/api/constructors/panel?${params.toString()}`,
+    `${API_BASE_URL}/api/constructors/panel?${params.toString()}`,
   );
 
   if (!response.ok) {
@@ -36,5 +35,5 @@ export function assetUrl(path: string | null | undefined): string {
     return path;
   }
 
-  return `${API_ORIGIN}/${path.replace(/^\/+/, "")}`;
+  return `${API_BASE_URL}/${path.replace(/^\/+/, "")}`;
 }

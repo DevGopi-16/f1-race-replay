@@ -54,3 +54,21 @@
     padding-top: 96px;
   }
 }
+
+
+
+
+
+
+
+.app-shell {
+  display: flex;
+  flex-direction: column;
+  min-height: 100dvh;
+}
+
+.app-shell-content {
+  min-height: 0;
+  flex: 0 0 auto;
+}
+

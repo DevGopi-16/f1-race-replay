@@ -89,14 +89,14 @@ export default function SessionDetailPage() {
   const [legendsError, setLegendsError] = useState("");
   const [legendTab, setLegendTab] = useState<LegendTab>("drivers");
 
-  // Results Console can look at another year of the same circuit
+
   const [sel, setSel] = useState({ year, round });
   const [otherDetail, setOtherDetail] = useState<SessionDetail | null>(null);
   const [otherLoading, setOtherLoading] = useState(false);
   const [otherError, setOtherError] = useState("");
   const [resultsTab, setResultsTab] = useState<ResultsTab>("race");
 
-  // ---- page race ----
+
   useEffect(() => {
     let cancelled = false;
     setSel({ year, round });
@@ -130,7 +130,7 @@ export default function SessionDetailPage() {
     };
   }, [year, round]);
 
-  // ---- circuit legends ----
+
   const circuitId = detail?.meta.circuit_id;
   useEffect(() => {
     if (!circuitId) return;
@@ -155,7 +155,7 @@ export default function SessionDetailPage() {
     };
   }, [circuitId]);
 
-  // ---- results for another year ----
+
   const samePage = sel.year === year && sel.round === round;
   useEffect(() => {
     if (samePage) {
@@ -252,8 +252,8 @@ export default function SessionDetailPage() {
   const done = isPast(meta.date);
   const hasSprint = !!detail.results.sprint?.length;
   const circuitMeta = getCircuitMeta(meta.event_name, meta.country);
-  // Circuit layouts changed a lot over the decades, so only draw the track
-  // for recent seasons.
+
+
   const svg = year >= 2018 ? getCircuitSvgUrl(meta.event_name, meta.country) : null;
   const start = formatStart(meta.date, meta.time_utc);
 
@@ -284,7 +284,7 @@ export default function SessionDetailPage() {
           </button>
         </div>
 
-        {/* ------------------------------------------------ Track console */}
+        {                                                                    }
         <div className="sd-label">
           <span className="sd-label-bar" aria-hidden="true" />
           Track Console
@@ -372,7 +372,7 @@ export default function SessionDetailPage() {
           </div>
         </section>
 
-        {/* ------------------------------------------- Circuit legends */}
+        {                                                                 }
         <div className="sd-label is-amber">
           <span className="sd-label-bar" aria-hidden="true" />
           Circuit Legends
@@ -479,7 +479,7 @@ export default function SessionDetailPage() {
           )}
         </section>
 
-        {/* ------------------------------------------- Results console */}
+        {                                                                 }
         <div className="sd-label sd-results-head">
           <span className="sd-label-bar" aria-hidden="true" />
           Results Console
@@ -529,7 +529,7 @@ export default function SessionDetailPage() {
   );
 }
 
-// -------------------------------------------------------------- table ---
+
 function ResultsTable({
   tab,
   race,
@@ -572,7 +572,7 @@ function ResultsTable({
                   <div className="sd-driver-cell">
                     <DriverAvatar id={r.id} code={r.code} name={r.name} year={year} size={30} />
                     <div className="sd-driver-text">
-                      <strong>{r.name}</strong> 
+                      <strong>{r.name}</strong>
                     </div>
                   </div>
                 </td>

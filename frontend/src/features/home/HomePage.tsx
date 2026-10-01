@@ -1,12 +1,13 @@
 import PageContainer from "../../components/layout/PageContainer";
 import Button from "../../components/ui/Button";
 import SectionLabel from "../../components/ui/SectionLabel";
-import Divider from "../../components/ui/Divider";
 import Reveal from "../../components/motion/Reveal";
 
 import HomeHero from "./components/HomeHero";
 import FeaturedRace from "./components/FeaturedRace";
 import ExperienceSection from "./components/ExperienceSection";
+import RacePredictionSection from "./components/RacePredictionSection";
+import ConstructorPulse from "./components/ConstructorPulse";
 import { useNextSession } from "./home.api";
 
 import "./home.css";
@@ -110,6 +111,12 @@ export default function HomePage() {
 
       <PageContainer wide>
         <Reveal delay="short">
+          <RacePredictionSection eventName={data.event_name} />
+        </Reveal>
+      </PageContainer>
+
+      <PageContainer wide>
+        <Reveal delay="short">
           <section className="home-featured-section">
             <FeaturedRace data={data} />
           </section>
@@ -162,39 +169,6 @@ export default function HomePage() {
         </Reveal>
       </PageContainer>
 
-      <PageContainer>
-        <Reveal delay="medium">
-          <section className="home-data-section">
-            <Divider />
-
-            <div className="home-data-content">
-              <SectionLabel number="04">
-                Built For The Race
-              </SectionLabel>
-
-              <h2>
-                EVERY LAP.
-                <br />
-                <span>EVERY DETAIL.</span>
-              </h2>
-
-              <p>
-                Experience Formula 1 through race
-                replays, session data, driver insights
-                and constructor performance.
-              </p>
-
-              <Button
-                variant="outline"
-                onClick={() => navigate("/replay")}
-              >
-                Watch A Replay
-              </Button>
-            </div>
-          </section>
-        </Reveal>
-      </PageContainer>
-
       <section className="home-footer-statement">
         <PageContainer>
           <Reveal>
@@ -209,6 +183,8 @@ export default function HomePage() {
             <span>
               BUILT FOR THE RACE.
             </span>
+
+            <ConstructorPulse />
           </Reveal>
         </PageContainer>
       </section>
