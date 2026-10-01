@@ -115,5 +115,6 @@ export function getCircuitSvgUrl(
 ): string | null {
   const slug = getCircuitSlug(eventName, country);
   if (!slug) return null;
-  return `/images/circuits/${style}/${tone}/${slug}.svg`;
+  const assetStyle = slug === "imola-3" && style === "detailed" ? "minimal" : style;
+  return `/images/circuits/${assetStyle}/${tone}/${slug}.svg`;
 }
