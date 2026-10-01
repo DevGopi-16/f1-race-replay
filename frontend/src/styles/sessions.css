@@ -800,6 +800,10 @@
     padding: 28px 16px 56px;
   }
 
+  .round-card-badges {
+    align-items: center;
+  }
+
   .sessions-grid,
   .sessions-hero {
     grid-template-columns: minmax(0, 1fr);

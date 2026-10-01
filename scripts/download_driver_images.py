@@ -2,11 +2,12 @@
 Download a face portrait for each F1 driver into
 frontend/public/drivers/<driverId>.jpg and write manifest.json.
 
-Source: the lead photo of the driver's Wikipedia article (Wikimedia Commons).
-Because that photo is not always a portrait, every image is run through a face
-detector: it is kept only if a clear face is found, then cropped to a square
-around it. Drivers without a usable photo are listed in missing.txt (show
-initials for those in the UI).
+Source: images linked from the driver's Wikipedia article, but only when the
+original file is hosted on Wikimedia Commons and its license allows reuse and
+adaptation (CC0, CC BY, CC BY-SA, or public domain). License and attribution
+metadata are saved in manifest.json. Non-free and unknown-license files are
+skipped. A clear face is detected and cropped to a square around it. Drivers
+without a usable photo are listed in missing.txt.
 
 Setup (once, inside your venv):
     pip install opencv-python-headless
@@ -19,22 +20,24 @@ Re-running skips drivers that already have an image.
 """
 
 import argparse
+import html
 import json
+import re
 import time
 from pathlib import Path
 from urllib.parse import unquote, urlparse
-from suit_check import suit_score
 import requests
 
 JOLPICA = "https://api.jolpi.ca/ergast/f1"
 WIKI_API = "https://en.wikipedia.org/w/api.php"
+COMMONS_API = "https://commons.wikimedia.org/w/api.php"
 
 ROOT = Path(__file__).resolve().parents[1]
 OUT = ROOT / "frontend" / "public" / "drivers"
 MANIFEST = OUT / "manifest.json"
 
 HEADERS = {
-    "User-Agent": "f1-race-replay-web/1.0 (student project; personal use)",
+    "User-Agent": "f1-race-replay-web/1.0 (https://github.com/DevGopi-16/f1-race-replay)",
 }
 
 
@@ -59,7 +62,7 @@ def all_drivers() -> list[dict]:
 
 def wiki_image_url(wiki_page_url: str) -> str | None:
     title = unquote(urlparse(wiki_page_url).path.rsplit("/", 1)[-1]).replace("_", " ")
-    r = requests.get(
+    r = get_with_retry(
         WIKI_API,
         params={
             "action": "query",
@@ -70,8 +73,6 @@ def wiki_image_url(wiki_page_url: str) -> str | None:
             "redirects": 1,
             "format": "json",
         },
-        headers=HEADERS,
-        timeout=20,
     )
     r.raise_for_status()
     pages = r.json().get("query", {}).get("pages", {})
@@ -82,7 +83,15 @@ def get_with_retry(url: str, params: dict | None = None, tries: int = 4) -> requ
     for attempt in range(tries):
         r = requests.get(url, params=params, headers=HEADERS, timeout=30)
         if r.status_code == 429:  # rate limited: wait and retry
-            time.sleep(5 * (attempt + 1))
+            if attempt == tries - 1:
+                r.raise_for_status()
+            retry_after = r.headers.get("Retry-After")
+            try:
+                delay = float(retry_after) if retry_after else 5 * (attempt + 1)
+            except ValueError:
+                delay = 5 * (attempt + 1)
+            print(f"Wikimedia rate limited; retrying in {delay:g}s", flush=True)
+            time.sleep(delay)
             continue
         r.raise_for_status()
         return r
@@ -116,6 +125,69 @@ def wiki_image_urls(wiki_page_url: str, limit: int = 8) -> list[str]:
         if u and u not in urls:
             urls.append(u)
     return urls[:limit]
+
+
+def _filename_from_image_url(url: str) -> str | None:
+    parts = unquote(urlparse(url).path).split("/")
+    if "thumb" in parts:
+        thumb_index = parts.index("thumb")
+        if len(parts) > thumb_index + 3:
+            return parts[thumb_index + 3]
+    if "commons" in parts and len(parts) > parts.index("commons") + 1:
+        return parts[-1]
+    return None
+
+
+def _plain_text(value: object) -> str:
+    return html.unescape(re.sub(r"<[^>]+>", "", str(value or ""))).strip()
+
+
+def _reusable_license(name: str) -> bool:
+    normalized = re.sub(r"\s+", " ", name.strip()).lower()
+    return (
+        normalized == "cc0"
+        or normalized.startswith("cc0 ")
+        or normalized.startswith("cc by ")
+        or normalized.startswith("cc by-sa ")
+        or normalized.startswith("public domain")
+        or normalized.startswith("pd-")
+    )
+
+
+def commons_image_metadata(url: str) -> dict[str, str] | None:
+    """Return attribution data only when Commons confirms a reusable license."""
+    filename = _filename_from_image_url(url)
+    if not filename:
+        return None
+
+    response = get_with_retry(
+        COMMONS_API,
+        params={
+            "action": "query",
+            "titles": f"File:{filename}",
+            "prop": "imageinfo",
+            "iiprop": "url|extmetadata",
+            "iiurlwidth": 800,
+            "format": "json",
+        },
+    )
+    pages = response.json().get("query", {}).get("pages", {})
+    page = next(iter(pages.values()), {})
+    image_info = next(iter(page.get("imageinfo", [])), {})
+    metadata = image_info.get("extmetadata", {})
+    license_name = _plain_text(metadata.get("LicenseShortName", {}).get("value"))
+    if not _reusable_license(license_name):
+        return None
+
+    return {
+        "file": filename,
+        "license": license_name,
+        "license_url": _plain_text(metadata.get("LicenseUrl", {}).get("value")),
+        "artist": _plain_text(metadata.get("Artist", {}).get("value")),
+        "credit": _plain_text(metadata.get("Credit", {}).get("value")),
+        "source_page": _plain_text(image_info.get("descriptionurl")),
+    }
+
 
 def crop_face(content: bytes, size: int = 400) -> bytes | None:
     """Return a square JPEG centred on the main face, or None if no clear face."""
@@ -181,7 +253,6 @@ def main() -> None:
         action="store_true",
         help="save the raw Wikipedia image without face detection",
     )
-    parser.add_argument("--threshold", type=float, default=0.6)
     args = parser.parse_args()
 
     if not args.no_face_filter:
@@ -209,6 +280,7 @@ def main() -> None:
 
     downloaded = 0
     missing = []
+    skipped_unlicensed = 0
 
     for d in drivers:
         driver_id = d["driverId"]
@@ -227,16 +299,15 @@ def main() -> None:
                 print(f"  no Wikipedia image: {name}")
                 continue
 
-            content, filename, suit = None, f"{driver_id}.jpg", None
+            content, filename, image_metadata = None, f"{driver_id}.jpg", None
             for url in urls:
+                image_metadata = commons_image_metadata(url)
+                if image_metadata is None:
+                    skipped_unlicensed += 1
+                    continue
+
                 raw = get_with_retry(url).content
                 time.sleep(1.5)  # stay under Wikimedia's rate limit
-                score = suit_score(raw)
-
-                if score < args.threshold:
-                    time.sleep(0.3)
-                    continue
-                suit = score
                 if args.no_face_filter:
                     content = raw
                     filename = f"{driver_id}{Path(urlparse(url).path).suffix.lower() or '.jpg'}"
@@ -256,13 +327,23 @@ def main() -> None:
             manifest[driver_id] = {
                 "file": filename,
                 "name": name,
-                "source": d["url"],
-                "suit_verified": round(suit, 2),
+                "source": image_metadata["source_page"],
+                "license": image_metadata["license"],
+                "license_url": image_metadata["license_url"],
+                "artist": image_metadata["artist"],
+                "credit": image_metadata["credit"],
+                "source_file": image_metadata["file"],
             }
 
             MANIFEST.write_text(json.dumps(manifest, indent=2))
             downloaded += 1
             print(f"  saved: {name} -> {filename}")
+        except requests.HTTPError as e:
+            if e.response is not None and e.response.status_code == 429:
+                raise SystemExit(
+                    "Wikimedia rate limit persisted after retries; stop and resume later."
+                ) from e
+            print(f"  failed: {name}: {e}")
         except Exception as e:
             print(f"  failed: {name}: {e}")
 
@@ -271,7 +352,8 @@ def main() -> None:
         if args.limit and downloaded >= args.limit:
             break
 
-    print(f"\nDownloaded {downloaded}. Without a usable image: {len(missing)}")
+    print(f"\nDownloaded {downloaded}. Without an eligible usable photo: {len(missing)}")
+    print(f"Skipped {skipped_unlicensed} files without a compatible reuse license.")
     if missing:
         (OUT / "missing.txt").write_text("\n".join(missing))
         print("List saved to frontend/public/drivers/missing.txt")

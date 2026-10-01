@@ -30,6 +30,29 @@ export interface Stint {
   lap_end: number | null;
 }
 
+export interface SessionDriver {
+  code: string;
+  name: string;
+  team: string;
+  position: number | null;
+  points: number | null;
+  color: string;
+}
+
+export function getSessionDrivers(
+  year: number,
+  round: number,
+  sessionType: string,
+) {
+  const params = new URLSearchParams({
+    year: String(year),
+    round: String(round),
+    session_type: sessionType,
+  });
+
+  return apiGet<SessionDriver[]>(`/api/drivers?${params.toString()}`);
+}
+
 export function getLapTelemetry(
   sessionKey: string,
   driverNumber: string,

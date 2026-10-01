@@ -6,6 +6,8 @@ import Reveal from "../../components/motion/Reveal";
 import HomeHero from "./components/HomeHero";
 import FeaturedRace from "./components/FeaturedRace";
 import ExperienceSection from "./components/ExperienceSection";
+import RacePredictionSection from "./components/RacePredictionSection";
+import ConstructorPulse from "./components/ConstructorPulse";
 import { useNextSession } from "./home.api";
 
 import "./home.css";
@@ -109,6 +111,12 @@ export default function HomePage() {
 
       <PageContainer wide>
         <Reveal delay="short">
+          <RacePredictionSection eventName={data.event_name} />
+        </Reveal>
+      </PageContainer>
+
+      <PageContainer wide>
+        <Reveal delay="short">
           <section className="home-featured-section">
             <FeaturedRace data={data} />
           </section>
@@ -175,6 +183,8 @@ export default function HomePage() {
             <span>
               BUILT FOR THE RACE.
             </span>
+
+            <ConstructorPulse />
           </Reveal>
         </PageContainer>
       </section>

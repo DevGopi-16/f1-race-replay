@@ -519,3 +519,105 @@
     min-height: 44px;
   }
 }
+
+.h2l {
+  --red: var(--color-accent);
+  font-family: var(--font-body);
+  background:
+    radial-gradient(ellipse at 78% 4%, rgba(225, 6, 0, 0.08), transparent 38%);
+}
+
+.h2l-hero {
+  padding-left: clamp(14px, 2vw, 26px);
+  border-left: 2px solid var(--red);
+}
+
+.h2l-title {
+  font-family: var(--font-display);
+  font-size: clamp(3rem, 7vw, 7rem);
+  font-weight: var(--weight-extrabold);
+  line-height: 0.88;
+  letter-spacing: -0.075em;
+  text-transform: uppercase;
+}
+
+.h2l-sub {
+  max-width: 54ch;
+  font-family: var(--font-body);
+  font-size: clamp(0.9rem, 1.2vw, 1rem);
+  line-height: 1.7;
+}
+
+.h2l-slot,
+.h2l-slot.b {
+  border-radius: 8px;
+  background:
+    radial-gradient(120% 90% at 50% 0%, color-mix(in srgb, var(--c) 24%, transparent), transparent 68%),
+    rgba(255, 255, 255, 0.018);
+}
+
+.h2l-vs b {
+  font-family: var(--font-mono);
+  font-weight: var(--weight-bold);
+}
+
+.h2l-status,
+.h2l-disclaimer {
+  font-family: var(--font-body);
+}
+
+.h2l-presets button {
+  border-radius: 3px;
+  font-family: var(--font-mono);
+  font-size: 0.62rem;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.h2l-learn h2 {
+  font-family: var(--font-display);
+  font-size: clamp(1.5rem, 2.4vw, 2rem);
+  font-weight: var(--weight-bold);
+  letter-spacing: -0.045em;
+  text-transform: uppercase;
+}
+
+.h2l-card {
+  border-radius: 4px;
+  background: rgba(255, 255, 255, 0.018);
+}
+
+.h2l-card h3 {
+  font-family: var(--font-display);
+  font-size: 0.82rem;
+  font-weight: var(--weight-semibold);
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+}
+
+.h2l-card p {
+  font-family: var(--font-body);
+}
+
+.h2l .h2h-field-label {
+  font-family: var(--font-mono);
+  font-size: 0.58rem;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+}
+
+.h2l .h2h-search-input,
+.h2l .h2h-selected-driver,
+.h2l .h2h-dropdown-item {
+  font-family: var(--font-body);
+}
+
+@media (max-width: 768px) {
+  .h2l {
+    padding-top: 56px;
+  }
+
+  .h2l-title {
+    font-size: clamp(2.5rem, 10vw, 4.5rem);
+  }
+}

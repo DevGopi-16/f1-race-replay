@@ -306,3 +306,67 @@
     padding-inline: 12px;
   }
 }
+
+.h2r {
+  --red: var(--color-accent);
+  font-family: var(--font-body);
+  background:
+    radial-gradient(ellipse at 76% 0%, rgba(225, 6, 0, 0.07), transparent 34%);
+}
+
+.h2r-top,
+.h2r-card header p,
+.h2r-card > header > small,
+.h2r-empty,
+.h2r-disclaimer {
+  font-family: var(--font-body);
+}
+
+.h2r-top button,
+.h2r-seg button,
+.h2r-pts .col {
+  font-family: var(--font-mono);
+}
+
+.h2r-hero h2,
+.h2r-verdict .score b,
+.h2r-card h2 {
+  font-family: var(--font-display);
+  font-weight: var(--weight-extrabold);
+  letter-spacing: -0.055em;
+}
+
+.h2r-hero h2 {
+  text-transform: uppercase;
+}
+
+.h2r-verdict,
+.h2r-card {
+  border-radius: 4px;
+  background: rgba(255, 255, 255, 0.018);
+}
+
+.h2r-card h2 {
+  font-size: 1rem;
+  letter-spacing: 0.035em;
+  text-transform: uppercase;
+}
+
+.h2r-top button {
+  border-radius: 3px;
+  font-size: 0.6rem;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+}
+
+.h2r-verdict .score b,
+.h2r-vrow .lv,
+.h2r-vrow .rv,
+.h2r-tiles b,
+.h2r-season strong {
+  font-family: var(--font-display);
+}
+
+.h2r-disclaimer {
+  font-size: 0.78rem;
+}

@@ -127,7 +127,7 @@ export default function FloatingNav() {
             </span>
 
             <span className="brand-name">
-              RACE REPLAY
+              RACE VISION
             </span>
           </NavLink>
 
