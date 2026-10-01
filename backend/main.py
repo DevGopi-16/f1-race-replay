@@ -478,7 +478,6 @@ async def warm_constructor_history_cache():
 async def start_stats_refresh_loop():
     asyncio.create_task(_periodic_stats_refresh_loop())
 
-@app.on_event("startup")
 async def start_live_watcher():
     loop = asyncio.get_event_loop()
     loop.run_in_executor(None, run_live_watcher)
