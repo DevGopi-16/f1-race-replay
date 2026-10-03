@@ -5,6 +5,7 @@ from pathlib import Path
 
 from fastapi import APIRouter, HTTPException, Query
 from fastapi.encoders import jsonable_encoder
+from fastf1.exceptions import RateLimitExceededError
 
 from src.domain.f1_data import get_race_weekends_by_year
 from src.domain.next_session import get_next_session
@@ -32,7 +33,7 @@ def _is_fresh(year: int, saved_at: float) -> bool:
 def _read_cache(year: int):
     if year in _memory:
         saved_at, data = _memory[year]
-        if _is_fresh(year, saved_at):
+        if _is_fresh(year, saved_at) and _is_usable_schedule(data):
             return data
 
     path = CACHE_DIR / f"{year}.json"
@@ -41,10 +42,56 @@ def _read_cache(year: int):
             saved_at = path.stat().st_mtime
             if _is_fresh(year, saved_at):
                 data = json.loads(path.read_text())
-                _memory[year] = (saved_at, data)
-                return data
+                if _is_usable_schedule(data):
+                    _memory[year] = (saved_at, data)
+                    return data
         except Exception:
             pass  # corrupt file, refetch
+    return None
+
+
+def _is_usable_schedule(data) -> bool:
+    if not isinstance(data, list) or not data:
+        return False
+
+    required_keys = {
+        "round_number",
+        "event_name",
+        "date",
+        "country",
+        "type",
+    }
+    for event in data:
+        if not isinstance(event, dict) or not required_keys.issubset(event):
+            return False
+        if event["round_number"] is None or not event["event_name"]:
+            return False
+        try:
+            datetime.fromisoformat(str(event["date"]))
+        except (TypeError, ValueError):
+            return False
+
+    return True
+
+
+def _read_stale_cache(year: int):
+    if year in _memory:
+        _, data = _memory[year]
+        if _is_usable_schedule(data):
+            return data
+
+    path = CACHE_DIR / f"{year}.json"
+    if not path.exists():
+        return None
+
+    try:
+        data = json.loads(path.read_text())
+    except (OSError, json.JSONDecodeError):
+        return None
+
+    if _is_usable_schedule(data):
+        _memory[year] = (path.stat().st_mtime, data)
+        return data
     return None
 
 
@@ -55,6 +102,24 @@ def _write_cache(year: int, data) -> None:
         (CACHE_DIR / f"{year}.json").write_text(json.dumps(payload))
     except Exception:
         pass  # cache failure should never break the request
+
+
+def get_schedule_data(year: int):
+    cached = _read_cache(year)
+    if cached is not None:
+        return cached
+
+    try:
+        weekends = get_race_weekends_by_year(year)
+    except RateLimitExceededError:
+        stale_cache = _read_stale_cache(year)
+        if stale_cache is not None:
+            return stale_cache
+        raise
+
+    if weekends:
+        _write_cache(year, weekends)
+    return weekends
 
 
 @router.get("/next-session")
@@ -79,12 +144,8 @@ def schedule(year: int):
             detail=f"Year must be between {MIN_YEAR} and {max_year}",
         )
 
-    cached = _read_cache(year)
-    if cached is not None:
-        return cached
-
     try:
-        weekends = get_race_weekends_by_year(year)
+        weekends = get_schedule_data(year)
     except Exception as e:
         msg = str(e)
         if "calls/h" in msg or "rate" in msg.lower():
@@ -96,8 +157,5 @@ def schedule(year: int):
             status_code=502,
             detail=f"Couldn't load {year} schedule: {e}",
         )
-
-    if weekends:  # never cache empty results
-        _write_cache(year, weekends)
 
     return weekends

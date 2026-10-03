@@ -5,6 +5,10 @@ import datetime
 
 import requests
 import fastf1
+import pandas as pd
+from fastf1.exceptions import RateLimitExceededError
+
+from src.api.schedule import get_schedule_data
 
 
 JOLPICA_BASE = "https://api.jolpi.ca/ergast/f1"
@@ -79,6 +83,27 @@ def _safe_float(value, default=0.0):
     return _safe_number(value, default)
 
 
+def _get_event_schedule(season: int) -> pd.DataFrame:
+    weekends = get_schedule_data(season)
+    return pd.DataFrame(
+        [
+            {
+                "RoundNumber": event["round_number"],
+                "EventName": event["event_name"],
+                "EventDate": pd.Timestamp(event["date"]),
+                "Country": event["country"],
+            }
+            for event in weekends
+        ],
+        columns=[
+            "RoundNumber",
+            "EventName",
+            "EventDate",
+            "Country",
+        ],
+    )
+
+
 def fetch_driver_standings(
     season: int,
     round_: int | None = None,
@@ -105,10 +130,7 @@ def fetch_driver_standings(
 
 
 def _completed_rounds(season: int) -> list[int]:
-    schedule = fastf1.get_event_schedule(
-        season,
-        include_testing=False,
-    )
+    schedule = _get_event_schedule(season)
 
     today = datetime.datetime.now()
     cutoff = today - datetime.timedelta(days=5)
@@ -126,10 +148,7 @@ def _upcoming_races(
     season: int,
     count: int = 4,
 ) -> list[dict]:
-    schedule = fastf1.get_event_schedule(
-        season,
-        include_testing=False,
-    )
+    schedule = _get_event_schedule(season)
 
     completed = set(_completed_rounds(season))
 
@@ -227,10 +246,7 @@ def _compute_season_stats(
             "history": [],
         }
 
-    schedule = fastf1.get_event_schedule(
-        season,
-        include_testing=False,
-    )
+    schedule = _get_event_schedule(season)
 
     round_names = dict(
         zip(
@@ -308,6 +324,8 @@ def _compute_season_stats(
 
                 fl_entry["fastest_laps"] += 1
 
+        except RateLimitExceededError:
+            raise
         except Exception as exc:
             print(
                 f"[driver_panel] skipping race round "
@@ -347,6 +365,8 @@ def _compute_season_stats(
                         if qpos == 1:
                             entry["poles"] += 1
 
+        except RateLimitExceededError:
+            raise
         except Exception as exc:
             print(
                 f"[driver_panel] skipping qualifying round "
@@ -404,10 +424,7 @@ def _compute_season_stats(
 def _current_event_name(
     season: int,
 ) -> str | None:
-    schedule = fastf1.get_event_schedule(
-        season,
-        include_testing=False,
-    )
+    schedule = _get_event_schedule(season)
 
     completed = _completed_rounds(season)
 

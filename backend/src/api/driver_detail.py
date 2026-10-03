@@ -3,6 +3,7 @@ from pathlib import Path
 
 import requests
 from fastapi import APIRouter, HTTPException, Query
+from fastf1.exceptions import RateLimitExceededError
 
 from src.domain.driver_panel import build_driver_full
 
@@ -57,6 +58,11 @@ def driver_full(code: str, year: int = Query(default=None)):
             status_code=502,
             detail=f"Couldn't reach Jolpica API: {e}",
         )
+    except RateLimitExceededError:
+        raise HTTPException(
+            status_code=429,
+            detail="Upstream FastF1 rate limit reached. Try again later.",
+        ) from None
 
     if not data:
         raise HTTPException(
