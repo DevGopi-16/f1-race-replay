@@ -417,14 +417,24 @@ if DIST_IMAGES_DIR.exists():
         name="frontend-images",
     )
 
-# Public driver images from frontend/public/drivers
+# Public driver images + React driver-detail routes
 DIST_DRIVERS_DIR = DIST_DIR / "drivers"
-if DIST_DRIVERS_DIR.exists():
-    app.mount(
-        "/drivers",
-        StaticFiles(directory=DIST_DRIVERS_DIR),
-        name="driver-images",
-    )
+
+@app.get("/drivers/{file_path:path}", include_in_schema=False)
+async def driver_assets_or_spa(file_path: str):
+    target = DIST_DRIVERS_DIR / file_path
+
+    if target.is_file():
+        return FileResponse(target)
+
+    index_file = DIST_DIR / "index.html"
+    if not index_file.exists():
+        raise HTTPException(
+            status_code=404,
+            detail="Vite build not found. Run `npm run build` inside frontend/.",
+        )
+
+    return FileResponse(index_file)
 
 # --- OAuth Routes ---
 
