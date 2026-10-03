@@ -398,7 +398,7 @@ FRONTEND_DIR = PROJECT_DIR / "frontend"
 DIST_DIR = FRONTEND_DIR / "dist"
 DIST_ASSETS_DIR = DIST_DIR / "assets"
 
-# Vite production assets:
+# Vite production assets
 # /assets/index-xxxxx.js
 # /assets/index-xxxxx.css
 if DIST_ASSETS_DIR.exists():
@@ -406,6 +406,24 @@ if DIST_ASSETS_DIR.exists():
         "/assets",
         StaticFiles(directory=DIST_ASSETS_DIR),
         name="vite-assets",
+    )
+
+# Public images from frontend/public/images
+DIST_IMAGES_DIR = DIST_DIR / "images"
+if DIST_IMAGES_DIR.exists():
+    app.mount(
+        "/images",
+        StaticFiles(directory=DIST_IMAGES_DIR),
+        name="frontend-images",
+    )
+
+# Public driver images from frontend/public/drivers
+DIST_DRIVERS_DIR = DIST_DIR / "drivers"
+if DIST_DRIVERS_DIR.exists():
+    app.mount(
+        "/drivers",
+        StaticFiles(directory=DIST_DRIVERS_DIR),
+        name="driver-images",
     )
 
 # --- OAuth Routes ---
@@ -825,8 +843,12 @@ def react_spa_fallback(path: str):
         raise HTTPException(status_code=404, detail="API endpoint not found")
 
     # Vite assets should be handled by /assets.
-    if path.startswith("assets/"):
-        raise HTTPException(status_code=404, detail="Vite asset not found")
+    if (
+        path.startswith("assets/")
+        or path.startswith("images/")
+        or path.startswith("drivers/")
+    ):
+        raise HTTPException(status_code=404, detail="Frontend asset not found")
 
     index_file = DIST_DIR / "index.html"
 
