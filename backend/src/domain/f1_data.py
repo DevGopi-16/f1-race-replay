@@ -82,6 +82,9 @@ def _process_single_driver(args):
 
     pit_in_times = []
     pit_out_times = []
+    empty_telemetry_laps = 0
+    invalid_distance_laps = 0
+    raw_telemetry_samples = 0
 
     for _, lap in laps_driver.iterlaps():
 
@@ -94,7 +97,10 @@ def _process_single_driver(args):
             lap_tel = lap.get_telemetry()
 
             if lap_tel is None or lap_tel.empty:
+                empty_telemetry_laps += 1
                 continue
+
+            raw_telemetry_samples += len(lap_tel)
 
             required = [
                 "SessionTime",
@@ -169,6 +175,7 @@ def _process_single_driver(args):
             valid_distance = np.isfinite(d_lap)
 
             if not np.any(valid_distance):
+                invalid_distance_laps += 1
                 continue
 
             first_valid = float(d_lap[valid_distance][0])
@@ -299,7 +306,10 @@ def _process_single_driver(args):
     # ------------------------------------------------------------
     if not t_all:
         print(
-            f"[Replay] {driver_code}: NO TELEMETRY EXTRACTED"
+            f"[Replay] {driver_code}: NO TELEMETRY EXTRACTED "
+            f"(raw_samples={raw_telemetry_samples}, "
+            f"empty_telemetry_laps={empty_telemetry_laps}, "
+            f"invalid_distance_laps={invalid_distance_laps})"
         )
         return None
 
@@ -340,6 +350,10 @@ def _process_single_driver(args):
     brake_all = brake_all[valid_time]
 
     if len(t_all) == 0:
+        print(
+            f"[Replay] {driver_code}: NO USABLE TIMESTAMPS "
+            f"(raw_samples={raw_telemetry_samples}, finite_timestamps=0)"
+        )
         return None
 
     order = np.argsort(t_all)
@@ -383,11 +397,13 @@ def _process_single_driver(args):
     print(
         f"Completed telemetry for driver: {driver_code} "
         f"({len(t_all)} samples, "
-        f"{driver_max_lap:.0f} laps)"
+        f"{driver_max_lap:.0f} laps; "
+        f"raw_telemetry_samples={raw_telemetry_samples})"
     )
 
     return {
         "code": driver_code,
+        "raw_sample_count": raw_telemetry_samples,
         "data": {
             "t": t_all,
             "x": x_all,
@@ -798,6 +814,17 @@ def get_race_telemetry(session, session_type="R"):
     except Exception as exc:
         raise RuntimeError(f"Failed to load race telemetry: {exc}") from exc
 
+    event = session.event
+    event_date = event.get("EventDate")
+    event_year = getattr(event_date, "year", "unknown")
+    event_round = event.get("RoundNumber", "unknown")
+    event_name = event.get("EventName", "unknown")
+    print(
+        f"[Replay] Telemetry extraction session: year={event_year}, "
+        f"round={event_round}, session_type={session_type}, "
+        f"event={event_name}, drivers={len(session.drivers)}"
+    )
+
     # ------------------------------------------------------------------
     # Process every driver. Multiprocessing is avoided here deliberately:
     # FastF1/Pandas objects are large and can be expensive to pickle, and
@@ -810,11 +837,21 @@ def get_race_telemetry(session, session_type="R"):
         except Exception as exc:
             print(f"[Replay] Could not resolve driver {driver_no}: {exc}")
 
+    print(
+        f"[Replay] Driver codes being processed: "
+        f"{list(driver_codes.values())}"
+    )
+
     driver_data = {}
 
     for driver_no, driver_code in driver_codes.items():
         result = _process_single_driver((driver_no, session, driver_code))
         if result is None:
+            print(
+                f"[Replay] Driver {driver_code} ({driver_no}): "
+                f"_process_single_driver returned None; "
+                f"see extraction rejection reason above."
+            )
             continue
 
         data = result["data"]
@@ -841,7 +878,15 @@ def get_race_telemetry(session, session_type="R"):
         for key in list(cleaned.keys()):
             cleaned[key] = cleaned[key][valid]
 
-        if len(cleaned["t"]) < 2:
+        finite_timestamp_count = len(cleaned["t"])
+        if finite_timestamp_count < 2:
+            print(
+                f"[Replay] Driver {driver_code} ({driver_no}): "
+                f"_process_single_driver returned data; "
+                f"raw_telemetry_samples={result['raw_sample_count']}, "
+                f"finite_timestamps_after_cleanup={finite_timestamp_count}, "
+                f"skipped=True (fewer than 2 timestamps)."
+            )
             continue
 
         order = np.argsort(cleaned["t"])
@@ -854,8 +899,27 @@ def get_race_telemetry(session, session_type="R"):
 
         cleaned["t"] = unique_t
         driver_data[driver_code] = cleaned
+        print(
+            f"[Replay] Driver {driver_code} ({driver_no}): "
+            f"_process_single_driver returned data; "
+            f"raw_telemetry_samples={result['raw_sample_count']}, "
+            f"finite_timestamps_after_cleanup={finite_timestamp_count}, "
+            f"unique_timestamps={len(unique_t)}, skipped=False."
+        )
+
+    print(
+        f"[Replay] Telemetry extraction complete: "
+        f"driver_data_count={len(driver_data)}"
+    )
 
     if not driver_data:
+        print(
+            f"[Replay] No usable drivers remain: "
+            f"driver_data_count={len(driver_data)}, "
+            f"session_driver_count={len(session.drivers)}, "
+            f"event_year={event_year}, round={event_round}, "
+            f"session_type={session_type}, event={event_name}."
+        )
         raise RuntimeError("No usable race telemetry was extracted from FastF1.")
 
     # ------------------------------------------------------------------
